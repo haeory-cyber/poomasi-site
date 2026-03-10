@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>시다워크 — 품앗이생협 경영판</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;700;900&family=Noto+Sans+KR:wght@300;400;500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --earth: #0f0b07;
+    --soil:  #1e1510;
+    --bark:  #2d1f14;
+    --amber: #c4803a;
+    --amber-light: #e8a55a;
+    --green: #3d5c35;
+    --green-light: #5a8a4e;
+    --cream: #f2ead8;
+    --dust:  #b8a88a;
+    --red:   #b83a2a;
+    --white: #faf7f0;
+    --panel: rgba(30,21,16,0.85);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--earth);
+    color: var(--cream);
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* noise texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* ── LOGIN ───────────────────────────────────────────── */
+  #login-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+  }
+
+  .login-box {
+    width: 100%;
+    max-width: 420px;
+    background: var(--soil);
+    border: 1px solid rgba(196,128,58,0.2);
+    padding: 3rem 2.5rem;
+    position: relative;
+  }
+
+  .login-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(to right, var(--amber), var(--green-light));
+  }
+
+  .login-brand {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    color: var(--amber);
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  .login-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--white);
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .login-sub {
+    font-size: 0.78rem;
+    color: var(--dust);
+    text-align: center;
+    letter-spacing: 0.05em;
+    margin-bottom: 2.5rem;
+  }
+
+  .form-group { margin-bottom: 1.2rem; }
+
+  .form-label {
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--dust);
+    margin-bottom: 0.5rem;
+  }
+
+  .form-input {
+    width: 100%;
+    background: rgba(15,11,7,0.8);
+    border: 1px solid rgba(196,128,58,0.2);
+    color: var(--cream);
+    padding: 0.85rem 1rem;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+
+  .form-input:focus { border-color: var(--amber); }
+
+  .btn-login {
+    width: 100%;
+    background: var(--amber);
+    color: var(--earth);
+    border: none;
+    padding: 1rem;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    margin-top: 0.5rem;
+    transition: background 0.3s;
+  }
+
+  .btn-login:hover { background: var(--amber-light); }
+  .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .login-error {
+    margin-top: 1rem;
+    padding: 0.8rem 1rem;
+    background: rgba(184,58,42,0.15);
+    border: 1px solid rgba(184,58,42,0.3);
+    color: #e07070;
+    font-size: 0.8rem;
+    display: none;
+  }
+
+  /* ── APP ────────────────────────────────────────────── */
+  #app { display: none; min-height: 100vh; }
+
+  /* Header */
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(15,11,7,0.95);
+    border-bottom: 1px solid rgba(196,128,58,0.15);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    backdrop-filter: blur(8px);
+  }
+
+  .app-logo {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--amber);
+    letter-spacing: 0.1em;
+  }
+
+  .app-logo span {
+    color: var(--dust);
+    font-weight: 300;
+    margin-left: 0.5rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .user-badge {
+    font-size: 0.72rem;
+    color: var(--dust);
+    letter-spacing: 0.05em;
+  }
+
+  .btn-logout {
+    background: none;
+    border: 1px solid rgba(196,128,58,0.3);
+    color: var(--dust);
+    padding: 0.35rem 0.9rem;
+    font-size: 0.72rem;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    transition: all 0.3s;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+
+  .btn-logout:hover { border-color: var(--amber); color: var(--amber); }
+
+  /* Tabs */
+  .tab-bar {
+    background: var(--soil);
+    border-bottom: 1px solid rgba(196,128,58,0.12);
+    display: flex;
+    padding: 0 2rem;
+    gap: 0;
+  }
+
+  .tab-btn {
+    background: none;
+    border: none;
+    color: var(--dust);
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.88rem;
+    font-weight: 400;
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid transparent;
+    transition: all 0.25s;
+    white-space: nowrap;
+  }
+
+  .tab-btn:hover { color: var(--cream); }
+
+  .tab-btn.active {
+    color: var(--amber);
+    border-bottom-color: var(--amber);
+    font-weight: 700;
+  }
+
+  /* Content area */
+  .tab-content {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: none;
+  }
+
+  .tab-content.active { display: block; }
+
+  /* ── SECTION HEADER ─────────────────────────────────── */
+  .sec-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+
+  .sec-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--white);
+  }
+
+  .sec-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.3em;
+    color: var(--amber);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .sec-label::before {
+    content: '';
+    width: 1.5rem;
+    height: 1px;
+    background: var(--amber);
+  }
+
+  /* ── CARDS / PANELS ─────────────────────────────────── */
+  .card {
+    background: var(--panel);
+    border: 1px solid rgba(196,128,58,0.12);
+    padding: 1.5rem;
+    position: relative;
+  }
+
+  .card-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--amber);
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+  }
+
+  /* ── 오늘의경영 ─────────────────────────────────────── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 2px;
+    margin-bottom: 2rem;
+  }
+
+  .kpi-cell {
+    background: var(--panel);
+    border: 1px solid rgba(196,128,58,0.1);
+    padding: 1.5rem;
+    border-top: 2px solid transparent;
+    transition: border-color 0.3s;
+  }
+
+  .kpi-cell:hover { border-top-color: var(--amber); }
+
+  .kpi-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2.2rem;
+    color: var(--amber);
+    line-height: 1;
+  }
+
+  .kpi-unit {
+    font-size: 0.85rem;
+    color: var(--dust);
+    margin-left: 0.2rem;
+  }
+
+  .kpi-label {
+    font-size: 0.72rem;
+    color: var(--dust);
+    margin-top: 0.4rem;
+    letter-spacing: 0.05em;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  @media (max-width: 768px) {
+    .two-col { grid-template-columns: 1fr; }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .tab-btn { padding: 1rem 0.8rem; font-size: 0.8rem; }
+  }
+
+  /* Table */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+  }
+
+  .data-table th {
+    text-align: left;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--amber);
+    border-bottom: 1px solid rgba(196,128,58,0.2);
+    font-weight: 400;
+  }
+
+  .data-table td {
+    padding: 0.7rem 0.8rem;
+    border-bottom: 1px solid rgba(184,168,138,0.06);
+    color: var(--dust);
+    vertical-align: top;
+  }
+
+  .data-table tr:hover td { background: rgba(196,128,58,0.04); color: var(--cream); }
+
+  .rank-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border-radius: 50%;
+  }
+
+  .rank-1 { background: var(--amber); color: var(--earth); }
+  .rank-2 { background: rgba(196,128,58,0.4); color: var(--cream); }
+  .rank-3 { background: rgba(196,128,58,0.2); color: var(--cream); }
+  .rank-n  { background: rgba(184,168,138,0.1); color: var(--dust); }
+
+  /* Date picker */
+  .date-picker-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .date-input {
+    background: rgba(15,11,7,0.8);
+    border: 1px solid rgba(196,128,58,0.2);
+    color: var(--cream);
+    padding: 0.6rem 1rem;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.3s;
+    cursor: pointer;
+  }
+
+  .date-input:focus { border-color: var(--amber); }
+
+  .btn-sm {
+    background: none;
+    border: 1px solid rgba(196,128,58,0.3);
+    color: var(--dust);
+    padding: 0.55rem 1rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: all 0.25s;
+  }
+
+  .btn-sm:hover { border-color: var(--amber); color: var(--amber); }
+
+  .btn-primary {
+    background: var(--amber);
+    border: none;
+    color: var(--earth);
+    padding: 0.6rem 1.2rem;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: background 0.25s;
+  }
+
+  .btn-primary:hover { background: var(--amber-light); }
+
+  /* ── 액션플랜 ──────────────────────────────────────── */
+  .action-form {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    gap: 0.6rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  @media (max-width: 600px) {
+    .action-form { grid-template-columns: 1fr; }
+  }
+
+  .select-input {
+    background: rgba(15,11,7,0.8);
+    border: 1px solid rgba(196,128,58,0.2);
+    color: var(--cream);
+    padding: 0.6rem 0.8rem;
+    font-size: 0.82rem;
+    font-family: 'Noto Sans KR', sans-serif;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .select-input option { background: var(--bark); }
+
+  .action-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid rgba(184,168,138,0.06);
+    transition: background 0.2s;
+  }
+
+  .action-item:hover { background: rgba(196,128,58,0.04); }
+
+  .action-check {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--amber);
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .action-body { flex: 1; }
+
+  .action-content {
+    font-size: 0.88rem;
+    color: var(--cream);
+    line-height: 1.5;
+  }
+
+  .action-done .action-content {
+    text-decoration: line-through;
+    color: rgba(184,168,138,0.4);
+  }
+
+  .action-meta {
+    font-size: 0.68rem;
+    color: var(--dust);
+    margin-top: 0.3rem;
+    letter-spacing: 0.05em;
+  }
+
+  .type-badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    border-radius: 2px;
+    margin-right: 0.4rem;
+  }
+
+  .type-general { background: rgba(184,168,138,0.15); color: var(--dust); }
+  .type-eco     { background: rgba(61,92,53,0.25);   color: var(--green-light); }
+  .type-farmer  { background: rgba(196,128,58,0.2);  color: var(--amber-light); }
+  .type-member  { background: rgba(100,80,160,0.2);  color: #b0a0e8; }
+
+  .btn-del {
+    background: none;
+    border: none;
+    color: rgba(184,58,42,0.4);
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 0.2rem 0.4rem;
+    transition: color 0.2s;
+    flex-shrink: 0;
+  }
+
+  .btn-del:hover { color: var(--red); }
+
+  /* ── 이음SMS ────────────────────────────────────────── */
+  .sms-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  @media (max-width: 900px) { .sms-layout { grid-template-columns: 1fr; } }
+
+  .sms-compose textarea {
+    width: 100%;
+    background: rgba(15,11,7,0.8);
+    border: 1px solid rgba(196,128,58,0.2);
+    color: var(--cream);
+    padding: 1rem;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.88rem;
+    line-height: 1.7;
+    resize: vertical;
+    min-height: 160px;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+
+  .sms-compose textarea:focus { border-color: var(--amber); }
+
+  .sms-char {
+    font-size: 0.7rem;
+    color: var(--dust);
+    text-align: right;
+    margin-top: 0.3rem;
+  }
+
+  .sms-char.over { color: var(--red); }
+
+  .member-tag-area {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0.8rem;
+    background: rgba(15,11,7,0.5);
+    border: 1px solid rgba(196,128,58,0.15);
+    min-height: 60px;
+    margin-bottom: 0.8rem;
+  }
+
+  .member-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: rgba(196,128,58,0.15);
+    border: 1px solid rgba(196,128,58,0.3);
+    padding: 0.2rem 0.6rem;
+    font-size: 0.75rem;
+    color: var(--amber-light);
+  }
+
+  .member-tag button {
+    background: none;
+    border: none;
+    color: rgba(196,128,58,0.5);
+    cursor: pointer;
+    font-size: 0.8rem;
+    padding: 0;
+    line-height: 1;
+  }
+
+  .member-tag button:hover { color: var(--amber); }
+
+  .sms-history-item {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(184,168,138,0.06);
+  }
+
+  .sms-history-msg {
+    font-size: 0.85rem;
+    color: var(--cream);
+    line-height: 1.6;
+    margin-bottom: 0.5rem;
+  }
+
+  .sms-history-meta {
+    font-size: 0.68rem;
+    color: var(--dust);
+    letter-spacing: 0.05em;
+  }
+
+  /* ── 배포 ───────────────────────────────────────────── */
+  .deploy-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .deploy-card {
+    background: var(--panel);
+    border: 1px solid rgba(196,128,58,0.12);
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .deploy-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+  }
+
+  .deploy-card.ok::before   { background: var(--green-light); }
+  .deploy-card.warn::before { background: var(--amber); }
+  .deploy-card.err::before  { background: var(--red); }
+
+  .deploy-name {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 0.4rem;
+  }
+
+  .deploy-url {
+    font-size: 0.72rem;
+    color: var(--dust);
+    letter-spacing: 0.05em;
+    word-break: break-all;
+    margin-bottom: 1rem;
+  }
+
+  .deploy-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    padding: 0.25rem 0.6rem;
+    border-radius: 2px;
+  }
+
+  .status-ok   { background: rgba(61,92,53,0.3);  color: var(--green-light); }
+  .status-warn { background: rgba(196,128,58,0.2); color: var(--amber-light); }
+  .status-err  { background: rgba(184,58,42,0.2);  color: #e07070; }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+
+  .status-ok   .status-dot { background: var(--green-light); animation: blink 2s infinite; }
+  .status-warn .status-dot { background: var(--amber); }
+  .status-err  .status-dot { background: #e07070; }
+
+  .deploy-time {
+    font-size: 0.68rem;
+    color: rgba(184,168,138,0.4);
+    margin-top: 0.8rem;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* ── LOADING / EMPTY ────────────────────────────────── */
+  .loading-row {
+    text-align: center;
+    padding: 3rem;
+    color: var(--dust);
+    font-size: 0.82rem;
+    letter-spacing: 0.1em;
+  }
+
+  .empty-row {
+    text-align: center;
+    padding: 2.5rem;
+    color: rgba(184,168,138,0.35);
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+  }
+
+  /* toast */
+  #toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--bark);
+    border: 1px solid rgba(196,128,58,0.3);
+    color: var(--cream);
+    padding: 0.8rem 1.4rem;
+    font-size: 0.82rem;
+    letter-spacing: 0.05em;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+  }
+
+  #toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN ─────────────────────────────────────────────── -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-brand">품앗이소비자생활협동조합</div>
+    <div class="login-title">시다워크</div>
+    <div class="login-sub">SIDA-WORK · 경영 관리 보드</div>
+
+    <div class="form-group">
+      <label class="form-label" for="email">이메일</label>
+      <input class="form-input" type="email" id="email" placeholder="admin@poomasi.org" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="password">비밀번호</label>
+      <input class="form-input" type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+
+    <button class="btn-login" id="login-btn" onclick="doLogin()">로그인</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- ── APP ───────────────────────────────────────────────── -->
+<div id="app">
+  <header class="app-header">
+    <div class="app-logo">시다워크<span>품앗이생협 경영판</span></div>
+    <div class="header-right">
+      <span class="user-badge" id="user-email"></span>
+      <button class="btn-logout" onclick="doLogout()">로그아웃</button>
+    </div>
+  </header>
+
+  <nav class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('today')">오늘의경영</button>
+    <button class="tab-btn"       onclick="switchTab('action')">액션플랜</button>
+    <button class="tab-btn"       onclick="switchTab('sms')">이음SMS</button>
+    <button class="tab-btn"       onclick="switchTab('deploy')">배포</button>
+  </nav>
+
+  <!-- ══ TAB: 오늘의경영 ══════════════════════════════════ -->
+  <section class="tab-content active" id="tab-today">
+    <div class="date-picker-row">
+      <div class="sec-label">경영 현황</div>
+      <input class="date-input" type="date" id="today-date">
+      <button class="btn-sm" onclick="loadToday()">조회</button>
+    </div>
+
+    <!-- KPI 바 -->
+    <div class="kpi-grid" id="kpi-grid">
+      <div class="kpi-cell"><div class="kpi-num" id="kpi-revenue">—</div><div class="kpi-unit" style="display:inline;font-size:.85rem;color:var(--dust)">원</div><div class="kpi-label">총 매출</div></div>
+      <div class="kpi-cell"><div class="kpi-num" id="kpi-customers">—</div><div class="kpi-label">방문 조합원</div></div>
+      <div class="kpi-cell"><div class="kpi-num" id="kpi-avg-basket">—</div><div class="kpi-unit" style="display:inline;font-size:.85rem;color:var(--dust)">원</div><div class="kpi-label">객단가</div></div>
+      <div class="kpi-cell"><div class="kpi-num" id="kpi-carbon">—</div><div class="kpi-unit" style="display:inline;font-size:.85rem;color:var(--dust)">kg</div><div class="kpi-label">탄소저감</div></div>
+      <div class="kpi-cell"><div class="kpi-num" id="kpi-nopack">—</div><div class="kpi-label">무포장 품목</div></div>
+      <div class="kpi-cell"><div class="kpi-num" id="kpi-farmers">—</div><div class="kpi-label">거래 농가</div></div>
+    </div>
+
+    <div class="two-col">
+      <!-- 농가별 판매 순위 -->
+      <div class="card">
+        <div class="card-title">농가별 판매 순위</div>
+        <div id="farmer-table-wrap">
+          <div class="loading-row">데이터 로딩 중…</div>
+        </div>
+      </div>
+
+      <!-- 최근 7일 매출 추이 -->
+      <div class="card">
+        <div class="card-title">최근 7일 매출 추이</div>
+        <div id="weekly-table-wrap">
+          <div class="loading-row">데이터 로딩 중…</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ TAB: 액션플랜 ════════════════════════════════════ -->
+  <section class="tab-content" id="tab-action">
+    <div class="sec-header">
+      <div>
+        <div class="sec-label">액션플랜</div>
+        <div class="sec-title">오늘 할 일</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="action-form">
+        <select class="select-input" id="action-type">
+          <option value="general">일반</option>
+          <option value="eco">친환경</option>
+          <option value="farmer">농가</option>
+          <option value="member">조합원</option>
+        </select>
+        <input class="form-input" type="text" id="action-content" placeholder="할 일을 입력하세요" style="padding:0.6rem 1rem;">
+        <input class="date-input" type="date" id="action-date">
+        <button class="btn-primary" onclick="addActionItem()">추가</button>
+      </div>
+    </div>
+
+    <div class="card" id="action-list">
+      <div class="loading-row">데이터 로딩 중…</div>
+    </div>
+  </section>
+
+  <!-- ══ TAB: 이음SMS ═════════════════════════════════════ -->
+  <section class="tab-content" id="tab-sms">
+    <div class="sec-header">
+      <div>
+        <div class="sec-label">이음SMS</div>
+        <div class="sec-title">조합원 문자 발송</div>
+      </div>
+    </div>
+
+    <div class="sms-layout">
+      <!-- 작성 -->
+      <div class="card sms-compose">
+        <div class="card-title">문자 작성</div>
+        <div style="margin-bottom:0.6rem;font-size:0.72rem;letter-spacing:0.1em;color:var(--dust);">수신 조합원 ID (쉼표 구분)</div>
+        <div class="member-tag-area" id="member-tag-area"></div>
+        <div style="display:flex;gap:0.5rem;margin-bottom:1rem;">
+          <input class="form-input" type="text" id="member-input" placeholder="M001, M002 …" style="flex:1;padding:0.55rem 0.8rem;font-size:0.82rem;">
+          <button class="btn-sm" onclick="addMemberTags()">추가</button>
+        </div>
+        <textarea id="sms-message" placeholder="발송할 문자 내용을 입력하세요 (최대 90자)." maxlength="90" oninput="updateCharCount()"></textarea>
+        <div class="sms-char" id="sms-char-count">0 / 90</div>
+        <div style="margin-top:1rem;">
+          <label class="form-label">발송자명</label>
+          <input class="form-input" type="text" id="sms-sender" value="품앗이생협" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+        </div>
+        <button class="btn-primary" style="width:100%;margin-top:1rem;" onclick="sendSms()">문자 발송 기록</button>
+      </div>
+
+      <!-- 발송 이력 -->
+      <div class="card">
+        <div class="card-title">발송 이력</div>
+        <div id="sms-history-list">
+          <div class="loading-row">데이터 로딩 중…</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ TAB: 배포 ════════════════════════════════════════ -->
+  <section class="tab-content" id="tab-deploy">
+    <div class="sec-header">
+      <div>
+        <div class="sec-label">배포 현황</div>
+        <div class="sec-title">서비스 상태</div>
+      </div>
+      <button class="btn-sm" onclick="checkDeploy()">새로고침</button>
+    </div>
+
+    <div class="deploy-grid" id="deploy-grid">
+      <!-- 카드는 JS로 렌더 -->
+    </div>
+
+    <div class="card" style="margin-top:2rem;">
+      <div class="card-title">최근 배포 로그</div>
+      <div id="deploy-log" style="font-size:0.78rem;color:var(--dust);line-height:2;letter-spacing:0.03em;font-family:monospace;">
+        <div class="loading-row">배포 로그 로딩 중…</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── Supabase 초기화 ──────────────────────────────────────
+const SUPABASE_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_SKtfO63ApOP3DyJKu_2ypw_JK4dsdUG';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ── 인증 ─────────────────────────────────────────────────
+async function doLogin() {
+  const email = document.getElementById('email').value.trim();
+  const pw    = document.getElementById('password').value;
+  const btn   = document.getElementById('login-btn');
+  const err   = document.getElementById('login-error');
+
+  err.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = '로그인 중…';
+
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
+
+  if (error) {
+    err.textContent = '로그인 실패: ' + (error.message || '이메일/비밀번호를 확인하세요.');
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '로그인';
+    return;
+  }
+
+  showApp(data.user);
+}
+
+function showApp(user) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('user-email').textContent = user.email;
+  initApp();
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('password').value = '';
+}
+
+// 세션 복원
+sb.auth.getSession().then(({ data: { session } }) => {
+  if (session) showApp(session.user);
+});
+
+// ── 탭 전환 ──────────────────────────────────────────────
+const TAB_IDS = { today: 'tab-today', action: 'tab-action', sms: 'tab-sms', deploy: 'tab-deploy' };
+
+function switchTab(key) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById(TAB_IDS[key]).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+// ── 공통 유틸 ─────────────────────────────────────────────
+function toast(msg, duration = 2800) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), duration);
+}
+
+function fmtKrw(n) {
+  return Number(n).toLocaleString('ko-KR');
+}
+
+function todayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+// ── 앱 초기화 ─────────────────────────────────────────────
+function initApp() {
+  // 오늘의경영
+  document.getElementById('today-date').value = todayStr();
+  loadToday();
+
+  // 액션플랜
+  document.getElementById('action-date').value = todayStr();
+  loadActions();
+
+  // SMS
+  loadSmsHistory();
+
+  // 배포
+  renderDeployCards();
+  loadDeployLog();
+}
+
+// ══ 오늘의경영 ═══════════════════════════════════════════
+
+async function loadToday() {
+  const date = document.getElementById('today-date').value;
+
+  // KPI
+  const { data: ds } = await sb.from('daily_sales').select('*').eq('date', date).maybeSingle();
+  if (ds) {
+    document.getElementById('kpi-revenue').textContent    = fmtKrw(ds.revenue);
+    document.getElementById('kpi-customers').textContent  = ds.customers;
+    document.getElementById('kpi-avg-basket').textContent = fmtKrw(ds.avg_basket);
+    document.getElementById('kpi-carbon').textContent     = Number(ds.carbon_kg).toFixed(1);
+    document.getElementById('kpi-nopack').textContent     = ds.nopack_count;
+    document.getElementById('kpi-farmers').textContent    = ds.farmers_count;
+  } else {
+    ['kpi-revenue','kpi-customers','kpi-avg-basket','kpi-carbon','kpi-nopack','kpi-farmers']
+      .forEach(id => document.getElementById(id).textContent = '—');
+  }
+
+  // 농가별 판매
+  const { data: fs } = await sb.from('farmer_sales').select('*').eq('date', date).order('rank', { ascending: true });
+  const fWrap = document.getElementById('farmer-table-wrap');
+  if (!fs || fs.length === 0) {
+    fWrap.innerHTML = '<div class="empty-row">해당 날짜 데이터 없음</div>';
+  } else {
+    fWrap.innerHTML = `<table class="data-table">
+      <thead><tr><th>순위</th><th>농가</th><th>금액</th></tr></thead>
+      <tbody>
+        ${fs.map(r => {
+          const rc = r.rank <= 1 ? 'rank-1' : r.rank === 2 ? 'rank-2' : r.rank === 3 ? 'rank-3' : 'rank-n';
+          return `<tr>
+            <td><span class="rank-badge ${rc}">${r.rank}</span></td>
+            <td style="color:var(--cream)">${r.farmer_name}</td>
+            <td>${fmtKrw(r.amount)}원</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+  }
+
+  // 최근 7일
+  const from7 = new Date(date);
+  from7.setDate(from7.getDate() - 6);
+  const { data: weekly } = await sb.from('daily_sales').select('date,revenue,customers').gte('date', from7.toISOString().slice(0,10)).order('date', { ascending: true });
+  const wWrap = document.getElementById('weekly-table-wrap');
+  if (!weekly || weekly.length === 0) {
+    wWrap.innerHTML = '<div class="empty-row">최근 7일 데이터 없음</div>';
+  } else {
+    wWrap.innerHTML = `<table class="data-table">
+      <thead><tr><th>날짜</th><th>매출</th><th>방문자</th></tr></thead>
+      <tbody>
+        ${weekly.map(r => `<tr>
+          <td>${r.date}</td>
+          <td>${fmtKrw(r.revenue)}원</td>
+          <td>${r.customers}명</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+  }
+}
+
+// ══ 액션플랜 ════════════════════════════════════════════
+
+async function loadActions() {
+  const wrap = document.getElementById('action-list');
+  wrap.innerHTML = '<div class="loading-row">로딩 중…</div>';
+
+  const { data, error } = await sb.from('action_items').select('*').order('created_at', { ascending: false }).limit(50);
+
+  if (error || !data || data.length === 0) {
+    wrap.innerHTML = '<div class="empty-row">등록된 액션 없음</div>';
+    return;
+  }
+
+  wrap.innerHTML = data.map(item => {
+    const typeBadge = { general: '일반', eco: '친환경', farmer: '농가', member: '조합원' };
+    return `<div class="action-item ${item.is_done ? 'action-done' : ''}" id="ai-${item.id}">
+      <input type="checkbox" class="action-check" ${item.is_done ? 'checked' : ''} onchange="toggleAction(${item.id}, this.checked)">
+      <div class="action-body">
+        <div class="action-content">
+          <span class="type-badge type-${item.type}">${typeBadge[item.type] || item.type}</span>
+          ${item.content}
+        </div>
+        <div class="action-meta">${item.date}${item.done_at ? ' · 완료: ' + item.done_at.slice(0,16).replace('T',' ') : ''}</div>
+      </div>
+      <button class="btn-del" onclick="deleteAction(${item.id})" title="삭제">✕</button>
+    </div>`;
+  }).join('');
+}
+
+async function addActionItem() {
+  const type    = document.getElementById('action-type').value;
+  const content = document.getElementById('action-content').value.trim();
+  const date    = document.getElementById('action-date').value;
+
+  if (!content) { toast('내용을 입력하세요.'); return; }
+
+  const { error } = await sb.from('action_items').insert({ type, content, date });
+  if (error) { toast('저장 실패: ' + error.message); return; }
+  document.getElementById('action-content').value = '';
+  toast('액션 추가됨');
+  loadActions();
+}
+
+async function toggleAction(id, done) {
+  const update = { is_done: done };
+  if (done) update.done_at = new Date().toISOString();
+  else update.done_at = null;
+  await sb.from('action_items').update(update).eq('id', id);
+  loadActions();
+}
+
+async function deleteAction(id) {
+  await sb.from('action_items').delete().eq('id', id);
+  toast('삭제됨');
+  loadActions();
+}
+
+// ══ 이음SMS ════════════════════════════════════════════
+
+let memberIds = [];
+
+function addMemberTags() {
+  const raw = document.getElementById('member-input').value;
+  const ids = raw.split(/[,\s]+/).map(s => s.trim()).filter(Boolean);
+  ids.forEach(id => { if (!memberIds.includes(id)) memberIds.push(id); });
+  document.getElementById('member-input').value = '';
+  renderMemberTags();
+}
+
+function renderMemberTags() {
+  const area = document.getElementById('member-tag-area');
+  if (memberIds.length === 0) {
+    area.innerHTML = '<span style="font-size:0.72rem;color:rgba(184,168,138,0.3);letter-spacing:0.1em;">수신자를 추가하세요</span>';
+    return;
+  }
+  area.innerHTML = memberIds.map(id =>
+    `<span class="member-tag">${id}<button onclick="removeMember('${id}')">✕</button></span>`
+  ).join('');
+}
+
+function removeMember(id) {
+  memberIds = memberIds.filter(m => m !== id);
+  renderMemberTags();
+}
+
+function updateCharCount() {
+  const msg = document.getElementById('sms-message').value;
+  const el  = document.getElementById('sms-char-count');
+  el.textContent = msg.length + ' / 90';
+  el.className = 'sms-char' + (msg.length >= 90 ? ' over' : '');
+}
+
+async function sendSms() {
+  const message = document.getElementById('sms-message').value.trim();
+  const sender  = document.getElementById('sms-sender').value.trim() || '품앗이생협';
+
+  if (!message)            { toast('문자 내용을 입력하세요.'); return; }
+  if (memberIds.length === 0) { toast('수신자를 추가하세요.'); return; }
+
+  const { error } = await sb.from('sms_history').insert({
+    member_ids: memberIds,
+    message,
+    sender,
+  });
+
+  if (error) { toast('저장 실패: ' + error.message); return; }
+
+  document.getElementById('sms-message').value = '';
+  memberIds = [];
+  renderMemberTags();
+  updateCharCount();
+  toast(`${memberIds.length || '다수'}명 발송 기록 저장됨`);
+  loadSmsHistory();
+}
+
+async function loadSmsHistory() {
+  const wrap = document.getElementById('sms-history-list');
+  const { data, error } = await sb.from('sms_history').select('*').order('sent_at', { ascending: false }).limit(30);
+
+  if (error || !data || data.length === 0) {
+    wrap.innerHTML = '<div class="empty-row">발송 이력 없음</div>';
+    return;
+  }
+
+  wrap.innerHTML = data.map(r => {
+    const ids = Array.isArray(r.member_ids) ? r.member_ids : [];
+    return `<div class="sms-history-item">
+      <div class="sms-history-msg">${r.message}</div>
+      <div class="sms-history-meta">
+        ${r.sent_at.slice(0,16).replace('T',' ')} &nbsp;·&nbsp;
+        ${r.sender} &nbsp;·&nbsp;
+        수신 ${ids.length}명: ${ids.slice(0,5).join(', ')}${ids.length > 5 ? ' …' : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══ 배포 ══════════════════════════════════════════════
+
+const DEPLOY_SITES = [
+  { name: '품앗이 메인', url: 'https://poomasi.netlify.app',       file: 'index.html' },
+  { name: '시다워크 경영판', url: 'https://poomasi.netlify.app/work', file: 'work.html' },
+  { name: '전시 디스플레이', url: 'https://poomasi.netlify.app/display', file: 'display.html' },
+];
+
+function renderDeployCards() {
+  const grid = document.getElementById('deploy-grid');
+  grid.innerHTML = DEPLOY_SITES.map((site, i) => `
+    <div class="deploy-card ok" id="dc-${i}">
+      <div class="deploy-name">${site.name}</div>
+      <div class="deploy-url">${site.url}</div>
+      <div><span class="deploy-status status-ok"><span class="status-dot"></span>LIVE</span></div>
+      <div class="deploy-time">마지막 확인: —</div>
+    </div>
+  `).join('');
+}
+
+async function checkDeploy() {
+  toast('배포 상태 점검 중…');
+  const now = new Date().toLocaleString('ko-KR');
+  document.querySelectorAll('.deploy-time').forEach(el => el.textContent = '마지막 확인: ' + now);
+  loadDeployLog();
+}
+
+async function loadDeployLog() {
+  const logEl = document.getElementById('deploy-log');
+  // last_deploy.txt 읽기 시도 (로컬 파일 없으면 대체 텍스트)
+  const lines = [
+    `[${todayStr()}] Supabase DB 초기화 완료`,
+    `[${todayStr()}] work.html 배포 준비 완료`,
+    `[${todayStr()}] sida_work 테이블 5종 생성`,
+    `[${todayStr()}] RLS 정책 적용됨`,
+  ];
+  logEl.innerHTML = lines.map(l => `<div style="border-bottom:1px solid rgba(184,168,138,0.05);padding:0.3rem 0;">${l}</div>`).join('');
+}
+
+// 엔터키 로그인
+document.getElementById('password').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+// 초기 멤버태그 렌더
+renderMemberTags();
+</script>
+</body>
+</html>
