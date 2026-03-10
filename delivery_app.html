@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>배달 관리</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', sans-serif; background: #f5f5f5; color: #333; padding-bottom: 24px; }
+
+/* Header */
+.header { background: #2563eb; color: white; padding: 13px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 20; box-shadow: 0 2px 8px rgba(0,0,0,.2); }
+.header-title { font-size: 17px; font-weight: 700; }
+.btn-new { background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.4); color: white; border-radius: 6px; padding: 5px 11px; font-size: 12px; cursor: pointer; }
+.btn-new:active { background: rgba(255,255,255,.35); }
+
+/* Route Section */
+.route-section { background: white; border-bottom: 2px solid #e5e7eb; }
+.route-header { padding: 10px 16px 8px; display: flex; align-items: center; gap: 8px; }
+.route-title { font-size: 14px; font-weight: 700; color: #374151; }
+.route-count { font-size: 13px; color: #6b7280; }
+.route-empty { padding: 12px 16px 14px; font-size: 13px; color: #9ca3af; }
+
+/* Route Items */
+.route-item { border-top: 1px solid #f3f4f6; }
+.route-item.completed .ri-name { color: #9ca3af; text-decoration: line-through; }
+.route-item.completed .ri-phone { color: #d1d5db; }
+.ri-summary { display: flex; align-items: center; padding: 11px 16px; cursor: pointer; gap: 10px; user-select: none; }
+.ri-summary:active { background: #f9fafb; }
+.ri-num { font-size: 12px; color: #9ca3af; min-width: 16px; }
+.ri-check { font-size: 15px; min-width: 20px; text-align: center; }
+.ri-name { font-size: 15px; font-weight: 700; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ri-phone { font-size: 12px; color: #6b7280; white-space: nowrap; }
+.ri-time { font-size: 11px; color: #10b981; white-space: nowrap; margin-left: 4px; }
+
+/* Route Detail (expanded) */
+.ri-detail { display: none; background: #f9fafb; border-top: 1px solid #f0f0f0; padding: 12px 16px; }
+.ri-detail.open { display: block; }
+.d-row { display: flex; gap: 6px; margin-bottom: 7px; font-size: 13px; align-items: flex-start; }
+.d-label { color: #9ca3af; min-width: 36px; font-size: 12px; padding-top: 2px; flex-shrink: 0; }
+.d-value { color: #374151; flex: 1; word-break: break-all; }
+.pw-wrap { display: flex; align-items: center; gap: 6px; flex: 1; }
+.toggle-btn { background: none; border: 1px solid #d1d5db; border-radius: 5px; padding: 1px 7px; font-size: 11px; color: #6b7280; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+.toggle-btn:active { background: #f3f4f6; }
+.d-memo { background: #f0f0f0; border-radius: 6px; padding: 7px 10px; font-size: 12px; color: #6b7280; margin-bottom: 10px; line-height: 1.5; }
+.d-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.abtn { flex: 1; min-width: 60px; border: none; border-radius: 8px; padding: 10px 8px; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 3px; text-decoration: none; }
+.abtn:active { opacity: .8; }
+.abtn-tmap { background: #fef3c7; color: #92400e; }
+.abtn-call { background: #dbeafe; color: #1e40af; }
+.abtn-done { background: #d1fae5; color: #065f46; }
+.abtn-done.is-done { background: #f3f4f6; color: #9ca3af; }
+.abtn-del { background: #fee2e2; color: #991b1b; flex: 0; min-width: 42px; }
+
+/* Search */
+.search-bar { background: white; padding: 10px 16px; border-bottom: 1px solid #e5e7eb; position: sticky; top: 47px; z-index: 15; }
+.search-wrap { display: flex; gap: 8px; }
+.search-wrap input { flex: 1; border: 1.5px solid #d1d5db; border-radius: 8px; padding: 9px 12px; font-size: 16px; outline: none; transition: border-color .2s; }
+.search-wrap input:focus { border-color: #2563eb; }
+.search-wrap button { background: #2563eb; color: white; border: none; border-radius: 8px; padding: 9px 16px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.search-wrap button:active { background: #1d4ed8; }
+
+/* Search Results */
+.content { padding: 10px 12px; }
+.count { font-size: 13px; color: #6b7280; padding: 2px 0 6px; }
+.card { background: white; border-radius: 10px; padding: 14px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+.card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.c-name { font-size: 16px; font-weight: 700; }
+.c-phone { font-size: 13px; color: #6b7280; }
+.c-row { display: flex; gap: 6px; margin-bottom: 6px; font-size: 13px; align-items: flex-start; }
+.c-label { color: #9ca3af; min-width: 36px; font-size: 12px; padding-top: 2px; flex-shrink: 0; }
+.c-value { color: #374151; flex: 1; word-break: break-all; }
+.c-memo { background: #f9fafb; border-radius: 6px; padding: 7px 10px; font-size: 12px; color: #6b7280; margin-top: 6px; line-height: 1.5; }
+.c-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.cbtn { flex: 1; min-width: 70px; border: none; border-radius: 8px; padding: 10px 8px; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 4px; text-decoration: none; }
+.cbtn:active { opacity: .8; }
+.cbtn-add { background: #ede9fe; color: #5b21b6; }
+.cbtn-added { background: #f3f4f6; color: #9ca3af; cursor: default; }
+.cbtn-call { background: #dbeafe; color: #1e40af; }
+
+.empty { text-align: center; padding: 40px 20px; color: #9ca3af; }
+.empty .icon { font-size: 40px; margin-bottom: 10px; }
+.loading { text-align: center; padding: 30px; color: #6b7280; font-size: 14px; }
+.spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid #e5e7eb; border-top-color: #2563eb; border-radius: 50%; animation: spin .7s linear infinite; margin-right: 6px; vertical-align: middle; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1f2937; color: white; padding: 10px 20px; border-radius: 20px; font-size: 14px; opacity: 0; transition: all .3s; z-index: 100; pointer-events: none; white-space: nowrap; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="header-title">배달 관리</span>
+  <button class="btn-new" onclick="confirmNewRoute()">새 루트</button>
+</div>
+
+<div class="route-section">
+  <div class="route-header">
+    <span class="route-title">오늘 배달 루트</span>
+    <span class="route-count" id="routeCount"></span>
+  </div>
+  <div id="routeList"></div>
+</div>
+
+<div class="search-bar">
+  <div class="search-wrap">
+    <input type="tel" id="searchInput" placeholder="전화번호 끝 4자리" inputmode="numeric"
+      oninput="onInput(this)" onkeydown="if(event.key==='Enter')search()">
+    <button onclick="search()">검색</button>
+  </div>
+</div>
+
+<div class="content">
+  <div id="results"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_SKtfO63ApOP3DyJKu_2ypw_JK4dsdUG';
+const STORAGE_KEY  = 'poomasi_delivery_route';
+const SB_HEADERS   = {
+  apikey:         SUPABASE_KEY,
+  Authorization:  `Bearer ${SUPABASE_KEY}`,
+  'Content-Type': 'application/json',
+  Prefer:         'return=minimal'
+};
+
+// ── 상태 ──────────────────────────────────────────────────────────────────
+let route       = loadRoute();   // { date, items: [...] }
+let expandedIdx = null;
+let routePwVis  = {};            // idx → bool
+let searchPwVis = {};            // idx → bool
+let searchData  = [];            // 현재 검색 결과
+
+// ── 유틸 ──────────────────────────────────────────────────────────────────
+function today() {
+  return new Date().toLocaleDateString('sv-SE'); // YYYY-MM-DD
+}
+
+function esc(s) {
+  return String(s || '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function formatPhone(p) {
+  if (!p) return '';
+  const d = p.replace(/\D/g, '');
+  if (d.length === 11) return d.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+  if (d.length === 10) return d.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+  return p;
+}
+
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+function showLoading() {
+  document.getElementById('results').innerHTML =
+    '<div class="loading"><span class="spinner"></span>불러오는 중...</div>';
+}
+
+function showError(msg) {
+  document.getElementById('results').innerHTML =
+    `<div class="empty"><div class="icon">⚠️</div><p>오류: ${esc(msg)}</p></div>`;
+}
+
+// ── localStorage ──────────────────────────────────────────────────────────
+function loadRoute() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { date: today(), items: [] };
+    const data = JSON.parse(raw);
+    if (data.date !== today()) return { date: today(), items: [] }; // 자정 자동 초기화
+    return data;
+  } catch { return { date: today(), items: [] }; }
+}
+
+function saveRoute() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(route));
+}
+
+// ── 루트 조작 ─────────────────────────────────────────────────────────────
+function addToRoute(idx) {
+  const member = searchData[idx];
+  if (!member) return;
+  const phone = member['전화번호'] || '';
+  if (route.items.some(r => r.전화번호 === phone)) {
+    showToast('이미 루트에 있습니다');
+    return;
+  }
+  route.items.push({
+    route_order:  route.items.length + 1,
+    이름:          member['이름']   || '',
+    전화번호:       phone,
+    주소:          member['주소']   || '',
+    동호수:         member['동호수'] || '',
+    비번:          member['비번']   || '',
+    메모:          member['메모']   || '',
+    completed_at: null
+  });
+  saveRoute();
+  renderRoute();
+  renderSearchResults(); // 추가됨 상태 갱신
+  showToast(`${member['이름']} 추가됨`);
+}
+
+function removeFromRoute(idx) {
+  if (route.items[idx].completed_at) { showToast('완료된 항목은 삭제할 수 없습니다'); return; }
+  if (!confirm(`${route.items[idx].이름}을(를) 루트에서 제거할까요?`)) return;
+  route.items.splice(idx, 1);
+  route.items.forEach((r, i) => r.route_order = i + 1);
+  saveRoute();
+  if (expandedIdx === idx) expandedIdx = null;
+  else if (expandedIdx > idx) expandedIdx--;
+  routePwVis = {};
+  renderRoute();
+}
+
+function completeAndSms(idx) {
+  const item = route.items[idx];
+  if (!item.completed_at) {
+    const now = new Date().toISOString();
+    item.completed_at = now;
+    saveRoute();          // localStorage 즉시 저장 (SMS 이동 전에)
+    renderRoute();
+    sbSaveDelivery(item, now); // Supabase 비동기 (결과 안 기다림)
+  }
+  const body = encodeURIComponent('배달 완료했습니다.');
+  window.location.href = `sms:${item.전화번호}?body=${body}`;
+}
+
+async function sbSaveDelivery(item, completedAt) {
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/delivery_routes`, {
+      method:  'POST',
+      headers: SB_HEADERS,
+      body:    JSON.stringify({
+        date:         route.date,
+        route_order:  item.route_order,
+        이름:          item.이름,
+        전화번호:       item.전화번호,
+        주소:          item.주소,
+        동호수:         item.동호수,
+        completed_at: completedAt
+      })
+    });
+  } catch (e) { console.error('DB 저장 실패:', e); }
+}
+
+function toggleExpand(idx) {
+  expandedIdx = (expandedIdx === idx) ? null : idx;
+  renderRoute();
+}
+
+function toggleRoutePw(e, idx) {
+  e.stopPropagation();
+  routePwVis[idx] = !routePwVis[idx];
+  renderRoute();
+}
+
+function confirmNewRoute() {
+  if (!route.items.length) { showToast('루트가 비어 있습니다'); return; }
+  if (!confirm('오늘 루트를 초기화할까요?\n(완료 기록은 DB에 보존됩니다)')) return;
+  route = { date: today(), items: [] };
+  saveRoute();
+  expandedIdx = null;
+  routePwVis  = {};
+  renderRoute();
+}
+
+// ── 루트 렌더링 ───────────────────────────────────────────────────────────
+function renderRoute() {
+  const list    = document.getElementById('routeList');
+  const countEl = document.getElementById('routeCount');
+  const total   = route.items.length;
+  const done    = route.items.filter(r => r.completed_at).length;
+
+  countEl.textContent = total ? `${done}/${total}` : '';
+
+  if (!total) {
+    list.innerHTML = '<div class="route-empty">아래에서 검색 후 루트를 추가하세요</div>';
+    return;
+  }
+
+  list.innerHTML = route.items.map((item, idx) => {
+    const isExpanded = expandedIdx === idx;
+    const isDone     = !!item.completed_at;
+    const doneTime   = isDone
+      ? new Date(item.completed_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
+      : '';
+    const pwVis     = routePwVis[idx];
+    const pwDisplay = item.비번
+      ? (pwVis ? esc(item.비번) : '●'.repeat(Math.min(item.비번.length, 8)))
+      : '';
+    const fullAddr = (item.주소 + (item.동호수 ? ' ' + item.동호수 : '')).trim();
+
+    return `
+    <div class="route-item${isDone ? ' completed' : ''}">
+      <div class="ri-summary" onclick="toggleExpand(${idx})">
+        <span class="ri-num">${idx + 1}</span>
+        <span class="ri-check">${isDone ? '✅' : '○'}</span>
+        <span class="ri-name">${esc(item.이름)}</span>
+        <span class="ri-phone">${formatPhone(item.전화번호)}</span>
+        ${isDone ? `<span class="ri-time">${doneTime}</span>` : ''}
+      </div>
+      <div class="ri-detail${isExpanded ? ' open' : ''}">
+        ${item.주소 ? `<div class="d-row"><span class="d-label">주소</span><span class="d-value">${esc(fullAddr)}</span></div>` : ''}
+        ${item.비번 ? `
+        <div class="d-row">
+          <span class="d-label">비번</span>
+          <div class="pw-wrap">
+            <span>${pwDisplay}</span>
+            <button class="toggle-btn" onclick="toggleRoutePw(event,${idx})">${pwVis ? '숨김' : '표시'}</button>
+          </div>
+        </div>` : ''}
+        ${item.메모 ? `<div class="d-memo">💬 ${esc(item.메모)}</div>` : ''}
+        <div class="d-actions">
+          ${fullAddr ? `<button class="abtn abtn-tmap" onclick="openTmap(${idx})">🗺️ 티맵</button>` : ''}
+          ${item.전화번호 ? `<a class="abtn abtn-call" href="tel:${item.전화번호}">📞 전화</a>` : ''}
+          <button class="abtn abtn-done${isDone ? ' is-done' : ''}" onclick="completeAndSms(${idx})">
+            ${isDone ? '✅ 완료됨' : '✉️ 완료+문자'}
+          </button>
+          ${!isDone ? `<button class="abtn abtn-del" onclick="removeFromRoute(${idx})">✕</button>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── 검색 ──────────────────────────────────────────────────────────────────
+function onInput(el) {
+  el.value = el.value.replace(/[^0-9\-]/g, '');
+}
+
+async function search() {
+  const q = document.getElementById('searchInput').value.trim().replace(/\D/g, '');
+  if (!q) { document.getElementById('results').innerHTML = ''; return; }
+  showLoading();
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/delivery_members?select=*&전화번호=ilike.*${q}*`,
+      { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+    );
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    searchData  = await res.json();
+    searchPwVis = {};
+    renderSearchResults();
+  } catch (e) { showError(e.message); }
+}
+
+function renderSearchResults() {
+  const el = document.getElementById('results');
+  if (!searchData.length) {
+    el.innerHTML = '<div class="empty"><div class="icon">🔍</div><p>검색 결과가 없습니다.</p></div>';
+    return;
+  }
+  el.innerHTML = `<div class="count">${searchData.length}명</div>` +
+    searchData.map((m, i) => searchCard(m, i)).join('');
+}
+
+function searchCard(m, i) {
+  const phone    = m['전화번호'] || '';
+  const addr     = m['주소']    || '';
+  const dong     = m['동호수']  || '';
+  const pw       = m['비번']    || '';
+  const memo     = m['메모']    || '';
+  const fullAddr = (addr + (dong ? ' ' + dong : '')).trim();
+  const inRoute  = route.items.some(r => r.전화번호 === phone);
+  const pwVis    = searchPwVis[i];
+  const pwDisplay = pw
+    ? (pwVis ? esc(pw) : '●'.repeat(Math.min(pw.length, 8)))
+    : '';
+
+  return `
+  <div class="card">
+    <div class="card-top">
+      <span class="c-name">${esc(m['이름'] || '')}</span>
+      <span class="c-phone">${formatPhone(phone)}</span>
+    </div>
+    ${addr ? `<div class="c-row"><span class="c-label">주소</span><span class="c-value">${esc(fullAddr)}</span></div>` : ''}
+    ${pw   ? `<div class="c-row"><span class="c-label">비번</span><div class="pw-wrap"><span>${pwDisplay}</span><button class="toggle-btn" onclick="toggleSearchPw(event,${i})">${pwVis ? '숨김' : '표시'}</button></div></div>` : ''}
+    ${memo ? `<div class="c-memo">💬 ${esc(memo)}</div>` : ''}
+    <div class="c-actions">
+      <button class="cbtn ${inRoute ? 'cbtn-added' : 'cbtn-add'}"
+        ${inRoute ? 'disabled' : `onclick="addToRoute(${i})"`}>
+        ${inRoute ? '✓ 추가됨' : '+ 루트추가'}
+      </button>
+      ${phone ? `<a class="cbtn cbtn-call" href="tel:${phone}">📞 전화</a>` : ''}
+    </div>
+  </div>`;
+}
+
+function toggleSearchPw(e, i) {
+  e.stopPropagation();
+  searchPwVis[i] = !searchPwVis[i];
+  renderSearchResults();
+}
+
+// ── 티맵 ──────────────────────────────────────────────────────────────────
+function openTmap(idx) {
+  const item = route.items[idx];
+  const addr = (item.주소 + (item.동호수 ? ' ' + item.동호수 : '')).trim();
+  if (!addr) return;
+  window.location.href = `tmap://search?name=${encodeURIComponent(addr)}`;
+  setTimeout(() => {
+    if (!document.hidden) showToast('티맵 앱을 설치해주세요');
+  }, 1500);
+}
+
+// ── 초기 렌더링 ───────────────────────────────────────────────────────────
+renderRoute();
+</script>
+</body>
+</html>
