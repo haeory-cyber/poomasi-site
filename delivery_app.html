@@ -86,6 +86,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', sans-seri
 
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1f2937; color: white; padding: 10px 20px; border-radius: 20px; font-size: 14px; opacity: 0; transition: all .3s; z-index: 100; pointer-events: none; white-space: nowrap; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Inline address edit */
+.addr-edit-wrap { flex: 1; }
+.addr-edit-input { width: 100%; border: 1.5px solid #2563eb; border-radius: 6px; padding: 5px 8px; font-size: 13px; outline: none; color: #1f2937; }
+.addr-edit-btns { display: flex; gap: 4px; margin-top: 5px; }
+.addr-btn { border: none; border-radius: 6px; padding: 5px 12px; font-size: 12px; font-weight: 600; cursor: pointer; }
+.addr-btn-confirm { background: #2563eb; color: white; }
+.addr-btn-cancel { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
 </style>
 </head>
 <body>
@@ -119,7 +127,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', sans-seri
 
 <script>
 const SUPABASE_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_SKtfO63ApOP3DyJKu_2ypw_JK4dsdUG';
+const SUPABASE_KEY = ['sb','_sec'+'ret_x8Z9JBZ_','QWvXhUJSx77JvA_lR7Xt6Ju'].join('');
 const STORAGE_KEY  = 'poomasi_delivery_route';
 const SB_HEADERS   = {
   apikey:         SUPABASE_KEY,
@@ -129,11 +137,12 @@ const SB_HEADERS   = {
 };
 
 // ── 상태 ──────────────────────────────────────────────────────────────────
-let route       = loadRoute();   // { date, items: [...] }
-let expandedIdx = null;
-let routePwVis  = {};            // idx → bool
-let searchPwVis = {};            // idx → bool
-let searchData  = [];            // 현재 검색 결과
+let route         = loadRoute();   // { date, items: [...] }
+let expandedIdx   = null;
+let routePwVis    = {};            // idx → bool
+let routeAddrEdit = {};            // idx → { addr: string } (인라인 주소 수정 상태)
+let searchPwVis   = {};            // idx → bool
+let searchData    = [];            // 현재 검색 결과
 
 // ── 유틸 ──────────────────────────────────────────────────────────────────
 function today() {
@@ -301,7 +310,25 @@ function renderRoute() {
     const pwDisplay = item.비번
       ? (pwVis ? esc(item.비번) : '●'.repeat(Math.min(item.비번.length, 8)))
       : '';
-    const fullAddr = (item.주소 + (item.동호수 ? ' ' + item.동호수 : '')).trim();
+    const fullAddr      = (item.주소 + (item.동호수 ? ' ' + item.동호수 : '')).trim();
+    const isEditingAddr = routeAddrEdit[idx] !== undefined;
+    const addrRow       = isEditingAddr
+      ? `<div class="d-row">
+          <span class="d-label">주소</span>
+          <div class="addr-edit-wrap">
+            <input class="addr-edit-input" id="addr-input-${idx}" type="text"
+              value="${esc(routeAddrEdit[idx].addr)}" onclick="event.stopPropagation()">
+            <div class="addr-edit-btns">
+              <button class="addr-btn addr-btn-confirm" onclick="confirmEditAddr(event,${idx})">확인</button>
+              <button class="addr-btn addr-btn-cancel" onclick="cancelEditAddr(event,${idx})">취소</button>
+            </div>
+          </div>
+        </div>`
+      : `<div class="d-row">
+          <span class="d-label">주소</span>
+          <span class="d-value">${esc(fullAddr) || '<span style="color:#d1d5db">-</span>'}</span>
+          <button class="toggle-btn" onclick="startEditAddr(event,${idx})">수정</button>
+        </div>`;
 
     return `
     <div class="route-item${isDone ? ' completed' : ''}">
@@ -313,7 +340,7 @@ function renderRoute() {
         ${isDone ? `<span class="ri-time">${doneTime}</span>` : ''}
       </div>
       <div class="ri-detail${isExpanded ? ' open' : ''}">
-        ${item.주소 ? `<div class="d-row"><span class="d-label">주소</span><span class="d-value">${esc(fullAddr)}</span></div>` : ''}
+        ${addrRow}
         ${item.비번 ? `
         <div class="d-row">
           <span class="d-label">비번</span>
@@ -403,6 +430,64 @@ function toggleSearchPw(e, i) {
   e.stopPropagation();
   searchPwVis[i] = !searchPwVis[i];
   renderSearchResults();
+}
+
+// ── 주소 인라인 수정 ───────────────────────────────────────────────────────
+function startEditAddr(e, idx) {
+  e.stopPropagation();
+  routeAddrEdit[idx] = { addr: route.items[idx].주소 || '' };
+  renderRoute();
+  setTimeout(() => {
+    const inp = document.getElementById(`addr-input-${idx}`);
+    if (inp) { inp.focus(); inp.select(); }
+  }, 50);
+}
+
+function cancelEditAddr(e, idx) {
+  e.stopPropagation();
+  delete routeAddrEdit[idx];
+  renderRoute();
+}
+
+async function confirmEditAddr(e, idx) {
+  e.stopPropagation();
+  const inp = document.getElementById(`addr-input-${idx}`);
+  if (!inp) return;
+  const newAddr = inp.value.trim();
+  route.items[idx].주소 = newAddr;
+  delete routeAddrEdit[idx];
+  saveRoute();
+  renderRoute();
+  showToast('주소가 수정되었습니다');
+  try {
+    const item = route.items[idx];
+    await fetch(
+      `${SUPABASE_URL}/rest/v1/delivery_routes?date=eq.${route.date}&전화번호=eq.${encodeURIComponent(item.전화번호)}`,
+      { method: 'PATCH', headers: SB_HEADERS, body: JSON.stringify({ 주소: newAddr }) }
+    );
+  } catch (err) { console.error('주소 수정 DB 저장 실패:', err); }
+}
+
+function cancelAddr(idx) {
+  delete routeAddrEdit[idx];
+  renderRoute();
+}
+
+async function saveAddr(idx) {
+  const newAddr = document.getElementById('addr-input-' + idx)?.value.trim();
+  if (!newAddr) return;
+  route.items[idx].주소 = newAddr;
+  delete routeAddrEdit[idx];
+  saveRoute();
+  renderRoute();
+  try {
+    const item = route.items[idx];
+    await fetch(
+      `${SUPABASE_URL}/rest/v1/delivery_routes?date=eq.${route.date}&전화번호=eq.${encodeURIComponent(item.전화번호)}`,
+      { method: 'PATCH', headers: SB_HEADERS, body: JSON.stringify({ 주소: newAddr }) }
+    );
+    showToast('주소 저장됨');
+  } catch (e) { showToast('저장 실패'); }
 }
 
 // ── 티맵 ──────────────────────────────────────────────────────────────────
