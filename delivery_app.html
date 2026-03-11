@@ -244,7 +244,7 @@ function completeAndSms(idx) {
     renderRoute();
     sbSaveDelivery(item, now); // Supabase 비동기 (결과 안 기다림)
   }
-  const body = encodeURIComponent('배달 완료했습니다.');
+  const body = encodeURIComponent('품앗이마을 지족점입니다. 문앞에 배달완료했습니다.');
   window.location.href = `sms:${item.전화번호}?body=${body}`;
 }
 
