@@ -622,9 +622,17 @@ async function saveAddr(idx) {
 // ── 티맵 ──────────────────────────────────────────────────────────────────
 function openTmap(idx) {
   const item = route.items[idx];
-  const addr = (item.주소 + (item.동호수 ? ' ' + item.동호수 : '')).trim();
-  if (!addr) return;
-  window.location.href = `tmap://search?name=${encodeURIComponent(addr)}`;
+  let base = item.주소 || '';
+  let dongho = item.동호수 || '';
+  let tmapAddr;
+  if (dongho) {
+    const dongOnly = dongho.replace(/\s*\d+호.*$/, '').trim();
+    tmapAddr = (base + ' ' + dongOnly).trim();
+  } else {
+    tmapAddr = base.replace(/\s*\d+호.*$/, '').trim();
+  }
+  if (!tmapAddr) return;
+  window.location.href = `tmap://search?name=${encodeURIComponent(tmapAddr)}`;
   setTimeout(() => {
     if (!document.hidden) showToast('티맵 앱을 설치해주세요');
   }, 1500);
