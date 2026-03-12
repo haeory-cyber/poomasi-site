@@ -1010,7 +1010,7 @@ function todayStr() {
 // ── 앱 초기화 ─────────────────────────────────────────────
 function initApp() {
   // 오늘의경영
-  document.getElementById('today-date').value = todayStr();
+  const _yd=new Date(); _yd.setDate(_yd.getDate()-1); document.getElementById('today-date').value=_yd.toISOString().slice(0,10);
   loadToday();
 
   // 액션플랜
