@@ -247,9 +247,8 @@
 
   .gallery-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
-    grid-template-rows: auto auto;
-    gap: 4px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
   }
 
   .gallery-item {
@@ -257,21 +256,35 @@
     position: relative;
   }
 
-  .gallery-item:first-child {
-    grid-row: 1 / 3;
-  }
-
   .gallery-item img {
     width: 100%;
     height: 100%;
+    aspect-ratio: 4/3;
     object-fit: cover;
     display: block;
     transition: transform 0.6s ease;
-    min-height: 220px;
   }
 
-  .gallery-item:first-child img {
-    min-height: 460px;
+  /* 에디토리얼 피처: 1번, 6번, 11번 → 2열 wide */
+  .gallery-item:nth-child(1),
+  .gallery-item:nth-child(6),
+  .gallery-item:nth-child(11) {
+    grid-column: span 2;
+  }
+
+  .gallery-item:nth-child(1) img,
+  .gallery-item:nth-child(6) img,
+  .gallery-item:nth-child(11) img {
+    aspect-ratio: 16/9;
+  }
+
+  /* 마지막(16번째) → 풀 배너 */
+  .gallery-item:nth-child(16) {
+    grid-column: span 3;
+  }
+
+  .gallery-item:nth-child(16) img {
+    aspect-ratio: 21/9;
   }
 
   .gallery-item:hover img { transform: scale(1.03); }
@@ -530,7 +543,6 @@
     .nav-links { display: none; }
     .info-bar { grid-template-columns: 1fr; gap: 1.2rem; }
     .gallery-grid { grid-template-columns: 1fr; }
-    .gallery-item:first-child { grid-row: auto; }
     #nopack { grid-template-columns: 1fr; gap: 2rem; }
     .directions-grid { grid-template-columns: 1fr; }
     .footer-inner { grid-template-columns: 1fr; gap: 2rem; }
