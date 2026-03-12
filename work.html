@@ -760,6 +760,25 @@
     opacity: 1;
     transform: translateY(0);
   }
+
+  /* ── 농가 더보기 버튼 ────────────────────────────────── */
+  .btn-farmer-toggle {
+    background: none;
+    border: 1px solid rgba(196,128,58,0.3);
+    color: var(--amber);
+    padding: 0.45rem 1.4rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: all 0.25s;
+  }
+
+  .btn-farmer-toggle:hover {
+    border-color: var(--amber);
+    background: rgba(196,128,58,0.08);
+    color: var(--amber-light);
+  }
 </style>
 </head>
 <body>
@@ -1050,19 +1069,24 @@ async function loadToday() {
   if (!fs || fs.length === 0) {
     fWrap.innerHTML = '<div class="empty-row">해당 날짜 데이터 없음</div>';
   } else {
+    const rows = fs.map((r, idx) => {
+      const rc = r.rank <= 1 ? 'rank-1' : r.rank === 2 ? 'rank-2' : r.rank === 3 ? 'rank-3' : 'rank-n';
+      const extraAttr = idx >= 5 ? ' class="farmer-extra" style="display:none"' : '';
+      return `<tr${extraAttr}>
+        <td><span class="rank-badge ${rc}">${r.rank}</span></td>
+        <td style="color:var(--cream)">${r.farmer_name}</td>
+        <td>${fmtKrw(r.amount)}원</td>
+      </tr>`;
+    }).join('');
+    const toggleBtn = fs.length > 5
+      ? `<div style="text-align:center;margin-top:0.8rem;">
+           <button class="btn-farmer-toggle" onclick="toggleFarmerRows(this)" data-expanded="false">더보기 ▼</button>
+         </div>`
+      : '';
     fWrap.innerHTML = `<table class="data-table">
       <thead><tr><th>순위</th><th>농가</th><th>금액</th></tr></thead>
-      <tbody>
-        ${fs.map(r => {
-          const rc = r.rank <= 1 ? 'rank-1' : r.rank === 2 ? 'rank-2' : r.rank === 3 ? 'rank-3' : 'rank-n';
-          return `<tr>
-            <td><span class="rank-badge ${rc}">${r.rank}</span></td>
-            <td style="color:var(--cream)">${r.farmer_name}</td>
-            <td>${fmtKrw(r.amount)}원</td>
-          </tr>`;
-        }).join('')}
-      </tbody>
-    </table>`;
+      <tbody>${rows}</tbody>
+    </table>${toggleBtn}`;
   }
 
   // 최근 7일
@@ -1260,6 +1284,15 @@ async function loadDeployLog() {
     `[${todayStr()}] RLS 정책 적용됨`,
   ];
   logEl.innerHTML = lines.map(l => `<div style="border-bottom:1px solid rgba(184,168,138,0.05);padding:0.3rem 0;">${l}</div>`).join('');
+}
+
+// ── 농가 더보기/접기 ─────────────────────────────────────
+function toggleFarmerRows(btn) {
+  const expanded = btn.dataset.expanded === 'true';
+  const rows = btn.closest('#farmer-table-wrap').querySelectorAll('tr.farmer-extra');
+  rows.forEach(tr => { tr.style.display = expanded ? 'none' : ''; });
+  btn.dataset.expanded = expanded ? 'false' : 'true';
+  btn.textContent = expanded ? '더보기 ▼' : '접기 ▲';
 }
 
 // 엔터키 로그인
