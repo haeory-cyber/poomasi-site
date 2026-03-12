@@ -912,75 +912,22 @@
   .reveal-delay-2 { transition-delay: 0.3s; }
   .reveal-delay-3 { transition-delay: 0.45s; }
 
-  /* Ticker — 실시간 데이터 암시 */
-  .ticker-bar {
-    background: rgba(15,11,7,0.95);
-    border-top: 1px solid rgba(196,128,58,0.15);
-    border-bottom: 1px solid rgba(196,128,58,0.15);
-    padding: 0.7rem 0;
-    overflow: hidden;
-    position: relative;
-  }
-
-  .ticker-inner {
-    display: flex;
-    gap: 4rem;
-    animation: ticker 30s linear infinite;
-    white-space: nowrap;
-  }
-
-  .ticker-item {
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    color: var(--dust);
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-  }
-
-  .ticker-item .label {
-    color: var(--amber);
-    font-size: 0.6rem;
-    letter-spacing: 0.2em;
-  }
-
-  .ticker-item .value {
-    color: var(--cream);
-    font-weight: 500;
-  }
-
-  .ticker-dot {
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: var(--amber);
-    animation: blink 1.5s infinite;
-  }
-
-  @keyframes ticker {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
-  }
-
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.2; }
-  }
 
   /* ── 의제가 이제가 되었다 ── */
   .ago-section {
-    padding: 5rem 8vw;
+    padding: 6rem 8vw;
     background: var(--earth);
     text-align: center;
-    border-bottom: 1px solid rgba(196,128,58,0.1);
+    border-top: 1px solid rgba(196,128,58,0.15);
+    border-bottom: 1px solid rgba(196,128,58,0.15);
   }
 
   .ago-text {
     font-family: 'Noto Serif KR', serif;
     font-size: clamp(1.5rem, 4vw, 3rem);
     font-weight: 300;
-    color: rgba(184,168,138,0.4);
-    letter-spacing: 0.1em;
+    color: var(--dust);
+    letter-spacing: 0.05em;
     line-height: 2;
   }
 
@@ -1068,22 +1015,6 @@
   </div>
 </section>
 
-<!-- TICKER -->
-<div class="ticker-bar">
-  <div class="ticker-inner">
-    <span class="ticker-item"><span class="label">운영 시작</span><span class="ticker-dot"></span><span class="value">1999년 한밭레츠</span></span>
-    <span class="ticker-item"><span class="label">위치</span><span class="ticker-dot"></span><span class="value">대전 유성구 지족로 364번길 40</span></span>
-    <span class="ticker-item"><span class="label">중간 플랫폼</span><span class="ticker-dot"></span><span class="value">0개</span></span>
-    <span class="ticker-item"><span class="label">포장</span><span class="ticker-dot"></span><span class="value">하지 않습니다</span></span>
-    <span class="ticker-item"><span class="label">데이터</span><span class="ticker-dot"></span><span class="value">우리가 소유합니다</span></span>
-    <!-- 반복 -->
-    <span class="ticker-item"><span class="label">운영 시작</span><span class="ticker-dot"></span><span class="value">1999년 한밭레츠</span></span>
-    <span class="ticker-item"><span class="label">위치</span><span class="ticker-dot"></span><span class="value">대전 유성구 지족로 364번길 40</span></span>
-    <span class="ticker-item"><span class="label">중간 플랫폼</span><span class="ticker-dot"></span><span class="value">0개</span></span>
-    <span class="ticker-item"><span class="label">포장</span><span class="ticker-dot"></span><span class="value">하지 않습니다</span></span>
-    <span class="ticker-item"><span class="label">데이터</span><span class="ticker-dot"></span><span class="value">우리가 소유합니다</span></span>
-  </div>
-</div>
 
 <!-- ACT 1: 저항 -->
 <section id="act1">
@@ -1239,8 +1170,8 @@
 <!-- 의제가 이제가 되었다 -->
 <div class="ago-section">
   <div class="ago-text reveal">
-    논밭에서 식탁까지 가장 빠른 시스템,<br>
-    그리고 가장 적은 탄소발자국
+    논밭에서 식탁까지 <strong>가장 빠른 시스템</strong>,<br>
+    그리고 <em>가장 적은 탄소발자국</em>
   </div>
 </div>
 
