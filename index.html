@@ -1271,12 +1271,6 @@
 
   reveals.forEach(el => observer.observe(el));
 
-  // Ticker duplicate for seamless loop
-  const ticker = document.querySelector('.ticker-inner');
-  if (ticker) {
-    const clone = ticker.cloneNode(true);
-    ticker.parentElement.appendChild(clone);
-  }
 </script>
 </body>
 </html>
