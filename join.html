@@ -459,6 +459,30 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
+  /* 홈 버튼 */
+  .home-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--soil);
+    text-decoration: none;
+    letter-spacing: 0.1em;
+    padding: 8px 14px;
+    background: rgba(250,247,242,0.92);
+    border: 1px solid var(--fog);
+    border-radius: 2px;
+    backdrop-filter: blur(4px);
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .home-btn:hover {
+    color: var(--moss);
+    border-color: var(--leaf);
+  }
+
   /* 구분선 */
   hr.divider {
     border: none;
@@ -479,6 +503,8 @@
 </style>
 </head>
 <body>
+
+<a class="home-btn" href="index.html">← 광장으로</a>
 
 <div class="page">
 
