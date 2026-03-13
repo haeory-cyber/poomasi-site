@@ -959,7 +959,121 @@
     .data-arrow { transform: rotate(90deg); text-align: center; }
   }
   .lab-strip{background:rgba(61,92,53,0.12);border-top:1px solid rgba(90,138,78,0.2);border-bottom:1px solid rgba(90,138,78,0.2);padding:2rem 8vw;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1.5rem}.lab-cell{text-align:center}.lab-num{font-family:'DM Serif Display',serif;font-size:2rem;color:var(--amber);line-height:1}.lab-unit{font-size:.85rem;color:var(--dust);margin-left:.2rem}.lab-key{font-size:.65rem;letter-spacing:.15em;color:rgba(184,168,138,.5);margin-top:.4rem}.lab-roadmap{padding:1.2rem 8vw;background:rgba(196,128,58,0.06);border-bottom:1px solid rgba(196,128,58,0.1);font-size:.8rem;color:var(--dust);letter-spacing:.05em;text-align:center}.lab-roadmap strong{color:var(--amber-light)}
-  .lab-strip{background:rgba(61,92,53,0.12);border-top:1px solid rgba(90,138,78,0.2);border-bottom:1px solid rgba(90,138,78,0.2);padding:2rem 8vw;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1.5rem}.lab-cell{text-align:center}.lab-num{font-family:'DM Serif Display',serif;font-size:2rem;color:var(--amber);line-height:1}.lab-unit{font-size:.85rem;color:var(--dust);margin-left:.2rem}.lab-key{font-size:.65rem;letter-spacing:.15em;color:rgba(184,168,138,.5);margin-top:.4rem}.lab-roadmap{padding:1.2rem 8vw;background:rgba(196,128,58,0.06);border-bottom:1px solid rgba(196,128,58,0.1);font-size:.8rem;color:var(--dust);letter-spacing:.05em;text-align:center}.lab-roadmap strong{color:var(--amber-light)}
+
+  /* ── FOOD MILEAGE ── */
+  #foodmileage {
+    background: var(--soil);
+    overflow: hidden;
+  }
+  .fm-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    margin-top: 4rem;
+    align-items: center;
+  }
+  .fm-map-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .fm-map-wrap svg {
+    width: 100%;
+    max-width: 380px;
+    height: auto;
+    overflow: visible;
+  }
+  .fm-headline {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(1.6rem, 3vw, 2.6rem);
+    font-weight: 900;
+    line-height: 1.3;
+    color: var(--white);
+    margin-bottom: 1.8rem;
+  }
+  .fm-headline em {
+    color: var(--green-light);
+    font-style: normal;
+    display: block;
+    font-size: 1.3em;
+    line-height: 1;
+    margin-top: 0.4rem;
+  }
+  .fm-compare {
+    display: grid;
+    grid-template-columns: 1fr 36px 1fr;
+    gap: 1rem;
+    align-items: center;
+    background: rgba(10,8,5,0.5);
+    border: 1px solid rgba(196,128,58,0.15);
+    padding: 1.8rem;
+    margin-bottom: 2rem;
+    position: relative;
+  }
+  .fm-compare::before {
+    content: '이동거리 비교';
+    position: absolute;
+    top: -0.6rem;
+    left: 1.5rem;
+    background: var(--soil);
+    padding: 0 0.8rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--amber);
+  }
+  .fm-side { text-align: center; }
+  .fm-big {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2.8rem;
+    line-height: 1;
+  }
+  .fm-side.ours .fm-big { color: var(--green-light); }
+  .fm-side.theirs .fm-big {
+    color: rgba(184,168,138,0.25);
+    text-decoration: line-through;
+    text-decoration-color: rgba(184,58,42,0.5);
+  }
+  .fm-unit { font-size: 0.85rem; color: var(--dust); margin-left: 0.2rem; }
+  .fm-tag { font-size: 0.62rem; letter-spacing: 0.12em; margin-top: 0.5rem; }
+  .fm-side.ours .fm-tag { color: var(--green-light); }
+  .fm-side.theirs .fm-tag { color: rgba(184,168,138,0.3); }
+  .fm-vs { text-align: center; font-size: 0.58rem; letter-spacing: 0.08em; color: var(--amber); }
+  .fm-stats { list-style: none; }
+  .fm-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid rgba(184,168,138,0.07);
+  }
+  .fm-stat:last-child { border-bottom: none; }
+  .fm-stat-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.8rem;
+    color: var(--amber);
+    white-space: nowrap;
+    min-width: 80px;
+  }
+  .fm-stat-desc {
+    font-size: 0.77rem;
+    color: var(--dust);
+    text-align: right;
+    line-height: 1.7;
+  }
+  .fm-source {
+    margin-top: 1.5rem;
+    font-size: 0.62rem;
+    color: rgba(184,168,138,0.3);
+    letter-spacing: 0.08em;
+  }
+
+  /* doors 4개 대응 */
+  .doors-grid { grid-template-columns: repeat(2, 1fr); }
+
+  @media (max-width: 768px) {
+    .fm-layout { grid-template-columns: 1fr; gap: 3rem; }
+    .doors-grid { grid-template-columns: 1fr !important; }
+  }
 </style>
 </head>
 <body>
@@ -971,6 +1085,8 @@
     <li><a href="#act1">저항</a></li>
     <li><a href="#act2">건설</a></li>
     <li><a href="work.html">기동</a></li>
+    <li><a href="#foodmileage">푸드마일리지</a></li>
+    <li><a href="annual_report.html">리포트</a></li>
     <li><a href="market.html">매장 안내</a></li>
     <li><a href="join.html">조합원 가입</a></li>
   </ul>
@@ -1111,12 +1227,12 @@
       <div class="stat-label">중간 플랫폼</div>
     </div>
     <div class="stat-item reveal reveal-delay-2">
-      <div class="stat-num">209<span class="stat-unit">명</span></div>
-      <div class="stat-label">어제 방문 조합원 (2026.03.07)</div>
+      <div class="stat-num">519<span class="stat-unit">곳</span></div>
+      <div class="stat-label">거래 농가 (2023–2025 누적)</div>
     </div>
     <div class="stat-item reveal reveal-delay-3">
-      <div class="stat-num">96<span class="stat-unit">명</span></div>
-      <div class="stat-label">어제 거래 농가 (2026.03.07)</div>
+      <div class="stat-num">9.51<span class="stat-unit">억</span></div>
+      <div class="stat-label">생산자회 84명 매출 (2025)</div>
     </div>
   </div>
 
@@ -1128,15 +1244,6 @@
     <div class="lab-cell"><div class="lab-num">55,575<span class="lab-unit">kg</span></div><div class="lab-key">탄소저감 (누적추정)</div></div>
   </div>
   <div class="lab-roadmap"><strong>재사용 용기 가져오면</strong> → 무포장 완성 + 탄소중립포인트 적립&nbsp;&nbsp;|&nbsp;&nbsp;어제(2026.03.07) 지족점 POS 자동 산출  </div>
-
-  <!-- 실험실 데이터 — 자동 생성 -->
-  <div class="lab-strip">
-    <div class="lab-cell"><div class="lab-num">12<span class="lab-unit">종</span></div><div class="lab-key">무비닐(벌크)</div></div>
-    <div class="lab-cell"><div class="lab-num">11<span class="lab-unit">종</span></div><div class="lab-key">무라벨(nl)</div></div>
-    <div class="lab-cell"><div class="lab-num">29<span class="lab-unit">종</span></div><div class="lab-key">친환경</div></div>
-    <div class="lab-cell"><div class="lab-num">44,325<span class="lab-unit">kg</span></div><div class="lab-key">탄소저감 (누적추정)</div></div>
-  </div>
-  <div class="lab-roadmap"><strong>재사용 용기 가져오면</strong> → 무포장 완성 + 탄소중립포인트 적립&nbsp;&nbsp;|&nbsp;&nbsp;어제(2026.03.10) 지족점 POS 자동 산출  </div>
 
   <!-- Doors -->
   <div class="doors-section">
@@ -1163,6 +1270,13 @@
         <div class="door-desc">마을이 세계를 구한다.<br>Data Sovereignty 선언.</div>
         <div class="door-arrow">→</div>
       </a>
+      <a href="annual_report.html" class="door reveal reveal-delay-3">
+        <div class="door-number">04</div>
+        <div class="door-label">ANNUAL REPORT · 기록실</div>
+        <div class="door-title">로컬의 반격<br>2023–2025</div>
+        <div class="door-desc">3년을 버텼다. 흑자로 돌아섰다.<br>숫자로, 포장 없이.</div>
+        <div class="door-arrow">→</div>
+      </a>
     </div>
   </div>
 </section>
@@ -1174,6 +1288,135 @@
     그리고 <em>가장 적은 탄소발자국</em>
   </div>
 </div>
+
+<!-- 푸드마일리지 섹션 -->
+<section id="foodmileage">
+  <div class="section-label reveal">FOOD MILEAGE · 푸드마일리지</div>
+  <div class="fm-layout">
+
+    <!-- B안: 동심원 지도 -->
+    <div class="fm-map-wrap reveal">
+      <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <clipPath id="fm-canvas">
+            <rect x="0" y="0" width="400" height="400"/>
+          </clipPath>
+          <radialGradient id="fm-inner" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="rgba(61,92,53,0.5)"/>
+            <stop offset="100%" stop-color="rgba(61,92,53,0)"/>
+          </radialGradient>
+        </defs>
+
+        <!-- 200km 대형마트 점선 (클립) -->
+        <circle cx="200" cy="200" r="560"
+          stroke="rgba(184,58,42,0.22)" stroke-width="1.5"
+          stroke-dasharray="8 5" fill="none"
+          clip-path="url(#fm-canvas)"/>
+
+        <!-- 40km 로컬 기준 경계 -->
+        <circle cx="200" cy="200" r="130"
+          fill="rgba(61,92,53,0.06)"
+          stroke="rgba(196,128,58,0.35)" stroke-width="1"
+          stroke-dasharray="5 3"/>
+
+        <!-- 27.1km 품앗이 평균 (강조) -->
+        <circle cx="200" cy="200" r="88"
+          fill="rgba(61,92,53,0.14)"
+          stroke="#5a8a4e" stroke-width="2"/>
+
+        <!-- 5km 조합원 생활권 -->
+        <circle cx="200" cy="200" r="16"
+          fill="url(#fm-inner)"
+          stroke="rgba(90,138,78,0.65)" stroke-width="1.2"/>
+
+        <!-- 중심점 매장 -->
+        <circle cx="200" cy="200" r="4.5" fill="#c4803a"/>
+        <text x="200" y="222" text-anchor="middle"
+          font-size="8.5" fill="#c4803a" letter-spacing="0.08em"
+          font-family="sans-serif">지족점</text>
+
+        <!-- 5km 라벨 -->
+        <line x1="213" y1="187" x2="230" y2="170"
+          stroke="rgba(90,138,78,0.45)" stroke-width="0.8"/>
+        <text x="233" y="168" text-anchor="start"
+          font-size="9" fill="rgba(90,138,78,0.85)"
+          font-family="sans-serif">5km</text>
+        <text x="233" y="180" text-anchor="start"
+          font-size="7" fill="rgba(90,138,78,0.55)"
+          font-family="sans-serif">조합원 54% 거주</text>
+
+        <!-- 27.1km 라벨 -->
+        <line x1="288" y1="200" x2="304" y2="200"
+          stroke="#5a8a4e" stroke-width="0.8"/>
+        <text x="307" y="196" text-anchor="start"
+          font-size="11" font-weight="bold" fill="#5a8a4e"
+          font-family="sans-serif">27.1km</text>
+        <text x="307" y="210" text-anchor="start"
+          font-size="7.5" fill="rgba(90,138,78,0.65)"
+          font-family="sans-serif">품앗이 평균</text>
+
+        <!-- 40km 라벨 (우상단) -->
+        <line x1="292" y1="108" x2="302" y2="92"
+          stroke="rgba(196,128,58,0.55)" stroke-width="0.8"/>
+        <text x="305" y="90" text-anchor="start"
+          font-size="9" fill="rgba(196,128,58,0.8)"
+          font-family="sans-serif">40km</text>
+        <text x="305" y="102" text-anchor="start"
+          font-size="7" fill="rgba(196,128,58,0.5)"
+          font-family="sans-serif">로컬 기준</text>
+
+        <!-- 200km 라벨 (좌상단) -->
+        <text x="8" y="20" text-anchor="start"
+          font-size="9" fill="rgba(184,58,42,0.5)"
+          font-family="sans-serif">↗ 200km</text>
+        <text x="8" y="33" text-anchor="start"
+          font-size="7.5" fill="rgba(184,58,42,0.38)"
+          font-family="sans-serif">대형마트 유통 기준</text>
+      </svg>
+    </div>
+
+    <!-- A안: 숫자 대비 + 통계 -->
+    <div class="reveal reveal-delay-1">
+      <h2 class="fm-headline">
+        논밭에서 식탁까지
+        <em>평균 27.1km</em>
+      </h2>
+
+      <div class="fm-compare">
+        <div class="fm-side ours">
+          <div class="fm-big">27<span class="fm-unit">km</span></div>
+          <div class="fm-tag">POOMASI · 품앗이</div>
+        </div>
+        <div class="fm-vs">VS</div>
+        <div class="fm-side theirs">
+          <div class="fm-big">200<span class="fm-unit">km</span></div>
+          <div class="fm-tag">대형마트 유통망</div>
+        </div>
+      </div>
+
+      <ul class="fm-stats">
+        <li class="fm-stat">
+          <span class="fm-stat-num">81%</span>
+          <span class="fm-stat-desc">거래의 81%가<br>반경 40km 이내 로컬 농가</span>
+        </li>
+        <li class="fm-stat">
+          <span class="fm-stat-num">75.7%</span>
+          <span class="fm-stat-desc">완전 로컬 거래<br>농가 40km + 소비자 5km 이내</span>
+        </li>
+        <li class="fm-stat">
+          <span class="fm-stat-num">54%</span>
+          <span class="fm-stat-desc">조합원의 54%가<br>매장 5km 이내 거주</span>
+        </li>
+        <li class="fm-stat">
+          <span class="fm-stat-num">-40.6%</span>
+          <span class="fm-stat-desc">비로컬 → 로컬 전환 시<br>탄소 절감 가능량</span>
+        </li>
+      </ul>
+      <div class="fm-source">출처 · 품앗이생협 푸드마일리지 분석보고서 2025 | 분석 거래 13,794건 기준</div>
+    </div>
+
+  </div>
+</section>
 
 <!-- MANIFESTO STRIP -->
 <div id="manifesto">
