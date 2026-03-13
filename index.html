@@ -912,6 +912,37 @@
   .reveal-delay-2 { transition-delay: 0.3s; }
   .reveal-delay-3 { transition-delay: 0.45s; }
 
+  /* ── 이벤트 티커 ──────────────────────────────────── */
+  .ticker-wrap {
+    background: #1B4332;
+    border-bottom: 1px solid rgba(64,145,108,0.25);
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 0.55rem 0;
+  }
+  .ticker-inner {
+    display: inline-flex;
+    animation: ticker-scroll 28s linear infinite;
+  }
+  .ticker-inner:hover { animation-play-state: paused; }
+  .ticker-item {
+    display: inline-block;
+    padding: 0 3rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    color: rgba(212,239,223,0.82);
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .ticker-item .ticker-type {
+    color: #74C69D;
+    font-weight: 700;
+    margin-right: 0.5rem;
+  }
+  @keyframes ticker-scroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
 
   /* ── 의제가 이제가 되었다 ── */
   .ago-section {
@@ -1216,6 +1247,11 @@
     </div>
   </div>
 
+  <!-- 이벤트 티커 -->
+  <div class="ticker-wrap" id="ticker-wrap" style="display:none">
+    <div class="ticker-inner" id="ticker-inner"></div>
+  </div>
+
   <!-- Stats — 정직한 데이터만. 확인된 것부터 하나씩. -->
   <div class="stats-row">
     <div class="stat-item reveal">
@@ -1513,6 +1549,36 @@
   }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
   reveals.forEach(el => observer.observe(el));
+
+  // ── 이벤트 티커 ────────────────────────────────────
+  (async function loadTicker() {
+    const SB_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
+    const SB_KEY = ['sb_publi', 'shable_SKtfO63Ap', 'OP3DyJKu_2ypw_JK4dsdUG'].join('');
+    const today  = new Date().toISOString().slice(0, 10);
+    const DEFAULT = '<span class="ticker-item"><span class="ticker-type">품앗이</span>포장하지 않습니다 · 비닐도, 과장도</span>';
+    const wrap  = document.getElementById('ticker-wrap');
+    const inner = document.getElementById('ticker-inner');
+    try {
+      const qs = 'select=type,content&is_active=eq.true&or=(expires_at.is.null,expires_at.gte.' + today + ')&order=created_at.desc';
+      const r = await fetch(SB_URL + '/rest/v1/events?' + qs, {
+        headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+      });
+      const items = await r.json();
+      let html;
+      if (Array.isArray(items) && items.length > 0) {
+        html = items.map(ev =>
+          '<span class="ticker-item"><span class="ticker-type">' + ev.type + '</span>' + ev.content + '</span>'
+        ).join('');
+      } else {
+        html = DEFAULT;
+      }
+      inner.innerHTML = html + html;
+      wrap.style.display = '';
+    } catch(e) {
+      inner.innerHTML = DEFAULT + DEFAULT;
+      wrap.style.display = '';
+    }
+  })();
 
 </script>
 </body>
