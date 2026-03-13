@@ -779,6 +779,58 @@
     background: rgba(196,128,58,0.08);
     color: var(--amber-light);
   }
+
+  /* ── 이벤트 등록 ─────────────────────────────────── */
+  .evt-type-row, .evt-period-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .evt-type-btn, .evt-period-btn {
+    background: none;
+    border: 1px solid rgba(196,128,58,0.25);
+    color: var(--dust);
+    padding: 0.45rem 1rem;
+    font-size: 0.78rem;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+  }
+
+  .evt-type-btn:hover, .evt-period-btn:hover {
+    border-color: var(--amber); color: var(--amber);
+  }
+
+  .evt-type-btn.selected {
+    background: var(--amber); color: var(--earth);
+    border-color: var(--amber); font-weight: 700;
+  }
+
+  .evt-period-btn.selected {
+    background: rgba(196,128,58,0.15);
+    border-color: var(--amber); color: var(--amber-light);
+  }
+
+  .evt-list-item {
+    display: flex; align-items: flex-start;
+    gap: 1rem; padding: 0.9rem 1rem;
+    border-bottom: 1px solid rgba(184,168,138,0.06);
+  }
+
+  .evt-list-item:hover { background: rgba(196,128,58,0.03); }
+
+  .evt-badge {
+    display: inline-block; padding: 0.15rem 0.6rem;
+    font-size: 0.62rem; letter-spacing: 0.1em;
+    background: rgba(196,128,58,0.15); color: var(--amber-light);
+    flex-shrink: 0; margin-top: 2px;
+  }
+
+  .evt-content-text { flex: 1; font-size: 0.88rem; color: var(--cream); line-height: 1.4; }
+  .evt-meta { font-size: 0.68rem; color: var(--dust); margin-top: 0.3rem; }
 </style>
 </head>
 <body>
@@ -821,6 +873,7 @@
     <button class="tab-btn"       onclick="switchTab('action')">액션플랜</button>
     <button class="tab-btn"       onclick="switchTab('sms')">이음SMS</button>
     <button class="tab-btn"       onclick="switchTab('deploy')">배포</button>
+    <button class="tab-btn"       onclick="switchTab('event')">이벤트 등록</button>
   </nav>
 
   <!-- ══ TAB: 오늘의경영 ══════════════════════════════════ -->
@@ -836,7 +889,8 @@
       <div class="kpi-cell"><div class="kpi-num" id="kpi-revenue">—</div><div class="kpi-unit" style="display:inline;font-size:.85rem;color:var(--dust)">원</div><div class="kpi-label">총 매출</div></div>
       <div class="kpi-cell"><div class="kpi-num" id="kpi-customers">—</div><div class="kpi-label">방문 조합원</div></div>
       <div class="kpi-cell"><div class="kpi-num" id="kpi-avg-basket">—</div><div class="kpi-unit" style="display:inline;font-size:.85rem;color:var(--dust)">원</div><div class="kpi-label">객단가</div></div>
-      <div class="kpi-cell"><div class="kpi-num" id="kpi-carbon">—</div><div class="kpi-unit" style="display:inline;font-size:.85rem;color:var(--dust)">kg</div><div class="kpi-label">탄소저감</div></div>
+      <div class="kpi-cell"><div class="kpi-num" id="kpi-carbon">—</div><div class="kpi-unit" style="display:inline;font-size:.85rem;color:var(--dust)">kg</div><div class="kpi-label">탄소저감</div>
+  <div id='kpi-carbon-detail' style='font-size:.72rem;color:var(--dust);margin-top:.2rem'></div></div>
       <div class="kpi-cell"><div class="kpi-num" id="kpi-nopack">—</div><div class="kpi-label">무포장 품목</div></div>
       <div class="kpi-cell"><div class="kpi-num" id="kpi-farmers">—</div><div class="kpi-label">거래 농가</div></div>
     </div>
@@ -947,6 +1001,50 @@
       </div>
     </div>
   </section>
+
+  <!-- ══ TAB: 이벤트 등록 ═════════════════════════════════ -->
+  <section class="tab-content" id="tab-event">
+    <div class="sec-header">
+      <div>
+        <div class="sec-label">EVENTS</div>
+        <div class="sec-title">이벤트 등록</div>
+      </div>
+    </div>
+
+    <!-- 등록 폼 -->
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title">새 이벤트</div>
+
+      <div style="margin-bottom:0.5rem;font-size:0.7rem;letter-spacing:0.15em;color:var(--dust);">유형</div>
+      <div class="evt-type-row">
+        <button class="evt-type-btn selected" data-type="신규입점" onclick="selectEvtType(this)">신규입점</button>
+        <button class="evt-type-btn" data-type="공동구매" onclick="selectEvtType(this)">공동구매</button>
+        <button class="evt-type-btn" data-type="할인" onclick="selectEvtType(this)">할인</button>
+        <button class="evt-type-btn" data-type="공지" onclick="selectEvtType(this)">공지</button>
+      </div>
+
+      <div style="margin-bottom:0.5rem;font-size:0.7rem;letter-spacing:0.15em;color:var(--dust);">내용</div>
+      <textarea id="evt-content" placeholder="예: 홍성 유기농 토마토 첫 입점"
+        style="width:100%;background:rgba(15,11,7,0.8);border:1px solid rgba(196,128,58,0.2);color:var(--cream);padding:0.9rem 1rem;font-family:'Noto Sans KR',sans-serif;font-size:0.88rem;line-height:1.6;resize:vertical;min-height:90px;outline:none;margin-bottom:1.2rem;transition:border-color .3s;"
+        onfocus="this.style.borderColor='var(--amber)'" onblur="this.style.borderColor='rgba(196,128,58,0.2)'"></textarea>
+
+      <div style="margin-bottom:0.5rem;font-size:0.7rem;letter-spacing:0.15em;color:var(--dust);">기간</div>
+      <div class="evt-period-row">
+        <button class="evt-period-btn selected" data-period="today" onclick="selectEvtPeriod(this)">오늘만</button>
+        <button class="evt-period-btn" data-period="week" onclick="selectEvtPeriod(this)">이번주</button>
+        <button class="evt-period-btn" data-period="month" onclick="selectEvtPeriod(this)">이번달</button>
+        <button class="evt-period-btn" data-period="always" onclick="selectEvtPeriod(this)">상시</button>
+      </div>
+
+      <button class="btn-primary" style="width:100%;margin-top:0.5rem;" onclick="submitEvent()">등록</button>
+    </div>
+
+    <!-- 활성 이벤트 목록 -->
+    <div class="card">
+      <div class="card-title">현재 활성 이벤트</div>
+      <div id="evt-list"><div class="loading-row">로딩 중…</div></div>
+    </div>
+  </section>
 </div>
 
 <div id="toast"></div>
@@ -1001,7 +1099,7 @@ sb.auth.getSession().then(({ data: { session } }) => {
 });
 
 // ── 탭 전환 ──────────────────────────────────────────────
-const TAB_IDS = { today: 'tab-today', action: 'tab-action', sms: 'tab-sms', deploy: 'tab-deploy' };
+const TAB_IDS = { today: 'tab-today', action: 'tab-action', sms: 'tab-sms', deploy: 'tab-deploy', event: 'tab-event' };
 
 function switchTab(key) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -1042,6 +1140,9 @@ function initApp() {
   // 배포
   renderDeployCards();
   loadDeployLog();
+
+  // 이벤트
+  loadEvents();
 }
 
 // ══ 오늘의경영 ═══════════════════════════════════════════
@@ -1056,6 +1157,7 @@ async function loadToday() {
     document.getElementById('kpi-customers').textContent  = ds.customers;
     document.getElementById('kpi-avg-basket').textContent = fmtKrw(ds.avg_basket);
     document.getElementById('kpi-carbon').textContent     = Number(ds.carbon_kg).toFixed(1);
+    const tEl=document.getElementById('kpi-carbon-detail');if(tEl&&ds.transport_carbon!=null){tEl.textContent='수송 '+Number(ds.transport_carbon).toFixed(1)+' + 무포장 '+Number(ds.nopack_carbon).toFixed(1)+'kg';}
     document.getElementById('kpi-nopack').textContent     = ds.nopack_count;
     document.getElementById('kpi-farmers').textContent    = ds.farmers_count;
   } else {
@@ -1302,6 +1404,72 @@ document.getElementById('password').addEventListener('keydown', e => {
 
 // 초기 멤버태그 렌더
 renderMemberTags();
+
+// ══ 이벤트 등록 ════════════════════════════════════════
+
+function selectEvtType(btn) {
+  document.querySelectorAll('.evt-type-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function selectEvtPeriod(btn) {
+  document.querySelectorAll('.evt-period-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function getEvtExpires(period) {
+  const d = new Date();
+  if (period === 'today') return d.toISOString().slice(0, 10);
+  if (period === 'week')  { d.setDate(d.getDate() + (7 - d.getDay() || 7)); return d.toISOString().slice(0, 10); }
+  if (period === 'month') { return new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().slice(0, 10); }
+  return null;
+}
+
+async function submitEvent() {
+  const typeBtn   = document.querySelector('.evt-type-btn.selected');
+  const periodBtn = document.querySelector('.evt-period-btn.selected');
+  const content   = document.getElementById('evt-content').value.trim();
+  if (!content) { toast('내용을 입력하세요.'); return; }
+  const type       = typeBtn   ? typeBtn.dataset.type   : '공지';
+  const period     = periodBtn ? periodBtn.dataset.period : 'always';
+  const expires_at = getEvtExpires(period);
+  const { error } = await sb.from('events').insert({ type, content, expires_at });
+  if (error) { toast('저장 실패: ' + error.message); return; }
+  document.getElementById('evt-content').value = '';
+  toast('이벤트 등록됨 ✓');
+  loadEvents();
+}
+
+async function loadEvents() {
+  const wrap  = document.getElementById('evt-list');
+  if (!wrap) return;
+  const today = new Date().toISOString().slice(0, 10);
+  const { data, error } = await sb.from('events')
+    .select('*')
+    .eq('is_active', true)
+    .or('expires_at.is.null,expires_at.gte.' + today)
+    .order('created_at', { ascending: false });
+  if (error || !data || data.length === 0) {
+    wrap.innerHTML = '<div class="empty-row">활성 이벤트 없음</div>';
+    return;
+  }
+  wrap.innerHTML = data.map(ev => `
+    <div class="evt-list-item">
+      <span class="evt-badge">${ev.type}</span>
+      <div style="flex:1;">
+        <div class="evt-content-text">${ev.content}</div>
+        <div class="evt-meta">${ev.created_at.slice(0,10)}${ev.expires_at ? ' ~ ' + ev.expires_at : ' (상시)'}</div>
+      </div>
+      <button class="btn-del" onclick="deactivateEvent(${ev.id})" title="삭제">✕</button>
+    </div>
+  `).join('');
+}
+
+async function deactivateEvent(id) {
+  await sb.from('events').update({ is_active: false }).eq('id', id);
+  toast('이벤트 삭제됨');
+  loadEvents();
+}
 </script>
 </body>
 </html>
