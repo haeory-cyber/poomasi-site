@@ -517,10 +517,11 @@
     margin-right: 0.4rem;
   }
 
-  .type-general { background: rgba(184,168,138,0.15); color: var(--dust); }
-  .type-eco     { background: rgba(61,92,53,0.25);   color: var(--green-light); }
-  .type-farmer  { background: rgba(196,128,58,0.2);  color: var(--amber-light); }
-  .type-member  { background: rgba(100,80,160,0.2);  color: #b0a0e8; }
+  .type-store      { background: rgba(196,128,58,0.2);   color: var(--amber-light); }
+  .type-homepage   { background: rgba(61,92,53,0.25);   color: var(--green-light); }
+  .type-automation { background: rgba(100,80,160,0.2);  color: #b0a0e8; }
+  .type-office     { background: rgba(58,100,160,0.2);  color: #90c0f0; }
+  .type-general    { background: rgba(184,168,138,0.15); color: var(--dust); }
 
   .btn-del {
     background: none;
@@ -534,6 +535,9 @@
   }
 
   .btn-del:hover { color: var(--red); }
+
+  .action-memo { font-size: 0.8rem; color: var(--dust); margin-top: 0.2rem; }
+  .action-section-header { font-size: 0.85rem; color: var(--amber); padding: 0.5rem 0; border-bottom: 1px solid rgba(196,128,58,0.2); margin: 1rem 0 0.5rem; cursor: pointer; }
 
   /* ── 이음SMS ────────────────────────────────────────── */
   .sms-layout {
@@ -924,13 +928,24 @@
       </div>
     </div>
 
+    <!-- 검색/필터 -->
+    <div style="display:flex;gap:0.6rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap;">
+      <input class="form-input" type="text" id="action-search" placeholder="키워드 검색 (내용·메모)" style="flex:1;min-width:160px;padding:0.6rem 1rem;font-size:0.85rem;">
+      <select class="select-input" id="action-month" style="min-width:110px;">
+        <option value="">전체 월</option>
+      </select>
+      <button class="btn-sm" onclick="searchActions()">검색</button>
+      <button class="btn-sm" onclick="clearSearch()">초기화</button>
+    </div>
+
     <div class="card" style="margin-bottom:1.5rem;">
       <div class="action-form">
         <select class="select-input" id="action-type">
-          <option value="general">일반</option>
-          <option value="eco">친환경</option>
-          <option value="farmer">농가</option>
-          <option value="member">조합원</option>
+          <option value="store">매장</option>
+          <option value="homepage">홈페이지</option>
+          <option value="automation">자동화</option>
+          <option value="office">사무</option>
+          <option value="general">기타</option>
         </select>
         <input class="form-input" type="text" id="action-content" placeholder="할 일을 입력하세요" style="padding:0.6rem 1rem;">
         <input class="date-input" type="date" id="action-date">
@@ -940,6 +955,11 @@
 
     <div class="card" id="action-list">
       <div class="loading-row">데이터 로딩 중…</div>
+    </div>
+
+    <!-- 이번 달 요약 -->
+    <div class="card" id="action-summary" style="margin-top:1.5rem;">
+      <div class="loading-row">요약 로딩 중…</div>
     </div>
   </section>
 
@@ -1261,31 +1281,73 @@ async function loadToday() {
 
 // ══ 액션플랜 ════════════════════════════════════════════
 
+const typeBadge = { store: '매장', homepage: '홈페이지', automation: '자동화', office: '사무', general: '기타' };
+
+function renderActionItem(item) {
+  const memo = item.memo ? `<div class="action-memo">📝 ${item.memo}</div>` : '';
+  return `<div class="action-item ${item.is_done ? 'action-done' : ''}" id="ai-${item.id}">
+    <input type="checkbox" class="action-check" ${item.is_done ? 'checked' : ''} onchange="toggleAction(${item.id}, this.checked, event)">
+    <div class="action-body">
+      <div class="action-content">
+        <span class="type-badge type-${item.type}">${typeBadge[item.type] || item.type}</span>
+        ${item.content}
+      </div>
+      ${memo}
+      <div class="action-meta">${item.date}${item.done_at ? ' · 완료: ' + item.done_at.slice(0,16).replace('T',' ') : ''}</div>
+    </div>
+    <button class="btn-del" onclick="deleteAction(${item.id})" title="삭제">✕</button>
+  </div>`;
+}
+
 async function loadActions() {
   const wrap = document.getElementById('action-list');
   wrap.innerHTML = '<div class="loading-row">로딩 중…</div>';
 
-  const { data, error } = await sb.from('action_items').select('*').order('created_at', { ascending: false }).limit(50);
+  // 미완료: 오늘 이전 날짜 포함 이월
+  const { data: undone } = await sb.from('action_items')
+    .select('*').eq('is_done', false)
+    .lte('date', todayStr()).order('date', { ascending: true });
 
-  if (error || !data || data.length === 0) {
-    wrap.innerHTML = '<div class="empty-row">등록된 액션 없음</div>';
-    return;
+  // 완료: 최근 30개
+  const { data: done } = await sb.from('action_items')
+    .select('*').eq('is_done', true)
+    .order('done_at', { ascending: false }).limit(30);
+
+  const undoneList = undone || [];
+  const doneList   = done   || [];
+
+  let html = '';
+
+  // 미완료 섹션
+  html += `<div class="action-section-header">📋 미완료 — ${undoneList.length}건</div>`;
+  if (undoneList.length === 0) {
+    html += '<div class="empty-row">미완료 항목 없음</div>';
+  } else {
+    html += undoneList.map(renderActionItem).join('');
   }
 
-  wrap.innerHTML = data.map(item => {
-    const typeBadge = { general: '일반', eco: '친환경', farmer: '농가', member: '조합원' };
-    return `<div class="action-item ${item.is_done ? 'action-done' : ''}" id="ai-${item.id}">
-      <input type="checkbox" class="action-check" ${item.is_done ? 'checked' : ''} onchange="toggleAction(${item.id}, this.checked)">
-      <div class="action-body">
-        <div class="action-content">
-          <span class="type-badge type-${item.type}">${typeBadge[item.type] || item.type}</span>
-          ${item.content}
-        </div>
-        <div class="action-meta">${item.date}${item.done_at ? ' · 완료: ' + item.done_at.slice(0,16).replace('T',' ') : ''}</div>
-      </div>
-      <button class="btn-del" onclick="deleteAction(${item.id})" title="삭제">✕</button>
-    </div>`;
-  }).join('');
+  // 완료 섹션 (기본 숨김)
+  html += `<div class="action-section-header" onclick="toggleDoneSection()" style="margin-top:1.5rem;">✅ 완료 — ${doneList.length}건 <span id="done-toggle-hint" style="font-size:0.75rem;color:var(--dust);">(펼치기)</span></div>`;
+  html += `<div id="done-section" style="display:none;">`;
+  if (doneList.length === 0) {
+    html += '<div class="empty-row">완료 항목 없음</div>';
+  } else {
+    html += doneList.map(renderActionItem).join('');
+  }
+  html += '</div>';
+
+  wrap.innerHTML = html;
+  loadActionSummary();
+  initMonthDropdown();
+}
+
+function toggleDoneSection() {
+  const section = document.getElementById('done-section');
+  const hint    = document.getElementById('done-toggle-hint');
+  if (!section) return;
+  const hidden = section.style.display === 'none';
+  section.style.display = hidden ? 'block' : 'none';
+  if (hint) hint.textContent = hidden ? '(접기)' : '(펼치기)';
 }
 
 async function addActionItem() {
@@ -1302,11 +1364,39 @@ async function addActionItem() {
   loadActions();
 }
 
-async function toggleAction(id, done) {
-  const update = { is_done: done };
-  if (done) update.done_at = new Date().toISOString();
-  else update.done_at = null;
-  await sb.from('action_items').update(update).eq('id', id);
+async function toggleAction(id, done, evt) {
+  if (done) {
+    // 메모 입력 UI 표시
+    const item = evt.target.closest('.action-item');
+    if (item) {
+      const existing = item.querySelector('.memo-input-row');
+      if (existing) existing.remove();
+      const memoRow = document.createElement('div');
+      memoRow.className = 'memo-input-row';
+      memoRow.style.cssText = 'display:flex;gap:0.5rem;align-items:flex-start;margin-top:0.5rem;';
+      memoRow.innerHTML = `
+        <textarea placeholder="완료 메모 (선택사항)" style="flex:1;background:rgba(15,11,7,0.8);border:1px solid rgba(196,128,58,0.2);color:var(--cream);padding:0.4rem 0.6rem;font-size:0.8rem;font-family:'Noto Sans KR',sans-serif;resize:none;height:50px;outline:none;" id="memo-ta-${id}"></textarea>
+        <button class="btn-primary" style="padding:0.4rem 0.8rem;font-size:0.78rem;" onclick="saveDone(${id})">저장</button>
+      `;
+      item.querySelector('.action-body').appendChild(memoRow);
+    }
+  } else {
+    const { error } = await sb.from('action_items').update({ is_done: false, done_at: null, memo: null }).eq('id', id);
+    if (error) { toast('저장 실패: ' + error.message); return; }
+    loadActions();
+  }
+}
+
+async function saveDone(id) {
+  const ta   = document.getElementById(`memo-ta-${id}`);
+  const memo = ta ? ta.value.trim() : '';
+  const { error } = await sb.from('action_items').update({
+    is_done: true,
+    done_at: new Date().toISOString(),
+    memo: memo || null
+  }).eq('id', id);
+  if (error) { toast('저장 실패: ' + error.message); return; }
+  toast('완료 저장됨');
   loadActions();
 }
 
@@ -1314,6 +1404,85 @@ async function deleteAction(id) {
   await sb.from('action_items').delete().eq('id', id);
   toast('삭제됨');
   loadActions();
+}
+
+async function searchActions() {
+  const keyword = document.getElementById('action-search').value.trim();
+  const month   = document.getElementById('action-month').value;
+  const wrap    = document.getElementById('action-list');
+
+  if (!keyword && !month) { loadActions(); return; }
+
+  wrap.innerHTML = '<div class="loading-row">검색 중…</div>';
+
+  let query = sb.from('action_items').select('*');
+  if (keyword) {
+    query = query.or(`content.ilike.%${keyword}%,memo.ilike.%${keyword}%`);
+  }
+  if (month) {
+    query = query.like('date', `${month}%`);
+  }
+  query = query.order('date', { ascending: true });
+
+  const { data, error } = await query;
+  if (error || !data || data.length === 0) {
+    wrap.innerHTML = '<div class="empty-row">검색 결과 없음</div>';
+    return;
+  }
+  wrap.innerHTML = `
+    <div class="action-section-header">🔍 검색 결과 — ${data.length}건</div>
+    ${data.map(renderActionItem).join('')}
+  `;
+}
+
+function clearSearch() {
+  document.getElementById('action-search').value = '';
+  document.getElementById('action-month').value  = '';
+  loadActions();
+}
+
+async function loadActionSummary() {
+  const summaryWrap = document.getElementById('action-summary');
+  if (!summaryWrap) return;
+  const monthStr = todayStr().slice(0, 7);
+
+  const { data: doneData   } = await sb.from('action_items').select('type').eq('is_done', true).like('date', `${monthStr}%`);
+  const { data: undoneData } = await sb.from('action_items').select('type').eq('is_done', false).like('date', `${monthStr}%`);
+
+  const done   = doneData   || [];
+  const undone = undoneData || [];
+
+  const typeCounts = {};
+  [...done, ...undone].forEach(item => {
+    typeCounts[item.type] = (typeCounts[item.type] || 0) + 1;
+  });
+
+  const typeLabels = { store: '매장', homepage: '홈페이지', automation: '자동화', office: '사무', general: '기타' };
+  const typeDist   = Object.entries(typeLabels).map(([k, v]) => `${v} ${typeCounts[k] || 0}`).join(' / ');
+
+  summaryWrap.innerHTML = `
+    <div class="card-title">이번 달 요약 (${monthStr})</div>
+    <div style="font-size:0.85rem;color:var(--dust);line-height:2;">
+      <div>완료: <span style="color:var(--green-light)">${done.length}건</span></div>
+      <div>미완료: <span style="color:var(--amber)">${undone.length}건</span></div>
+      <div style="font-size:0.78rem;margin-top:0.3rem;">type별: ${typeDist}</div>
+    </div>
+  `;
+}
+
+function initMonthDropdown() {
+  const sel = document.getElementById('action-month');
+  if (!sel) return;
+  const today  = new Date();
+  const months = [];
+  for (let i = 0; i < 6; i++) {
+    const d   = new Date(today.getFullYear(), today.getMonth() - i, 1);
+    const val = d.toISOString().slice(0, 7);
+    months.push(val);
+  }
+  const currentVal = sel.value;
+  sel.innerHTML = '<option value="">전체 월</option>' +
+    months.map(m => `<option value="${m}"${m === currentVal ? ' selected' : ''}>${m}</option>`).join('');
 }
 
 // ══ 이음SMS ════════════════════════════════════════════
