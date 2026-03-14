@@ -625,11 +625,15 @@ function openTmap(idx) {
   let base = item.주소 || '';
   let dongho = item.동호수 || '';
   let tmapAddr;
-  if (dongho) {
-    const dongOnly = dongho.replace(/\s*\d+호.*$/, '').trim();
-    tmapAddr = (base + ' ' + dongOnly).trim();
-  } else {
-    tmapAddr = base.replace(/\s*\d+호.*$/, '').trim();
+  {
+    let raw = dongho ? (base + ' ' + dongho).trim() : base;
+    // 1단계: '305동 203호' → '305동'
+    raw = raw.replace(/( \d+동)\s*\d+호.*$/, '$1');
+    // 2단계: '305-203' → '305' (동 표기 없는 케이스)
+    raw = raw.replace(/-\d+$/, '');
+    // 3단계: 단독 호수 제거
+    raw = raw.replace(/\s*\d+호.*$/, '');
+    tmapAddr = raw.trim();
   }
   if (!tmapAddr) return;
   window.location.href = `tmap://search?name=${encodeURIComponent(tmapAddr)}`;
