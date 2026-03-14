@@ -874,6 +874,7 @@
     <button class="tab-btn"       onclick="switchTab('sms')">이음SMS</button>
     <button class="tab-btn"       onclick="switchTab('deploy')">배포</button>
     <button class="tab-btn"       onclick="switchTab('event')">이벤트 등록</button>
+    <button class="tab-btn" onclick="switchTab('suppliers')">발주처</button>
   </nav>
 
   <!-- ══ TAB: 오늘의경영 ══════════════════════════════════ -->
@@ -1045,6 +1046,49 @@
       <div id="evt-list"><div class="loading-row">로딩 중…</div></div>
     </div>
   </section>
+
+  <!-- ══ TAB: 발주처 관리 ══ -->
+  <section class="tab-content" id="tab-suppliers">
+    <div class="sec-header">
+      <div>
+        <div class="sec-label">SUPPLIERS</div>
+        <div class="sec-title">발주처 관리</div>
+      </div>
+      <button class="btn-sm" onclick="showAddSupplier()">+ 추가</button>
+    </div>
+
+    <!-- 추가 폼 (기본 숨김) -->
+    <div class="card" id="supplier-add-form" style="display:none;margin-bottom:1.5rem;">
+      <div class="card-title">새 발주처</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+        <div>
+          <label class="form-label">업체명 *</label>
+          <input class="form-input" id="sup-name" placeholder="업체명" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+        </div>
+        <div>
+          <label class="form-label">전화번호</label>
+          <input class="form-input" id="sup-phone" placeholder="010-0000-0000" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+        </div>
+        <div>
+          <label class="form-label">이메일</label>
+          <input class="form-input" id="sup-email" placeholder="example@email.com" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+        </div>
+        <div>
+          <label class="form-label">메모</label>
+          <input class="form-input" id="sup-note" placeholder="담당자명 등" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+        </div>
+      </div>
+      <div style="display:flex;gap:0.5rem;">
+        <button class="btn-primary" onclick="addSupplier()">저장</button>
+        <button class="btn-sm" onclick="hideAddSupplier()">취소</button>
+      </div>
+    </div>
+
+    <!-- 목록 -->
+    <div class="card">
+      <div id="supplier-list"><div class="loading-row">로딩 중…</div></div>
+    </div>
+  </section>
 </div>
 
 <div id="toast"></div>
@@ -1099,7 +1143,7 @@ sb.auth.getSession().then(({ data: { session } }) => {
 });
 
 // ── 탭 전환 ──────────────────────────────────────────────
-const TAB_IDS = { today: 'tab-today', action: 'tab-action', sms: 'tab-sms', deploy: 'tab-deploy', event: 'tab-event' };
+const TAB_IDS = { today: 'tab-today', action: 'tab-action', sms: 'tab-sms', deploy: 'tab-deploy', event: 'tab-event', suppliers: 'tab-suppliers' };
 
 function switchTab(key) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -1143,6 +1187,9 @@ function initApp() {
 
   // 이벤트
   loadEvents();
+
+  // 발주처
+  loadSuppliers();
 }
 
 // ══ 오늘의경영 ═══════════════════════════════════════════
@@ -1469,6 +1516,107 @@ async function deactivateEvent(id) {
   await sb.from('events').update({ is_active: false }).eq('id', id);
   toast('이벤트 삭제됨');
   loadEvents();
+}
+
+// ══ 발주처 관리 ══
+function showAddSupplier() {
+  document.getElementById('supplier-add-form').style.display = 'block';
+}
+function hideAddSupplier() {
+  document.getElementById('supplier-add-form').style.display = 'none';
+  ['sup-name','sup-phone','sup-email','sup-note'].forEach(id => document.getElementById(id).value = '');
+}
+
+async function addSupplier() {
+  const name  = document.getElementById('sup-name').value.trim();
+  if (!name) { toast('업체명을 입력하세요.'); return; }
+  const phone = document.getElementById('sup-phone').value.trim();
+  const email = document.getElementById('sup-email').value.trim();
+  const note  = document.getElementById('sup-note').value.trim();
+  const { error } = await sb.from('suppliers').insert({ name, phone, email, note });
+  if (error) { toast('저장 실패: ' + error.message); return; }
+  toast('발주처 추가됨 ✓');
+  hideAddSupplier();
+  loadSuppliers();
+}
+
+async function loadSuppliers() {
+  const wrap = document.getElementById('supplier-list');
+  const { data, error } = await sb.from('suppliers')
+    .select('*')
+    .eq('is_active', true)
+    .order('name');
+  if (error || !data || data.length === 0) {
+    wrap.innerHTML = '<div class="empty-row">발주처 없음</div>';
+    return;
+  }
+  wrap.innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
+      <thead>
+        <tr style="border-bottom:1px solid rgba(184,168,138,0.15);">
+          <th style="padding:0.6rem 0.8rem;text-align:left;color:var(--dust);font-weight:400;letter-spacing:0.08em;">업체명</th>
+          <th style="padding:0.6rem 0.8rem;text-align:left;color:var(--dust);font-weight:400;">전화번호</th>
+          <th style="padding:0.6rem 0.8rem;text-align:left;color:var(--dust);font-weight:400;">이메일</th>
+          <th style="padding:0.6rem 0.8rem;text-align:left;color:var(--dust);font-weight:400;">메모</th>
+          <th style="padding:0.6rem 0.8rem;text-align:center;color:var(--dust);font-weight:400;">관리</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${data.map(s => `
+          <tr style="border-bottom:1px solid rgba(184,168,138,0.06);" id="sup-row-${s.id}">
+            <td style="padding:0.65rem 0.8rem;color:var(--cream);">${s.name}</td>
+            <td style="padding:0.65rem 0.8rem;color:var(--dust);">
+              <span id="sup-ph-${s.id}">${s.phone || '—'}</span>
+              <input id="sup-ph-input-${s.id}" class="form-input" value="${s.phone || ''}"
+                style="display:none;padding:0.3rem 0.5rem;font-size:0.8rem;width:130px;">
+            </td>
+            <td style="padding:0.65rem 0.8rem;color:var(--dust);">
+              <span id="sup-em-${s.id}">${s.email || '—'}</span>
+              <input id="sup-em-input-${s.id}" class="form-input" value="${s.email || ''}"
+                style="display:none;padding:0.3rem 0.5rem;font-size:0.8rem;width:160px;">
+            </td>
+            <td style="padding:0.65rem 0.8rem;color:var(--dust);">
+              <span id="sup-nt-${s.id}">${s.note || '—'}</span>
+              <input id="sup-nt-input-${s.id}" class="form-input" value="${s.note || ''}"
+                style="display:none;padding:0.3rem 0.5rem;font-size:0.8rem;width:120px;">
+            </td>
+            <td style="padding:0.65rem 0.8rem;text-align:center;">
+              <button class="btn-sm" id="sup-edit-btn-${s.id}" onclick="editSupplier(${s.id})"
+                style="font-size:0.72rem;padding:0.2rem 0.6rem;margin-right:0.3rem;">수정</button>
+              <button class="btn-sm" id="sup-save-btn-${s.id}" onclick="saveSupplier(${s.id})"
+                style="display:none;font-size:0.72rem;padding:0.2rem 0.6rem;margin-right:0.3rem;background:var(--green);">저장</button>
+              <button class="btn-del" onclick="deleteSupplier(${s.id})" title="삭제">✕</button>
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>`;
+}
+
+function editSupplier(id) {
+  ['ph','em','nt'].forEach(f => {
+    document.getElementById(`sup-${f}-${id}`).style.display = 'none';
+    document.getElementById(`sup-${f}-input-${id}`).style.display = 'inline-block';
+  });
+  document.getElementById(`sup-edit-btn-${id}`).style.display = 'none';
+  document.getElementById(`sup-save-btn-${id}`).style.display = 'inline-block';
+}
+
+async function saveSupplier(id) {
+  const phone = document.getElementById(`sup-ph-input-${id}`).value.trim();
+  const email = document.getElementById(`sup-em-input-${id}`).value.trim();
+  const note  = document.getElementById(`sup-nt-input-${id}`).value.trim();
+  const { error } = await sb.from('suppliers').update({ phone, email, note }).eq('id', id);
+  if (error) { toast('저장 실패: ' + error.message); return; }
+  toast('수정됨 ✓');
+  loadSuppliers();
+}
+
+async function deleteSupplier(id) {
+  if (!confirm('삭제하시겠습니까?')) return;
+  await sb.from('suppliers').update({ is_active: false }).eq('id', id);
+  toast('삭제됨');
+  loadSuppliers();
 }
 </script>
 </body>
