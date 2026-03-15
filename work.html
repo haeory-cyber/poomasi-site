@@ -1441,13 +1441,13 @@ async function loadTopCustomers() {
   list.innerHTML = '<div class="loading-row">조회 중…</div>';
 
   try {
-    // 상위 30 단골
+    // 상위 300 단골
     const { data: fm, error: e1 } = await sb
       .from('farmer_members')
       .select('member_id,member_name,purchase_count')
       .eq('farmer_name', farmerName)
       .order('purchase_count', { ascending: false })
-      .limit(30);
+      .limit(300);
     if (e1) throw e1;
     if (!fm || !fm.length) { list.innerHTML = '<div class="empty-row">단골 없음</div>'; return; }
 
