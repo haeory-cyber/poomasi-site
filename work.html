@@ -1411,7 +1411,7 @@ async function loadFarmerList() {
     const { data, error } = await sb
       .from('farmer_members')
       .select('farmer_name')
-      .order('farmer_name');
+      .order('farmer_name').limit(10000);
     if (error) throw error;
     const farmers = [...new Set(data.map(r => r.farmer_name).filter(Boolean))].sort((a,b) => a.localeCompare(b,'ko'));
     allFarmerNames = farmers;
