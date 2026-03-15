@@ -1411,12 +1411,11 @@ async function loadFarmerList() {
     const { data, error } = await sb
       .from('farmer_members')
       .select('farmer_name')
-      .order('farmer_name')
-      .limit(200000);
+      .order('farmer_name');
     if (error) throw error;
-    const names = [...new Set(data.map(r => r.farmer_name).filter(Boolean))].sort((a,b) => a.localeCompare(b,'ko'));
-    allFarmerNames = names;
-    renderFarmerSelect(names);
+    const farmers = [...new Set(data.map(r => r.farmer_name).filter(Boolean))].sort((a,b) => a.localeCompare(b,'ko'));
+    allFarmerNames = farmers;
+    renderFarmerSelect(farmers);
   } catch(e) {
     document.getElementById('farmer-select').innerHTML = '<option value="">로드 실패</option>';
     console.error('loadFarmerList error:', e);
