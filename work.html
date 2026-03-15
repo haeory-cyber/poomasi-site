@@ -215,6 +215,9 @@
     display: flex;
     padding: 0 2rem;
     gap: 0;
+    position: sticky;
+    top: 56px;
+    z-index: 99;
   }
 
   .tab-btn {
@@ -346,7 +349,9 @@
   @media (max-width: 768px) {
     .two-col { grid-template-columns: 1fr; }
     .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-    .tab-btn { padding: 1rem 0.8rem; font-size: 0.8rem; }
+    .app-header { padding: 0 1rem; }
+    .tab-bar { padding: 0 0.5rem; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .tab-btn { padding: 0.85rem 0.8rem; font-size: 0.8rem; flex-shrink: 0; }
   }
 
   /* Table */
@@ -626,83 +631,6 @@
     letter-spacing: 0.05em;
   }
 
-  /* ── 배포 ───────────────────────────────────────────── */
-  .deploy-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 1.5rem;
-  }
-
-  .deploy-card {
-    background: var(--panel);
-    border: 1px solid rgba(196,128,58,0.12);
-    padding: 1.5rem;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .deploy-card::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 3px;
-  }
-
-  .deploy-card.ok::before   { background: var(--green-light); }
-  .deploy-card.warn::before { background: var(--amber); }
-  .deploy-card.err::before  { background: var(--red); }
-
-  .deploy-name {
-    font-family: 'Noto Serif KR', serif;
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--white);
-    margin-bottom: 0.4rem;
-  }
-
-  .deploy-url {
-    font-size: 0.72rem;
-    color: var(--dust);
-    letter-spacing: 0.05em;
-    word-break: break-all;
-    margin-bottom: 1rem;
-  }
-
-  .deploy-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.72rem;
-    letter-spacing: 0.1em;
-    padding: 0.25rem 0.6rem;
-    border-radius: 2px;
-  }
-
-  .status-ok   { background: rgba(61,92,53,0.3);  color: var(--green-light); }
-  .status-warn { background: rgba(196,128,58,0.2); color: var(--amber-light); }
-  .status-err  { background: rgba(184,58,42,0.2);  color: #e07070; }
-
-  .status-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-  }
-
-  .status-ok   .status-dot { background: var(--green-light); animation: blink 2s infinite; }
-  .status-warn .status-dot { background: var(--amber); }
-  .status-err  .status-dot { background: #e07070; }
-
-  .deploy-time {
-    font-size: 0.68rem;
-    color: rgba(184,168,138,0.4);
-    margin-top: 0.8rem;
-  }
-
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-
   /* ── LOADING / EMPTY ────────────────────────────────── */
   .loading-row {
     text-align: center;
@@ -876,8 +804,7 @@
     <button class="tab-btn active" onclick="switchTab('today')">오늘의경영</button>
     <button class="tab-btn"       onclick="switchTab('action')">액션플랜</button>
     <button class="tab-btn"       onclick="switchTab('sms')">이음SMS</button>
-    <button class="tab-btn"       onclick="switchTab('deploy')">배포</button>
-    <button class="tab-btn"       onclick="switchTab('event')">이벤트 등록</button>
+<button class="tab-btn"       onclick="switchTab('event')">이벤트 등록</button>
     <button class="tab-btn" onclick="switchTab('suppliers')">발주처</button>
   </nav>
 
@@ -997,28 +924,6 @@
         <div id="sms-history-list">
           <div class="loading-row">데이터 로딩 중…</div>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══ TAB: 배포 ════════════════════════════════════════ -->
-  <section class="tab-content" id="tab-deploy">
-    <div class="sec-header">
-      <div>
-        <div class="sec-label">배포 현황</div>
-        <div class="sec-title">서비스 상태</div>
-      </div>
-      <button class="btn-sm" onclick="checkDeploy()">새로고침</button>
-    </div>
-
-    <div class="deploy-grid" id="deploy-grid">
-      <!-- 카드는 JS로 렌더 -->
-    </div>
-
-    <div class="card" style="margin-top:2rem;">
-      <div class="card-title">최근 배포 로그</div>
-      <div id="deploy-log" style="font-size:0.78rem;color:var(--dust);line-height:2;letter-spacing:0.03em;font-family:monospace;">
-        <div class="loading-row">배포 로그 로딩 중…</div>
       </div>
     </div>
   </section>
@@ -1163,7 +1068,7 @@ sb.auth.getSession().then(({ data: { session } }) => {
 });
 
 // ── 탭 전환 ──────────────────────────────────────────────
-const TAB_IDS = { today: 'tab-today', action: 'tab-action', sms: 'tab-sms', deploy: 'tab-deploy', event: 'tab-event', suppliers: 'tab-suppliers' };
+const TAB_IDS = { today: 'tab-today', action: 'tab-action', sms: 'tab-sms', event: 'tab-event', suppliers: 'tab-suppliers' };
 
 function switchTab(key) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -1200,10 +1105,6 @@ function initApp() {
 
   // SMS
   loadSmsHistory();
-
-  // 배포
-  renderDeployCards();
-  loadDeployLog();
 
   // 이벤트
   loadEvents();
@@ -1563,45 +1464,6 @@ async function loadSmsHistory() {
       </div>
     </div>`;
   }).join('');
-}
-
-// ══ 배포 ══════════════════════════════════════════════
-
-const DEPLOY_SITES = [
-  { name: '품앗이 메인', url: 'https://poomasi.netlify.app',       file: 'index.html' },
-  { name: '시다워크 경영판', url: 'https://poomasi.netlify.app/work', file: 'work.html' },
-  { name: '전시 디스플레이', url: 'https://poomasi.netlify.app/display', file: 'display.html' },
-];
-
-function renderDeployCards() {
-  const grid = document.getElementById('deploy-grid');
-  grid.innerHTML = DEPLOY_SITES.map((site, i) => `
-    <div class="deploy-card ok" id="dc-${i}">
-      <div class="deploy-name">${site.name}</div>
-      <div class="deploy-url">${site.url}</div>
-      <div><span class="deploy-status status-ok"><span class="status-dot"></span>LIVE</span></div>
-      <div class="deploy-time">마지막 확인: —</div>
-    </div>
-  `).join('');
-}
-
-async function checkDeploy() {
-  toast('배포 상태 점검 중…');
-  const now = new Date().toLocaleString('ko-KR');
-  document.querySelectorAll('.deploy-time').forEach(el => el.textContent = '마지막 확인: ' + now);
-  loadDeployLog();
-}
-
-async function loadDeployLog() {
-  const logEl = document.getElementById('deploy-log');
-  // last_deploy.txt 읽기 시도 (로컬 파일 없으면 대체 텍스트)
-  const lines = [
-    `[${todayStr()}] Supabase DB 초기화 완료`,
-    `[${todayStr()}] work.html 배포 준비 완료`,
-    `[${todayStr()}] sida_work 테이블 5종 생성`,
-    `[${todayStr()}] RLS 정책 적용됨`,
-  ];
-  logEl.innerHTML = lines.map(l => `<div style="border-bottom:1px solid rgba(184,168,138,0.05);padding:0.3rem 0;">${l}</div>`).join('');
 }
 
 // ── 농가 더보기/접기 ─────────────────────────────────────
