@@ -1441,11 +1441,12 @@ async function loadTopCustomers() {
   list.innerHTML = '<div class="loading-row">조회 중…</div>';
 
   try {
-    // 상위 300 단골
+    // 상위 300 단골 (3회 이상)
     const { data: fm, error: e1 } = await sb
       .from('farmer_members')
       .select('member_id,member_name,purchase_count')
       .eq('farmer_name', farmerName)
+      .gte('purchase_count', 3)
       .order('purchase_count', { ascending: false })
       .limit(300);
     if (e1) throw e1;
