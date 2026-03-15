@@ -1408,10 +1408,7 @@ let customerPool   = []; // [{member_id, member_name, purchase_count, phone}]
 
 async function loadFarmerList() {
   try {
-    const { data, error } = await sb
-      .from('farmer_members')
-      .select('farmer_name')
-      .order('farmer_name').limit(10000);
+    const { data, error } = await sb.rpc('get_distinct_farmers');
     if (error) throw error;
     const farmers = [...new Set(data.map(r => r.farmer_name).filter(Boolean))].sort((a,b) => a.localeCompare(b,'ko'));
     allFarmerNames = farmers;
