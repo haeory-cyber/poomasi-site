@@ -789,7 +789,7 @@
       <button class="tab-btn"       onclick="switchTab('action')">액션플랜</button>
       <button class="tab-btn"       onclick="switchTab('sms')">이음SMS</button>
       <button class="tab-btn"       onclick="switchTab('event')">이벤트 등록</button>
-      <button class="tab-btn" onclick="switchTab('suppliers')">발주처</button>
+      <button class="tab-btn" onclick="switchTab('suppliers')">발주</button>
     </nav>
   </div>
 
@@ -985,46 +985,100 @@
     </div>
   </section>
 
-  <!-- ══ TAB: 발주처 관리 ══ -->
+  <!-- ══ TAB: 발주 ══ -->
   <section class="tab-content" id="tab-suppliers">
     <div class="sec-header">
       <div>
-        <div class="sec-label">SUPPLIERS</div>
-        <div class="sec-title">발주처 관리</div>
-      </div>
-      <button class="btn-sm" onclick="showAddSupplier()">+ 추가</button>
-    </div>
-
-    <!-- 추가 폼 (기본 숨김) -->
-    <div class="card" id="supplier-add-form" style="display:none;margin-bottom:1.5rem;">
-      <div class="card-title">새 발주처</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
-        <div>
-          <label class="form-label">업체명 *</label>
-          <input class="form-input" id="sup-name" placeholder="업체명" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
-        </div>
-        <div>
-          <label class="form-label">전화번호</label>
-          <input class="form-input" id="sup-phone" placeholder="010-0000-0000" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
-        </div>
-        <div>
-          <label class="form-label">이메일</label>
-          <input class="form-input" id="sup-email" placeholder="example@email.com" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
-        </div>
-        <div>
-          <label class="form-label">메모</label>
-          <input class="form-input" id="sup-note" placeholder="담당자명 등" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
-        </div>
-      </div>
-      <div style="display:flex;gap:0.5rem;">
-        <button class="btn-primary" onclick="addSupplier()">저장</button>
-        <button class="btn-sm" onclick="hideAddSupplier()">취소</button>
+        <div class="sec-label">ORDER</div>
+        <div class="sec-title">발주</div>
       </div>
     </div>
 
-    <!-- 목록 -->
-    <div class="card">
-      <div id="supplier-list"><div class="loading-row">로딩 중…</div></div>
+    <!-- 서브탭 바 -->
+    <div style="display:flex;gap:0;border-bottom:1px solid rgba(196,128,58,0.25);margin-bottom:1.5rem;">
+      <button class="sub-tab-btn active" id="stab-suppliers" onclick="switchSubTab('suppliers')" style="background:none;border:none;color:var(--dust);font-size:0.8rem;letter-spacing:0.08em;padding:0.5rem 1rem;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;">발주처관리</button>
+      <button class="sub-tab-btn" id="stab-tele" onclick="switchSubTab('tele')" style="background:none;border:none;color:var(--dust);font-size:0.8rem;letter-spacing:0.08em;padding:0.5rem 1rem;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;">텔레발주</button>
+      <button class="sub-tab-btn" id="stab-order" onclick="switchSubTab('order')" style="background:none;border:none;color:var(--dust);font-size:0.8rem;letter-spacing:0.08em;padding:0.5rem 1rem;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;">발주하기</button>
+    </div>
+
+    <!-- ── 서브패널: 발주처관리 ── -->
+    <div id="sub-suppliers">
+      <div class="sec-header" style="margin-bottom:1rem;">
+        <div></div>
+        <button class="btn-sm" onclick="showAddSupplier()">+ 추가</button>
+      </div>
+
+      <!-- 추가 폼 (기본 숨김) -->
+      <div class="card" id="supplier-add-form" style="display:none;margin-bottom:1.5rem;">
+        <div class="card-title">새 발주처</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+          <div>
+            <label class="form-label">업체명 *</label>
+            <input class="form-input" id="sup-name" placeholder="업체명" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+          </div>
+          <div>
+            <label class="form-label">전화번호</label>
+            <input class="form-input" id="sup-phone" placeholder="010-0000-0000" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+          </div>
+          <div>
+            <label class="form-label">이메일</label>
+            <input class="form-input" id="sup-email" placeholder="example@email.com" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+          </div>
+          <div>
+            <label class="form-label">메모</label>
+            <input class="form-input" id="sup-note" placeholder="담당자명 등" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+          </div>
+        </div>
+        <div style="display:flex;gap:0.5rem;">
+          <button class="btn-primary" onclick="addSupplier()">저장</button>
+          <button class="btn-sm" onclick="hideAddSupplier()">취소</button>
+        </div>
+      </div>
+
+      <!-- 목록 -->
+      <div class="card">
+        <div id="supplier-list"><div class="loading-row">로딩 중…</div></div>
+      </div>
+    </div>
+
+    <!-- ── 서브패널: 텔레발주 ── -->
+    <div id="sub-tele" style="display:none;">
+      <div class="sec-header" style="margin-bottom:1rem;">
+        <div style="font-size:0.8rem;color:var(--dust);">현장 직원 발주 요청</div>
+        <button class="btn-sm" onclick="loadTeleOrders()">↻ 새로고침</button>
+      </div>
+      <div class="card">
+        <div id="tele-list"><div class="loading-row">로딩 중…</div></div>
+      </div>
+    </div>
+
+    <!-- ── 서브패널: 발주하기 ── -->
+    <div id="sub-order" style="display:none;">
+      <div class="card" style="margin-bottom:1rem;">
+        <div class="card-title" style="margin-bottom:0.8rem;">발주처 선택</div>
+        <select class="form-input" id="order-supplier-select" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+          <option value="">-- 발주처 선택 --</option>
+        </select>
+        <div id="order-supplier-phone" style="font-size:0.78rem;color:var(--dust);margin-top:0.4rem;"></div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="margin-bottom:0.8rem;">발주 내용</div>
+        <textarea class="form-input" id="order-message" rows="7" style="width:100%;padding:0.6rem 0.8rem;font-size:0.85rem;resize:vertical;">[품앗이소비자생활협동조합 발주 요청]
+
+안녕하세요. 품앗이소비자생활협동조합입니다.
+아래와 같이 발주 요청드립니다.
+
+품목:
+수량:
+납품일:
+
+감사합니다.</textarea>
+        <div style="display:flex;gap:0.5rem;margin-top:1rem;">
+          <button class="btn-primary" onclick="sendOrderSms()">📨 문자발송</button>
+          <button class="btn-sm" onclick="sendOrderEmail()">✉ 이메일발송</button>
+        </div>
+        <div id="order-result" style="margin-top:0.8rem;font-size:0.82rem;color:var(--dust);"></div>
+      </div>
     </div>
   </section>
 </div>
@@ -1784,6 +1838,116 @@ async function deleteSupplier(id) {
   await sb.from('suppliers').update({ is_active: false }).eq('id', id);
   toast('삭제됨');
   loadSuppliers();
+}
+
+// ══ 서브탭 전환 ══
+function switchSubTab(key) {
+  ['suppliers', 'tele', 'order'].forEach(k => {
+    document.getElementById(`sub-${k}`).style.display = k === key ? '' : 'none';
+    const btn = document.getElementById(`stab-${k}`);
+    if (btn) {
+      btn.style.color = k === key ? 'var(--amber)' : 'var(--dust)';
+      btn.style.borderBottom = k === key ? '2px solid var(--amber)' : '2px solid transparent';
+    }
+  });
+  if (key === 'tele') loadTeleOrders();
+  if (key === 'order') loadSupplierDropdown();
+}
+
+// ══ 텔레발주 ══
+async function loadTeleOrders() {
+  const wrap = document.getElementById('tele-list');
+  wrap.innerHTML = '<div class="loading-row">로딩 중…</div>';
+  const { data, error } = await sb.from('staff_data')
+    .select('created_at, item_name, urgency, content')
+    .order('created_at', { ascending: false });
+  if (error || !data || data.length === 0) {
+    wrap.innerHTML = '<div class="empty-row">현장 요청 없음</div>';
+    return;
+  }
+  const urgencyColor = { '긴급': 'var(--red)', '보통': 'var(--amber)', '여유': 'var(--green-light)' };
+  wrap.innerHTML = data.map(r => {
+    const color = urgencyColor[r.urgency] || 'var(--dust)';
+    const dt = r.created_at ? new Date(r.created_at).toLocaleString('ko-KR', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }) : '';
+    return `<div style="padding:0.75rem 0;border-bottom:1px solid rgba(184,168,138,0.08);">
+      <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.3rem;">
+        <span style="font-size:0.85rem;color:var(--cream);">${r.item_name || '—'}</span>
+        <span style="font-size:0.72rem;color:${color};border:1px solid ${color};padding:0.1rem 0.45rem;border-radius:3px;">${r.urgency || ''}</span>
+        <span style="font-size:0.72rem;color:var(--dust);margin-left:auto;">${dt}</span>
+      </div>
+      <div style="font-size:0.8rem;color:var(--dust);">${r.content || ''}</div>
+    </div>`;
+  }).join('');
+}
+
+// ══ 발주하기 ══
+async function loadSupplierDropdown() {
+  const sel = document.getElementById('order-supplier-select');
+  sel.innerHTML = '<option value="">-- 발주처 선택 --</option>';
+  const { data } = await sb.from('suppliers').select('id, name, phone, email').eq('is_active', true).order('name');
+  if (!data) return;
+  data.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.id;
+    opt.textContent = s.name + (s.phone ? ' (' + s.phone + ')' : '');
+    opt.dataset.phone = s.phone || '';
+    opt.dataset.email = s.email || '';
+    sel.appendChild(opt);
+  });
+  sel.onchange = () => {
+    const opt = sel.options[sel.selectedIndex];
+    document.getElementById('order-supplier-phone').textContent = opt.dataset.phone ? '📞 ' + opt.dataset.phone : '';
+  };
+}
+
+async function sendOrderSms() {
+  const sel = document.getElementById('order-supplier-select');
+  const opt = sel.options[sel.selectedIndex];
+  if (!opt || !opt.value) { toast('발주처를 선택하세요.'); return; }
+  const phone = opt.dataset.phone;
+  if (!phone) { toast('선택한 발주처에 전화번호가 없습니다.'); return; }
+  const message = document.getElementById('order-message').value.trim();
+  if (!message) { toast('발주 내용을 입력하세요.'); return; }
+
+  const apiKey    = localStorage.getItem('solapi_key');
+  const apiSecret = localStorage.getItem('solapi_secret');
+  const fromNum   = localStorage.getItem('solapi_from') || '0427160019';
+  if (!apiKey || !apiSecret) { toast('⚙ 이음SMS 탭에서 Solapi API 설정을 먼저 저장하세요.'); return; }
+
+  const resultDiv = document.getElementById('order-result');
+  resultDiv.textContent = '발송 중…';
+
+  const date = new Date().toISOString();
+  const salt = Math.random().toString(36).substring(2, 14);
+  const sig  = await hmacSha256Hex(apiSecret, date + salt);
+  const auth = `HMAC-SHA256 apiKey=${apiKey}, date=${date}, salt=${salt}, signature=${sig}`;
+
+  try {
+    const resp = await fetch('https://api.solapi.com/messages/v4/send-many', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': auth },
+      body: JSON.stringify({ messages: [{ to: phone.replace(/-/g,''), from: fromNum.replace(/-/g,''), text: message }] }),
+    });
+    const result = await resp.json();
+    if (!resp.ok) { resultDiv.textContent = '오류: ' + (result.message || resp.status); return; }
+    toast('발주 문자 발송 완료');
+    resultDiv.textContent = '✓ 발송 완료';
+    await sb.from('sms_history').insert({ member_ids: [], message, sender: fromNum });
+  } catch(e) {
+    resultDiv.textContent = '네트워크 오류: ' + e.message;
+  }
+}
+
+function sendOrderEmail() {
+  const sel = document.getElementById('order-supplier-select');
+  const opt = sel.options[sel.selectedIndex];
+  if (!opt || !opt.value) { toast('발주처를 선택하세요.'); return; }
+  const email = opt.dataset.email;
+  if (!email) { toast('선택한 발주처에 이메일이 없습니다.'); return; }
+  const message = document.getElementById('order-message').value.trim();
+  const subject = encodeURIComponent('[품앗이생협] 발주 요청');
+  const body = encodeURIComponent(message);
+  window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
 }
 </script>
 </body>
