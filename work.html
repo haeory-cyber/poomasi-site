@@ -574,7 +574,7 @@
     font-size: 0.88rem;
     line-height: 1.7;
     resize: vertical;
-    min-height: 160px;
+    min-height: 140px;
     outline: none;
     transition: border-color 0.3s;
   }
@@ -590,57 +590,30 @@
 
   .sms-char.over { color: var(--red); }
 
-  .member-tag-area {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    padding: 0.8rem;
-    background: rgba(15,11,7,0.5);
-    border: 1px solid rgba(196,128,58,0.15);
-    min-height: 60px;
-    margin-bottom: 0.8rem;
-  }
-
-  .member-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    background: rgba(196,128,58,0.15);
-    border: 1px solid rgba(196,128,58,0.3);
-    padding: 0.2rem 0.6rem;
-    font-size: 0.75rem;
-    color: var(--amber-light);
-  }
-
-  .member-tag button {
-    background: none;
-    border: none;
-    color: rgba(196,128,58,0.5);
-    cursor: pointer;
-    font-size: 0.8rem;
-    padding: 0;
-    line-height: 1;
-  }
-
-  .member-tag button:hover { color: var(--amber); }
-
-  .sms-history-item {
-    padding: 1rem;
-    border-bottom: 1px solid rgba(184,168,138,0.06);
-  }
-
-  .sms-history-msg {
-    font-size: 0.85rem;
+  #farmer-select {
+    width: 100%;
+    background: rgba(15,11,7,0.8);
+    border: 1px solid rgba(196,128,58,0.2);
     color: var(--cream);
-    line-height: 1.6;
-    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.85rem;
+    outline: none;
+    cursor: pointer;
   }
 
-  .sms-history-meta {
-    font-size: 0.68rem;
-    color: var(--dust);
-    letter-spacing: 0.05em;
+  #farmer-select option { background: #1a1510; }
+  #farmer-select option:checked { background: rgba(196,128,58,0.3); }
+
+  .customer-cb {
+    accent-color: var(--amber);
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    flex-shrink: 0;
   }
+
+  #sms-result-list { font-size: 0.82rem; }
 
   /* ── LOADING / EMPTY ────────────────────────────────── */
   .loading-row {
@@ -908,34 +881,62 @@
     <div class="sec-header">
       <div>
         <div class="sec-label">이음SMS</div>
-        <div class="sec-title">조합원 문자 발송</div>
+        <div class="sec-title">농가-단골 문자 발송</div>
       </div>
     </div>
 
     <div class="sms-layout">
-      <!-- 작성 -->
-      <div class="card sms-compose">
-        <div class="card-title">문자 작성</div>
-        <div style="margin-bottom:0.6rem;font-size:0.72rem;letter-spacing:0.1em;color:var(--dust);">수신 조합원 ID (쉼표 구분)</div>
-        <div class="member-tag-area" id="member-tag-area"></div>
-        <div style="display:flex;gap:0.5rem;margin-bottom:1rem;">
-          <input class="form-input" type="text" id="member-input" placeholder="M001, M002 …" style="flex:1;padding:0.55rem 0.8rem;font-size:0.82rem;">
-          <button class="btn-sm" onclick="addMemberTags()">추가</button>
+      <!-- 왼쪽: 농가 선택 + 단골 목록 -->
+      <div>
+        <!-- 농가 선택 -->
+        <div class="card" style="margin-bottom:1.5rem;">
+          <div class="card-title">1. 농가 선택</div>
+          <input type="text" id="farmer-search" class="form-input" placeholder="농가명 검색…" oninput="filterFarmers()" style="margin-bottom:0.7rem;padding:0.55rem 0.8rem;font-size:0.85rem;">
+          <select id="farmer-select" size="7">
+            <option value="">로딩 중…</option>
+          </select>
+          <button class="btn-primary" style="width:100%;margin-top:0.8rem;" onclick="loadTopCustomers()">단골 조회 ▶</button>
         </div>
-        <textarea id="sms-message" placeholder="발송할 문자 내용을 입력하세요 (최대 90자)." maxlength="90" oninput="updateCharCount()"></textarea>
-        <div class="sms-char" id="sms-char-count">0 / 90</div>
-        <div style="margin-top:1rem;">
-          <label class="form-label">발송자명</label>
-          <input class="form-input" type="text" id="sms-sender" value="품앗이생협" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+
+        <!-- 단골 체크리스트 -->
+        <div class="card" id="customer-card" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;">
+            <div class="card-title" style="margin:0;">2. 단골 선택</div>
+            <button class="btn-sm" onclick="toggleSelectAll()">전체선택/해제</button>
+          </div>
+          <div id="customer-list" style="max-height:380px;overflow-y:auto;"></div>
         </div>
-        <button class="btn-primary" style="width:100%;margin-top:1rem;" onclick="sendSms()">문자 발송 기록</button>
       </div>
 
-      <!-- 발송 이력 -->
-      <div class="card">
-        <div class="card-title">발송 이력</div>
-        <div id="sms-history-list">
-          <div class="loading-row">데이터 로딩 중…</div>
+      <!-- 오른쪽: 문자 작성 + 발송 -->
+      <div>
+        <div class="card sms-compose">
+          <div class="card-title">3. 문자 작성 및 발송</div>
+
+          <div style="font-size:0.7rem;letter-spacing:0.12em;color:var(--dust);margin-bottom:0.3rem;">선택 인원</div>
+          <div id="selected-count" style="font-size:1.1rem;color:var(--amber);font-weight:600;margin-bottom:1rem;">0명 선택</div>
+
+          <textarea id="sms-message" placeholder="안녕하세요! {농가명} 농산물이 입고되었습니다…" maxlength="90" oninput="updateCharCount()"></textarea>
+          <div class="sms-char" id="sms-char-count">0 / 90</div>
+
+          <!-- API 설정 (접이식) -->
+          <details style="margin-top:1rem;">
+            <summary style="font-size:0.72rem;letter-spacing:0.1em;color:var(--dust);cursor:pointer;padding:0.4rem 0;">⚙ Solapi API 설정</summary>
+            <div style="margin-top:0.6rem;display:flex;flex-direction:column;gap:0.5rem;">
+              <input class="form-input" type="password" id="solapi-key" placeholder="API Key" style="padding:0.5rem 0.8rem;font-size:0.82rem;">
+              <input class="form-input" type="password" id="solapi-secret" placeholder="API Secret" style="padding:0.5rem 0.8rem;font-size:0.82rem;">
+              <input class="form-input" type="text" id="solapi-from" placeholder="발신번호" value="0427160019" style="padding:0.5rem 0.8rem;font-size:0.82rem;">
+              <button class="btn-sm" onclick="saveApiConfig()" style="align-self:flex-start;">저장 (localStorage)</button>
+            </div>
+          </details>
+
+          <button class="btn-primary" style="width:100%;margin-top:1rem;" onclick="sendSms()">📨 발송</button>
+
+          <!-- 발송 결과 -->
+          <div id="sms-result" style="margin-top:1rem;display:none;">
+            <div class="card-title" style="margin-bottom:0.5rem;">발송 결과</div>
+            <div id="sms-result-list"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -1117,7 +1118,8 @@ function initApp() {
   loadActions();
 
   // SMS
-  loadSmsHistory();
+  loadFarmerNames();
+  loadApiConfig();
 
   // 이벤트
   loadEvents();
@@ -1401,30 +1403,97 @@ function initMonthDropdown() {
 
 // ══ 이음SMS ════════════════════════════════════════════
 
-let memberIds = [];
+let allFarmerNames = [];
+let customerPool   = []; // [{member_id, member_name, purchase_count, phone}]
 
-function addMemberTags() {
-  const raw = document.getElementById('member-input').value;
-  const ids = raw.split(/[,\s]+/).map(s => s.trim()).filter(Boolean);
-  ids.forEach(id => { if (!memberIds.includes(id)) memberIds.push(id); });
-  document.getElementById('member-input').value = '';
-  renderMemberTags();
-}
-
-function renderMemberTags() {
-  const area = document.getElementById('member-tag-area');
-  if (memberIds.length === 0) {
-    area.innerHTML = '<span style="font-size:0.72rem;color:rgba(184,168,138,0.3);letter-spacing:0.1em;">수신자를 추가하세요</span>';
-    return;
+async function loadFarmerNames() {
+  try {
+    const resp = await fetch(
+      `${SUPABASE_URL}/rest/v1/farmer_members?select=farmer_name&order=farmer_name`,
+      { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+    );
+    const data = await resp.json();
+    const names = [...new Set(data.map(r => r.farmer_name).filter(Boolean))].sort((a,b) => a.localeCompare(b,'ko'));
+    allFarmerNames = names;
+    renderFarmerSelect(names);
+  } catch(e) {
+    document.getElementById('farmer-select').innerHTML = '<option value="">로드 실패</option>';
   }
-  area.innerHTML = memberIds.map(id =>
-    `<span class="member-tag">${id}<button onclick="removeMember('${id}')">✕</button></span>`
-  ).join('');
 }
 
-function removeMember(id) {
-  memberIds = memberIds.filter(m => m !== id);
-  renderMemberTags();
+function renderFarmerSelect(names) {
+  const sel = document.getElementById('farmer-select');
+  sel.innerHTML = names.length
+    ? names.map(n => `<option value="${n}">${n}</option>`).join('')
+    : '<option value="">농가 없음</option>';
+}
+
+function filterFarmers() {
+  const q = document.getElementById('farmer-search').value.trim().toLowerCase();
+  renderFarmerSelect(q ? allFarmerNames.filter(n => n.toLowerCase().includes(q)) : allFarmerNames);
+}
+
+async function loadTopCustomers() {
+  const farmerName = document.getElementById('farmer-select').value;
+  if (!farmerName) { toast('농가를 선택하세요.'); return; }
+
+  const card = document.getElementById('customer-card');
+  const list = document.getElementById('customer-list');
+  card.style.display = '';
+  list.innerHTML = '<div class="loading-row">조회 중…</div>';
+
+  try {
+    const r1 = await fetch(
+      `${SUPABASE_URL}/rest/v1/farmer_members?farmer_name=eq.${encodeURIComponent(farmerName)}&select=member_id,member_name,purchase_count&order=purchase_count.desc&limit=30`,
+      { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+    );
+    const fm = await r1.json();
+    if (!fm.length) { list.innerHTML = '<div class="empty-row">단골 없음</div>'; return; }
+
+    const ids = fm.map(r => r.member_id).join(',');
+    const r2 = await fetch(
+      `${SUPABASE_URL}/rest/v1/members?member_id=in.(${ids})&select=member_id,member_name,phone`,
+      { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+    );
+    const members = await r2.json();
+    const phoneMap = Object.fromEntries(members.map(m => [m.member_id, m.phone || '']));
+
+    customerPool = fm.map(r => ({
+      member_id:      r.member_id,
+      member_name:    r.member_name || r.member_id,
+      purchase_count: r.purchase_count,
+      phone:          phoneMap[r.member_id] || '',
+    }));
+
+    renderCustomerList();
+  } catch(e) {
+    list.innerHTML = `<div class="empty-row">오류: ${e.message}</div>`;
+  }
+}
+
+function renderCustomerList() {
+  const list = document.getElementById('customer-list');
+  list.innerHTML = customerPool.map((c, i) => `
+    <label style="display:flex;align-items:center;gap:0.6rem;padding:0.5rem 0;border-bottom:1px solid rgba(184,168,138,0.06);cursor:pointer;">
+      <input type="checkbox" class="customer-cb" data-idx="${i}" checked onchange="updateSelectedCount()">
+      <span style="flex:1;font-size:0.83rem;color:var(--cream);">${c.member_name}</span>
+      <span style="font-size:0.72rem;color:var(--dust);min-width:32px;text-align:right;">${c.purchase_count}회</span>
+      <span style="font-size:0.72rem;color:var(--amber-light);min-width:105px;text-align:right;">${c.phone || '번호없음'}</span>
+    </label>
+  `).join('');
+  updateSelectedCount();
+}
+
+function toggleSelectAll() {
+  const cbs = [...document.querySelectorAll('.customer-cb')];
+  const allChecked = cbs.every(cb => cb.checked);
+  cbs.forEach(cb => { cb.checked = !allChecked; });
+  updateSelectedCount();
+}
+
+function updateSelectedCount() {
+  const n = document.querySelectorAll('.customer-cb:checked').length;
+  document.getElementById('selected-count').textContent = `${n}명 선택`;
 }
 
 function updateCharCount() {
@@ -1434,49 +1503,100 @@ function updateCharCount() {
   el.className = 'sms-char' + (msg.length >= 90 ? ' over' : '');
 }
 
-async function sendSms() {
-  const message = document.getElementById('sms-message').value.trim();
-  const sender  = document.getElementById('sms-sender').value.trim() || '품앗이생협';
-
-  if (!message)            { toast('문자 내용을 입력하세요.'); return; }
-  if (memberIds.length === 0) { toast('수신자를 추가하세요.'); return; }
-
-  const { error } = await sb.from('sms_history').insert({
-    member_ids: memberIds,
-    message,
-    sender,
-  });
-
-  if (error) { toast('저장 실패: ' + error.message); return; }
-
-  document.getElementById('sms-message').value = '';
-  memberIds = [];
-  renderMemberTags();
-  updateCharCount();
-  toast(`${memberIds.length || '다수'}명 발송 기록 저장됨`);
-  loadSmsHistory();
+function saveApiConfig() {
+  localStorage.setItem('solapi_key',    document.getElementById('solapi-key').value.trim());
+  localStorage.setItem('solapi_secret', document.getElementById('solapi-secret').value.trim());
+  localStorage.setItem('solapi_from',   document.getElementById('solapi-from').value.trim());
+  toast('API 설정 저장됨');
 }
 
-async function loadSmsHistory() {
-  const wrap = document.getElementById('sms-history-list');
-  const { data, error } = await sb.from('sms_history').select('*').order('sent_at', { ascending: false }).limit(30);
+function loadApiConfig() {
+  document.getElementById('solapi-key').value    = localStorage.getItem('solapi_key')    || '';
+  document.getElementById('solapi-secret').value = localStorage.getItem('solapi_secret') || '';
+  document.getElementById('solapi-from').value   = localStorage.getItem('solapi_from')   || '0427160019';
+}
 
-  if (error || !data || data.length === 0) {
-    wrap.innerHTML = '<div class="empty-row">발송 이력 없음</div>';
+async function hmacSha256Hex(secret, message) {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig  = await crypto.subtle.sign('HMAC', key, enc.encode(message));
+  return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function sendSms() {
+  const message = document.getElementById('sms-message').value.trim();
+  if (!message) { toast('문자 내용을 입력하세요.'); return; }
+
+  const checked = [...document.querySelectorAll('.customer-cb:checked')];
+  if (!checked.length) { toast('수신자를 선택하세요.'); return; }
+
+  const apiKey    = localStorage.getItem('solapi_key')    || document.getElementById('solapi-key').value.trim();
+  const apiSecret = localStorage.getItem('solapi_secret') || document.getElementById('solapi-secret').value.trim();
+  const fromNum   = localStorage.getItem('solapi_from')   || document.getElementById('solapi-from').value.trim();
+
+  if (!apiKey || !apiSecret || !fromNum) {
+    toast('⚙ Solapi API 설정을 먼저 입력·저장하세요.');
     return;
   }
 
-  wrap.innerHTML = data.map(r => {
-    const ids = Array.isArray(r.member_ids) ? r.member_ids : [];
-    return `<div class="sms-history-item">
-      <div class="sms-history-msg">${r.message}</div>
-      <div class="sms-history-meta">
-        ${r.sent_at.slice(0,16).replace('T',' ')} &nbsp;·&nbsp;
-        ${r.sender} &nbsp;·&nbsp;
-        수신 ${ids.length}명: ${ids.slice(0,5).join(', ')}${ids.length > 5 ? ' …' : ''}
+  const recipients = checked
+    .map(cb => customerPool[+cb.dataset.idx])
+    .filter(c => c && c.phone);
+
+  if (!recipients.length) { toast('전화번호가 있는 수신자가 없습니다.'); return; }
+
+  const resDiv  = document.getElementById('sms-result');
+  const resList = document.getElementById('sms-result-list');
+  resDiv.style.display = '';
+  resList.innerHTML = '<div class="loading-row">발송 중…</div>';
+
+  const date = new Date().toISOString();
+  const salt = Math.random().toString(36).substring(2, 14);
+  const sig  = await hmacSha256Hex(apiSecret, date + salt);
+  const auth = `HMAC-SHA256 apiKey=${apiKey}, date=${date}, salt=${salt}, signature=${sig}`;
+
+  const messages = recipients.map(c => ({
+    to:   c.phone.replace(/-/g, ''),
+    from: fromNum.replace(/-/g, ''),
+    text: message,
+  }));
+
+  try {
+    const resp = await fetch('https://api.solapi.com/messages/v4/send-many', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': auth },
+      body: JSON.stringify({ messages }),
+    });
+    const result = await resp.json();
+
+    if (!resp.ok) {
+      resList.innerHTML = `<div class="empty-row" style="color:var(--red);">오류: ${result.message || resp.status}</div>`;
+      return;
+    }
+
+    const successCount = result.count?.success ?? result.groupInfo?.count?.total ?? recipients.length;
+    const failCount    = result.count?.fail    ?? 0;
+
+    resList.innerHTML = `
+      <div style="padding:0.6rem 0;font-size:0.85rem;">
+        <span style="color:#4caf50;">✓ 성공 ${successCount}건</span>
+        ${failCount ? `&nbsp;·&nbsp;<span style="color:var(--red);">✗ 실패 ${failCount}건</span>` : ''}
       </div>
-    </div>`;
-  }).join('');
+      <div style="font-size:0.72rem;color:var(--dust);line-height:1.9;">
+        ${recipients.map(c => `${c.member_name} (${c.phone})`).join('<br>')}
+      </div>`;
+
+    toast(`${successCount}명 발송 완료`);
+
+    await sb.from('sms_history').insert({
+      member_ids: recipients.map(c => c.member_id),
+      message,
+      sender: fromNum,
+    });
+
+  } catch(e) {
+    resList.innerHTML = `<div class="empty-row" style="color:var(--red);">네트워크 오류: ${e.message}</div>`;
+  }
 }
 
 // ── 농가 더보기/접기 ─────────────────────────────────────
