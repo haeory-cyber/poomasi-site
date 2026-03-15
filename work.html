@@ -153,8 +153,10 @@
 
   /* Header */
   .sticky-nav {
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 100;
   }
 
@@ -175,14 +177,17 @@
     font-weight: 700;
     color: var(--amber);
     letter-spacing: 0.1em;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    line-height: 1.2;
   }
 
   .app-logo span {
     color: var(--dust);
     font-weight: 300;
-    margin-left: 0.5rem;
-    font-size: 0.75rem;
-    letter-spacing: 0.05em;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
   }
 
   .header-right {
@@ -246,6 +251,7 @@
   /* Content area */
   .tab-content {
     padding: 2rem;
+    padding-top: 112px;
     max-width: 1200px;
     margin: 0 auto;
     display: none;
@@ -354,14 +360,7 @@
     .tab-bar { padding: 0 0.5rem; overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .tab-btn { padding: 0.85rem 0.8rem; font-size: 0.8rem; flex-shrink: 0; }
     .sticky-nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
       width: 100%;
-    }
-    .tab-content {
-      padding-top: 108px;
     }
   }
 
