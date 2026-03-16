@@ -171,25 +171,24 @@
     justify-content: space-between;
     height: 56px;
     backdrop-filter: blur(8px);
+    position: relative;
   }
 
   .app-logo {
     font-family: 'Noto Serif KR', serif;
-    font-size: 0.85rem;
+    font-size: 1.05rem;
     font-weight: 700;
-    color: var(--amber);
-    letter-spacing: 0.1em;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    color: var(--cream);
+    letter-spacing: 0.15em;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     white-space: nowrap;
+    text-shadow: 0 0 20px rgba(196,128,58,0.4);
   }
 
   .app-logo span {
-    color: var(--dust);
-    font-weight: 300;
-    font-size: 0.75rem;
-    letter-spacing: 0.05em;
+    color: var(--amber);
   }
 
   .header-right {
@@ -817,7 +816,7 @@
 <div id="app">
   <div class="sticky-nav">
     <header class="app-header">
-      <div class="app-logo">시다워크<span>품앗이생협 경영판</span></div>
+      <div class="app-logo"><span>품앗이생협</span> 경영판</div>
       <div class="header-right">
         <span class="user-badge" id="user-email"></span>
         <button class="btn-logout" onclick="doLogout()">로그아웃</button>
