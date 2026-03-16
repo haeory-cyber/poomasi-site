@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -21,6 +21,8 @@
     --red:   #b83a2a;
     --white: #faf7f0;
     --panel: rgba(30,21,16,0.85);
+    --surface: rgba(45,31,20,0.8);
+    --border: rgba(184,168,138,0.15);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1327,7 +1329,7 @@ sb.auth.getSession().then(({ data: { session } }) => {
 });
 
 // ── 탭 전환 ──────────────────────────────────────────────
-const TAB_IDS = { today: 'tab-today', action: 'tab-action', sms: 'tab-sms', event: 'tab-event', suppliers: 'tab-suppliers' };
+const TAB_IDS = { today: 'tab-today', action: 'tab-action', project: 'tab-project', grant: 'tab-grant', ai: 'tab-ai', sms: 'tab-sms', event: 'tab-event', suppliers: 'tab-suppliers' };
 
 function switchTab(key) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -1862,8 +1864,6 @@ document.getElementById('password').addEventListener('keydown', e => {
   if (e.key === 'Enter') doLogin();
 });
 
-// 초기 멤버태그 렌더
-renderMemberTags();
 
 // ══ 이벤트 등록 ════════════════════════════════════════
 
@@ -2140,6 +2140,19 @@ function sendOrderEmail() {
   const subject = encodeURIComponent('[품앗이생협] 발주 요청');
   const body = encodeURIComponent(message);
   window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+}
+
+// ══ 섹션 토글 ══════════════════════════════════════════
+function toggleProjSection(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const isHidden = el.style.display === 'none';
+  el.style.display = isHidden ? 'flex' : 'none';
+  const header = el.previousElementSibling;
+  if (header) {
+    const hint = header.querySelector('.toggle-hint');
+    if (hint) hint.textContent = isHidden ? '(접기)' : '(펼치기)';
+  }
 }
 
 // ══ 패미 추가: 프로젝트관리 · 지원사업 · AI경영지원실 ══
