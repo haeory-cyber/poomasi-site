@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>품앗이생협 경영판</title>
+<title>시다워크 — 품앗이생협 경영판</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;700;900&family=Noto+Sans+KR:wght@300;400;500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -153,10 +153,8 @@
 
   /* Header */
   .sticky-nav {
-    position: fixed;
+    position: sticky;
     top: 0;
-    left: 0;
-    right: 0;
     z-index: 100;
   }
 
@@ -172,21 +170,20 @@
   }
 
   .app-logo {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
     font-family: 'Noto Serif KR', serif;
     font-size: 0.85rem;
     font-weight: 700;
     color: var(--amber);
     letter-spacing: 0.1em;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    white-space: nowrap;
-    margin-left: 5rem;
   }
 
   .app-logo span {
     color: var(--dust);
     font-weight: 300;
+    margin-left: 0.5rem;
     font-size: 0.75rem;
     letter-spacing: 0.05em;
   }
@@ -252,7 +249,6 @@
   /* Content area */
   .tab-content {
     padding: 2rem;
-    padding-top: 112px;
     max-width: 1200px;
     margin: 0 auto;
     display: none;
@@ -361,7 +357,14 @@
     .tab-bar { padding: 0 0.5rem; overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .tab-btn { padding: 0.85rem 0.8rem; font-size: 0.8rem; flex-shrink: 0; }
     .sticky-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
       width: 100%;
+    }
+    .tab-content {
+      padding-top: 108px;
     }
   }
 
@@ -574,7 +577,7 @@
     font-size: 0.88rem;
     line-height: 1.7;
     resize: vertical;
-    min-height: 140px;
+    min-height: 160px;
     outline: none;
     transition: border-color 0.3s;
   }
@@ -590,30 +593,57 @@
 
   .sms-char.over { color: var(--red); }
 
-  #farmer-select {
-    width: 100%;
-    background: rgba(15,11,7,0.8);
-    border: 1px solid rgba(196,128,58,0.2);
-    color: var(--cream);
-    padding: 0.5rem;
-    font-family: 'Noto Sans KR', sans-serif;
+  .member-tag-area {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0.8rem;
+    background: rgba(15,11,7,0.5);
+    border: 1px solid rgba(196,128,58,0.15);
+    min-height: 60px;
+    margin-bottom: 0.8rem;
+  }
+
+  .member-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: rgba(196,128,58,0.15);
+    border: 1px solid rgba(196,128,58,0.3);
+    padding: 0.2rem 0.6rem;
+    font-size: 0.75rem;
+    color: var(--amber-light);
+  }
+
+  .member-tag button {
+    background: none;
+    border: none;
+    color: rgba(196,128,58,0.5);
+    cursor: pointer;
+    font-size: 0.8rem;
+    padding: 0;
+    line-height: 1;
+  }
+
+  .member-tag button:hover { color: var(--amber); }
+
+  .sms-history-item {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(184,168,138,0.06);
+  }
+
+  .sms-history-msg {
     font-size: 0.85rem;
-    outline: none;
-    cursor: pointer;
+    color: var(--cream);
+    line-height: 1.6;
+    margin-bottom: 0.5rem;
   }
 
-  #farmer-select option { background: #1a1510; }
-  #farmer-select option:checked { background: rgba(196,128,58,0.3); }
-
-  .customer-cb {
-    accent-color: var(--amber);
-    width: 15px;
-    height: 15px;
-    cursor: pointer;
-    flex-shrink: 0;
+  .sms-history-meta {
+    font-size: 0.68rem;
+    color: var(--dust);
+    letter-spacing: 0.05em;
   }
-
-  #sms-result-list { font-size: 0.82rem; }
 
   /* ── LOADING / EMPTY ────────────────────────────────── */
   .loading-row {
@@ -757,7 +787,7 @@
 <div id="login-screen">
   <div class="login-box">
     <div class="login-brand">품앗이소비자생활협동조합</div>
-    <div class="login-title"></div>
+    <div class="login-title">시다워크</div>
     <div class="login-sub">SIDA-WORK · 경영 관리 보드</div>
 
     <div class="form-group">
@@ -778,7 +808,7 @@
 <div id="app">
   <div class="sticky-nav">
     <header class="app-header">
-      <div class="app-logo"><span>품앗이생협 경영판</span></div>
+      <div class="app-logo">시다워크<span>품앗이생협 경영판</span></div>
       <div class="header-right">
         <span class="user-badge" id="user-email"></span>
         <button class="btn-logout" onclick="doLogout()">로그아웃</button>
@@ -790,7 +820,7 @@
       <button class="tab-btn"       onclick="switchTab('action')">액션플랜</button>
       <button class="tab-btn"       onclick="switchTab('sms')">이음SMS</button>
       <button class="tab-btn"       onclick="switchTab('event')">이벤트 등록</button>
-      <button class="tab-btn" onclick="switchTab('suppliers')">발주</button>
+      <button class="tab-btn" onclick="switchTab('suppliers')">발주처</button>
     </nav>
   </div>
 
@@ -881,62 +911,34 @@
     <div class="sec-header">
       <div>
         <div class="sec-label">이음SMS</div>
-        <div class="sec-title">농가-단골 문자 발송</div>
+        <div class="sec-title">조합원 문자 발송</div>
       </div>
     </div>
 
     <div class="sms-layout">
-      <!-- 왼쪽: 농가 선택 + 단골 목록 -->
-      <div>
-        <!-- 농가 선택 -->
-        <div class="card" style="margin-bottom:1.5rem;">
-          <div class="card-title">1. 농가 선택</div>
-          <input type="text" id="farmer-search" class="form-input" placeholder="농가명 검색…" oninput="filterFarmers()" style="margin-bottom:0.7rem;padding:0.55rem 0.8rem;font-size:0.85rem;">
-          <select id="farmer-select" size="7">
-            <option value="">로딩 중…</option>
-          </select>
-          <button class="btn-primary" style="width:100%;margin-top:0.8rem;" onclick="loadTopCustomers()">단골 조회 ▶</button>
+      <!-- 작성 -->
+      <div class="card sms-compose">
+        <div class="card-title">문자 작성</div>
+        <div style="margin-bottom:0.6rem;font-size:0.72rem;letter-spacing:0.1em;color:var(--dust);">수신 조합원 ID (쉼표 구분)</div>
+        <div class="member-tag-area" id="member-tag-area"></div>
+        <div style="display:flex;gap:0.5rem;margin-bottom:1rem;">
+          <input class="form-input" type="text" id="member-input" placeholder="M001, M002 …" style="flex:1;padding:0.55rem 0.8rem;font-size:0.82rem;">
+          <button class="btn-sm" onclick="addMemberTags()">추가</button>
         </div>
-
-        <!-- 단골 체크리스트 -->
-        <div class="card" id="customer-card" style="display:none;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;">
-            <div class="card-title" style="margin:0;">2. 단골 선택</div>
-            <button class="btn-sm" onclick="toggleSelectAll()">전체선택/해제</button>
-          </div>
-          <div id="customer-list" style="max-height:380px;overflow-y:auto;"></div>
+        <textarea id="sms-message" placeholder="발송할 문자 내용을 입력하세요 (최대 90자)." maxlength="90" oninput="updateCharCount()"></textarea>
+        <div class="sms-char" id="sms-char-count">0 / 90</div>
+        <div style="margin-top:1rem;">
+          <label class="form-label">발송자명</label>
+          <input class="form-input" type="text" id="sms-sender" value="품앗이생협" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
         </div>
+        <button class="btn-primary" style="width:100%;margin-top:1rem;" onclick="sendSms()">문자 발송 기록</button>
       </div>
 
-      <!-- 오른쪽: 문자 작성 + 발송 -->
-      <div>
-        <div class="card sms-compose">
-          <div class="card-title">3. 문자 작성 및 발송</div>
-
-          <div style="font-size:0.7rem;letter-spacing:0.12em;color:var(--dust);margin-bottom:0.3rem;">선택 인원</div>
-          <div id="selected-count" style="font-size:1.1rem;color:var(--amber);font-weight:600;margin-bottom:1rem;">0명 선택</div>
-
-          <textarea id="sms-message" placeholder="안녕하세요! {농가명} 농산물이 입고되었습니다…" maxlength="90" oninput="updateCharCount()"></textarea>
-          <div class="sms-char" id="sms-char-count">0 / 90</div>
-
-          <!-- API 설정 (접이식) -->
-          <details style="margin-top:1rem;">
-            <summary style="font-size:0.72rem;letter-spacing:0.1em;color:var(--dust);cursor:pointer;padding:0.4rem 0;">⚙ Solapi API 설정</summary>
-            <div style="margin-top:0.6rem;display:flex;flex-direction:column;gap:0.5rem;">
-              <input class="form-input" type="password" id="solapi-key" placeholder="API Key" style="padding:0.5rem 0.8rem;font-size:0.82rem;">
-              <input class="form-input" type="password" id="solapi-secret" placeholder="API Secret" style="padding:0.5rem 0.8rem;font-size:0.82rem;">
-              <input class="form-input" type="text" id="solapi-from" placeholder="발신번호" value="0427160019" style="padding:0.5rem 0.8rem;font-size:0.82rem;">
-              <button class="btn-sm" onclick="saveApiConfig()" style="align-self:flex-start;">저장 (localStorage)</button>
-            </div>
-          </details>
-
-          <button class="btn-primary" style="width:100%;margin-top:1rem;" onclick="sendSms()">📨 발송</button>
-
-          <!-- 발송 결과 -->
-          <div id="sms-result" style="margin-top:1rem;display:none;">
-            <div class="card-title" style="margin-bottom:0.5rem;">발송 결과</div>
-            <div id="sms-result-list"></div>
-          </div>
+      <!-- 발송 이력 -->
+      <div class="card">
+        <div class="card-title">발송 이력</div>
+        <div id="sms-history-list">
+          <div class="loading-row">데이터 로딩 중…</div>
         </div>
       </div>
     </div>
@@ -986,100 +988,46 @@
     </div>
   </section>
 
-  <!-- ══ TAB: 발주 ══ -->
+  <!-- ══ TAB: 발주처 관리 ══ -->
   <section class="tab-content" id="tab-suppliers">
     <div class="sec-header">
       <div>
-        <div class="sec-label">ORDER</div>
-        <div class="sec-title">발주</div>
+        <div class="sec-label">SUPPLIERS</div>
+        <div class="sec-title">발주처 관리</div>
       </div>
+      <button class="btn-sm" onclick="showAddSupplier()">+ 추가</button>
     </div>
 
-    <!-- 서브탭 바 -->
-    <div style="display:flex;gap:0;border-bottom:1px solid rgba(196,128,58,0.25);margin-bottom:1.5rem;">
-      <button class="sub-tab-btn active" id="stab-suppliers" onclick="switchSubTab('suppliers')" style="background:none;border:none;color:var(--dust);font-size:0.8rem;letter-spacing:0.08em;padding:0.5rem 1rem;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;">발주처관리</button>
-      <button class="sub-tab-btn" id="stab-tele" onclick="switchSubTab('tele')" style="background:none;border:none;color:var(--dust);font-size:0.8rem;letter-spacing:0.08em;padding:0.5rem 1rem;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;">텔레발주</button>
-      <button class="sub-tab-btn" id="stab-order" onclick="switchSubTab('order')" style="background:none;border:none;color:var(--dust);font-size:0.8rem;letter-spacing:0.08em;padding:0.5rem 1rem;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;">발주하기</button>
-    </div>
-
-    <!-- ── 서브패널: 발주처관리 ── -->
-    <div id="sub-suppliers">
-      <div class="sec-header" style="margin-bottom:1rem;">
-        <div></div>
-        <button class="btn-sm" onclick="showAddSupplier()">+ 추가</button>
-      </div>
-
-      <!-- 추가 폼 (기본 숨김) -->
-      <div class="card" id="supplier-add-form" style="display:none;margin-bottom:1.5rem;">
-        <div class="card-title">새 발주처</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
-          <div>
-            <label class="form-label">업체명 *</label>
-            <input class="form-input" id="sup-name" placeholder="업체명" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
-          </div>
-          <div>
-            <label class="form-label">전화번호</label>
-            <input class="form-input" id="sup-phone" placeholder="010-0000-0000" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
-          </div>
-          <div>
-            <label class="form-label">이메일</label>
-            <input class="form-input" id="sup-email" placeholder="example@email.com" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
-          </div>
-          <div>
-            <label class="form-label">메모</label>
-            <input class="form-input" id="sup-note" placeholder="담당자명 등" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
-          </div>
+    <!-- 추가 폼 (기본 숨김) -->
+    <div class="card" id="supplier-add-form" style="display:none;margin-bottom:1.5rem;">
+      <div class="card-title">새 발주처</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+        <div>
+          <label class="form-label">업체명 *</label>
+          <input class="form-input" id="sup-name" placeholder="업체명" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
         </div>
-        <div style="display:flex;gap:0.5rem;">
-          <button class="btn-primary" onclick="addSupplier()">저장</button>
-          <button class="btn-sm" onclick="hideAddSupplier()">취소</button>
+        <div>
+          <label class="form-label">전화번호</label>
+          <input class="form-input" id="sup-phone" placeholder="010-0000-0000" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+        </div>
+        <div>
+          <label class="form-label">이메일</label>
+          <input class="form-input" id="sup-email" placeholder="example@email.com" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+        </div>
+        <div>
+          <label class="form-label">메모</label>
+          <input class="form-input" id="sup-note" placeholder="담당자명 등" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
         </div>
       </div>
-
-      <!-- 목록 -->
-      <div class="card">
-        <div id="supplier-list"><div class="loading-row">로딩 중…</div></div>
+      <div style="display:flex;gap:0.5rem;">
+        <button class="btn-primary" onclick="addSupplier()">저장</button>
+        <button class="btn-sm" onclick="hideAddSupplier()">취소</button>
       </div>
     </div>
 
-    <!-- ── 서브패널: 텔레발주 ── -->
-    <div id="sub-tele" style="display:none;">
-      <div class="sec-header" style="margin-bottom:1rem;">
-        <div style="font-size:0.8rem;color:var(--dust);">현장 직원 발주 요청</div>
-        <button class="btn-sm" onclick="loadTeleOrders()">↻ 새로고침</button>
-      </div>
-      <div class="card">
-        <div id="tele-list"><div class="loading-row">로딩 중…</div></div>
-      </div>
-    </div>
-
-    <!-- ── 서브패널: 발주하기 ── -->
-    <div id="sub-order" style="display:none;">
-      <div class="card" style="margin-bottom:1rem;">
-        <div class="card-title" style="margin-bottom:0.8rem;">발주처 선택</div>
-        <select class="form-input" id="order-supplier-select" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
-          <option value="">-- 발주처 선택 --</option>
-        </select>
-        <div id="order-supplier-phone" style="font-size:0.78rem;color:var(--dust);margin-top:0.4rem;"></div>
-      </div>
-      <div class="card">
-        <div class="card-title" style="margin-bottom:0.8rem;">발주 내용</div>
-        <textarea class="form-input" id="order-message" rows="7" style="width:100%;padding:0.6rem 0.8rem;font-size:0.85rem;resize:vertical;">[품앗이소비자생활협동조합 발주 요청]
-
-안녕하세요. 품앗이소비자생활협동조합입니다.
-아래와 같이 발주 요청드립니다.
-
-품목:
-수량:
-납품일:
-
-감사합니다.</textarea>
-        <div style="display:flex;gap:0.5rem;margin-top:1rem;">
-          <button class="btn-primary" onclick="sendOrderSms()">📨 문자발송</button>
-          <button class="btn-sm" onclick="sendOrderEmail()">✉ 이메일발송</button>
-        </div>
-        <div id="order-result" style="margin-top:0.8rem;font-size:0.82rem;color:var(--dust);"></div>
-      </div>
+    <!-- 목록 -->
+    <div class="card">
+      <div id="supplier-list"><div class="loading-row">로딩 중…</div></div>
     </div>
   </section>
 </div>
@@ -1143,7 +1091,6 @@ function switchTab(key) {
   document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
   document.getElementById(TAB_IDS[key]).classList.add('active');
   event.currentTarget.classList.add('active');
-  if (key === 'sms') loadFarmerList();
 }
 
 // ── 공통 유틸 ─────────────────────────────────────────────
@@ -1173,8 +1120,7 @@ function initApp() {
   loadActions();
 
   // SMS
-  loadFarmerList();
-  loadApiConfig();
+  loadSmsHistory();
 
   // 이벤트
   loadEvents();
@@ -1458,100 +1404,30 @@ function initMonthDropdown() {
 
 // ══ 이음SMS ════════════════════════════════════════════
 
-let allFarmerNames = [];
-let customerPool   = []; // [{member_id, member_name, purchase_count, phone}]
+let memberIds = [];
 
-async function loadFarmerList() {
-  try {
-    const { data, error } = await sb.rpc('get_distinct_farmers');
-    if (error) throw error;
-    const farmers = [...new Set(data.map(r => r.farmer_name).filter(Boolean))].sort((a,b) => a.localeCompare(b,'ko'));
-    allFarmerNames = farmers;
-    renderFarmerSelect(farmers);
-  } catch(e) {
-    document.getElementById('farmer-select').innerHTML = '<option value="">로드 실패</option>';
-    console.error('loadFarmerList error:', e);
+function addMemberTags() {
+  const raw = document.getElementById('member-input').value;
+  const ids = raw.split(/[,\s]+/).map(s => s.trim()).filter(Boolean);
+  ids.forEach(id => { if (!memberIds.includes(id)) memberIds.push(id); });
+  document.getElementById('member-input').value = '';
+  renderMemberTags();
+}
+
+function renderMemberTags() {
+  const area = document.getElementById('member-tag-area');
+  if (memberIds.length === 0) {
+    area.innerHTML = '<span style="font-size:0.72rem;color:rgba(184,168,138,0.3);letter-spacing:0.1em;">수신자를 추가하세요</span>';
+    return;
   }
+  area.innerHTML = memberIds.map(id =>
+    `<span class="member-tag">${id}<button onclick="removeMember('${id}')">✕</button></span>`
+  ).join('');
 }
 
-function renderFarmerSelect(names) {
-  const sel = document.getElementById('farmer-select');
-  sel.innerHTML = names.length
-    ? names.map(n => `<option value="${n}">${n}</option>`).join('')
-    : '<option value="">농가 없음</option>';
-}
-
-function filterFarmers() {
-  const q = document.getElementById('farmer-search').value.trim().toLowerCase();
-  renderFarmerSelect(q ? allFarmerNames.filter(n => n.toLowerCase().includes(q)) : allFarmerNames);
-}
-
-async function loadTopCustomers() {
-  const farmerName = document.getElementById('farmer-select').value;
-  if (!farmerName) { toast('농가를 선택하세요.'); return; }
-
-  const card = document.getElementById('customer-card');
-  const list = document.getElementById('customer-list');
-  card.style.display = '';
-  list.innerHTML = '<div class="loading-row">조회 중…</div>';
-
-  try {
-    // 상위 300 단골 (3회 이상)
-    const { data: fm, error: e1 } = await sb
-      .from('farmer_members')
-      .select('member_id,member_name,purchase_count')
-      .eq('farmer_name', farmerName)
-      .gte('purchase_count', 3)
-      .order('purchase_count', { ascending: false })
-      .limit(300);
-    if (e1) throw e1;
-    if (!fm || !fm.length) { list.innerHTML = '<div class="empty-row">단골 없음</div>'; return; }
-
-    // 전화번호 조회
-    const memberIds = fm.map(r => r.member_id);
-    const { data: members, error: e2 } = await sb
-      .from('members')
-      .select('member_id,member_name,phone')
-      .in('member_id', memberIds);
-    if (e2) throw e2;
-    const phoneMap = Object.fromEntries((members || []).map(m => [m.member_id, m.phone || '']));
-
-    customerPool = fm.map(r => ({
-      member_id:      r.member_id,
-      member_name:    r.member_name || r.member_id,
-      purchase_count: r.purchase_count,
-      phone:          phoneMap[r.member_id] || '',
-    }));
-
-    renderCustomerList();
-  } catch(e) {
-    list.innerHTML = `<div class="empty-row">오류: ${e.message}</div>`;
-  }
-}
-
-function renderCustomerList() {
-  const list = document.getElementById('customer-list');
-  list.innerHTML = customerPool.map((c, i) => `
-    <label style="display:flex;align-items:center;gap:0.6rem;padding:0.5rem 0;border-bottom:1px solid rgba(184,168,138,0.06);cursor:pointer;">
-      <input type="checkbox" class="customer-cb" data-idx="${i}" checked onchange="updateSelectedCount()">
-      <span style="flex:1;font-size:0.83rem;color:var(--cream);">${c.member_name}</span>
-      <span style="font-size:0.72rem;color:var(--dust);min-width:32px;text-align:right;">${c.purchase_count}회</span>
-      <span style="font-size:0.72rem;color:var(--amber-light);min-width:105px;text-align:right;">${c.phone || '번호없음'}</span>
-    </label>
-  `).join('');
-  updateSelectedCount();
-}
-
-function toggleSelectAll() {
-  const cbs = [...document.querySelectorAll('.customer-cb')];
-  const allChecked = cbs.every(cb => cb.checked);
-  cbs.forEach(cb => { cb.checked = !allChecked; });
-  updateSelectedCount();
-}
-
-function updateSelectedCount() {
-  const n = document.querySelectorAll('.customer-cb:checked').length;
-  document.getElementById('selected-count').textContent = `${n}명 선택`;
+function removeMember(id) {
+  memberIds = memberIds.filter(m => m !== id);
+  renderMemberTags();
 }
 
 function updateCharCount() {
@@ -1561,100 +1437,49 @@ function updateCharCount() {
   el.className = 'sms-char' + (msg.length >= 90 ? ' over' : '');
 }
 
-function saveApiConfig() {
-  localStorage.setItem('solapi_key',    document.getElementById('solapi-key').value.trim());
-  localStorage.setItem('solapi_secret', document.getElementById('solapi-secret').value.trim());
-  localStorage.setItem('solapi_from',   document.getElementById('solapi-from').value.trim());
-  toast('API 설정 저장됨');
-}
-
-function loadApiConfig() {
-  document.getElementById('solapi-key').value    = localStorage.getItem('solapi_key')    || '';
-  document.getElementById('solapi-secret').value = localStorage.getItem('solapi_secret') || '';
-  document.getElementById('solapi-from').value   = localStorage.getItem('solapi_from')   || '0427160019';
-}
-
-async function hmacSha256Hex(secret, message) {
-  const enc = new TextEncoder();
-  const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-  const sig  = await crypto.subtle.sign('HMAC', key, enc.encode(message));
-  return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2,'0')).join('');
-}
-
 async function sendSms() {
   const message = document.getElementById('sms-message').value.trim();
-  if (!message) { toast('문자 내용을 입력하세요.'); return; }
+  const sender  = document.getElementById('sms-sender').value.trim() || '품앗이생협';
 
-  const checked = [...document.querySelectorAll('.customer-cb:checked')];
-  if (!checked.length) { toast('수신자를 선택하세요.'); return; }
+  if (!message)            { toast('문자 내용을 입력하세요.'); return; }
+  if (memberIds.length === 0) { toast('수신자를 추가하세요.'); return; }
 
-  const apiKey    = localStorage.getItem('solapi_key')    || document.getElementById('solapi-key').value.trim();
-  const apiSecret = localStorage.getItem('solapi_secret') || document.getElementById('solapi-secret').value.trim();
-  const fromNum   = localStorage.getItem('solapi_from')   || document.getElementById('solapi-from').value.trim();
+  const { error } = await sb.from('sms_history').insert({
+    member_ids: memberIds,
+    message,
+    sender,
+  });
 
-  if (!apiKey || !apiSecret || !fromNum) {
-    toast('⚙ Solapi API 설정을 먼저 입력·저장하세요.');
+  if (error) { toast('저장 실패: ' + error.message); return; }
+
+  document.getElementById('sms-message').value = '';
+  memberIds = [];
+  renderMemberTags();
+  updateCharCount();
+  toast(`${memberIds.length || '다수'}명 발송 기록 저장됨`);
+  loadSmsHistory();
+}
+
+async function loadSmsHistory() {
+  const wrap = document.getElementById('sms-history-list');
+  const { data, error } = await sb.from('sms_history').select('*').order('sent_at', { ascending: false }).limit(30);
+
+  if (error || !data || data.length === 0) {
+    wrap.innerHTML = '<div class="empty-row">발송 이력 없음</div>';
     return;
   }
 
-  const recipients = checked
-    .map(cb => customerPool[+cb.dataset.idx])
-    .filter(c => c && c.phone);
-
-  if (!recipients.length) { toast('전화번호가 있는 수신자가 없습니다.'); return; }
-
-  const resDiv  = document.getElementById('sms-result');
-  const resList = document.getElementById('sms-result-list');
-  resDiv.style.display = '';
-  resList.innerHTML = '<div class="loading-row">발송 중…</div>';
-
-  const date = new Date().toISOString();
-  const salt = Math.random().toString(36).substring(2, 14);
-  const sig  = await hmacSha256Hex(apiSecret, date + salt);
-  const auth = `HMAC-SHA256 apiKey=${apiKey}, date=${date}, salt=${salt}, signature=${sig}`;
-
-  const messages = recipients.map(c => ({
-    to:   c.phone.replace(/-/g, ''),
-    from: fromNum.replace(/-/g, ''),
-    text: message,
-  }));
-
-  try {
-    const resp = await fetch('https://api.solapi.com/messages/v4/send-many', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': auth },
-      body: JSON.stringify({ messages }),
-    });
-    const result = await resp.json();
-
-    if (!resp.ok) {
-      resList.innerHTML = `<div class="empty-row" style="color:var(--red);">오류: ${result.message || resp.status}</div>`;
-      return;
-    }
-
-    const successCount = result.count?.success ?? result.groupInfo?.count?.total ?? recipients.length;
-    const failCount    = result.count?.fail    ?? 0;
-
-    resList.innerHTML = `
-      <div style="padding:0.6rem 0;font-size:0.85rem;">
-        <span style="color:#4caf50;">✓ 성공 ${successCount}건</span>
-        ${failCount ? `&nbsp;·&nbsp;<span style="color:var(--red);">✗ 실패 ${failCount}건</span>` : ''}
+  wrap.innerHTML = data.map(r => {
+    const ids = Array.isArray(r.member_ids) ? r.member_ids : [];
+    return `<div class="sms-history-item">
+      <div class="sms-history-msg">${r.message}</div>
+      <div class="sms-history-meta">
+        ${r.sent_at.slice(0,16).replace('T',' ')} &nbsp;·&nbsp;
+        ${r.sender} &nbsp;·&nbsp;
+        수신 ${ids.length}명: ${ids.slice(0,5).join(', ')}${ids.length > 5 ? ' …' : ''}
       </div>
-      <div style="font-size:0.72rem;color:var(--dust);line-height:1.9;">
-        ${recipients.map(c => `${c.member_name} (${c.phone})`).join('<br>')}
-      </div>`;
-
-    toast(`${successCount}명 발송 완료`);
-
-    await sb.from('sms_history').insert({
-      member_ids: recipients.map(c => c.member_id),
-      message,
-      sender: fromNum,
-    });
-
-  } catch(e) {
-    resList.innerHTML = `<div class="empty-row" style="color:var(--red);">네트워크 오류: ${e.message}</div>`;
-  }
+    </div>`;
+  }).join('');
 }
 
 // ── 농가 더보기/접기 ─────────────────────────────────────
@@ -1839,116 +1664,6 @@ async function deleteSupplier(id) {
   await sb.from('suppliers').update({ is_active: false }).eq('id', id);
   toast('삭제됨');
   loadSuppliers();
-}
-
-// ══ 서브탭 전환 ══
-function switchSubTab(key) {
-  ['suppliers', 'tele', 'order'].forEach(k => {
-    document.getElementById(`sub-${k}`).style.display = k === key ? '' : 'none';
-    const btn = document.getElementById(`stab-${k}`);
-    if (btn) {
-      btn.style.color = k === key ? 'var(--amber)' : 'var(--dust)';
-      btn.style.borderBottom = k === key ? '2px solid var(--amber)' : '2px solid transparent';
-    }
-  });
-  if (key === 'tele') loadTeleOrders();
-  if (key === 'order') loadSupplierDropdown();
-}
-
-// ══ 텔레발주 ══
-async function loadTeleOrders() {
-  const wrap = document.getElementById('tele-list');
-  wrap.innerHTML = '<div class="loading-row">로딩 중…</div>';
-  const { data, error } = await sb.from('staff_data')
-    .select('created_at, item_name, urgency, content')
-    .order('created_at', { ascending: false });
-  if (error || !data || data.length === 0) {
-    wrap.innerHTML = '<div class="empty-row">현장 요청 없음</div>';
-    return;
-  }
-  const urgencyColor = { '긴급': 'var(--red)', '보통': 'var(--amber)', '여유': 'var(--green-light)' };
-  wrap.innerHTML = data.map(r => {
-    const color = urgencyColor[r.urgency] || 'var(--dust)';
-    const dt = r.created_at ? new Date(r.created_at).toLocaleString('ko-KR', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }) : '';
-    return `<div style="padding:0.75rem 0;border-bottom:1px solid rgba(184,168,138,0.08);">
-      <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.3rem;">
-        <span style="font-size:0.85rem;color:var(--cream);">${r.item_name || '—'}</span>
-        <span style="font-size:0.72rem;color:${color};border:1px solid ${color};padding:0.1rem 0.45rem;border-radius:3px;">${r.urgency || ''}</span>
-        <span style="font-size:0.72rem;color:var(--dust);margin-left:auto;">${dt}</span>
-      </div>
-      <div style="font-size:0.8rem;color:var(--dust);">${r.content || ''}</div>
-    </div>`;
-  }).join('');
-}
-
-// ══ 발주하기 ══
-async function loadSupplierDropdown() {
-  const sel = document.getElementById('order-supplier-select');
-  sel.innerHTML = '<option value="">-- 발주처 선택 --</option>';
-  const { data } = await sb.from('suppliers').select('id, name, phone, email').eq('is_active', true).order('name');
-  if (!data) return;
-  data.forEach(s => {
-    const opt = document.createElement('option');
-    opt.value = s.id;
-    opt.textContent = s.name + (s.phone ? ' (' + s.phone + ')' : '');
-    opt.dataset.phone = s.phone || '';
-    opt.dataset.email = s.email || '';
-    sel.appendChild(opt);
-  });
-  sel.onchange = () => {
-    const opt = sel.options[sel.selectedIndex];
-    document.getElementById('order-supplier-phone').textContent = opt.dataset.phone ? '📞 ' + opt.dataset.phone : '';
-  };
-}
-
-async function sendOrderSms() {
-  const sel = document.getElementById('order-supplier-select');
-  const opt = sel.options[sel.selectedIndex];
-  if (!opt || !opt.value) { toast('발주처를 선택하세요.'); return; }
-  const phone = opt.dataset.phone;
-  if (!phone) { toast('선택한 발주처에 전화번호가 없습니다.'); return; }
-  const message = document.getElementById('order-message').value.trim();
-  if (!message) { toast('발주 내용을 입력하세요.'); return; }
-
-  const apiKey    = localStorage.getItem('solapi_key');
-  const apiSecret = localStorage.getItem('solapi_secret');
-  const fromNum   = localStorage.getItem('solapi_from') || '0427160019';
-  if (!apiKey || !apiSecret) { toast('⚙ 이음SMS 탭에서 Solapi API 설정을 먼저 저장하세요.'); return; }
-
-  const resultDiv = document.getElementById('order-result');
-  resultDiv.textContent = '발송 중…';
-
-  const date = new Date().toISOString();
-  const salt = Math.random().toString(36).substring(2, 14);
-  const sig  = await hmacSha256Hex(apiSecret, date + salt);
-  const auth = `HMAC-SHA256 apiKey=${apiKey}, date=${date}, salt=${salt}, signature=${sig}`;
-
-  try {
-    const resp = await fetch('https://api.solapi.com/messages/v4/send-many', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': auth },
-      body: JSON.stringify({ messages: [{ to: phone.replace(/-/g,''), from: fromNum.replace(/-/g,''), text: message }] }),
-    });
-    const result = await resp.json();
-    if (!resp.ok) { resultDiv.textContent = '오류: ' + (result.message || resp.status); return; }
-    toast('발주 문자 발송 완료');
-    resultDiv.textContent = '✓ 발송 완료';
-    await sb.from('sms_history').insert({ member_ids: [], message, sender: fromNum });
-  } catch(e) {
-    resultDiv.textContent = '네트워크 오류: ' + e.message;
-  }
-}
-
-function sendOrderEmail() {
-  const sel = document.getElementById('order-supplier-select');
-  const opt = sel.options[sel.selectedIndex];
-  if (!opt || !opt.value) { toast('발주처를 선택하세요.'); return; }
-  const email = opt.dataset.email;
-  if (!email) { toast('선택한 발주처에 이메일이 없습니다.'); return; }
-  const message = document.getElementById('order-message').value.trim();
-  const subject = encodeURIComponent('[품앗이생협] 발주 요청');
-  const body = encodeURIComponent(message);
-  window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
 }
 </script>
 </body>
