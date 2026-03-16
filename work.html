@@ -153,8 +153,10 @@
 
   /* Header */
   .sticky-nav {
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 100;
   }
 
@@ -170,20 +172,20 @@
   }
 
   .app-logo {
-    display: flex;
-    align-items: center;
-    white-space: nowrap;
     font-family: 'Noto Serif KR', serif;
     font-size: 0.85rem;
     font-weight: 700;
     color: var(--amber);
     letter-spacing: 0.1em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
   }
 
   .app-logo span {
     color: var(--dust);
     font-weight: 300;
-    margin-left: 0.5rem;
     font-size: 0.75rem;
     letter-spacing: 0.05em;
   }
@@ -249,6 +251,7 @@
   /* Content area */
   .tab-content {
     padding: 2rem;
+    padding-top: 112px;
     max-width: 1200px;
     margin: 0 auto;
     display: none;
@@ -357,14 +360,7 @@
     .tab-bar { padding: 0 0.5rem; overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .tab-btn { padding: 0.85rem 0.8rem; font-size: 0.8rem; flex-shrink: 0; }
     .sticky-nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
       width: 100%;
-    }
-    .tab-content {
-      padding-top: 108px;
     }
   }
 
@@ -577,7 +573,7 @@
     font-size: 0.88rem;
     line-height: 1.7;
     resize: vertical;
-    min-height: 160px;
+    min-height: 140px;
     outline: none;
     transition: border-color 0.3s;
   }
@@ -593,57 +589,30 @@
 
   .sms-char.over { color: var(--red); }
 
-  .member-tag-area {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    padding: 0.8rem;
-    background: rgba(15,11,7,0.5);
-    border: 1px solid rgba(196,128,58,0.15);
-    min-height: 60px;
-    margin-bottom: 0.8rem;
-  }
-
-  .member-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    background: rgba(196,128,58,0.15);
-    border: 1px solid rgba(196,128,58,0.3);
-    padding: 0.2rem 0.6rem;
-    font-size: 0.75rem;
-    color: var(--amber-light);
-  }
-
-  .member-tag button {
-    background: none;
-    border: none;
-    color: rgba(196,128,58,0.5);
-    cursor: pointer;
-    font-size: 0.8rem;
-    padding: 0;
-    line-height: 1;
-  }
-
-  .member-tag button:hover { color: var(--amber); }
-
-  .sms-history-item {
-    padding: 1rem;
-    border-bottom: 1px solid rgba(184,168,138,0.06);
-  }
-
-  .sms-history-msg {
-    font-size: 0.85rem;
+  #farmer-select {
+    width: 100%;
+    background: rgba(15,11,7,0.8);
+    border: 1px solid rgba(196,128,58,0.2);
     color: var(--cream);
-    line-height: 1.6;
-    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.85rem;
+    outline: none;
+    cursor: pointer;
   }
 
-  .sms-history-meta {
-    font-size: 0.68rem;
-    color: var(--dust);
-    letter-spacing: 0.05em;
+  #farmer-select option { background: #1a1510; }
+  #farmer-select option:checked { background: rgba(196,128,58,0.3); }
+
+  .customer-cb {
+    accent-color: var(--amber);
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    flex-shrink: 0;
   }
+
+  #sms-result-list { font-size: 0.82rem; }
 
   /* ── LOADING / EMPTY ────────────────────────────────── */
   .loading-row {
@@ -777,6 +746,44 @@
 
   .evt-content-text { flex: 1; font-size: 0.88rem; color: var(--cream); line-height: 1.4; }
   .evt-meta { font-size: 0.68rem; color: var(--dust); margin-top: 0.3rem; }
+
+  /* ── 서브탭 ────────────────────────────────────────── */
+  .subtab-bar { display:flex; gap:0.4rem; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:0.5rem; }
+  .subtab-btn { padding:0.4rem 1rem; border:none; background:transparent; color:var(--dust); cursor:pointer; border-radius:6px 6px 0 0; font-size:0.85rem; transition:all 0.2s; }
+  .subtab-btn.active { background:var(--amber); color:#fff; font-weight:600; }
+  .subtab-btn:hover:not(.active) { background:rgba(196,128,58,0.1); }
+
+  /* ── 프로젝트 섹션 ──────────────────────────────────── */
+  .proj-section { margin-bottom:1.2rem; }
+  .proj-section-header { padding:0.7rem 1rem; background:var(--surface); border-radius:8px; cursor:pointer; font-weight:600; font-size:0.9rem; color:var(--cream); display:flex; align-items:center; gap:0.6rem; }
+  .proj-section-header.active-header { background:rgba(196,128,58,0.15); border-left:3px solid var(--amber); }
+  .proj-list { padding:0.5rem 0; display:flex; flex-direction:column; gap:0.6rem; }
+  .proj-card { background:var(--surface); border-radius:8px; padding:1rem 1.2rem; display:flex; flex-direction:column; gap:0.4rem; border-left:3px solid transparent; cursor:pointer; transition:border-color 0.2s; }
+  .proj-card:hover { border-left-color:var(--amber); }
+  .proj-card-title { font-weight:600; color:var(--cream); font-size:0.95rem; }
+  .proj-card-desc { color:var(--dust); font-size:0.82rem; line-height:1.5; }
+  .proj-card-meta { font-size:0.75rem; color:rgba(184,168,138,0.5); display:flex; gap:1rem; flex-wrap:wrap; }
+  .proj-card-footer { display:flex; justify-content:space-between; align-items:center; margin-top:0.3rem; }
+
+  /* ── 배지 ──────────────────────────────────────────── */
+  .badge { background:rgba(184,168,138,0.2); color:var(--dust); padding:0.1rem 0.5rem; border-radius:20px; font-size:0.75rem; font-weight:600; }
+  .badge-active { background:rgba(196,128,58,0.25); color:var(--amber); }
+  .toggle-hint { font-size:0.72rem; color:var(--dust); margin-left:auto; }
+
+  /* ── 지원사업 카드 ──────────────────────────────────── */
+  .grant-card { background:var(--surface); border-radius:8px; padding:1rem 1.2rem; display:flex; flex-direction:column; gap:0.4rem; margin-bottom:0.6rem; }
+  .grant-card-title { font-weight:600; color:var(--cream); font-size:0.95rem; }
+  .grant-card-org { color:var(--amber); font-size:0.82rem; }
+  .grant-card-meta { font-size:0.78rem; color:var(--dust); display:flex; gap:1.2rem; flex-wrap:wrap; }
+  .grant-status-badge { padding:0.15rem 0.6rem; border-radius:20px; font-size:0.75rem; font-weight:600; }
+  .grant-info   { background:rgba(184,168,138,0.15); color:var(--dust); }
+  .grant-applying { background:rgba(196,128,58,0.25); color:var(--amber); }
+  .grant-completed { background:rgba(61,92,53,0.3); color:#8fba7a; }
+  .grant-failed { background:rgba(180,60,60,0.2); color:#e07070; }
+
+  /* ── AI 실시간 점등 ─────────────────────────────────── */
+  @keyframes pulse-green { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .realtime-on { background:#4ade80 !important; animation:pulse-green 2s infinite; }
 </style>
 </head>
 <body>
@@ -817,7 +824,10 @@
 
     <nav class="tab-bar">
       <button class="tab-btn active" onclick="switchTab('today')">오늘의경영</button>
-      <button class="tab-btn"       onclick="switchTab('action')">액션플랜</button>
+      <button class="tab-btn"       onclick="switchTab('action')">오늘할일</button>
+      <button class="tab-btn"       onclick="switchTab('project')">프로젝트관리</button>
+      <button class="tab-btn"       onclick="switchTab('grant')">지원사업</button>
+      <button class="tab-btn"       onclick="switchTab('ai')">AI경영지원실</button>
       <button class="tab-btn"       onclick="switchTab('sms')">이음SMS</button>
       <button class="tab-btn"       onclick="switchTab('event')">이벤트 등록</button>
       <button class="tab-btn" onclick="switchTab('suppliers')">발주처</button>
@@ -911,34 +921,62 @@
     <div class="sec-header">
       <div>
         <div class="sec-label">이음SMS</div>
-        <div class="sec-title">조합원 문자 발송</div>
+        <div class="sec-title">농가-단골 문자 발송</div>
       </div>
     </div>
 
     <div class="sms-layout">
-      <!-- 작성 -->
-      <div class="card sms-compose">
-        <div class="card-title">문자 작성</div>
-        <div style="margin-bottom:0.6rem;font-size:0.72rem;letter-spacing:0.1em;color:var(--dust);">수신 조합원 ID (쉼표 구분)</div>
-        <div class="member-tag-area" id="member-tag-area"></div>
-        <div style="display:flex;gap:0.5rem;margin-bottom:1rem;">
-          <input class="form-input" type="text" id="member-input" placeholder="M001, M002 …" style="flex:1;padding:0.55rem 0.8rem;font-size:0.82rem;">
-          <button class="btn-sm" onclick="addMemberTags()">추가</button>
+      <!-- 왼쪽: 농가 선택 + 단골 목록 -->
+      <div>
+        <!-- 농가 선택 -->
+        <div class="card" style="margin-bottom:1.5rem;">
+          <div class="card-title">1. 농가 선택</div>
+          <input type="text" id="farmer-search" class="form-input" placeholder="농가명 검색…" oninput="filterFarmers()" style="margin-bottom:0.7rem;padding:0.55rem 0.8rem;font-size:0.85rem;">
+          <select id="farmer-select" size="7">
+            <option value="">로딩 중…</option>
+          </select>
+          <button class="btn-primary" style="width:100%;margin-top:0.8rem;" onclick="loadTopCustomers()">단골 조회 ▶</button>
         </div>
-        <textarea id="sms-message" placeholder="발송할 문자 내용을 입력하세요 (최대 90자)." maxlength="90" oninput="updateCharCount()"></textarea>
-        <div class="sms-char" id="sms-char-count">0 / 90</div>
-        <div style="margin-top:1rem;">
-          <label class="form-label">발송자명</label>
-          <input class="form-input" type="text" id="sms-sender" value="품앗이생협" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+
+        <!-- 단골 체크리스트 -->
+        <div class="card" id="customer-card" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;">
+            <div class="card-title" style="margin:0;">2. 단골 선택</div>
+            <button class="btn-sm" onclick="toggleSelectAll()">전체선택/해제</button>
+          </div>
+          <div id="customer-list" style="max-height:380px;overflow-y:auto;"></div>
         </div>
-        <button class="btn-primary" style="width:100%;margin-top:1rem;" onclick="sendSms()">문자 발송 기록</button>
       </div>
 
-      <!-- 발송 이력 -->
-      <div class="card">
-        <div class="card-title">발송 이력</div>
-        <div id="sms-history-list">
-          <div class="loading-row">데이터 로딩 중…</div>
+      <!-- 오른쪽: 문자 작성 + 발송 -->
+      <div>
+        <div class="card sms-compose">
+          <div class="card-title">3. 문자 작성 및 발송</div>
+
+          <div style="font-size:0.7rem;letter-spacing:0.12em;color:var(--dust);margin-bottom:0.3rem;">선택 인원</div>
+          <div id="selected-count" style="font-size:1.1rem;color:var(--amber);font-weight:600;margin-bottom:1rem;">0명 선택</div>
+
+          <textarea id="sms-message" placeholder="안녕하세요! {농가명} 농산물이 입고되었습니다…" maxlength="90" oninput="updateCharCount()"></textarea>
+          <div class="sms-char" id="sms-char-count">0 / 90</div>
+
+          <!-- API 설정 (접이식) -->
+          <details style="margin-top:1rem;">
+            <summary style="font-size:0.72rem;letter-spacing:0.1em;color:var(--dust);cursor:pointer;padding:0.4rem 0;">⚙ Solapi API 설정</summary>
+            <div style="margin-top:0.6rem;display:flex;flex-direction:column;gap:0.5rem;">
+              <input class="form-input" type="password" id="solapi-key" placeholder="API Key" style="padding:0.5rem 0.8rem;font-size:0.82rem;">
+              <input class="form-input" type="password" id="solapi-secret" placeholder="API Secret" style="padding:0.5rem 0.8rem;font-size:0.82rem;">
+              <input class="form-input" type="text" id="solapi-from" placeholder="발신번호" value="0427160019" style="padding:0.5rem 0.8rem;font-size:0.82rem;">
+              <button class="btn-sm" onclick="saveApiConfig()" style="align-self:flex-start;">저장 (localStorage)</button>
+            </div>
+          </details>
+
+          <button class="btn-primary" style="width:100%;margin-top:1rem;" onclick="sendSms()">📨 발송</button>
+
+          <!-- 발송 결과 -->
+          <div id="sms-result" style="margin-top:1rem;display:none;">
+            <div class="card-title" style="margin-bottom:0.5rem;">발송 결과</div>
+            <div id="sms-result-list"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -988,48 +1026,253 @@
     </div>
   </section>
 
-  <!-- ══ TAB: 발주처 관리 ══ -->
+  <!-- ══ TAB: 발주 ══ -->
   <section class="tab-content" id="tab-suppliers">
     <div class="sec-header">
       <div>
-        <div class="sec-label">SUPPLIERS</div>
-        <div class="sec-title">발주처 관리</div>
-      </div>
-      <button class="btn-sm" onclick="showAddSupplier()">+ 추가</button>
-    </div>
-
-    <!-- 추가 폼 (기본 숨김) -->
-    <div class="card" id="supplier-add-form" style="display:none;margin-bottom:1.5rem;">
-      <div class="card-title">새 발주처</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
-        <div>
-          <label class="form-label">업체명 *</label>
-          <input class="form-input" id="sup-name" placeholder="업체명" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
-        </div>
-        <div>
-          <label class="form-label">전화번호</label>
-          <input class="form-input" id="sup-phone" placeholder="010-0000-0000" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
-        </div>
-        <div>
-          <label class="form-label">이메일</label>
-          <input class="form-input" id="sup-email" placeholder="example@email.com" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
-        </div>
-        <div>
-          <label class="form-label">메모</label>
-          <input class="form-input" id="sup-note" placeholder="담당자명 등" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
-        </div>
-      </div>
-      <div style="display:flex;gap:0.5rem;">
-        <button class="btn-primary" onclick="addSupplier()">저장</button>
-        <button class="btn-sm" onclick="hideAddSupplier()">취소</button>
+        <div class="sec-label">ORDER</div>
+        <div class="sec-title">발주</div>
       </div>
     </div>
 
-    <!-- 목록 -->
-    <div class="card">
-      <div id="supplier-list"><div class="loading-row">로딩 중…</div></div>
+    <!-- 서브탭 바 -->
+    <div style="display:flex;gap:0;border-bottom:1px solid rgba(196,128,58,0.25);margin-bottom:1.5rem;">
+      <button class="sub-tab-btn active" id="stab-suppliers" onclick="switchSubTab('suppliers')" style="background:none;border:none;color:var(--dust);font-size:0.8rem;letter-spacing:0.08em;padding:0.5rem 1rem;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;">발주처관리</button>
+      <button class="sub-tab-btn" id="stab-tele" onclick="switchSubTab('tele')" style="background:none;border:none;color:var(--dust);font-size:0.8rem;letter-spacing:0.08em;padding:0.5rem 1rem;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;">텔레발주</button>
+      <button class="sub-tab-btn" id="stab-order" onclick="switchSubTab('order')" style="background:none;border:none;color:var(--dust);font-size:0.8rem;letter-spacing:0.08em;padding:0.5rem 1rem;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;">발주하기</button>
+    </div>
+
+    <!-- ── 서브패널: 발주처관리 ── -->
+    <div id="sub-suppliers">
+      <div class="sec-header" style="margin-bottom:1rem;">
+        <div></div>
+        <button class="btn-sm" onclick="showAddSupplier()">+ 추가</button>
+      </div>
+
+      <!-- 추가 폼 (기본 숨김) -->
+      <div class="card" id="supplier-add-form" style="display:none;margin-bottom:1.5rem;">
+        <div class="card-title">새 발주처</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+          <div>
+            <label class="form-label">업체명 *</label>
+            <input class="form-input" id="sup-name" placeholder="업체명" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+          </div>
+          <div>
+            <label class="form-label">전화번호</label>
+            <input class="form-input" id="sup-phone" placeholder="010-0000-0000" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+          </div>
+          <div>
+            <label class="form-label">이메일</label>
+            <input class="form-input" id="sup-email" placeholder="example@email.com" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+          </div>
+          <div>
+            <label class="form-label">메모</label>
+            <input class="form-input" id="sup-note" placeholder="담당자명 등" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+          </div>
+        </div>
+        <div style="display:flex;gap:0.5rem;">
+          <button class="btn-primary" onclick="addSupplier()">저장</button>
+          <button class="btn-sm" onclick="hideAddSupplier()">취소</button>
+        </div>
+      </div>
+
+      <!-- 목록 -->
+      <div class="card">
+        <div id="supplier-list"><div class="loading-row">로딩 중…</div></div>
+      </div>
+    </div>
+
+    <!-- ── 서브패널: 텔레발주 ── -->
+    <div id="sub-tele" style="display:none;">
+      <div class="sec-header" style="margin-bottom:1rem;">
+        <div style="font-size:0.8rem;color:var(--dust);">현장 직원 발주 요청</div>
+        <button class="btn-sm" onclick="loadTeleOrders()">↻ 새로고침</button>
+      </div>
+      <div class="card">
+        <div id="tele-list"><div class="loading-row">로딩 중…</div></div>
+      </div>
+    </div>
+
+    <!-- ── 서브패널: 발주하기 ── -->
+    <div id="sub-order" style="display:none;">
+      <div class="card" style="margin-bottom:1rem;">
+        <div class="card-title" style="margin-bottom:0.8rem;">발주처 선택</div>
+        <select class="form-input" id="order-supplier-select" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+          <option value="">-- 발주처 선택 --</option>
+        </select>
+        <div id="order-supplier-phone" style="font-size:0.78rem;color:var(--dust);margin-top:0.4rem;"></div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="margin-bottom:0.8rem;">발주 내용</div>
+        <textarea class="form-input" id="order-message" rows="7" style="width:100%;padding:0.6rem 0.8rem;font-size:0.85rem;resize:vertical;">[품앗이소비자생활협동조합 발주 요청]
+
+안녕하세요. 품앗이소비자생활협동조합입니다.
+아래와 같이 발주 요청드립니다.
+
+품목:
+수량:
+납품일:
+
+감사합니다.</textarea>
+        <div style="display:flex;gap:0.5rem;margin-top:1rem;">
+          <button class="btn-primary" onclick="sendOrderSms()">📨 문자발송</button>
+          <button class="btn-sm" onclick="sendOrderEmail()">✉ 이메일발송</button>
+        </div>
+        <div id="order-result" style="margin-top:0.8rem;font-size:0.82rem;color:var(--dust);"></div>
+      </div>
     </div>
   </section>
+  <!-- ══ TAB: 프로젝트관리 ══════════════════════════════════ -->
+  <section class="tab-content" id="tab-project">
+    <div class="sec-header">
+      <div>
+        <div class="sec-label">프로젝트관리</div>
+        <div class="sec-title">프로젝트 현황</div>
+      </div>
+      <button class="btn-primary" onclick="openProjectModal('general')">+ 신규 등록</button>
+    </div>
+
+    <!-- 프로젝트 서브섹션 -->
+    <div class="proj-section">
+      <div class="proj-section-header" onclick="toggleProjSection('proj-idea')">
+        💡 신규구상 <span id="proj-idea-count" class="badge">0</span>
+        <span class="toggle-hint">(펼치기)</span>
+      </div>
+      <div id="proj-idea" class="proj-list" style="display:none;"></div>
+    </div>
+
+    <div class="proj-section">
+      <div class="proj-section-header active-header" onclick="toggleProjSection('proj-inprogress')">
+        🔧 진행중 <span id="proj-inprogress-count" class="badge badge-active">0</span>
+      </div>
+      <div id="proj-inprogress" class="proj-list"></div>
+    </div>
+
+    <div class="proj-section">
+      <div class="proj-section-header" onclick="toggleProjSection('proj-done')">
+        ✅ 완료 <span id="proj-done-count" class="badge">0</span>
+        <span class="toggle-hint">(펼치기)</span>
+      </div>
+      <div id="proj-done" class="proj-list" style="display:none;"></div>
+    </div>
+  </section>
+
+  <!-- ══ TAB: 지원사업 ════════════════════════════════════ -->
+  <section class="tab-content" id="tab-grant">
+    <div class="sec-header">
+      <div>
+        <div class="sec-label">지원사업</div>
+        <div class="sec-title">지원사업 관리</div>
+      </div>
+      <button class="btn-primary" onclick="openGrantModal()">+ 사업 등록</button>
+    </div>
+
+    <!-- 지원사업 서브탭 -->
+    <div class="subtab-bar">
+      <button class="subtab-btn active" onclick="switchGrantTab('info')">지원사업 정보</button>
+      <button class="subtab-btn" onclick="switchGrantTab('applying')">신청중인 사업</button>
+    </div>
+
+    <div id="grant-info-panel">
+      <div id="grant-info-list" class="card"><div class="loading-row">로딩 중…</div></div>
+    </div>
+    <div id="grant-applying-panel" style="display:none;">
+      <div id="grant-applying-list" class="card"><div class="loading-row">로딩 중…</div></div>
+    </div>
+  </section>
+
+  <!-- ══ TAB: AI경영지원실 ════════════════════════════════ -->
+  <section class="tab-content" id="tab-ai">
+    <div class="sec-header">
+      <div>
+        <div class="sec-label">AI경영지원실</div>
+        <div class="sec-title">AI 프로젝트 현황</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.8rem;">
+        <span id="ai-realtime-dot" style="width:8px;height:8px;border-radius:50%;background:#6b7280;display:inline-block;" title="실시간 연결 대기중"></span>
+        <button class="btn-primary" onclick="openProjectModal('ai')">+ 신규 등록</button>
+      </div>
+    </div>
+
+    <div class="proj-section">
+      <div class="proj-section-header" onclick="toggleProjSection('ai-idea')">
+        💡 신규구상 <span id="ai-idea-count" class="badge">0</span>
+        <span class="toggle-hint">(펼치기)</span>
+      </div>
+      <div id="ai-idea" class="proj-list" style="display:none;"></div>
+    </div>
+
+    <div class="proj-section">
+      <div class="proj-section-header active-header" onclick="toggleProjSection('ai-inprogress')">
+        🤖 진행중 <span id="ai-inprogress-count" class="badge badge-active">0</span>
+      </div>
+      <div id="ai-inprogress" class="proj-list"></div>
+    </div>
+
+    <div class="proj-section">
+      <div class="proj-section-header" onclick="toggleProjSection('ai-done')">
+        ✅ 완료 <span id="ai-done-count" class="badge">0</span>
+        <span class="toggle-hint">(펼치기)</span>
+      </div>
+      <div id="ai-done" class="proj-list" style="display:none;"></div>
+    </div>
+  </section>
+
+  <!-- 프로젝트 등록/수정 모달 -->
+  <div id="project-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999;align-items:center;justify-content:center;">
+    <div class="card" style="width:min(480px,90vw);padding:1.5rem;">
+      <div class="card-title" id="project-modal-title">프로젝트 등록</div>
+      <input type="hidden" id="proj-modal-id">
+      <input type="hidden" id="proj-modal-category">
+      <div style="display:flex;flex-direction:column;gap:0.8rem;margin-top:1rem;">
+        <input class="form-input" id="proj-title" placeholder="프로젝트명 *" style="padding:0.6rem 1rem;">
+        <textarea class="form-input" id="proj-desc" placeholder="설명" rows="3" style="padding:0.6rem 1rem;resize:vertical;"></textarea>
+        <select class="select-input" id="proj-status">
+          <option value="idea">💡 신규구상</option>
+          <option value="in_progress">🔧 진행중</option>
+          <option value="completed">✅ 완료</option>
+        </select>
+        <input class="form-input" id="proj-assigned" placeholder="담당자 (선택)" style="padding:0.6rem 1rem;">
+        <div style="display:flex;gap:0.5rem;">
+          <input class="date-input" type="date" id="proj-start" style="flex:1;" title="시작일">
+          <input class="date-input" type="date" id="proj-end" style="flex:1;" title="완료예정일">
+        </div>
+        <textarea class="form-input" id="proj-notes" placeholder="메모" rows="2" style="padding:0.6rem 1rem;resize:vertical;"></textarea>
+      </div>
+      <div style="display:flex;gap:0.6rem;margin-top:1.2rem;justify-content:flex-end;">
+        <button class="btn-sm" onclick="closeProjectModal()">취소</button>
+        <button class="btn-primary" onclick="saveProject()">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 지원사업 등록 모달 -->
+  <div id="grant-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999;align-items:center;justify-content:center;">
+    <div class="card" style="width:min(480px,90vw);padding:1.5rem;">
+      <div class="card-title" id="grant-modal-title">지원사업 등록</div>
+      <input type="hidden" id="grant-modal-id">
+      <div style="display:flex;flex-direction:column;gap:0.8rem;margin-top:1rem;">
+        <input class="form-input" id="grant-org" placeholder="지원기관 *" style="padding:0.6rem 1rem;">
+        <input class="form-input" id="grant-name" placeholder="과제명 *" style="padding:0.6rem 1rem;">
+        <input class="form-input" id="grant-schedule" placeholder="지원일정 (예: 2026-04 ~ 2026-05)" style="padding:0.6rem 1rem;">
+        <input class="form-input" id="grant-amount" placeholder="지원금액 (예: 최대 5천만원)" style="padding:0.6rem 1rem;">
+        <input class="form-input" id="grant-url" placeholder="사이트 URL" style="padding:0.6rem 1rem;">
+        <select class="select-input" id="grant-status">
+          <option value="info">📋 정보수집</option>
+          <option value="applying">📝 신청중</option>
+          <option value="completed">✅ 완료</option>
+          <option value="failed">❌ 미선정</option>
+        </select>
+        <textarea class="form-input" id="grant-notes" placeholder="메모" rows="2" style="padding:0.6rem 1rem;resize:vertical;"></textarea>
+      </div>
+      <div style="display:flex;gap:0.6rem;margin-top:1.2rem;justify-content:flex-end;">
+        <button class="btn-sm" onclick="closeGrantModal()">취소</button>
+        <button class="btn-primary" onclick="saveGrant()">저장</button>
+      </div>
+    </div>
+  </div>
+
+
 </div>
 
 <div id="toast"></div>
@@ -1091,6 +1334,7 @@ function switchTab(key) {
   document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
   document.getElementById(TAB_IDS[key]).classList.add('active');
   event.currentTarget.classList.add('active');
+  if (key === 'sms') loadFarmerList();
 }
 
 // ── 공통 유틸 ─────────────────────────────────────────────
@@ -1120,7 +1364,8 @@ function initApp() {
   loadActions();
 
   // SMS
-  loadSmsHistory();
+  loadFarmerList();
+  loadApiConfig();
 
   // 이벤트
   loadEvents();
@@ -1404,30 +1649,100 @@ function initMonthDropdown() {
 
 // ══ 이음SMS ════════════════════════════════════════════
 
-let memberIds = [];
+let allFarmerNames = [];
+let customerPool   = []; // [{member_id, member_name, purchase_count, phone}]
 
-function addMemberTags() {
-  const raw = document.getElementById('member-input').value;
-  const ids = raw.split(/[,\s]+/).map(s => s.trim()).filter(Boolean);
-  ids.forEach(id => { if (!memberIds.includes(id)) memberIds.push(id); });
-  document.getElementById('member-input').value = '';
-  renderMemberTags();
-}
-
-function renderMemberTags() {
-  const area = document.getElementById('member-tag-area');
-  if (memberIds.length === 0) {
-    area.innerHTML = '<span style="font-size:0.72rem;color:rgba(184,168,138,0.3);letter-spacing:0.1em;">수신자를 추가하세요</span>';
-    return;
+async function loadFarmerList() {
+  try {
+    const { data, error } = await sb.rpc('get_distinct_farmers');
+    if (error) throw error;
+    const farmers = [...new Set(data.map(r => r.farmer_name).filter(Boolean))].sort((a,b) => a.localeCompare(b,'ko'));
+    allFarmerNames = farmers;
+    renderFarmerSelect(farmers);
+  } catch(e) {
+    document.getElementById('farmer-select').innerHTML = '<option value="">로드 실패</option>';
+    console.error('loadFarmerList error:', e);
   }
-  area.innerHTML = memberIds.map(id =>
-    `<span class="member-tag">${id}<button onclick="removeMember('${id}')">✕</button></span>`
-  ).join('');
 }
 
-function removeMember(id) {
-  memberIds = memberIds.filter(m => m !== id);
-  renderMemberTags();
+function renderFarmerSelect(names) {
+  const sel = document.getElementById('farmer-select');
+  sel.innerHTML = names.length
+    ? names.map(n => `<option value="${n}">${n}</option>`).join('')
+    : '<option value="">농가 없음</option>';
+}
+
+function filterFarmers() {
+  const q = document.getElementById('farmer-search').value.trim().toLowerCase();
+  renderFarmerSelect(q ? allFarmerNames.filter(n => n.toLowerCase().includes(q)) : allFarmerNames);
+}
+
+async function loadTopCustomers() {
+  const farmerName = document.getElementById('farmer-select').value;
+  if (!farmerName) { toast('농가를 선택하세요.'); return; }
+
+  const card = document.getElementById('customer-card');
+  const list = document.getElementById('customer-list');
+  card.style.display = '';
+  list.innerHTML = '<div class="loading-row">조회 중…</div>';
+
+  try {
+    // 상위 300 단골 (3회 이상)
+    const { data: fm, error: e1 } = await sb
+      .from('farmer_members')
+      .select('member_id,member_name,purchase_count')
+      .eq('farmer_name', farmerName)
+      .gte('purchase_count', 3)
+      .order('purchase_count', { ascending: false })
+      .limit(300);
+    if (e1) throw e1;
+    if (!fm || !fm.length) { list.innerHTML = '<div class="empty-row">단골 없음</div>'; return; }
+
+    // 전화번호 조회
+    const memberIds = fm.map(r => r.member_id);
+    const { data: members, error: e2 } = await sb
+      .from('members')
+      .select('member_id,member_name,phone')
+      .in('member_id', memberIds);
+    if (e2) throw e2;
+    const phoneMap = Object.fromEntries((members || []).map(m => [m.member_id, m.phone || '']));
+
+    customerPool = fm.map(r => ({
+      member_id:      r.member_id,
+      member_name:    r.member_name || r.member_id,
+      purchase_count: r.purchase_count,
+      phone:          phoneMap[r.member_id] || '',
+    }));
+
+    renderCustomerList();
+  } catch(e) {
+    list.innerHTML = `<div class="empty-row">오류: ${e.message}</div>`;
+  }
+}
+
+function renderCustomerList() {
+  const list = document.getElementById('customer-list');
+  list.innerHTML = customerPool.map((c, i) => `
+    <label style="display:flex;align-items:center;gap:0.6rem;padding:0.5rem 0;border-bottom:1px solid rgba(184,168,138,0.06);cursor:pointer;">
+      <input type="checkbox" class="customer-cb" data-idx="${i}" checked onchange="updateSelectedCount()">
+      <span style="flex:1;font-size:0.83rem;color:var(--cream);">${c.member_name}</span>
+      <span style="font-size:0.72rem;color:var(--dust);min-width:32px;text-align:right;">${c.purchase_count}회</span>
+      <span style="font-size:0.72rem;color:var(--amber-light);min-width:105px;text-align:right;">${c.phone || '번호없음'}</span>
+    </label>
+  `).join('');
+  updateSelectedCount();
+}
+
+function toggleSelectAll() {
+  const cbs = [...document.querySelectorAll('.customer-cb')];
+  const allChecked = cbs.every(cb => cb.checked);
+  cbs.forEach(cb => { cb.checked = !allChecked; });
+  updateSelectedCount();
+}
+
+function updateSelectedCount() {
+  const n = document.querySelectorAll('.customer-cb:checked').length;
+  document.getElementById('selected-count').textContent = `${n}명 선택`;
 }
 
 function updateCharCount() {
@@ -1437,49 +1752,100 @@ function updateCharCount() {
   el.className = 'sms-char' + (msg.length >= 90 ? ' over' : '');
 }
 
-async function sendSms() {
-  const message = document.getElementById('sms-message').value.trim();
-  const sender  = document.getElementById('sms-sender').value.trim() || '품앗이생협';
-
-  if (!message)            { toast('문자 내용을 입력하세요.'); return; }
-  if (memberIds.length === 0) { toast('수신자를 추가하세요.'); return; }
-
-  const { error } = await sb.from('sms_history').insert({
-    member_ids: memberIds,
-    message,
-    sender,
-  });
-
-  if (error) { toast('저장 실패: ' + error.message); return; }
-
-  document.getElementById('sms-message').value = '';
-  memberIds = [];
-  renderMemberTags();
-  updateCharCount();
-  toast(`${memberIds.length || '다수'}명 발송 기록 저장됨`);
-  loadSmsHistory();
+function saveApiConfig() {
+  localStorage.setItem('solapi_key',    document.getElementById('solapi-key').value.trim());
+  localStorage.setItem('solapi_secret', document.getElementById('solapi-secret').value.trim());
+  localStorage.setItem('solapi_from',   document.getElementById('solapi-from').value.trim());
+  toast('API 설정 저장됨');
 }
 
-async function loadSmsHistory() {
-  const wrap = document.getElementById('sms-history-list');
-  const { data, error } = await sb.from('sms_history').select('*').order('sent_at', { ascending: false }).limit(30);
+function loadApiConfig() {
+  document.getElementById('solapi-key').value    = localStorage.getItem('solapi_key')    || '';
+  document.getElementById('solapi-secret').value = localStorage.getItem('solapi_secret') || '';
+  document.getElementById('solapi-from').value   = localStorage.getItem('solapi_from')   || '0427160019';
+}
 
-  if (error || !data || data.length === 0) {
-    wrap.innerHTML = '<div class="empty-row">발송 이력 없음</div>';
+async function hmacSha256Hex(secret, message) {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig  = await crypto.subtle.sign('HMAC', key, enc.encode(message));
+  return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function sendSms() {
+  const message = document.getElementById('sms-message').value.trim();
+  if (!message) { toast('문자 내용을 입력하세요.'); return; }
+
+  const checked = [...document.querySelectorAll('.customer-cb:checked')];
+  if (!checked.length) { toast('수신자를 선택하세요.'); return; }
+
+  const apiKey    = localStorage.getItem('solapi_key')    || document.getElementById('solapi-key').value.trim();
+  const apiSecret = localStorage.getItem('solapi_secret') || document.getElementById('solapi-secret').value.trim();
+  const fromNum   = localStorage.getItem('solapi_from')   || document.getElementById('solapi-from').value.trim();
+
+  if (!apiKey || !apiSecret || !fromNum) {
+    toast('⚙ Solapi API 설정을 먼저 입력·저장하세요.');
     return;
   }
 
-  wrap.innerHTML = data.map(r => {
-    const ids = Array.isArray(r.member_ids) ? r.member_ids : [];
-    return `<div class="sms-history-item">
-      <div class="sms-history-msg">${r.message}</div>
-      <div class="sms-history-meta">
-        ${r.sent_at.slice(0,16).replace('T',' ')} &nbsp;·&nbsp;
-        ${r.sender} &nbsp;·&nbsp;
-        수신 ${ids.length}명: ${ids.slice(0,5).join(', ')}${ids.length > 5 ? ' …' : ''}
+  const recipients = checked
+    .map(cb => customerPool[+cb.dataset.idx])
+    .filter(c => c && c.phone);
+
+  if (!recipients.length) { toast('전화번호가 있는 수신자가 없습니다.'); return; }
+
+  const resDiv  = document.getElementById('sms-result');
+  const resList = document.getElementById('sms-result-list');
+  resDiv.style.display = '';
+  resList.innerHTML = '<div class="loading-row">발송 중…</div>';
+
+  const date = new Date().toISOString();
+  const salt = Math.random().toString(36).substring(2, 14);
+  const sig  = await hmacSha256Hex(apiSecret, date + salt);
+  const auth = `HMAC-SHA256 apiKey=${apiKey}, date=${date}, salt=${salt}, signature=${sig}`;
+
+  const messages = recipients.map(c => ({
+    to:   c.phone.replace(/-/g, ''),
+    from: fromNum.replace(/-/g, ''),
+    text: message,
+  }));
+
+  try {
+    const resp = await fetch('https://api.solapi.com/messages/v4/send-many', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': auth },
+      body: JSON.stringify({ messages }),
+    });
+    const result = await resp.json();
+
+    if (!resp.ok) {
+      resList.innerHTML = `<div class="empty-row" style="color:var(--red);">오류: ${result.message || resp.status}</div>`;
+      return;
+    }
+
+    const successCount = result.count?.success ?? result.groupInfo?.count?.total ?? recipients.length;
+    const failCount    = result.count?.fail    ?? 0;
+
+    resList.innerHTML = `
+      <div style="padding:0.6rem 0;font-size:0.85rem;">
+        <span style="color:#4caf50;">✓ 성공 ${successCount}건</span>
+        ${failCount ? `&nbsp;·&nbsp;<span style="color:var(--red);">✗ 실패 ${failCount}건</span>` : ''}
       </div>
-    </div>`;
-  }).join('');
+      <div style="font-size:0.72rem;color:var(--dust);line-height:1.9;">
+        ${recipients.map(c => `${c.member_name} (${c.phone})`).join('<br>')}
+      </div>`;
+
+    toast(`${successCount}명 발송 완료`);
+
+    await sb.from('sms_history').insert({
+      member_ids: recipients.map(c => c.member_id),
+      message,
+      sender: fromNum,
+    });
+
+  } catch(e) {
+    resList.innerHTML = `<div class="empty-row" style="color:var(--red);">네트워크 오류: ${e.message}</div>`;
+  }
 }
 
 // ── 농가 더보기/접기 ─────────────────────────────────────
@@ -1665,6 +2031,355 @@ async function deleteSupplier(id) {
   toast('삭제됨');
   loadSuppliers();
 }
+
+// ══ 서브탭 전환 ══
+function switchSubTab(key) {
+  ['suppliers', 'tele', 'order'].forEach(k => {
+    document.getElementById(`sub-${k}`).style.display = k === key ? '' : 'none';
+    const btn = document.getElementById(`stab-${k}`);
+    if (btn) {
+      btn.style.color = k === key ? 'var(--amber)' : 'var(--dust)';
+      btn.style.borderBottom = k === key ? '2px solid var(--amber)' : '2px solid transparent';
+    }
+  });
+  if (key === 'tele') loadTeleOrders();
+  if (key === 'order') loadSupplierDropdown();
+}
+
+// ══ 텔레발주 ══
+async function loadTeleOrders() {
+  const wrap = document.getElementById('tele-list');
+  wrap.innerHTML = '<div class="loading-row">로딩 중…</div>';
+  const { data, error } = await sb.from('staff_data')
+    .select('created_at, item_name, urgency, content')
+    .order('created_at', { ascending: false });
+  if (error || !data || data.length === 0) {
+    wrap.innerHTML = '<div class="empty-row">현장 요청 없음</div>';
+    return;
+  }
+  const urgencyColor = { '긴급': 'var(--red)', '보통': 'var(--amber)', '여유': 'var(--green-light)' };
+  wrap.innerHTML = data.map(r => {
+    const color = urgencyColor[r.urgency] || 'var(--dust)';
+    const dt = r.created_at ? new Date(r.created_at).toLocaleString('ko-KR', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }) : '';
+    return `<div style="padding:0.75rem 0;border-bottom:1px solid rgba(184,168,138,0.08);">
+      <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.3rem;">
+        <span style="font-size:0.85rem;color:var(--cream);">${r.item_name || '—'}</span>
+        <span style="font-size:0.72rem;color:${color};border:1px solid ${color};padding:0.1rem 0.45rem;border-radius:3px;">${r.urgency || ''}</span>
+        <span style="font-size:0.72rem;color:var(--dust);margin-left:auto;">${dt}</span>
+      </div>
+      <div style="font-size:0.8rem;color:var(--dust);">${r.content || ''}</div>
+    </div>`;
+  }).join('');
+}
+
+// ══ 발주하기 ══
+async function loadSupplierDropdown() {
+  const sel = document.getElementById('order-supplier-select');
+  sel.innerHTML = '<option value="">-- 발주처 선택 --</option>';
+  const { data } = await sb.from('suppliers').select('id, name, phone, email').eq('is_active', true).order('name');
+  if (!data) return;
+  data.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.id;
+    opt.textContent = s.name + (s.phone ? ' (' + s.phone + ')' : '');
+    opt.dataset.phone = s.phone || '';
+    opt.dataset.email = s.email || '';
+    sel.appendChild(opt);
+  });
+  sel.onchange = () => {
+    const opt = sel.options[sel.selectedIndex];
+    document.getElementById('order-supplier-phone').textContent = opt.dataset.phone ? '📞 ' + opt.dataset.phone : '';
+  };
+}
+
+async function sendOrderSms() {
+  const sel = document.getElementById('order-supplier-select');
+  const opt = sel.options[sel.selectedIndex];
+  if (!opt || !opt.value) { toast('발주처를 선택하세요.'); return; }
+  const phone = opt.dataset.phone;
+  if (!phone) { toast('선택한 발주처에 전화번호가 없습니다.'); return; }
+  const message = document.getElementById('order-message').value.trim();
+  if (!message) { toast('발주 내용을 입력하세요.'); return; }
+
+  const apiKey    = localStorage.getItem('solapi_key');
+  const apiSecret = localStorage.getItem('solapi_secret');
+  const fromNum   = localStorage.getItem('solapi_from') || '0427160019';
+  if (!apiKey || !apiSecret) { toast('⚙ 이음SMS 탭에서 Solapi API 설정을 먼저 저장하세요.'); return; }
+
+  const resultDiv = document.getElementById('order-result');
+  resultDiv.textContent = '발송 중…';
+
+  const date = new Date().toISOString();
+  const salt = Math.random().toString(36).substring(2, 14);
+  const sig  = await hmacSha256Hex(apiSecret, date + salt);
+  const auth = `HMAC-SHA256 apiKey=${apiKey}, date=${date}, salt=${salt}, signature=${sig}`;
+
+  try {
+    const resp = await fetch('https://api.solapi.com/messages/v4/send-many', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': auth },
+      body: JSON.stringify({ messages: [{ to: phone.replace(/-/g,''), from: fromNum.replace(/-/g,''), text: message }] }),
+    });
+    const result = await resp.json();
+    if (!resp.ok) { resultDiv.textContent = '오류: ' + (result.message || resp.status); return; }
+    toast('발주 문자 발송 완료');
+    resultDiv.textContent = '✓ 발송 완료';
+    await sb.from('sms_history').insert({ member_ids: [], message, sender: fromNum });
+  } catch(e) {
+    resultDiv.textContent = '네트워크 오류: ' + e.message;
+  }
+}
+
+function sendOrderEmail() {
+  const sel = document.getElementById('order-supplier-select');
+  const opt = sel.options[sel.selectedIndex];
+  if (!opt || !opt.value) { toast('발주처를 선택하세요.'); return; }
+  const email = opt.dataset.email;
+  if (!email) { toast('선택한 발주처에 이메일이 없습니다.'); return; }
+  const message = document.getElementById('order-message').value.trim();
+  const subject = encodeURIComponent('[품앗이생협] 발주 요청');
+  const body = encodeURIComponent(message);
+  window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+}
+
+// ══ 패미 추가: 프로젝트관리 · 지원사업 · AI경영지원실 ══
+function renderProjCard(p, category) {
+  const statusIcon = { idea:'💡', in_progress:'🔧', completed:'✅' };
+  const assignedStr = p.assigned_to ? `<span>👤 ${p.assigned_to}</span>` : '';
+  const dateStr = p.start_date ? `<span>📅 ${p.start_date}${p.end_date ? ' ~ '+p.end_date : ''}</span>` : '';
+  return `<div class="proj-card" onclick="openProjectModal('${category}', ${JSON.stringify(p).replace(/"/g,'&quot;')})">
+    <div class="proj-card-title">${statusIcon[p.status]||''} ${p.title}</div>
+    ${p.description ? `<div class="proj-card-desc">${p.description}</div>` : ''}
+    <div class="proj-card-meta">${assignedStr}${dateStr}</div>
+    ${p.notes ? `<div class="proj-card-desc" style="font-size:0.78rem;border-top:1px solid var(--border);padding-top:0.4rem;margin-top:0.2rem;">📝 ${p.notes}</div>` : ''}
+  </div>`;
+}
+
+async function loadProjects(category) {
+  const prefix = category === 'ai' ? 'ai' : 'proj';
+  ['idea','inprogress','done'].forEach(s => {
+    const el = document.getElementById(`${prefix}-${s}`);
+    if (el) el.innerHTML = '<div class="loading-row">로딩 중…</div>';
+  });
+
+  const { data, error } = await sb.from('projects')
+    .select('*').eq('category', category)
+    .order('created_at', { ascending: false });
+
+  if (error) { toast('로딩 실패: ' + error.message); return; }
+  const items = data || [];
+
+  const idea       = items.filter(p => p.status === 'idea');
+  const inProgress = items.filter(p => p.status === 'in_progress');
+  const done       = items.filter(p => p.status === 'completed');
+
+  const setList = (id, arr) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = arr.length ? arr.map(p => renderProjCard(p, category)).join('') : '<div class="empty-row">항목 없음</div>';
+  };
+
+  setList(`${prefix}-idea`,       idea);
+  setList(`${prefix}-inprogress`, inProgress);
+  setList(`${prefix}-done`,       done);
+
+  const setBadge = (id, count) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = count;
+  };
+  setBadge(`${prefix}-idea-count`,       idea.length);
+  setBadge(`${prefix}-inprogress-count`, inProgress.length);
+  setBadge(`${prefix}-done-count`,       done.length);
+}
+
+function openProjectModal(category, proj) {
+  const modal = document.getElementById('project-modal');
+  document.getElementById('proj-modal-category').value = category;
+  document.getElementById('project-modal-title').textContent = proj ? '프로젝트 수정' : '프로젝트 등록';
+  if (proj) {
+    document.getElementById('proj-modal-id').value    = proj.id;
+    document.getElementById('proj-title').value       = proj.title || '';
+    document.getElementById('proj-desc').value        = proj.description || '';
+    document.getElementById('proj-status').value      = proj.status || 'idea';
+    document.getElementById('proj-assigned').value    = proj.assigned_to || '';
+    document.getElementById('proj-start').value       = proj.start_date || '';
+    document.getElementById('proj-end').value         = proj.end_date || '';
+    document.getElementById('proj-notes').value       = proj.notes || '';
+  } else {
+    ['proj-modal-id','proj-title','proj-desc','proj-assigned','proj-start','proj-end','proj-notes'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('proj-status').value = 'idea';
+  }
+  modal.style.display = 'flex';
+}
+
+function closeProjectModal() {
+  document.getElementById('project-modal').style.display = 'none';
+}
+
+async function saveProject() {
+  const title    = document.getElementById('proj-title').value.trim();
+  if (!title) { toast('프로젝트명을 입력하세요.'); return; }
+  const id       = document.getElementById('proj-modal-id').value;
+  const category = document.getElementById('proj-modal-category').value;
+  const payload  = {
+    title,
+    description: document.getElementById('proj-desc').value.trim() || null,
+    status:      document.getElementById('proj-status').value,
+    category,
+    assigned_to: document.getElementById('proj-assigned').value.trim() || null,
+    start_date:  document.getElementById('proj-start').value || null,
+    end_date:    document.getElementById('proj-end').value || null,
+    notes:       document.getElementById('proj-notes').value.trim() || null,
+  };
+  let error;
+  if (id) {
+    ({ error } = await sb.from('projects').update(payload).eq('id', id));
+  } else {
+    ({ error } = await sb.from('projects').insert(payload));
+  }
+  if (error) { toast('저장 실패: ' + error.message); return; }
+  toast(id ? '수정됨 ✓' : '등록됨 ✓');
+  closeProjectModal();
+  loadProjects(category);
+}
+
+// ══ 지원사업 ════════════════════════════════════════════
+
+let currentGrantTab = 'info';
+
+function switchGrantTab(tab) {
+  currentGrantTab = tab;
+  document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.subtab-btn[onclick="switchGrantTab('${tab}')"]`).classList.add('active');
+  document.getElementById('grant-info-panel').style.display    = tab === 'info'     ? '' : 'none';
+  document.getElementById('grant-applying-panel').style.display = tab === 'applying' ? '' : 'none';
+  loadGrants();
+}
+
+function renderGrantCard(g) {
+  const statusMap = { info:'📋 정보수집', applying:'📝 신청중', completed:'✅ 완료', failed:'❌ 미선정' };
+  const urlStr = g.site_url ? `<a href="${g.site_url}" target="_blank" style="color:var(--amber);font-size:0.8rem;">🔗 사이트</a>` : '';
+  return `<div class="grant-card" onclick="openGrantModal(${JSON.stringify(g).replace(/"/g,'&quot;')})">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+      <div class="grant-card-title">${g.project_name}</div>
+      <span class="grant-status-badge grant-${g.status}">${statusMap[g.status]||g.status}</span>
+    </div>
+    <div class="grant-card-org">🏢 ${g.org_name}</div>
+    <div class="grant-card-meta">
+      ${g.schedule ? `<span>📅 ${g.schedule}</span>` : ''}
+      ${g.amount   ? `<span>💰 ${g.amount}</span>`   : ''}
+      ${urlStr}
+    </div>
+    ${g.notes ? `<div style="font-size:0.78rem;color:var(--dust);border-top:1px solid var(--border);padding-top:0.4rem;margin-top:0.3rem;">📝 ${g.notes}</div>` : ''}
+  </div>`;
+}
+
+async function loadGrants() {
+  const isApplying = currentGrantTab === 'applying';
+  const listId     = isApplying ? 'grant-applying-list' : 'grant-info-list';
+  const wrap       = document.getElementById(listId);
+  if (!wrap) return;
+  wrap.innerHTML = '<div class="loading-row">로딩 중…</div>';
+
+  let query = sb.from('grants').select('*').order('created_at', { ascending: false });
+  if (isApplying) query = query.eq('status', 'applying');
+
+  const { data, error } = await query;
+  if (error) { wrap.innerHTML = '<div class="empty-row">로딩 실패</div>'; return; }
+  wrap.innerHTML = data && data.length
+    ? data.map(renderGrantCard).join('')
+    : '<div class="empty-row">등록된 지원사업 없음</div>';
+}
+
+function openGrantModal(grant) {
+  const modal = document.getElementById('grant-modal');
+  document.getElementById('grant-modal-title').textContent = grant ? '지원사업 수정' : '지원사업 등록';
+  if (grant) {
+    document.getElementById('grant-modal-id').value    = grant.id;
+    document.getElementById('grant-org').value         = grant.org_name || '';
+    document.getElementById('grant-name').value        = grant.project_name || '';
+    document.getElementById('grant-schedule').value    = grant.schedule || '';
+    document.getElementById('grant-amount').value      = grant.amount || '';
+    document.getElementById('grant-url').value         = grant.site_url || '';
+    document.getElementById('grant-status').value      = grant.status || 'info';
+    document.getElementById('grant-notes').value       = grant.notes || '';
+  } else {
+    ['grant-modal-id','grant-org','grant-name','grant-schedule','grant-amount','grant-url','grant-notes'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('grant-status').value = 'info';
+  }
+  modal.style.display = 'flex';
+}
+
+function closeGrantModal() {
+  document.getElementById('grant-modal').style.display = 'none';
+}
+
+async function saveGrant() {
+  const org  = document.getElementById('grant-org').value.trim();
+  const name = document.getElementById('grant-name').value.trim();
+  if (!org || !name) { toast('기관명과 과제명을 입력하세요.'); return; }
+  const id = document.getElementById('grant-modal-id').value;
+  const payload = {
+    org_name:     org,
+    project_name: name,
+    schedule:     document.getElementById('grant-schedule').value.trim() || null,
+    amount:       document.getElementById('grant-amount').value.trim() || null,
+    site_url:     document.getElementById('grant-url').value.trim() || null,
+    status:       document.getElementById('grant-status').value,
+    notes:        document.getElementById('grant-notes').value.trim() || null,
+  };
+  let error;
+  if (id) {
+    ({ error } = await sb.from('grants').update(payload).eq('id', id));
+  } else {
+    ({ error } = await sb.from('grants').insert(payload));
+  }
+  if (error) { toast('저장 실패: ' + error.message); return; }
+  toast(id ? '수정됨 ✓' : '등록됨 ✓');
+  closeGrantModal();
+  loadGrants();
+}
+
+// ══ AI 경영지원실 Realtime ══════════════════════════════
+
+let aiRealtimeChannel = null;
+
+function initAiRealtime() {
+  const dot = document.getElementById('ai-realtime-dot');
+  aiRealtimeChannel = sb.channel('ai-projects')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'projects', filter: 'category=eq.ai' },
+      () => { loadProjects('ai'); }
+    )
+    .subscribe(status => {
+      if (dot) {
+        if (status === 'SUBSCRIBED') {
+          dot.classList.add('realtime-on');
+          dot.title = '실시간 연결됨';
+        } else {
+          dot.classList.remove('realtime-on');
+          dot.title = '연결 대기중';
+        }
+      }
+    });
+}
+
+// ══ 탭 전환 시 데이터 로딩 연결 ══════════════════════════
+
+const origSwitchTab = switchTab;
+switchTab = function(tab) {
+  origSwitchTab(tab);
+  if (tab === 'project') loadProjects('general');
+  if (tab === 'grant')   loadGrants();
+  if (tab === 'ai') {
+    loadProjects('ai');
+    if (!aiRealtimeChannel) initAiRealtime();
+  }
+};
+
 </script>
 </body>
 </html>
