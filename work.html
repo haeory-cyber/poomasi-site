@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -21,8 +21,6 @@
     --red:   #b83a2a;
     --white: #faf7f0;
     --panel: rgba(30,21,16,0.85);
-    --surface: rgba(45,31,20,0.8);
-    --border: rgba(184,168,138,0.15);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -171,22 +169,25 @@
     justify-content: space-between;
     height: 56px;
     backdrop-filter: blur(8px);
-    position: relative;
   }
 
   .app-logo {
     font-family: 'Noto Serif KR', serif;
-    font-size: 1.05rem;
+    font-size: 0.85rem;
     font-weight: 700;
-    color: var(--cream);
-    letter-spacing: 0.15em;
+    color: var(--amber);
+    letter-spacing: 0.1em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     white-space: nowrap;
-    text-shadow: 0 0 20px rgba(196,128,58,0.4);
-    text-align: center;
   }
 
   .app-logo span {
-    color: var(--amber);
+    color: var(--dust);
+    font-weight: 300;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
   }
 
   .header-right {
@@ -455,6 +456,54 @@
   }
 
   .btn-primary:hover { background: var(--amber-light); }
+
+  /* ── 서브탭 ────────────────────────────────────────── */
+  .subtab-bar { display:flex; gap:0.4rem; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:0.5rem; }
+  .subtab-btn { padding:0.4rem 1rem; border:none; background:transparent; color:var(--dust); cursor:pointer; border-radius:6px 6px 0 0; font-size:0.85rem; transition:all 0.2s; }
+  .subtab-btn.active { background:var(--amber); color:#fff; font-weight:600; }
+  .subtab-btn:hover:not(.active) { background:rgba(196,128,58,0.1); }
+
+  /* ── 프로젝트 섹션 ──────────────────────────────────── */
+  .proj-section { margin-bottom:1.2rem; }
+  .proj-section-header { padding:0.7rem 1rem; background:var(--surface); border-radius:8px; cursor:pointer; font-weight:600; font-size:0.9rem; color:var(--cream); display:flex; align-items:center; gap:0.6rem; }
+  .proj-section-header.active-header { background:rgba(196,128,58,0.15); border-left:3px solid var(--amber); }
+  .proj-list { padding:0.5rem 0; display:flex; flex-direction:column; gap:0.6rem; }
+  .proj-card { background:var(--surface); border-radius:8px; padding:1rem 1.2rem; display:flex; flex-direction:column; gap:0.4rem; border-left:3px solid transparent; cursor:pointer; transition:border-color 0.2s; }
+  .proj-card:hover { border-left-color:var(--amber); }
+  .proj-card-title { font-weight:600; color:var(--cream); font-size:0.95rem; }
+  .proj-card-desc { color:var(--dust); font-size:0.82rem; line-height:1.5; }
+  .proj-card-meta { font-size:0.75rem; color:rgba(184,168,138,0.5); display:flex; gap:1rem; flex-wrap:wrap; }
+  .proj-card-footer { display:flex; justify-content:space-between; align-items:center; margin-top:0.3rem; }
+
+  /* ── 배지 ──────────────────────────────────────────── */
+  .badge { background:rgba(184,168,138,0.2); color:var(--dust); padding:0.1rem 0.5rem; border-radius:20px; font-size:0.75rem; font-weight:600; }
+  .badge-active { background:rgba(196,128,58,0.25); color:var(--amber); }
+  .toggle-hint { font-size:0.72rem; color:var(--dust); margin-left:auto; }
+
+  /* ── 지원사업 카드 ──────────────────────────────────── */
+  .grant-card { background:var(--surface); border-radius:8px; padding:1rem 1.2rem; display:flex; flex-direction:column; gap:0.4rem; margin-bottom:0.6rem; }
+  .grant-card-title { font-weight:600; color:var(--cream); font-size:0.95rem; }
+  .grant-card-org { color:var(--amber); font-size:0.82rem; }
+  .grant-card-meta { font-size:0.78rem; color:var(--dust); display:flex; gap:1.2rem; flex-wrap:wrap; }
+  .grant-status-badge { padding:0.15rem 0.6rem; border-radius:20px; font-size:0.75rem; font-weight:600; }
+  .grant-info   { background:rgba(184,168,138,0.15); color:var(--dust); }
+  .grant-applying { background:rgba(196,128,58,0.25); color:var(--amber); }
+  .grant-completed { background:rgba(61,92,53,0.3); color:#8fba7a; }
+  .grant-failed { background:rgba(180,60,60,0.2); color:#e07070; }
+
+  /* ── bizinfo AI 공고 카드 ───────────────────────────── */
+  .bizinfo-section { margin-top:1.2rem; }
+  .bizinfo-section-header { font-size:0.78rem; color:var(--dust); font-weight:600; letter-spacing:0.05em; text-transform:uppercase; margin-bottom:0.6rem; display:flex; align-items:center; gap:0.5rem; }
+  .bizinfo-card { background:rgba(61,56,48,0.5); border:1px solid var(--border); border-radius:8px; padding:0.75rem 1rem; display:flex; flex-direction:column; gap:0.3rem; margin-bottom:0.5rem; }
+  .bizinfo-card-title { font-size:0.88rem; color:var(--cream); line-height:1.4; }
+  .bizinfo-card-meta { font-size:0.76rem; color:var(--dust); display:flex; gap:1rem; flex-wrap:wrap; align-items:center; }
+  .bizinfo-card-org { color:var(--amber); }
+  .bizinfo-add-btn { margin-left:auto; padding:0.2rem 0.6rem; font-size:0.72rem; background:rgba(196,128,58,0.2); color:var(--amber); border:1px solid rgba(196,128,58,0.4); border-radius:4px; cursor:pointer; white-space:nowrap; }
+  .bizinfo-add-btn:hover { background:rgba(196,128,58,0.35); }
+
+  /* ── AI 실시간 점등 ─────────────────────────────────── */
+  @keyframes pulse-green { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .realtime-on { background:#4ade80 !important; animation:pulse-green 2s infinite; }
 
   /* ── 액션플랜 ──────────────────────────────────────── */
   .action-form {
@@ -745,44 +794,6 @@
 
   .evt-content-text { flex: 1; font-size: 0.88rem; color: var(--cream); line-height: 1.4; }
   .evt-meta { font-size: 0.68rem; color: var(--dust); margin-top: 0.3rem; }
-
-  /* ── 서브탭 ────────────────────────────────────────── */
-  .subtab-bar { display:flex; gap:0.4rem; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:0.5rem; }
-  .subtab-btn { padding:0.4rem 1rem; border:none; background:transparent; color:var(--dust); cursor:pointer; border-radius:6px 6px 0 0; font-size:0.85rem; transition:all 0.2s; }
-  .subtab-btn.active { background:var(--amber); color:#fff; font-weight:600; }
-  .subtab-btn:hover:not(.active) { background:rgba(196,128,58,0.1); }
-
-  /* ── 프로젝트 섹션 ──────────────────────────────────── */
-  .proj-section { margin-bottom:1.2rem; }
-  .proj-section-header { padding:0.7rem 1rem; background:var(--surface); border-radius:8px; cursor:pointer; font-weight:600; font-size:0.9rem; color:var(--cream); display:flex; align-items:center; gap:0.6rem; }
-  .proj-section-header.active-header { background:rgba(196,128,58,0.15); border-left:3px solid var(--amber); }
-  .proj-list { padding:0.5rem 0; display:flex; flex-direction:column; gap:0.6rem; }
-  .proj-card { background:var(--surface); border-radius:8px; padding:1rem 1.2rem; display:flex; flex-direction:column; gap:0.4rem; border-left:3px solid transparent; cursor:pointer; transition:border-color 0.2s; }
-  .proj-card:hover { border-left-color:var(--amber); }
-  .proj-card-title { font-weight:600; color:var(--cream); font-size:0.95rem; }
-  .proj-card-desc { color:var(--dust); font-size:0.82rem; line-height:1.5; }
-  .proj-card-meta { font-size:0.75rem; color:rgba(184,168,138,0.5); display:flex; gap:1rem; flex-wrap:wrap; }
-  .proj-card-footer { display:flex; justify-content:space-between; align-items:center; margin-top:0.3rem; }
-
-  /* ── 배지 ──────────────────────────────────────────── */
-  .badge { background:rgba(184,168,138,0.2); color:var(--dust); padding:0.1rem 0.5rem; border-radius:20px; font-size:0.75rem; font-weight:600; }
-  .badge-active { background:rgba(196,128,58,0.25); color:var(--amber); }
-  .toggle-hint { font-size:0.72rem; color:var(--dust); margin-left:auto; }
-
-  /* ── 지원사업 카드 ──────────────────────────────────── */
-  .grant-card { background:var(--surface); border-radius:8px; padding:1rem 1.2rem; display:flex; flex-direction:column; gap:0.4rem; margin-bottom:0.6rem; }
-  .grant-card-title { font-weight:600; color:var(--cream); font-size:0.95rem; }
-  .grant-card-org { color:var(--amber); font-size:0.82rem; }
-  .grant-card-meta { font-size:0.78rem; color:var(--dust); display:flex; gap:1.2rem; flex-wrap:wrap; }
-  .grant-status-badge { padding:0.15rem 0.6rem; border-radius:20px; font-size:0.75rem; font-weight:600; }
-  .grant-info   { background:rgba(184,168,138,0.15); color:var(--dust); }
-  .grant-applying { background:rgba(196,128,58,0.25); color:var(--amber); }
-  .grant-completed { background:rgba(61,92,53,0.3); color:#8fba7a; }
-  .grant-failed { background:rgba(180,60,60,0.2); color:#e07070; }
-
-  /* ── AI 실시간 점등 ─────────────────────────────────── */
-  @keyframes pulse-green { 0%,100%{opacity:1} 50%{opacity:0.4} }
-  .realtime-on { background:#4ade80 !important; animation:pulse-green 2s infinite; }
 </style>
 </head>
 <body>
@@ -814,9 +825,8 @@
 <div id="app">
   <div class="sticky-nav">
     <header class="app-header">
-      <div style="flex:1;"></div>
-      <div class="app-logo"><span>품앗이생협</span> 경영판</div>
-      <div class="header-right" style="flex:1;justify-content:flex-end;">
+      <div class="app-logo">시다워크<span>품앗이생협 경영판</span></div>
+      <div class="header-right">
         <span class="user-badge" id="user-email"></span>
         <button class="btn-logout" onclick="doLogout()">로그아웃</button>
       </div>
@@ -830,7 +840,7 @@
       <button class="tab-btn"       onclick="switchTab('ai')">AI경영지원실</button>
       <button class="tab-btn"       onclick="switchTab('sms')">이음SMS</button>
       <button class="tab-btn"       onclick="switchTab('event')">이벤트 등록</button>
-      <button class="tab-btn" onclick="switchTab('suppliers')">발주처</button>
+      <button class="tab-btn"       onclick="switchTab('suppliers')">발주처</button>
     </nav>
   </div>
 
@@ -915,6 +925,164 @@
       <div class="loading-row">요약 로딩 중…</div>
     </div>
   </section>
+
+  <!-- ══ TAB: 프로젝트관리 ══════════════════════════════════ -->
+  <section class="tab-content" id="tab-project">
+    <div class="sec-header">
+      <div>
+        <div class="sec-label">프로젝트관리</div>
+        <div class="sec-title">프로젝트 현황</div>
+      </div>
+      <button class="btn-primary" onclick="openProjectModal('general')">+ 신규 등록</button>
+    </div>
+
+    <!-- 프로젝트 서브섹션 -->
+    <div class="proj-section">
+      <div class="proj-section-header" onclick="toggleProjSection('proj-idea')">
+        💡 신규구상 <span id="proj-idea-count" class="badge">0</span>
+        <span class="toggle-hint">(펼치기)</span>
+      </div>
+      <div id="proj-idea" class="proj-list" style="display:none;"></div>
+    </div>
+
+    <div class="proj-section">
+      <div class="proj-section-header active-header" onclick="toggleProjSection('proj-inprogress')">
+        🔧 진행중 <span id="proj-inprogress-count" class="badge badge-active">0</span>
+      </div>
+      <div id="proj-inprogress" class="proj-list"></div>
+    </div>
+
+    <div class="proj-section">
+      <div class="proj-section-header" onclick="toggleProjSection('proj-done')">
+        ✅ 완료 <span id="proj-done-count" class="badge">0</span>
+        <span class="toggle-hint">(펼치기)</span>
+      </div>
+      <div id="proj-done" class="proj-list" style="display:none;"></div>
+    </div>
+  </section>
+
+  <!-- ══ TAB: 지원사업 ════════════════════════════════════ -->
+  <section class="tab-content" id="tab-grant">
+    <div class="sec-header">
+      <div>
+        <div class="sec-label">지원사업</div>
+        <div class="sec-title">지원사업 관리</div>
+      </div>
+      <button class="btn-primary" onclick="openGrantModal()">+ 사업 등록</button>
+    </div>
+
+    <!-- 지원사업 서브탭 -->
+    <div class="subtab-bar">
+      <button class="subtab-btn active" onclick="switchGrantTab('info')">지원사업 정보</button>
+      <button class="subtab-btn" onclick="switchGrantTab('applying')">신청중인 사업</button>
+    </div>
+
+    <div id="grant-info-panel">
+      <div id="grant-info-list" class="card"><div class="loading-row">로딩 중…</div></div>
+
+      <!-- AI 조사 공고 섹션 -->
+      <div class="bizinfo-section">
+        <div class="bizinfo-section-header">
+          🤖 AI 조사 공고 <span id="bizinfo-fetched-at" style="font-weight:400;color:var(--dust);font-size:0.72rem;"></span>
+        </div>
+        <div id="bizinfo-grants-list"><div class="loading-row">로딩 중…</div></div>
+      </div>
+    </div>
+    <div id="grant-applying-panel" style="display:none;">
+      <div id="grant-applying-list" class="card"><div class="loading-row">로딩 중…</div></div>
+    </div>
+  </section>
+
+  <!-- ══ TAB: AI경영지원실 ════════════════════════════════ -->
+  <section class="tab-content" id="tab-ai">
+    <div class="sec-header">
+      <div>
+        <div class="sec-label">AI경영지원실</div>
+        <div class="sec-title">AI 프로젝트 현황</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.8rem;">
+        <span id="ai-realtime-dot" style="width:8px;height:8px;border-radius:50%;background:#6b7280;display:inline-block;" title="실시간 연결 대기중"></span>
+        <button class="btn-primary" onclick="openProjectModal('ai')">+ 신규 등록</button>
+      </div>
+    </div>
+
+    <div class="proj-section">
+      <div class="proj-section-header" onclick="toggleProjSection('ai-idea')">
+        💡 신규구상 <span id="ai-idea-count" class="badge">0</span>
+        <span class="toggle-hint">(펼치기)</span>
+      </div>
+      <div id="ai-idea" class="proj-list" style="display:none;"></div>
+    </div>
+
+    <div class="proj-section">
+      <div class="proj-section-header active-header" onclick="toggleProjSection('ai-inprogress')">
+        🤖 진행중 <span id="ai-inprogress-count" class="badge badge-active">0</span>
+      </div>
+      <div id="ai-inprogress" class="proj-list"></div>
+    </div>
+
+    <div class="proj-section">
+      <div class="proj-section-header" onclick="toggleProjSection('ai-done')">
+        ✅ 완료 <span id="ai-done-count" class="badge">0</span>
+        <span class="toggle-hint">(펼치기)</span>
+      </div>
+      <div id="ai-done" class="proj-list" style="display:none;"></div>
+    </div>
+  </section>
+
+  <!-- 프로젝트 등록/수정 모달 -->
+  <div id="project-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999;align-items:center;justify-content:center;">
+    <div class="card" style="width:min(480px,90vw);padding:1.5rem;">
+      <div class="card-title" id="project-modal-title">프로젝트 등록</div>
+      <input type="hidden" id="proj-modal-id">
+      <input type="hidden" id="proj-modal-category">
+      <div style="display:flex;flex-direction:column;gap:0.8rem;margin-top:1rem;">
+        <input class="form-input" id="proj-title" placeholder="프로젝트명 *" style="padding:0.6rem 1rem;">
+        <textarea class="form-input" id="proj-desc" placeholder="설명" rows="3" style="padding:0.6rem 1rem;resize:vertical;"></textarea>
+        <select class="select-input" id="proj-status">
+          <option value="idea">💡 신규구상</option>
+          <option value="in_progress">🔧 진행중</option>
+          <option value="completed">✅ 완료</option>
+        </select>
+        <input class="form-input" id="proj-assigned" placeholder="담당자 (선택)" style="padding:0.6rem 1rem;">
+        <div style="display:flex;gap:0.5rem;">
+          <input class="date-input" type="date" id="proj-start" style="flex:1;" title="시작일">
+          <input class="date-input" type="date" id="proj-end" style="flex:1;" title="완료예정일">
+        </div>
+        <textarea class="form-input" id="proj-notes" placeholder="메모" rows="2" style="padding:0.6rem 1rem;resize:vertical;"></textarea>
+      </div>
+      <div style="display:flex;gap:0.6rem;margin-top:1.2rem;justify-content:flex-end;">
+        <button class="btn-sm" onclick="closeProjectModal()">취소</button>
+        <button class="btn-primary" onclick="saveProject()">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 지원사업 등록 모달 -->
+  <div id="grant-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999;align-items:center;justify-content:center;">
+    <div class="card" style="width:min(480px,90vw);padding:1.5rem;">
+      <div class="card-title" id="grant-modal-title">지원사업 등록</div>
+      <input type="hidden" id="grant-modal-id">
+      <div style="display:flex;flex-direction:column;gap:0.8rem;margin-top:1rem;">
+        <input class="form-input" id="grant-org" placeholder="지원기관 *" style="padding:0.6rem 1rem;">
+        <input class="form-input" id="grant-name" placeholder="과제명 *" style="padding:0.6rem 1rem;">
+        <input class="form-input" id="grant-schedule" placeholder="지원일정 (예: 2026-04 ~ 2026-05)" style="padding:0.6rem 1rem;">
+        <input class="form-input" id="grant-amount" placeholder="지원금액 (예: 최대 5천만원)" style="padding:0.6rem 1rem;">
+        <input class="form-input" id="grant-url" placeholder="사이트 URL" style="padding:0.6rem 1rem;">
+        <select class="select-input" id="grant-status">
+          <option value="info">📋 정보수집</option>
+          <option value="applying">📝 신청중</option>
+          <option value="completed">✅ 완료</option>
+          <option value="failed">❌ 미선정</option>
+        </select>
+        <textarea class="form-input" id="grant-notes" placeholder="메모" rows="2" style="padding:0.6rem 1rem;resize:vertical;"></textarea>
+      </div>
+      <div style="display:flex;gap:0.6rem;margin-top:1.2rem;justify-content:flex-end;">
+        <button class="btn-sm" onclick="closeGrantModal()">취소</button>
+        <button class="btn-primary" onclick="saveGrant()">저장</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ══ TAB: 이음SMS ═════════════════════════════════════ -->
   <section class="tab-content" id="tab-sms">
@@ -1026,253 +1194,48 @@
     </div>
   </section>
 
-  <!-- ══ TAB: 발주 ══ -->
+  <!-- ══ TAB: 발주처 관리 ══ -->
   <section class="tab-content" id="tab-suppliers">
     <div class="sec-header">
       <div>
-        <div class="sec-label">ORDER</div>
-        <div class="sec-title">발주</div>
+        <div class="sec-label">SUPPLIERS</div>
+        <div class="sec-title">발주처 관리</div>
       </div>
+      <button class="btn-sm" onclick="showAddSupplier()">+ 추가</button>
     </div>
 
-    <!-- 서브탭 바 -->
-    <div style="display:flex;gap:0;border-bottom:1px solid rgba(196,128,58,0.25);margin-bottom:1.5rem;">
-      <button class="sub-tab-btn active" id="stab-suppliers" onclick="switchSubTab('suppliers')" style="background:none;border:none;color:var(--dust);font-size:0.8rem;letter-spacing:0.08em;padding:0.5rem 1rem;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;">발주처관리</button>
-      <button class="sub-tab-btn" id="stab-tele" onclick="switchSubTab('tele')" style="background:none;border:none;color:var(--dust);font-size:0.8rem;letter-spacing:0.08em;padding:0.5rem 1rem;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;">텔레발주</button>
-      <button class="sub-tab-btn" id="stab-order" onclick="switchSubTab('order')" style="background:none;border:none;color:var(--dust);font-size:0.8rem;letter-spacing:0.08em;padding:0.5rem 1rem;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;">발주하기</button>
-    </div>
-
-    <!-- ── 서브패널: 발주처관리 ── -->
-    <div id="sub-suppliers">
-      <div class="sec-header" style="margin-bottom:1rem;">
-        <div></div>
-        <button class="btn-sm" onclick="showAddSupplier()">+ 추가</button>
-      </div>
-
-      <!-- 추가 폼 (기본 숨김) -->
-      <div class="card" id="supplier-add-form" style="display:none;margin-bottom:1.5rem;">
-        <div class="card-title">새 발주처</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
-          <div>
-            <label class="form-label">업체명 *</label>
-            <input class="form-input" id="sup-name" placeholder="업체명" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
-          </div>
-          <div>
-            <label class="form-label">전화번호</label>
-            <input class="form-input" id="sup-phone" placeholder="010-0000-0000" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
-          </div>
-          <div>
-            <label class="form-label">이메일</label>
-            <input class="form-input" id="sup-email" placeholder="example@email.com" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
-          </div>
-          <div>
-            <label class="form-label">메모</label>
-            <input class="form-input" id="sup-note" placeholder="담당자명 등" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
-          </div>
+    <!-- 추가 폼 (기본 숨김) -->
+    <div class="card" id="supplier-add-form" style="display:none;margin-bottom:1.5rem;">
+      <div class="card-title">새 발주처</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+        <div>
+          <label class="form-label">업체명 *</label>
+          <input class="form-input" id="sup-name" placeholder="업체명" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
         </div>
-        <div style="display:flex;gap:0.5rem;">
-          <button class="btn-primary" onclick="addSupplier()">저장</button>
-          <button class="btn-sm" onclick="hideAddSupplier()">취소</button>
+        <div>
+          <label class="form-label">전화번호</label>
+          <input class="form-input" id="sup-phone" placeholder="010-0000-0000" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+        </div>
+        <div>
+          <label class="form-label">이메일</label>
+          <input class="form-input" id="sup-email" placeholder="example@email.com" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+        </div>
+        <div>
+          <label class="form-label">메모</label>
+          <input class="form-input" id="sup-note" placeholder="담당자명 등" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
         </div>
       </div>
-
-      <!-- 목록 -->
-      <div class="card">
-        <div id="supplier-list"><div class="loading-row">로딩 중…</div></div>
+      <div style="display:flex;gap:0.5rem;">
+        <button class="btn-primary" onclick="addSupplier()">저장</button>
+        <button class="btn-sm" onclick="hideAddSupplier()">취소</button>
       </div>
     </div>
 
-    <!-- ── 서브패널: 텔레발주 ── -->
-    <div id="sub-tele" style="display:none;">
-      <div class="sec-header" style="margin-bottom:1rem;">
-        <div style="font-size:0.8rem;color:var(--dust);">현장 직원 발주 요청</div>
-        <button class="btn-sm" onclick="loadTeleOrders()">↻ 새로고침</button>
-      </div>
-      <div class="card">
-        <div id="tele-list"><div class="loading-row">로딩 중…</div></div>
-      </div>
-    </div>
-
-    <!-- ── 서브패널: 발주하기 ── -->
-    <div id="sub-order" style="display:none;">
-      <div class="card" style="margin-bottom:1rem;">
-        <div class="card-title" style="margin-bottom:0.8rem;">발주처 선택</div>
-        <select class="form-input" id="order-supplier-select" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
-          <option value="">-- 발주처 선택 --</option>
-        </select>
-        <div id="order-supplier-phone" style="font-size:0.78rem;color:var(--dust);margin-top:0.4rem;"></div>
-      </div>
-      <div class="card">
-        <div class="card-title" style="margin-bottom:0.8rem;">발주 내용</div>
-        <textarea class="form-input" id="order-message" rows="7" style="width:100%;padding:0.6rem 0.8rem;font-size:0.85rem;resize:vertical;">[품앗이소비자생활협동조합 발주 요청]
-
-안녕하세요. 품앗이소비자생활협동조합입니다.
-아래와 같이 발주 요청드립니다.
-
-품목:
-수량:
-납품일:
-
-감사합니다.</textarea>
-        <div style="display:flex;gap:0.5rem;margin-top:1rem;">
-          <button class="btn-primary" onclick="sendOrderSms()">📨 문자발송</button>
-          <button class="btn-sm" onclick="sendOrderEmail()">✉ 이메일발송</button>
-        </div>
-        <div id="order-result" style="margin-top:0.8rem;font-size:0.82rem;color:var(--dust);"></div>
-      </div>
+    <!-- 목록 -->
+    <div class="card">
+      <div id="supplier-list"><div class="loading-row">로딩 중…</div></div>
     </div>
   </section>
-  <!-- ══ TAB: 프로젝트관리 ══════════════════════════════════ -->
-  <section class="tab-content" id="tab-project">
-    <div class="sec-header">
-      <div>
-        <div class="sec-label">프로젝트관리</div>
-        <div class="sec-title">프로젝트 현황</div>
-      </div>
-      <button class="btn-primary" onclick="openProjectModal('general')">+ 신규 등록</button>
-    </div>
-
-    <!-- 프로젝트 서브섹션 -->
-    <div class="proj-section">
-      <div class="proj-section-header" onclick="toggleProjSection('proj-idea')">
-        💡 신규구상 <span id="proj-idea-count" class="badge">0</span>
-        <span class="toggle-hint">(펼치기)</span>
-      </div>
-      <div id="proj-idea" class="proj-list" style="display:none;"></div>
-    </div>
-
-    <div class="proj-section">
-      <div class="proj-section-header active-header" onclick="toggleProjSection('proj-inprogress')">
-        🔧 진행중 <span id="proj-inprogress-count" class="badge badge-active">0</span>
-      </div>
-      <div id="proj-inprogress" class="proj-list"></div>
-    </div>
-
-    <div class="proj-section">
-      <div class="proj-section-header" onclick="toggleProjSection('proj-done')">
-        ✅ 완료 <span id="proj-done-count" class="badge">0</span>
-        <span class="toggle-hint">(펼치기)</span>
-      </div>
-      <div id="proj-done" class="proj-list" style="display:none;"></div>
-    </div>
-  </section>
-
-  <!-- ══ TAB: 지원사업 ════════════════════════════════════ -->
-  <section class="tab-content" id="tab-grant">
-    <div class="sec-header">
-      <div>
-        <div class="sec-label">지원사업</div>
-        <div class="sec-title">지원사업 관리</div>
-      </div>
-      <button class="btn-primary" onclick="openGrantModal()">+ 사업 등록</button>
-    </div>
-
-    <!-- 지원사업 서브탭 -->
-    <div class="subtab-bar">
-      <button class="subtab-btn active" onclick="switchGrantTab('info')">지원사업 정보</button>
-      <button class="subtab-btn" onclick="switchGrantTab('applying')">신청중인 사업</button>
-    </div>
-
-    <div id="grant-info-panel">
-      <div id="grant-info-list" class="card"><div class="loading-row">로딩 중…</div></div>
-    </div>
-    <div id="grant-applying-panel" style="display:none;">
-      <div id="grant-applying-list" class="card"><div class="loading-row">로딩 중…</div></div>
-    </div>
-  </section>
-
-  <!-- ══ TAB: AI경영지원실 ════════════════════════════════ -->
-  <section class="tab-content" id="tab-ai">
-    <div class="sec-header">
-      <div>
-        <div class="sec-label">AI경영지원실</div>
-        <div class="sec-title">AI 프로젝트 현황</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:0.8rem;">
-        <span id="ai-realtime-dot" style="width:8px;height:8px;border-radius:50%;background:#6b7280;display:inline-block;" title="실시간 연결 대기중"></span>
-        <button class="btn-primary" onclick="openProjectModal('ai')">+ 신규 등록</button>
-      </div>
-    </div>
-
-    <div class="proj-section">
-      <div class="proj-section-header" onclick="toggleProjSection('ai-idea')">
-        💡 신규구상 <span id="ai-idea-count" class="badge">0</span>
-        <span class="toggle-hint">(펼치기)</span>
-      </div>
-      <div id="ai-idea" class="proj-list" style="display:none;"></div>
-    </div>
-
-    <div class="proj-section">
-      <div class="proj-section-header active-header" onclick="toggleProjSection('ai-inprogress')">
-        🤖 진행중 <span id="ai-inprogress-count" class="badge badge-active">0</span>
-      </div>
-      <div id="ai-inprogress" class="proj-list"></div>
-    </div>
-
-    <div class="proj-section">
-      <div class="proj-section-header" onclick="toggleProjSection('ai-done')">
-        ✅ 완료 <span id="ai-done-count" class="badge">0</span>
-        <span class="toggle-hint">(펼치기)</span>
-      </div>
-      <div id="ai-done" class="proj-list" style="display:none;"></div>
-    </div>
-  </section>
-
-  <!-- 프로젝트 등록/수정 모달 -->
-  <div id="project-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999;align-items:center;justify-content:center;">
-    <div class="card" style="width:min(480px,90vw);padding:1.5rem;">
-      <div class="card-title" id="project-modal-title">프로젝트 등록</div>
-      <input type="hidden" id="proj-modal-id">
-      <input type="hidden" id="proj-modal-category">
-      <div style="display:flex;flex-direction:column;gap:0.8rem;margin-top:1rem;">
-        <input class="form-input" id="proj-title" placeholder="프로젝트명 *" style="padding:0.6rem 1rem;">
-        <textarea class="form-input" id="proj-desc" placeholder="설명" rows="3" style="padding:0.6rem 1rem;resize:vertical;"></textarea>
-        <select class="select-input" id="proj-status">
-          <option value="idea">💡 신규구상</option>
-          <option value="in_progress">🔧 진행중</option>
-          <option value="completed">✅ 완료</option>
-        </select>
-        <input class="form-input" id="proj-assigned" placeholder="담당자 (선택)" style="padding:0.6rem 1rem;">
-        <div style="display:flex;gap:0.5rem;">
-          <input class="date-input" type="date" id="proj-start" style="flex:1;" title="시작일">
-          <input class="date-input" type="date" id="proj-end" style="flex:1;" title="완료예정일">
-        </div>
-        <textarea class="form-input" id="proj-notes" placeholder="메모" rows="2" style="padding:0.6rem 1rem;resize:vertical;"></textarea>
-      </div>
-      <div style="display:flex;gap:0.6rem;margin-top:1.2rem;justify-content:flex-end;">
-        <button class="btn-sm" onclick="closeProjectModal()">취소</button>
-        <button class="btn-primary" onclick="saveProject()">저장</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 지원사업 등록 모달 -->
-  <div id="grant-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999;align-items:center;justify-content:center;">
-    <div class="card" style="width:min(480px,90vw);padding:1.5rem;">
-      <div class="card-title" id="grant-modal-title">지원사업 등록</div>
-      <input type="hidden" id="grant-modal-id">
-      <div style="display:flex;flex-direction:column;gap:0.8rem;margin-top:1rem;">
-        <input class="form-input" id="grant-org" placeholder="지원기관 *" style="padding:0.6rem 1rem;">
-        <input class="form-input" id="grant-name" placeholder="과제명 *" style="padding:0.6rem 1rem;">
-        <input class="form-input" id="grant-schedule" placeholder="지원일정 (예: 2026-04 ~ 2026-05)" style="padding:0.6rem 1rem;">
-        <input class="form-input" id="grant-amount" placeholder="지원금액 (예: 최대 5천만원)" style="padding:0.6rem 1rem;">
-        <input class="form-input" id="grant-url" placeholder="사이트 URL" style="padding:0.6rem 1rem;">
-        <select class="select-input" id="grant-status">
-          <option value="info">📋 정보수집</option>
-          <option value="applying">📝 신청중</option>
-          <option value="completed">✅ 완료</option>
-          <option value="failed">❌ 미선정</option>
-        </select>
-        <textarea class="form-input" id="grant-notes" placeholder="메모" rows="2" style="padding:0.6rem 1rem;resize:vertical;"></textarea>
-      </div>
-      <div style="display:flex;gap:0.6rem;margin-top:1.2rem;justify-content:flex-end;">
-        <button class="btn-sm" onclick="closeGrantModal()">취소</button>
-        <button class="btn-primary" onclick="saveGrant()">저장</button>
-      </div>
-    </div>
-  </div>
-
-
 </div>
 
 <div id="toast"></div>
@@ -1327,7 +1290,7 @@ sb.auth.getSession().then(({ data: { session } }) => {
 });
 
 // ── 탭 전환 ──────────────────────────────────────────────
-const TAB_IDS = { today: 'tab-today', action: 'tab-action', project: 'tab-project', grant: 'tab-grant', ai: 'tab-ai', sms: 'tab-sms', event: 'tab-event', suppliers: 'tab-suppliers' };
+const TAB_IDS = { today: 'tab-today', action: 'tab-action', sms: 'tab-sms', event: 'tab-event', suppliers: 'tab-suppliers' };
 
 function switchTab(key) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -1654,7 +1617,10 @@ let customerPool   = []; // [{member_id, member_name, purchase_count, phone}]
 
 async function loadFarmerList() {
   try {
-    const { data, error } = await sb.rpc('get_distinct_farmers');
+    const { data, error } = await sb
+      .from('farmer_members')
+      .select('farmer_name')
+      .order('farmer_name');
     if (error) throw error;
     const farmers = [...new Set(data.map(r => r.farmer_name).filter(Boolean))].sort((a,b) => a.localeCompare(b,'ko'));
     allFarmerNames = farmers;
@@ -1687,14 +1653,13 @@ async function loadTopCustomers() {
   list.innerHTML = '<div class="loading-row">조회 중…</div>';
 
   try {
-    // 상위 300 단골 (3회 이상)
+    // 상위 30 단골
     const { data: fm, error: e1 } = await sb
       .from('farmer_members')
       .select('member_id,member_name,purchase_count')
       .eq('farmer_name', farmerName)
-      .gte('purchase_count', 3)
       .order('purchase_count', { ascending: false })
-      .limit(300);
+      .limit(30);
     if (e1) throw e1;
     if (!fm || !fm.length) { list.innerHTML = '<div class="empty-row">단골 없음</div>'; return; }
 
@@ -1862,6 +1827,8 @@ document.getElementById('password').addEventListener('keydown', e => {
   if (e.key === 'Enter') doLogin();
 });
 
+// 초기 멤버태그 렌더
+renderMemberTags();
 
 // ══ 이벤트 등록 ════════════════════════════════════════
 
@@ -2030,130 +1997,18 @@ async function deleteSupplier(id) {
   loadSuppliers();
 }
 
-// ══ 서브탭 전환 ══
-function switchSubTab(key) {
-  ['suppliers', 'tele', 'order'].forEach(k => {
-    document.getElementById(`sub-${k}`).style.display = k === key ? '' : 'none';
-    const btn = document.getElementById(`stab-${k}`);
-    if (btn) {
-      btn.style.color = k === key ? 'var(--amber)' : 'var(--dust)';
-      btn.style.borderBottom = k === key ? '2px solid var(--amber)' : '2px solid transparent';
-    }
-  });
-  if (key === 'tele') loadTeleOrders();
-  if (key === 'order') loadSupplierDropdown();
-}
+// ══ 프로젝트관리 ════════════════════════════════════════
 
-// ══ 텔레발주 ══
-async function loadTeleOrders() {
-  const wrap = document.getElementById('tele-list');
-  wrap.innerHTML = '<div class="loading-row">로딩 중…</div>';
-  const { data, error } = await sb.from('staff_data')
-    .select('created_at, item_name, urgency, content')
-    .order('created_at', { ascending: false });
-  if (error || !data || data.length === 0) {
-    wrap.innerHTML = '<div class="empty-row">현장 요청 없음</div>';
-    return;
-  }
-  const urgencyColor = { '긴급': 'var(--red)', '보통': 'var(--amber)', '여유': 'var(--green-light)' };
-  wrap.innerHTML = data.map(r => {
-    const color = urgencyColor[r.urgency] || 'var(--dust)';
-    const dt = r.created_at ? new Date(r.created_at).toLocaleString('ko-KR', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }) : '';
-    return `<div style="padding:0.75rem 0;border-bottom:1px solid rgba(184,168,138,0.08);">
-      <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.3rem;">
-        <span style="font-size:0.85rem;color:var(--cream);">${r.item_name || '—'}</span>
-        <span style="font-size:0.72rem;color:${color};border:1px solid ${color};padding:0.1rem 0.45rem;border-radius:3px;">${r.urgency || ''}</span>
-        <span style="font-size:0.72rem;color:var(--dust);margin-left:auto;">${dt}</span>
-      </div>
-      <div style="font-size:0.8rem;color:var(--dust);">${r.content || ''}</div>
-    </div>`;
-  }).join('');
-}
-
-// ══ 발주하기 ══
-async function loadSupplierDropdown() {
-  const sel = document.getElementById('order-supplier-select');
-  sel.innerHTML = '<option value="">-- 발주처 선택 --</option>';
-  const { data } = await sb.from('suppliers').select('id, name, phone, email').eq('is_active', true).order('name');
-  if (!data) return;
-  data.forEach(s => {
-    const opt = document.createElement('option');
-    opt.value = s.id;
-    opt.textContent = s.name + (s.phone ? ' (' + s.phone + ')' : '');
-    opt.dataset.phone = s.phone || '';
-    opt.dataset.email = s.email || '';
-    sel.appendChild(opt);
-  });
-  sel.onchange = () => {
-    const opt = sel.options[sel.selectedIndex];
-    document.getElementById('order-supplier-phone').textContent = opt.dataset.phone ? '📞 ' + opt.dataset.phone : '';
-  };
-}
-
-async function sendOrderSms() {
-  const sel = document.getElementById('order-supplier-select');
-  const opt = sel.options[sel.selectedIndex];
-  if (!opt || !opt.value) { toast('발주처를 선택하세요.'); return; }
-  const phone = opt.dataset.phone;
-  if (!phone) { toast('선택한 발주처에 전화번호가 없습니다.'); return; }
-  const message = document.getElementById('order-message').value.trim();
-  if (!message) { toast('발주 내용을 입력하세요.'); return; }
-
-  const apiKey    = localStorage.getItem('solapi_key');
-  const apiSecret = localStorage.getItem('solapi_secret');
-  const fromNum   = localStorage.getItem('solapi_from') || '0427160019';
-  if (!apiKey || !apiSecret) { toast('⚙ 이음SMS 탭에서 Solapi API 설정을 먼저 저장하세요.'); return; }
-
-  const resultDiv = document.getElementById('order-result');
-  resultDiv.textContent = '발송 중…';
-
-  const date = new Date().toISOString();
-  const salt = Math.random().toString(36).substring(2, 14);
-  const sig  = await hmacSha256Hex(apiSecret, date + salt);
-  const auth = `HMAC-SHA256 apiKey=${apiKey}, date=${date}, salt=${salt}, signature=${sig}`;
-
-  try {
-    const resp = await fetch('https://api.solapi.com/messages/v4/send-many', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': auth },
-      body: JSON.stringify({ messages: [{ to: phone.replace(/-/g,''), from: fromNum.replace(/-/g,''), text: message }] }),
-    });
-    const result = await resp.json();
-    if (!resp.ok) { resultDiv.textContent = '오류: ' + (result.message || resp.status); return; }
-    toast('발주 문자 발송 완료');
-    resultDiv.textContent = '✓ 발송 완료';
-    await sb.from('sms_history').insert({ member_ids: [], message, sender: fromNum });
-  } catch(e) {
-    resultDiv.textContent = '네트워크 오류: ' + e.message;
-  }
-}
-
-function sendOrderEmail() {
-  const sel = document.getElementById('order-supplier-select');
-  const opt = sel.options[sel.selectedIndex];
-  if (!opt || !opt.value) { toast('발주처를 선택하세요.'); return; }
-  const email = opt.dataset.email;
-  if (!email) { toast('선택한 발주처에 이메일이 없습니다.'); return; }
-  const message = document.getElementById('order-message').value.trim();
-  const subject = encodeURIComponent('[품앗이생협] 발주 요청');
-  const body = encodeURIComponent(message);
-  window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
-}
-
-// ══ 섹션 토글 ══════════════════════════════════════════
 function toggleProjSection(id) {
-  const el = document.getElementById(id);
+  const el   = document.getElementById(id);
+  const hint = el.closest('.proj-section').querySelector('.toggle-hint');
   if (!el) return;
-  const isHidden = el.style.display === 'none';
-  el.style.display = isHidden ? 'flex' : 'none';
-  const header = el.previousElementSibling;
-  if (header) {
-    const hint = header.querySelector('.toggle-hint');
-    if (hint) hint.textContent = isHidden ? '(접기)' : '(펼치기)';
-  }
+  const hidden = el.style.display === 'none';
+  el.style.display = hidden ? 'flex' : 'none';
+  el.style.flexDirection = 'column';
+  if (hint) hint.textContent = hidden ? '(접기)' : '(펼치기)';
 }
 
-// ══ 패미 추가: 프로젝트관리 · 지원사업 · AI경영지원실 ══
 function renderProjCard(p, category) {
   const statusIcon = { idea:'💡', in_progress:'🔧', completed:'✅' };
   const assignedStr = p.assigned_to ? `<span>👤 ${p.assigned_to}</span>` : '';
@@ -2302,6 +2157,62 @@ async function loadGrants() {
   wrap.innerHTML = data && data.length
     ? data.map(renderGrantCard).join('')
     : '<div class="empty-row">등록된 지원사업 없음</div>';
+
+  if (!isApplying) loadBizinfoGrants();
+}
+
+function renderBizinfoCard(g) {
+  const endStr  = g.end_date ? `<span>📅 ~${g.end_date}</span>` : '';
+  const linkStr = g.link
+    ? `<a href="${g.link}" target="_blank" style="color:var(--amber);font-size:0.75rem;">🔗 공고 보기</a>`
+    : '';
+  const safeG = JSON.stringify(g).replace(/"/g, '&quot;');
+  return `<div class="bizinfo-card">
+    <div class="bizinfo-card-title">${g.title}</div>
+    <div class="bizinfo-card-meta">
+      <span class="bizinfo-card-org">🏢 ${g.author || '미상'}</span>
+      ${endStr}
+      ${linkStr}
+      <button class="bizinfo-add-btn" onclick="addBizinfoToGrants(${safeG})">+ 관심 등록</button>
+    </div>
+  </div>`;
+}
+
+async function loadBizinfoGrants() {
+  const wrap = document.getElementById('bizinfo-grants-list');
+  if (!wrap) return;
+  wrap.innerHTML = '<div class="loading-row">로딩 중…</div>';
+
+  const { data, error } = await sb
+    .from('bizinfo_grants')
+    .select('*')
+    .order('fetched_at', { ascending: false })
+    .order('id',         { ascending: false })
+    .limit(30);
+
+  if (error) { wrap.innerHTML = '<div class="empty-row">공고 로딩 실패</div>'; return; }
+  if (!data || !data.length) { wrap.innerHTML = '<div class="empty-row">조사된 공고 없음 (브리핑 실행 후 갱신됨)</div>'; return; }
+
+  const latest = data[0].fetched_at;
+  const el = document.getElementById('bizinfo-fetched-at');
+  if (el) el.textContent = `(최종 조사: ${latest})`;
+
+  wrap.innerHTML = data.map(renderBizinfoCard).join('');
+}
+
+async function addBizinfoToGrants(g) {
+  const payload = {
+    org_name:     g.author || '',
+    project_name: g.title,
+    schedule:     g.end_date ? `~ ${g.end_date}` : null,
+    site_url:     g.link || null,
+    status:       'info',
+    notes:        `기업마당 자동 수집 (${g.fetched_at})`,
+  };
+  const { error } = await sb.from('grants').insert(payload);
+  if (error) { toast('등록 실패: ' + error.message); return; }
+  toast('관심 등록됨 ✓');
+  loadGrants();
 }
 
 function openGrantModal(grant) {
@@ -2390,7 +2301,6 @@ switchTab = function(tab) {
     if (!aiRealtimeChannel) initAiRealtime();
   }
 };
-
 </script>
 </body>
 </html>
