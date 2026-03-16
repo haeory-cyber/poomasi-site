@@ -21,6 +21,8 @@
     --red:   #b83a2a;
     --white: #faf7f0;
     --panel: rgba(30,21,16,0.85);
+    --surface: rgba(45,31,20,0.8);
+    --border:  rgba(184,168,138,0.2);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -978,18 +980,18 @@
     </div>
 
     <div id="grant-info-panel">
-      <div id="grant-info-list" class="card"><div class="loading-row">로딩 중…</div></div>
+      <div id="grant-info-list" class="card"></div>
 
       <!-- AI 조사 공고 섹션 -->
       <div class="bizinfo-section">
         <div class="bizinfo-section-header">
           🤖 AI 조사 공고 <span id="bizinfo-fetched-at" style="font-weight:400;color:var(--dust);font-size:0.72rem;"></span>
         </div>
-        <div id="bizinfo-grants-list"><div class="loading-row">로딩 중…</div></div>
+        <div id="bizinfo-grants-list"></div>
       </div>
     </div>
     <div id="grant-applying-panel" style="display:none;">
-      <div id="grant-applying-list" class="card"><div class="loading-row">로딩 중…</div></div>
+      <div id="grant-applying-list" class="card"></div>
     </div>
   </section>
 
@@ -1826,9 +1828,6 @@ function toggleFarmerRows(btn) {
 document.getElementById('password').addEventListener('keydown', e => {
   if (e.key === 'Enter') doLogin();
 });
-
-// 초기 멤버태그 렌더
-renderMemberTags();
 
 // ══ 이벤트 등록 ════════════════════════════════════════
 
