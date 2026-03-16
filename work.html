@@ -2153,7 +2153,11 @@ async function loadGrants() {
   if (isApplying) query = query.eq('status', 'applying');
 
   const { data, error } = await query;
-  if (error) { wrap.innerHTML = '<div class="empty-row">로딩 실패</div>'; return; }
+  if (error) {
+    wrap.innerHTML = '<div class="empty-row">로딩 실패</div>';
+    if (!isApplying) loadBizinfoGrants();
+    return;
+  }
   wrap.innerHTML = data && data.length
     ? data.map(renderGrantCard).join('')
     : '<div class="empty-row">등록된 지원사업 없음</div>';
