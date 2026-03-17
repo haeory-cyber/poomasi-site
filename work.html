@@ -1980,10 +1980,10 @@ async function searchFarmerForSupplier() {
   resEl.style.display = 'block';
   resEl.innerHTML = '<div style="font-size:0.8rem;color:var(--dust);">검색 중…</div>';
 
-  const { data } = await sb.from('pos_transactions')
+  const { data } = await sb.from('farmer_members')
     .select('farmer_name')
     .ilike('farmer_name', '%' + q + '%')
-    .limit(50);
+    .limit(500);
 
   const names = [...new Set((data || []).map(r => r.farmer_name).filter(Boolean))].sort();
   if (!names.length) {
