@@ -1240,6 +1240,10 @@
             <label class="form-label">메모</label>
             <input class="form-input" id="sup-note" placeholder="담당자명 등" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
           </div>
+          <div>
+            <label class="form-label">카카오 ID</label>
+            <input class="form-input" id="sup-kakao" placeholder="카카오톡 ID (선택)" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+          </div>
         </div>
         <div style="display:flex;gap:0.5rem;">
           <button class="btn-primary" onclick="addSupplier()">저장</button>
@@ -1293,6 +1297,7 @@
 감사합니다.</textarea>
         <div style="display:flex;gap:0.5rem;margin-top:1rem;">
           <button class="btn-primary" onclick="sendOrderSms()">📨 문자발송</button>
+          <button class="btn-sm" onclick="sendOrderKakao()">💬 카톡발주</button>
           <button class="btn-sm" onclick="sendOrderEmail()">✉ 이메일발송</button>
         </div>
         <div id="order-result" style="margin-top:0.8rem;font-size:0.82rem;color:var(--dust);"></div>
@@ -1961,7 +1966,7 @@ function showAddSupplier() {
 }
 function hideAddSupplier() {
   document.getElementById('supplier-add-form').style.display = 'none';
-  ['sup-name','sup-phone','sup-email','sup-note'].forEach(id => document.getElementById(id).value = '');
+  ['sup-name','sup-phone','sup-email','sup-note','sup-kakao'].forEach(id => document.getElementById(id).value = '');
 }
 
 async function addSupplier() {
@@ -1970,7 +1975,8 @@ async function addSupplier() {
   const phone = document.getElementById('sup-phone').value.trim();
   const email = document.getElementById('sup-email').value.trim();
   const note  = document.getElementById('sup-note').value.trim();
-  const { error } = await sb.from('suppliers').insert({ name, phone, email, note });
+  const kakaoId = document.getElementById('sup-kakao').value.trim();
+  const { error } = await sb.from('suppliers').insert({ name, phone, email, note, kakao_id: kakaoId });
   if (error) { toast('저장 실패: ' + error.message); return; }
   toast('발주처 추가됨 ✓');
   hideAddSupplier();
@@ -2181,7 +2187,7 @@ function teleToggleAll() {
 async function loadSupplierDropdown() {
   const sel = document.getElementById('order-supplier-select');
   sel.innerHTML = '<option value="">-- 발주처 선택 --</option>';
-  const { data } = await sb.from('suppliers').select('id, name, phone, email').eq('is_active', true).order('name');
+  const { data } = await sb.from('suppliers').select('id, name, phone, email, kakao_id').eq('is_active', true).order('name');
   if (!data) return;
   data.forEach(s => {
     const opt = document.createElement('option');
@@ -2189,6 +2195,7 @@ async function loadSupplierDropdown() {
     opt.textContent = s.name + (s.phone ? ' (' + s.phone + ')' : '');
     opt.dataset.phone = s.phone || '';
     opt.dataset.email = s.email || '';
+    opt.dataset.kakaoId = s.kakao_id || '';
     sel.appendChild(opt);
   });
   sel.onchange = () => {
@@ -2232,6 +2239,27 @@ async function sendOrderSms() {
     await sb.from('sms_history').insert({ member_ids: [], message, sender: fromNum });
   } catch(e) {
     resultDiv.textContent = '네트워크 오류: ' + e.message;
+  }
+}
+
+function sendOrderKakao() {
+  const sel = document.getElementById('order-supplier-select');
+  const opt = sel.options[sel.selectedIndex];
+  if (!opt || !opt.value) { toast('발주처를 선택하세요.'); return; }
+  const message = document.getElementById('order-message').value.trim();
+  if (!message) { toast('발주 내용을 입력하세요.'); return; }
+  // 클립보드 복사
+  navigator.clipboard.writeText(message).then(() => {
+    toast('발주 내용 복사됨 ✓ 카카오톡에서 담당자에게 붙여넣기하세요.');
+  }).catch(() => {
+    toast('복사 실패 — 직접 내용을 선택하여 복사해주세요.');
+  });
+  // 카카오톡 앱 실행 (모바일)
+  const kakaoId = opt.dataset.kakaoId;
+  if (kakaoId) {
+    setTimeout(() => { window.location.href = 'kakaotalk://launch'; }, 500);
+  } else {
+    setTimeout(() => { window.location.href = 'kakaotalk://launch'; }, 500);
   }
 }
 
