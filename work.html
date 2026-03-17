@@ -1208,13 +1208,13 @@
 
     <!-- 서브탭 바 -->
     <div style="display:flex;gap:0;border-bottom:1px solid rgba(196,128,58,0.25);margin-bottom:1.5rem;">
-      <button class="sub-tab-btn active" id="stab-suppliers" onclick="switchSubTab('suppliers')" style="background:none;border:none;color:var(--dust);font-size:0.8rem;letter-spacing:0.08em;padding:0.5rem 1rem;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;">발주처관리</button>
-      <button class="sub-tab-btn" id="stab-tele" onclick="switchSubTab('tele')" style="background:none;border:none;color:var(--dust);font-size:0.8rem;letter-spacing:0.08em;padding:0.5rem 1rem;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;">텔레발주</button>
+      <button class="sub-tab-btn active" id="stab-tele" onclick="switchSubTab('tele')" style="background:none;border:none;color:var(--dust);font-size:0.8rem;letter-spacing:0.08em;padding:0.5rem 1rem;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;">텔레발주</button>
       <button class="sub-tab-btn" id="stab-order" onclick="switchSubTab('order')" style="background:none;border:none;color:var(--dust);font-size:0.8rem;letter-spacing:0.08em;padding:0.5rem 1rem;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;">발주하기</button>
+      <button class="sub-tab-btn" id="stab-suppliers" onclick="switchSubTab('tele')" style="background:none;border:none;color:var(--dust);font-size:0.8rem;letter-spacing:0.08em;padding:0.5rem 1rem;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;">발주처관리</button>
     </div>
 
     <!-- ── 서브패널: 발주처관리 ── -->
-    <div id="sub-suppliers">
+    <div id="sub-suppliers" style="display:none;">
       <div class="sec-header" style="margin-bottom:1rem;">
         <div></div>
         <button class="btn-sm" onclick="showAddSupplier()">+ 추가</button>
@@ -1254,7 +1254,7 @@
     </div>
 
     <!-- ── 서브패널: 텔레발주 ── -->
-    <div id="sub-tele" style="display:none;">
+    <div id="sub-tele">
       <div class="sec-header" style="margin-bottom:1rem;">
         <div style="font-size:0.8rem;color:var(--dust);">현장 직원 발주 요청</div>
         <button class="btn-sm" onclick="loadTeleOrders()">↻ 새로고침</button>
