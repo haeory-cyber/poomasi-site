@@ -1980,12 +1980,9 @@ async function searchFarmerForSupplier() {
   resEl.style.display = 'block';
   resEl.innerHTML = '<div style="font-size:0.8rem;color:var(--dust);">검색 중…</div>';
 
-  const { data } = await sb.from('farmer_members')
-    .select('farmer_name')
-    .ilike('farmer_name', '%' + q + '%')
-    .limit(500);
+  const { data } = await sb.rpc('get_farmer_names');
 
-  const names = [...new Set((data || []).map(r => r.farmer_name).filter(Boolean))].sort();
+  const names = (data || []).map(r => r.farmer_name).filter(n => n && n.includes(q)).sort();
   if (!names.length) {
     resEl.innerHTML = '<div style="font-size:0.8rem;color:var(--dust);padding:0.3rem;">검색 결과 없음 — 아래에 직접 입력하세요</div>';
     return;
