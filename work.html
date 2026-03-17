@@ -1264,6 +1264,7 @@
         <button id="tele-filter-wait"  class="btn-sm" style="border-bottom:2px solid transparent;" onclick="setTeleFilter('대기')">대기</button>
         <button id="tele-filter-done"  class="btn-sm" style="border-bottom:2px solid transparent;" onclick="setTeleFilter('발주완료')">발주완료</button>
       </div>
+      <div id='tele-bulk-bar' style='display:none;align-items:center;gap:0.7rem;margin-bottom:0.7rem;padding:0.5rem 0.7rem;background:rgba(184,168,138,0.10);border:1px solid var(--amber);border-radius:6px;'><span style='font-size:0.8rem;color:var(--cream);'><span id='tele-chk-count'>0</span>개 선택됨</span><button onclick='teleBulkDelete()' style='font-size:0.75rem;color:#fff;background:var(--red);border:1px solid var(--red);padding:0.3rem 0.7rem;border-radius:4px;cursor:pointer;font-weight:600;'>일괄 삭제(입고완료)</button><button onclick='teleToggleAll()' style='font-size:0.75rem;color:var(--amber);background:transparent;border:1px solid var(--amber);padding:0.3rem 0.7rem;border-radius:4px;cursor:pointer;'>전체선택</button></div>
       <div class="card">
         <div id="tele-list"><div class="loading-row">로딩 중…</div></div>
       </div>
@@ -2107,16 +2108,16 @@ function renderTeleOrders() {
       ? `<span style="font-size:0.72rem;color:var(--amber);border:1px solid var(--amber);padding:0.1rem 0.45rem;border-radius:3px;">발주완료</span>`
       : `<span style="font-size:0.72rem;color:var(--dust);border:1px solid var(--dust);padding:0.1rem 0.45rem;border-radius:3px;">대기</span>`;
     const doneBtn = isDone ? '' : `<button class="btn-sm" style="font-size:0.72rem;" onclick="teleMarkDone('${r.id}')">✓ 발주완료 처리</button>`;
-    const delBtn = `<button class="btn-sm" style="font-size:0.72rem;color:var(--red);border-color:var(--red);" onclick="teleDelete('${r.id}')">입고완료(삭제)</button>`;
     return `<div data-status="${r.status || ''}" style="padding:0.75rem 0;border-bottom:1px solid rgba(184,168,138,0.08);">
       <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.3rem;flex-wrap:wrap;">
+        <input type='checkbox' class='tele-chk' data-id='${r.id}' style='accent-color:var(--amber);width:18px;height:18px;cursor:pointer;flex-shrink:0;'>
         <span style="font-size:0.85rem;color:var(--cream);">${r.item_name || '—'}</span>
         <span style="font-size:0.72rem;color:${color};border:1px solid ${color};padding:0.1rem 0.45rem;border-radius:3px;">${r.urgency || ''}</span>
         ${statusBadge}
         <span style="font-size:0.72rem;color:var(--dust);margin-left:auto;">${dt}</span>
       </div>
       <div style="font-size:0.8rem;color:var(--dust);margin-bottom:0.4rem;">${r.content || ''}</div>
-      <div style="display:flex;gap:0.5rem;">${doneBtn}${delBtn}</div>
+      <div style="display:flex;gap:0.5rem;">${doneBtn}</div>
     </div>`;
   }).join('');
 }
@@ -2146,6 +2147,34 @@ async function teleDelete(id) {
   const { error } = await sb.from('staff_data').delete().eq('id', id);
   if (error) { alert('삭제 실패: ' + error.message); return; }
   await loadTeleOrders();
+}
+
+document.getElementById('tele-list').addEventListener('change', function(e) {
+  if (!e.target.classList.contains('tele-chk')) return;
+  const checked = document.querySelectorAll('#tele-list .tele-chk:checked').length;
+  const bar = document.getElementById('tele-bulk-bar');
+  document.getElementById('tele-chk-count').textContent = checked;
+  bar.style.display = checked > 0 ? 'flex' : 'none';
+});
+
+async function teleBulkDelete() {
+  const checkboxes = document.querySelectorAll('#tele-list .tele-chk:checked');
+  if (checkboxes.length === 0) return;
+  if (!confirm(`${checkboxes.length}개 항목을 입고완료 처리 후 삭제합니다. 계속할까요?`)) return;
+  const ids = Array.from(checkboxes).map(cb => cb.dataset.id);
+  const { error } = await sb.from('staff_data').delete().in('id', ids);
+  if (error) { alert('삭제 실패: ' + error.message); return; }
+  document.getElementById('tele-bulk-bar').style.display = 'none';
+  await loadTeleOrders();
+}
+
+function teleToggleAll() {
+  const checkboxes = document.querySelectorAll('#tele-list .tele-chk');
+  const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+  checkboxes.forEach(cb => { cb.checked = !allChecked; });
+  const checked = allChecked ? 0 : checkboxes.length;
+  document.getElementById('tele-chk-count').textContent = checked;
+  document.getElementById('tele-bulk-bar').style.display = checked > 0 ? 'flex' : 'none';
 }
 
 // ══ 발주하기 ══
