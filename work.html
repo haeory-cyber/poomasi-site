@@ -2324,11 +2324,31 @@ async function loadOrderItemSuggestion(supplierName) {
     refEl.style.display = 'block';
   }
 
-  // 발주 템플릿 — 수량은 빈칸 (참고해서 직접 입력)
-  const itemLines = sorted.map(([name]) => `  - ${name}: `).join('\n');
+  // 텔레발주 대기 건 조회
+  const { data: teleOrders } = await sb.from('staff_data')
+    .select('id, item_name, qty, urgency')
+    .eq('farmer_name', supplierName)
+    .eq('status', '대기')
+    .order('urgency');
+
+  // 발주 템플릿 생성
+  let itemLines = '';
+  if (teleOrders && teleOrders.length > 0) {
+    // 텔레발주 대기 건이 있으면 우선 반영
+    itemLines = teleOrders.map(t => {
+      const urg = t.urgency === '긴급' ? ' [긴급]' : t.urgency === '대비' ? ' [대비]' : '';
+      return `  - ${t.item_name}: ${t.qty || ''}개${urg}`;
+    }).join('\n');
+  } else {
+    // 없으면 POS 판매내역 기준 빈칸 템플릿
+    itemLines = sorted.map(([name]) => `  - ${name}: `).join('\n');
+  }
   msgEl.value = `[품앗이소비자생활협동조합 발주 요청]\n안녕하세요. 품앗이생협 지족점입니다.\n아래와 같이 발주 요청드립니다.\n\n${itemLines}\n\n감사합니다.`;
 
-  if (infoEl) infoEl.textContent = `최근 30일 판매 기준 ${sorted.length}개 품목`;
+  const teleCount = teleOrders ? teleOrders.length : 0;
+  if (infoEl) infoEl.textContent = teleCount > 0
+    ? `텔레발주 ${teleCount}건 반영됨 + 최근 30일 ${sorted.length}개 품목 참고`
+    : `최근 30일 판매 기준 ${sorted.length}개 품목`;
 }
 
 async function sendOrderSms() {
