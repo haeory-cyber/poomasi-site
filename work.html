@@ -2201,12 +2201,13 @@ async function loadSupplierDropdown() {
     opt.dataset.phone = s.phone || '';
     opt.dataset.email = s.email || '';
     opt.dataset.kakaoId = s.kakao_id || '';
+    opt.dataset.name = s.name;
     sel.appendChild(opt);
   });
   sel.onchange = () => {
     const opt = sel.options[sel.selectedIndex];
     document.getElementById('order-supplier-phone').textContent = opt.dataset.phone ? '📞 ' + opt.dataset.phone : '';
-    if (opt && opt.value) loadOrderItemSuggestion(opt.textContent.split(' (')[0]);
+    if (opt && opt.value) loadOrderItemSuggestion(opt.dataset.name || opt.textContent.split(' (')[0]);
   };
 }
 
