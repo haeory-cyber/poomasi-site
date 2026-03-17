@@ -30,3 +30,7 @@
 - 2026-03-17: **작업 완료 시 마크다운 업데이트 필수** — 별도 지시 없어도 관련 마크다운(레슨/체크리스트/SHARED_MEMORY 등) 자동 업데이트. 중요하면 이 공지사항에도.
 - 2026-03-17: **Supabase Auth 테이블 SQL 직접 수정 절대 금지** — `auth.users.encrypted_password`를 SQL `crypt()`로 수정하면 해시 파괴됨. 비밀번호 변경은 반드시 Admin API(`PUT /auth/v1/admin/users/<id>`) 사용할 것.
 - 2026-03-17: **JS 배포 전 문법 검사 권장** — `node --check`로 SyntaxError 확인. 단일 `<script>` 블록 내 문법 에러 1개가 전체 기능(로그인 포함)을 마비시킴.
+- 2026-03-17: **pre-commit hook 설치 필수** — GCP(지미)에는 설치 완료. git pull 안 하고 커밋하면 자동 차단됨. **패미/터미도 로컬 클론에 아래 훅을 설치할 것:**
+  ```
+  printf '#!/bin/bash\ngit fetch origin main --quiet 2>/dev/null\nBEHIND=$(git rev-list --count HEAD..origin/main 2>/dev/null)\nif [ "$BEHIND" -gt 0 ]; then\n  echo "BLOCKED: git pull 먼저 실행하세요 (${BEHIND}개 뒤처짐)"\n  exit 1\nfi\nexit 0\n' > .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+  ```
