@@ -2238,8 +2238,7 @@ async function loadOrderItemSuggestion(supplierName) {
 
   // 발주 템플릿 자동 생성
   const today = new Date().toLocaleDateString('ko-KR', {year:'numeric', month:'2-digit', day:'2-digit'});
-  const itemLines = sorted.map(([name, qty]) => `  - ${name}: 수량 ${qty} → 발주수량:`).join('
-');
+  const itemLines = sorted.map(([name, qty]) => `  - ${name}: 수량 ${qty} → 발주수량:`).join('\n');
   msgEl.value = `[품앗이소비자생활협동조합 발주 요청]
 안녕하세요. 품앗이생협 지족점입니다.
 아래와 같이 발주 요청드립니다.
