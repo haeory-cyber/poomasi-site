@@ -1283,6 +1283,7 @@
         </select>
         <div id="order-supplier-phone" style="font-size:0.78rem;color:var(--dust);margin-top:0.4rem;"></div>
         <div id="order-item-info" style="font-size:0.75rem;color:var(--amber);margin-top:0.3rem;"></div>
+        <div id="order-item-ref" style="display:none;max-height:180px;overflow-y:auto;background:rgba(61,56,48,0.5);border:1px solid rgba(196,128,58,0.15);border-radius:6px;padding:0.6rem 0.8rem;margin-top:0.5rem;"></div>
       </div>
       <div class="card">
         <div class="card-title" style="margin-bottom:0.8rem;">발주 내용</div>
@@ -2237,18 +2238,24 @@ async function loadOrderItemSuggestion(supplierName) {
   });
   const sorted = Object.entries(itemMap).sort((a,b) => b[1] - a[1]);
 
-  // 발주 템플릿 자동 생성
-  const today = new Date().toLocaleDateString('ko-KR', {year:'numeric', month:'2-digit', day:'2-digit'});
-  const itemLines = sorted.map(([name, qty]) => `  - ${name}: 수량 ${qty} → 발주수량:`).join('\n');
-  msgEl.value = `[품앗이소비자생활협동조합 발주 요청]
-안녕하세요. 품앗이생협 지족점입니다.
-아래와 같이 발주 요청드립니다.
+  // 참고용 판매내역 표시 (발주처에 전송 안 됨)
+  const refEl = document.getElementById('order-item-ref');
+  if (refEl) {
+    refEl.innerHTML = `<div style="font-size:0.78rem;color:var(--dust);margin-bottom:0.5rem;">📊 최근 30일 판매 참고 (발주처에 전송 안 됨)</div>` +
+      sorted.map(([name, qty]) =>
+        `<div style="display:flex;justify-content:space-between;padding:0.2rem 0;border-bottom:1px solid rgba(184,168,138,0.06);font-size:0.8rem;">
+          <span style="color:var(--cream);">${name}</span>
+          <span style="color:var(--amber);font-weight:600;">${qty}개</span>
+        </div>`
+      ).join('');
+    refEl.style.display = 'block';
+  }
 
-${itemLines}
+  // 발주 템플릿 — 수량은 빈칸 (참고해서 직접 입력)
+  const itemLines = sorted.map(([name]) => `  - ${name}: `).join('\n');
+  msgEl.value = `[품앗이소비자생활협동조합 발주 요청]\n안녕하세요. 품앗이생협 지족점입니다.\n아래와 같이 발주 요청드립니다.\n\n${itemLines}\n\n감사합니다.`;
 
-감사합니다.`;
-
-  if (infoEl) infoEl.textContent = `최근 30일 판매 기준 ${sorted.length}개 품목 (수량 수정 후 발송)`;
+  if (infoEl) infoEl.textContent = `최근 30일 판매 기준 ${sorted.length}개 품목`;
 }
 
 async function sendOrderSms() {
