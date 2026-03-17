@@ -1282,6 +1282,7 @@
           <option value="">-- 발주처 선택 --</option>
         </select>
         <div id="order-supplier-phone" style="font-size:0.78rem;color:var(--dust);margin-top:0.4rem;"></div>
+        <div id="order-item-info" style="font-size:0.75rem;color:var(--amber);margin-top:0.3rem;"></div>
       </div>
       <div class="card">
         <div class="card-title" style="margin-bottom:0.8rem;">발주 내용</div>
@@ -2187,7 +2188,7 @@ function teleToggleAll() {
 async function loadSupplierDropdown() {
   const sel = document.getElementById('order-supplier-select');
   sel.innerHTML = '<option value="">-- 발주처 선택 --</option>';
-  const { data } = await sb.from('suppliers').select('id, name, phone, email, kakao_id').eq('is_active', true).order('name');
+  const { data } = await sb.from('suppliers').select('id, name, phone, email, kakao_id, note').eq('is_active', true).order('name');
   if (!data) return;
   data.forEach(s => {
     const opt = document.createElement('option');
@@ -2201,7 +2202,49 @@ async function loadSupplierDropdown() {
   sel.onchange = () => {
     const opt = sel.options[sel.selectedIndex];
     document.getElementById('order-supplier-phone').textContent = opt.dataset.phone ? '📞 ' + opt.dataset.phone : '';
+    if (opt && opt.value) loadOrderItemSuggestion(opt.textContent.split(' (')[0]);
   };
+}
+
+async function loadOrderItemSuggestion(supplierName) {
+  const msgEl = document.getElementById('order-message');
+  const infoEl = document.getElementById('order-item-info');
+  if (infoEl) infoEl.textContent = '품목 조회 중…';
+
+  // pos_transactions에서 최근 30일 해당 농가 품목별 판매수량 집계
+  const from30 = new Date(); from30.setDate(from30.getDate() - 30);
+  const { data, error } = await sb
+    .from('pos_transactions')
+    .select('item_name, unit, qty')
+    .eq('farmer_name', supplierName)
+    .gte('sold_at', from30.toISOString());
+
+  if (error || !data || data.length === 0) {
+    if (infoEl) infoEl.textContent = '최근 30일 거래 내역 없음';
+    return;
+  }
+
+  // 품목별 집계
+  const itemMap = {};
+  data.forEach(r => {
+    const key = r.item_name + (r.unit ? ' (' + r.unit + ')' : '');
+    itemMap[key] = (itemMap[key] || 0) + (r.qty || 0);
+  });
+  const sorted = Object.entries(itemMap).sort((a,b) => b[1] - a[1]);
+
+  // 발주 템플릿 자동 생성
+  const today = new Date().toLocaleDateString('ko-KR', {year:'numeric', month:'2-digit', day:'2-digit'});
+  const itemLines = sorted.map(([name, qty]) => `  - ${name}: 수량 ${qty} → 발주수량:`).join('
+');
+  msgEl.value = `[품앗이소비자생활협동조합 발주 요청]
+안녕하세요. 품앗이생협 지족점입니다.
+아래와 같이 발주 요청드립니다.
+
+${itemLines}
+
+감사합니다.`;
+
+  if (infoEl) infoEl.textContent = `최근 30일 판매 기준 ${sorted.length}개 품목 (수량 수정 후 발송)`;
 }
 
 async function sendOrderSms() {
