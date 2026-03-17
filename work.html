@@ -844,6 +844,7 @@
       <button class="tab-btn"       onclick="switchTab('sms', event)">이음SMS</button>
       <button class="tab-btn"       onclick="switchTab('event', event)">이벤트 등록</button>
       <button class="tab-btn"       onclick="switchTab('suppliers', event)">발주</button>
+      <button class="tab-btn"       onclick="switchTab('notice', event)">사무국공지</button>
     </nav>
   </div>
 
@@ -1316,6 +1317,37 @@
       </div>
     </div>
   </section>
+
+  <!-- ══ TAB: 사무국공지 ══ -->
+  <section class="tab-content" id="tab-notice">
+    <div class="sec-header">
+      <div>
+        <div class="sec-label">NOTICE</div>
+        <div class="sec-title">사무국 공지</div>
+      </div>
+      <button class="btn-sm" onclick="toggleNoticeForm()">+ 새 공지</button>
+    </div>
+
+    <!-- 작성 폼 (기본 숨김) -->
+    <div class="card" id="notice-form" style="display:none;margin-bottom:1.5rem;">
+      <div class="card-title">공지 작성</div>
+      <div style="margin-bottom:1rem;">
+        <label class="form-label">제목</label>
+        <input class="form-input" id="notice-title" placeholder="공지 제목" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+      </div>
+      <div style="margin-bottom:1rem;">
+        <label class="form-label">내용</label>
+        <textarea class="form-input" id="notice-content" rows="5" placeholder="공지 내용을 입력하세요" style="width:100%;padding:0.6rem 0.8rem;font-size:0.85rem;resize:vertical;"></textarea>
+      </div>
+      <div style="display:flex;gap:0.5rem;">
+        <button class="btn-primary" onclick="saveNotice()">등록</button>
+        <button class="btn-sm" onclick="toggleNoticeForm()">취소</button>
+      </div>
+    </div>
+
+    <!-- 목록 -->
+    <div id="notice-list"><div class="loading-row">로딩 중…</div></div>
+  </section>
 </div>
 
 <div id="toast"></div>
@@ -1370,7 +1402,7 @@ sb.auth.getSession().then(({ data: { session } }) => {
 });
 
 // ── 탭 전환 ──────────────────────────────────────────────
-const TAB_IDS = { today: 'tab-today', action: 'tab-action', sms: 'tab-sms', event: 'tab-event', suppliers: 'tab-suppliers', project: 'tab-project', grant: 'tab-grant', ai: 'tab-ai' };
+const TAB_IDS = { today: 'tab-today', action: 'tab-action', sms: 'tab-sms', event: 'tab-event', suppliers: 'tab-suppliers', notice: 'tab-notice', project: 'tab-project', grant: 'tab-grant', ai: 'tab-ai' };
 
 function switchTab(key, evt) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -2664,6 +2696,59 @@ function initAiRealtime() {
     });
 }
 
+// ══ 사무국 공지 ══════════════════════════════════════════
+
+function toggleNoticeForm() {
+  const form = document.getElementById('notice-form');
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  if (form.style.display === 'none') {
+    document.getElementById('notice-title').value = '';
+    document.getElementById('notice-content').value = '';
+  }
+}
+
+async function saveNotice() {
+  const title = document.getElementById('notice-title').value.trim();
+  const content = document.getElementById('notice-content').value.trim();
+  if (!title) { toast('제목을 입력하세요.'); return; }
+  if (!content) { toast('내용을 입력하세요.'); return; }
+  const { data: { user } } = await sb.auth.getUser();
+  const author = user ? user.email : '알 수 없음';
+  const { error } = await sb.from('notices').insert({ title, content, author });
+  if (error) { toast('등록 실패: ' + error.message); return; }
+  toast('공지 등록됨 ✓');
+  toggleNoticeForm();
+  loadNotices();
+}
+
+async function deleteNotice(id) {
+  if (!confirm('이 공지를 삭제하시겠습니까?')) return;
+  const { error } = await sb.from('notices').delete().eq('id', id);
+  if (error) { toast('삭제 실패: ' + error.message); return; }
+  toast('삭제됨');
+  loadNotices();
+}
+
+async function loadNotices() {
+  const wrap = document.getElementById('notice-list');
+  const { data, error } = await sb.from('notices').select('*').order('created_at', { ascending: false });
+  if (error || !data || data.length === 0) {
+    wrap.innerHTML = '<div class="card"><div class="empty-row">공지사항이 없습니다.</div></div>';
+    return;
+  }
+  wrap.innerHTML = data.map(n => {
+    const date = new Date(n.created_at).toLocaleDateString('ko-KR', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+    return `<div class="card" style="margin-bottom:1rem;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div class="card-title" style="margin-bottom:0.4rem;">${n.title}</div>
+        <button class="btn-del" onclick="deleteNotice(${n.id})" title="삭제">✕</button>
+      </div>
+      <div style="font-size:0.83rem;color:var(--cream);white-space:pre-wrap;margin-bottom:0.6rem;">${n.content}</div>
+      <div style="font-size:0.72rem;color:var(--dust);">${n.author} · ${date}</div>
+    </div>`;
+  }).join('');
+}
+
 // ══ 탭 전환 시 데이터 로딩 연결 ══════════════════════════
 
 const origSwitchTab = switchTab;
@@ -2671,6 +2756,7 @@ switchTab = function(tab, evt) {
   origSwitchTab(tab, null);
   if (tab === 'project') loadProjects('general');
   if (tab === 'grant')   loadGrants();
+  if (tab === 'notice')  loadNotices();
   if (tab === 'ai') {
     loadProjects('ai');
     if (!aiRealtimeChannel) initAiRealtime();
