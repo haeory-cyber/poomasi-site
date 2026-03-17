@@ -2169,7 +2169,7 @@ function setTeleFilter(f) {
 
 function renderTeleOrders() {
   const wrap = document.getElementById('tele-list');
-  const urgencyColor = { '긴급': 'var(--red)', '보통': 'var(--amber)', '여유': 'var(--green-light)' };
+  const urgencyColor = { '긴급': 'var(--red)', '보통': 'var(--amber)', '대비': 'var(--green-light)', '여유': 'var(--green-light)' };
   const filtered = _teleAllData.filter(r => {
     if (_teleFilter === '전체') return true;
     if (_teleFilter === '발주완료') return r.status === '발주완료';
@@ -2190,7 +2190,9 @@ function renderTeleOrders() {
     return `<div data-status="${r.status || ''}" style="padding:0.75rem 0;border-bottom:1px solid rgba(184,168,138,0.08);">
       <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.3rem;flex-wrap:wrap;">
         <input type='checkbox' class='tele-chk' data-id='${r.id}' style='accent-color:var(--amber);width:18px;height:18px;cursor:pointer;flex-shrink:0;'>
+        <span style="font-size:0.78rem;color:var(--dust);">${r.farmer_name || ''}</span>
         <span style="font-size:0.85rem;color:var(--cream);">${r.item_name || '—'}</span>
+        ${r.qty ? `<span style="font-size:0.78rem;color:var(--cream);">${r.qty}개</span>` : ''}
         <span style="font-size:0.72rem;color:${color};border:1px solid ${color};padding:0.1rem 0.45rem;border-radius:3px;">${r.urgency || ''}</span>
         ${statusBadge}
         <span style="font-size:0.72rem;color:var(--dust);margin-left:auto;">${dt}</span>
@@ -2205,7 +2207,7 @@ async function loadTeleOrders() {
   const wrap = document.getElementById('tele-list');
   wrap.innerHTML = '<div class="loading-row">로딩 중…</div>';
   const { data, error } = await sb.from('staff_data')
-    .select('id, created_at, item_name, urgency, content, status')
+    .select('id, created_at, farmer_name, item_name, qty, urgency, content, status')
     .order('created_at', { ascending: false });
   if (error || !data) {
     wrap.innerHTML = '<div class="empty-row">현장 요청 없음</div>';
