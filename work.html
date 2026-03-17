@@ -2160,8 +2160,9 @@ document.getElementById('tele-list')?.addEventListener('change', function(e) {
   if (!e.target.classList.contains('tele-chk')) return;
   const checked = document.querySelectorAll('#tele-list .tele-chk:checked').length;
   const bar = document.getElementById('tele-bulk-bar');
-  document.getElementById('tele-chk-count').textContent = checked;
-  bar.style.display = checked > 0 ? 'flex' : 'none';
+  const chkCount = document.getElementById('tele-chk-count');
+  if (chkCount) chkCount.textContent = checked;
+  if (bar) bar.style.display = checked > 0 ? 'flex' : 'none';
 });
 
 async function teleBulkDelete() {
@@ -2171,7 +2172,8 @@ async function teleBulkDelete() {
   const ids = Array.from(checkboxes).map(cb => cb.dataset.id);
   const { error } = await sb.from('staff_data').delete().in('id', ids);
   if (error) { alert('삭제 실패: ' + error.message); return; }
-  document.getElementById('tele-bulk-bar').style.display = 'none';
+  const bulkBar = document.getElementById('tele-bulk-bar');
+  if (bulkBar) bulkBar.style.display = 'none';
   await loadTeleOrders();
 }
 
@@ -2180,8 +2182,10 @@ function teleToggleAll() {
   const allChecked = Array.from(checkboxes).every(cb => cb.checked);
   checkboxes.forEach(cb => { cb.checked = !allChecked; });
   const checked = allChecked ? 0 : checkboxes.length;
-  document.getElementById('tele-chk-count').textContent = checked;
-  document.getElementById('tele-bulk-bar').style.display = checked > 0 ? 'flex' : 'none';
+  const chkCountEl = document.getElementById('tele-chk-count');
+  const bulkBarEl = document.getElementById('tele-bulk-bar');
+  if (chkCountEl) chkCountEl.textContent = checked;
+  if (bulkBarEl) bulkBarEl.style.display = checked > 0 ? 'flex' : 'none';
 }
 
 // ══ 발주하기 ══
