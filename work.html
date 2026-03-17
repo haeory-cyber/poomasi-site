@@ -2156,7 +2156,7 @@ async function teleDelete(id) {
   await loadTeleOrders();
 }
 
-document.getElementById('tele-list').addEventListener('change', function(e) {
+document.getElementById('tele-list')?.addEventListener('change', function(e) {
   if (!e.target.classList.contains('tele-chk')) return;
   const checked = document.querySelectorAll('#tele-list .tele-chk:checked').length;
   const bar = document.getElementById('tele-bulk-bar');
