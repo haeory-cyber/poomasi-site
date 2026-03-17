@@ -843,7 +843,7 @@
       <button class="tab-btn"       onclick="switchTab('ai', event)">AI경영지원실</button>
       <button class="tab-btn"       onclick="switchTab('sms', event)">이음SMS</button>
       <button class="tab-btn"       onclick="switchTab('event', event)">이벤트 등록</button>
-      <button class="tab-btn"       onclick="switchTab('suppliers', event)">발주처</button>
+      <button class="tab-btn"       onclick="switchTab('suppliers', event)">발주</button>
     </nav>
   </div>
 
@@ -1258,6 +1258,11 @@
       <div class="sec-header" style="margin-bottom:1rem;">
         <div style="font-size:0.8rem;color:var(--dust);">현장 직원 발주 요청</div>
         <button class="btn-sm" onclick="loadTeleOrders()">↻ 새로고침</button>
+      </div>
+      <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem;">
+        <button id="tele-filter-all"   class="btn-sm" style="border-bottom:2px solid var(--amber);color:var(--amber);" onclick="setTeleFilter('전체')">전체</button>
+        <button id="tele-filter-wait"  class="btn-sm" style="border-bottom:2px solid transparent;" onclick="setTeleFilter('대기')">대기</button>
+        <button id="tele-filter-done"  class="btn-sm" style="border-bottom:2px solid transparent;" onclick="setTeleFilter('발주완료')">발주완료</button>
       </div>
       <div class="card">
         <div id="tele-list"><div class="loading-row">로딩 중…</div></div>
@@ -2066,29 +2071,81 @@ function switchSubTab(key) {
 }
 
 // ══ 텔레발주 ══
+let _teleAllData = [];
+let _teleFilter = '전체';
+
+function setTeleFilter(f) {
+  _teleFilter = f;
+  ['전체','대기','발주완료'].forEach(k => {
+    const key = k === '전체' ? 'all' : k === '대기' ? 'wait' : 'done';
+    const btn = document.getElementById('tele-filter-' + key);
+    if (btn) {
+      btn.style.color = k === f ? 'var(--amber)' : 'var(--dust)';
+      btn.style.borderBottom = k === f ? '2px solid var(--amber)' : '2px solid transparent';
+    }
+  });
+  renderTeleOrders();
+}
+
+function renderTeleOrders() {
+  const wrap = document.getElementById('tele-list');
+  const urgencyColor = { '긴급': 'var(--red)', '보통': 'var(--amber)', '여유': 'var(--green-light)' };
+  const filtered = _teleAllData.filter(r => {
+    if (_teleFilter === '전체') return true;
+    if (_teleFilter === '발주완료') return r.status === '발주완료';
+    return r.status !== '발주완료';
+  });
+  if (filtered.length === 0) {
+    wrap.innerHTML = '<div class="empty-row">현장 요청 없음</div>';
+    return;
+  }
+  wrap.innerHTML = filtered.map(r => {
+    const color = urgencyColor[r.urgency] || 'var(--dust)';
+    const dt = r.created_at ? new Date(r.created_at).toLocaleString('ko-KR', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }) : '';
+    const isDone = r.status === '발주완료';
+    const statusBadge = isDone
+      ? `<span style="font-size:0.72rem;color:var(--amber);border:1px solid var(--amber);padding:0.1rem 0.45rem;border-radius:3px;">발주완료</span>`
+      : `<span style="font-size:0.72rem;color:var(--dust);border:1px solid var(--dust);padding:0.1rem 0.45rem;border-radius:3px;">대기</span>`;
+    const doneBtn = isDone ? '' : `<button class="btn-sm" style="font-size:0.72rem;" onclick="teleMarkDone('${r.id}')">✓ 발주완료 처리</button>`;
+    const delBtn = `<button class="btn-sm" style="font-size:0.72rem;color:var(--red);border-color:var(--red);" onclick="teleDelete('${r.id}')">입고완료(삭제)</button>`;
+    return `<div data-status="${r.status || ''}" style="padding:0.75rem 0;border-bottom:1px solid rgba(184,168,138,0.08);">
+      <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.3rem;flex-wrap:wrap;">
+        <span style="font-size:0.85rem;color:var(--cream);">${r.item_name || '—'}</span>
+        <span style="font-size:0.72rem;color:${color};border:1px solid ${color};padding:0.1rem 0.45rem;border-radius:3px;">${r.urgency || ''}</span>
+        ${statusBadge}
+        <span style="font-size:0.72rem;color:var(--dust);margin-left:auto;">${dt}</span>
+      </div>
+      <div style="font-size:0.8rem;color:var(--dust);margin-bottom:0.4rem;">${r.content || ''}</div>
+      <div style="display:flex;gap:0.5rem;">${doneBtn}${delBtn}</div>
+    </div>`;
+  }).join('');
+}
+
 async function loadTeleOrders() {
   const wrap = document.getElementById('tele-list');
   wrap.innerHTML = '<div class="loading-row">로딩 중…</div>';
   const { data, error } = await sb.from('staff_data')
-    .select('created_at, item_name, urgency, content')
+    .select('id, created_at, item_name, urgency, content, status')
     .order('created_at', { ascending: false });
-  if (error || !data || data.length === 0) {
+  if (error || !data) {
     wrap.innerHTML = '<div class="empty-row">현장 요청 없음</div>';
     return;
   }
-  const urgencyColor = { '긴급': 'var(--red)', '보통': 'var(--amber)', '여유': 'var(--green-light)' };
-  wrap.innerHTML = data.map(r => {
-    const color = urgencyColor[r.urgency] || 'var(--dust)';
-    const dt = r.created_at ? new Date(r.created_at).toLocaleString('ko-KR', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }) : '';
-    return `<div style="padding:0.75rem 0;border-bottom:1px solid rgba(184,168,138,0.08);">
-      <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.3rem;">
-        <span style="font-size:0.85rem;color:var(--cream);">${r.item_name || '—'}</span>
-        <span style="font-size:0.72rem;color:${color};border:1px solid ${color};padding:0.1rem 0.45rem;border-radius:3px;">${r.urgency || ''}</span>
-        <span style="font-size:0.72rem;color:var(--dust);margin-left:auto;">${dt}</span>
-      </div>
-      <div style="font-size:0.8rem;color:var(--dust);">${r.content || ''}</div>
-    </div>`;
-  }).join('');
+  _teleAllData = data;
+  renderTeleOrders();
+}
+
+async function teleMarkDone(id) {
+  const { error } = await sb.from('staff_data').update({ status: '발주완료' }).eq('id', id);
+  if (error) { alert('처리 실패: ' + error.message); return; }
+  await loadTeleOrders();
+}
+
+async function teleDelete(id) {
+  if (!confirm('입고완료 처리 후 삭제합니다. 계속할까요?')) return;
+  const { error } = await sb.from('staff_data').delete().eq('id', id);
+  if (error) { alert('삭제 실패: ' + error.message); return; }
+  await loadTeleOrders();
 }
 
 // ══ 발주하기 ══
