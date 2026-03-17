@@ -1209,8 +1209,9 @@
 
     <!-- 서브탭 바 -->
     <div style="display:flex;gap:0;border-bottom:1px solid rgba(196,128,58,0.25);margin-bottom:1.5rem;">
-      <button class="sub-tab-btn active" id="stab-tele" onclick="switchSubTab('tele')" style="background:none;border:none;color:var(--dust);font-size:0.8rem;letter-spacing:0.08em;padding:0.5rem 1rem;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;">텔레발주</button>
+      <button class="sub-tab-btn active" id="stab-dashboard" onclick="switchSubTab('dashboard')" style="background:none;border:none;color:var(--dust);font-size:0.8rem;letter-spacing:0.08em;padding:0.5rem 1rem;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;">발주현황</button>
       <button class="sub-tab-btn" id="stab-order" onclick="switchSubTab('order')" style="background:none;border:none;color:var(--dust);font-size:0.8rem;letter-spacing:0.08em;padding:0.5rem 1rem;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;">발주하기</button>
+      <button class="sub-tab-btn" id="stab-tele" onclick="switchSubTab('tele')" style="background:none;border:none;color:var(--dust);font-size:0.8rem;letter-spacing:0.08em;padding:0.5rem 1rem;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;">발주내역</button>
       <button class="sub-tab-btn" id="stab-suppliers" onclick="switchSubTab('suppliers')" style="background:none;border:none;color:var(--dust);font-size:0.8rem;letter-spacing:0.08em;padding:0.5rem 1rem;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;">발주처관리</button>
     </div>
 
@@ -1268,8 +1269,17 @@
       </div>
     </div>
 
-    <!-- ── 서브패널: 텔레발주 ── -->
-    <div id="sub-tele">
+    <!-- ── 서브패널: 발주현황 (대시보드) ── -->
+    <div id="sub-dashboard">
+      <div class="sec-header" style="margin-bottom:1rem;">
+        <div style="font-size:0.8rem;color:var(--dust);">거래처별 발주 대기 현황</div>
+        <button class="btn-sm" onclick="loadOrderDashboard()">↻ 새로고침</button>
+      </div>
+      <div id="order-dashboard"><div class="loading-row">로딩 중…</div></div>
+    </div>
+
+    <!-- ── 서브패널: 발주내역 ── -->
+    <div id="sub-tele" style="display:none;">
       <div class="sec-header" style="margin-bottom:1rem;">
         <div style="font-size:0.8rem;color:var(--dust);">현장 직원 발주 요청</div>
         <button class="btn-sm" onclick="loadTeleOrders()">↻ 새로고침</button>
@@ -2137,14 +2147,16 @@ async function deleteSupplier(id) {
 
 // ══ 서브탭 전환 ══
 function switchSubTab(key) {
-  ['suppliers', 'tele', 'order'].forEach(k => {
-    document.getElementById(`sub-${k}`).style.display = k === key ? '' : 'none';
+  ['dashboard', 'suppliers', 'tele', 'order'].forEach(k => {
+    const el = document.getElementById(`sub-${k}`);
+    if (el) el.style.display = k === key ? '' : 'none';
     const btn = document.getElementById(`stab-${k}`);
     if (btn) {
       btn.style.color = k === key ? 'var(--amber)' : 'var(--dust)';
       btn.style.borderBottom = k === key ? '2px solid var(--amber)' : '2px solid transparent';
     }
   });
+  if (key === 'dashboard') loadOrderDashboard();
   if (key === 'tele') loadTeleOrders();
   if (key === 'order') loadSupplierDropdown();
   if (key === 'suppliers') loadSuppliers();
@@ -2718,6 +2730,80 @@ function initAiRealtime() {
     });
 }
 
+// ══ 발주현황 대시보드 ════════════════════════════════════
+
+async function loadOrderDashboard() {
+  const wrap = document.getElementById('order-dashboard');
+  wrap.innerHTML = '<div class="loading-row">로딩 중…</div>';
+
+  const { data, error } = await sb.from('staff_data')
+    .select('id, farmer_name, item_name, qty, urgency, created_at')
+    .eq('status', '대기')
+    .order('created_at', { ascending: false });
+
+  if (error || !data || data.length === 0) {
+    wrap.innerHTML = '<div class="card"><div class="empty-row">대기 중인 발주가 없습니다.</div></div>';
+    return;
+  }
+
+  // 거래처별 그룹화
+  const grouped = {};
+  data.forEach(r => {
+    const key = r.farmer_name || '(미지정)';
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(r);
+  });
+
+  const urgencyColor = { '긴급': 'var(--red)', '보통': 'var(--amber)', '대비': 'var(--green-light)' };
+
+  wrap.innerHTML = Object.entries(grouped).map(([supplier, items]) => {
+    const urgentCount = items.filter(i => i.urgency === '긴급').length;
+    const totalQty = items.reduce((sum, i) => sum + (i.qty || 0), 0);
+    const itemSummary = items.slice(0, 3).map(i => i.item_name).join(', ') + (items.length > 3 ? ` 외 ${items.length - 3}건` : '');
+    const urgentBadge = urgentCount > 0
+      ? `<span style="font-size:0.72rem;color:var(--red);border:1px solid var(--red);padding:0.1rem 0.4rem;border-radius:3px;margin-left:0.4rem;">긴급 ${urgentCount}</span>`
+      : '';
+
+    const itemRows = items.map(i => {
+      const urg = i.urgency ? `<span style="font-size:0.7rem;color:${urgencyColor[i.urgency] || 'var(--dust)'};margin-left:0.3rem;">${i.urgency}</span>` : '';
+      const dt = i.created_at ? new Date(i.created_at).toLocaleString('ko-KR', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }) : '';
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.3rem 0;border-bottom:1px solid rgba(184,168,138,0.06);font-size:0.82rem;">
+        <span style="color:var(--cream);">${i.item_name || '—'}${urg}</span>
+        <span style="color:var(--dust);">${i.qty || ''}개 <span style="font-size:0.72rem;margin-left:0.3rem;">${dt}</span></span>
+      </div>`;
+    }).join('');
+
+    return `<div class="card" style="margin-bottom:1rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem;">
+        <div>
+          <span class="card-title" style="margin-bottom:0;">${supplier}</span>
+          ${urgentBadge}
+          <span style="font-size:0.75rem;color:var(--dust);margin-left:0.5rem;">${items.length}건 · ${totalQty}개</span>
+        </div>
+        <button class="btn-sm" style="font-size:0.75rem;" onclick="goToOrder('${supplier.replace(/'/g, "\\'")}')">발주하기 →</button>
+      </div>
+      <div style="font-size:0.78rem;color:var(--dust);margin-bottom:0.4rem;">${itemSummary}</div>
+      ${itemRows}
+    </div>`;
+  }).join('');
+}
+
+function goToOrder(supplierName) {
+  switchSubTab('order');
+  // 드롭다운에서 해당 거래처 자동 선택
+  setTimeout(() => {
+    const sel = document.getElementById('order-supplier-select');
+    if (!sel) return;
+    for (let i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].dataset.name === supplierName || sel.options[i].textContent.startsWith(supplierName)) {
+        sel.selectedIndex = i;
+        sel.dispatchEvent(new Event('change'));
+        break;
+      }
+    }
+  }, 300);
+}
+
 // ══ 사무국 공지 ══════════════════════════════════════════
 
 function toggleNoticeForm() {
@@ -2776,6 +2862,7 @@ async function loadNotices() {
 const origSwitchTab = switchTab;
 switchTab = function(tab, evt) {
   origSwitchTab(tab, null);
+  if (tab === 'suppliers') switchSubTab('dashboard');
   if (tab === 'project') loadProjects('general');
   if (tab === 'grant')   loadGrants();
   if (tab === 'notice')  loadNotices();
