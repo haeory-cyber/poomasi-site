@@ -1223,6 +1223,16 @@
       <!-- 추가 폼 (기본 숨김) -->
       <div class="card" id="supplier-add-form" style="display:none;margin-bottom:1.5rem;">
         <div class="card-title">새 발주처</div>
+        <!-- POS 농가 검색 -->
+        <div style="margin-bottom:1rem;">
+          <label class="form-label">POS 농가에서 검색</label>
+          <div style="display:flex;gap:0.5rem;">
+            <input class="form-input" id="sup-farmer-search" placeholder="농가명 검색…" style="padding:0.55rem 0.8rem;font-size:0.85rem;flex:1;">
+            <button class="btn-sm" onclick="searchFarmerForSupplier()">검색</button>
+          </div>
+          <div id="sup-farmer-results" style="margin-top:0.4rem;max-height:120px;overflow-y:auto;display:none;background:rgba(61,56,48,0.5);border:1px solid rgba(196,128,58,0.15);border-radius:6px;padding:0.4rem;"></div>
+          <div style="font-size:0.72rem;color:var(--dust);margin-top:0.3rem;">POS에 없으면 아래에 직접 입력하세요</div>
+        </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
           <div>
             <label class="form-label">업체명 *</label>
@@ -1963,6 +1973,38 @@ async function deactivateEvent(id) {
 }
 
 // ══ 발주처 관리 ══
+async function searchFarmerForSupplier() {
+  const q = document.getElementById('sup-farmer-search').value.trim();
+  if (!q) { toast('검색어를 입력하세요.'); return; }
+  const resEl = document.getElementById('sup-farmer-results');
+  resEl.style.display = 'block';
+  resEl.innerHTML = '<div style="font-size:0.8rem;color:var(--dust);">검색 중…</div>';
+
+  const { data } = await sb.from('pos_transactions')
+    .select('farmer_name')
+    .ilike('farmer_name', '%' + q + '%')
+    .limit(50);
+
+  const names = [...new Set((data || []).map(r => r.farmer_name).filter(Boolean))].sort();
+  if (!names.length) {
+    resEl.innerHTML = '<div style="font-size:0.8rem;color:var(--dust);padding:0.3rem;">검색 결과 없음 — 아래에 직접 입력하세요</div>';
+    return;
+  }
+  resEl.innerHTML = names.map(n =>
+    `<div onclick="selectFarmerAsSupplier('${n.replace(/'/g, "\'")}')"
+      style="font-size:0.82rem;color:var(--cream);padding:0.3rem 0.5rem;cursor:pointer;border-radius:4px;"
+      onmouseover="this.style.background='rgba(196,128,58,0.15)'"
+      onmouseout="this.style.background=''">${n}</div>`
+  ).join('');
+}
+
+function selectFarmerAsSupplier(name) {
+  document.getElementById('sup-name').value = name;
+  document.getElementById('sup-farmer-results').style.display = 'none';
+  document.getElementById('sup-farmer-search').value = '';
+  toast(name + ' 선택됨');
+}
+
 function showAddSupplier() {
   document.getElementById('supplier-add-form').style.display = 'block';
 }
