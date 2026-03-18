@@ -1,5 +1,6 @@
-# Python 스크립트 (민감/내부용)
+# Python 스크립트 (민감/내부용) — scripts/ 폴더는 예외
 *.py
+!scripts/*.py
 __pycache__/
 *.pyc
 
@@ -24,6 +25,7 @@ key_box/
 *.exe
 *.yml
 *.yaml
+!.github/workflows/*.yml
 Thumbs.db
 .DS_Store
 .claude/

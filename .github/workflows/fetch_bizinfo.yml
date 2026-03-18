@@ -1,0 +1,27 @@
+name: Fetch Bizinfo Grants
+
+on:
+  schedule:
+    - cron: '30 0 * * *'  # 매일 09:30 KST (UTC 00:30)
+  workflow_dispatch:        # 수동 실행 가능
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Fetch and save bizinfo grants
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          BIZINFO_KEY:  ${{ secrets.BIZINFO_KEY }}
+        run: python scripts/fetch_bizinfo.py
