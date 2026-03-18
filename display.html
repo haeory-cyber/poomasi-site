@@ -51,6 +51,14 @@ backdrop-filter:blur(8px);transition:all .3s ease}
 .pay-badge{font-size:1.7vh;padding:.5vh 1.6vh;border-radius:20px;font-weight:600;letter-spacing:.05em}
 .pay-badge.local{background:rgba(90,138,78,.35);color:#8fba7a}
 .pay-badge.cashback{background:rgba(196,128,58,.35);color:var(--amber-l)}
+.news-page{background:var(--earth)}
+.news-kicker{font-size:2.2vh;color:var(--amber);letter-spacing:.5em;font-weight:500;margin-bottom:3vh}
+.news-kicker::before{content:"";display:inline-block;width:2rem;height:1px;background:var(--amber);margin-right:1rem;vertical-align:middle}
+.news-headline{font-size:clamp(4rem,13vw,16vh);color:var(--cream);font-weight:900;line-height:1.05;letter-spacing:.02em;position:relative;z-index:1;margin-bottom:3vh}
+.news-headline .em{color:var(--amber)}
+.news-details{display:flex;flex-direction:column;gap:1.2vh;position:relative;z-index:1}
+.news-detail-item{font-size:2.8vh;color:var(--dust);letter-spacing:.1em}
+.news-detail-item::before{content:"— ";color:var(--amber);opacity:.6}
 </style></head><body>
 <a href="index.html" class="home-btn"><span class="arrow">←</span> 홈으로</a>
 <div class="slide-container">
@@ -120,6 +128,17 @@ async function loadEventSlides(){
         d.innerHTML='<span class="deco">결</span>'
           +'<div class="evt-type-badge">결제 수단 안내</div>'
           +'<div class="pay-grid">'+items+'</div>';
+      }else if(ev.type==='뉴스'){
+        d.dataset.time='9000';
+        d.className='page news-page';
+        const parts=ev.content.split('|');
+        const kicker=parts[0]||'';
+        const headline=parts[1]||'';
+        const details=parts.slice(2).map(t=>'<div class="news-detail-item">'+t+'</div>').join('');
+        d.innerHTML='<span class="deco">'+kicker.charAt(0)+'</span>'
+          +'<div class="news-kicker">'+kicker+'</div>'
+          +'<div class="news-headline">'+headline.replace('됩니다','<span class="em">됩니다</span>')+'</div>'
+          +'<div class="news-details">'+details+'</div>';
       }else{
         d.dataset.time='7000';
         d.innerHTML='<span class="deco">'+ev.content.charAt(0)+'</span>'
