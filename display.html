@@ -42,10 +42,15 @@ backdrop-filter:blur(8px);transition:all .3s ease}
 .evt-type-badge{font-size:2.2vh;color:var(--amber);letter-spacing:.5em;font-weight:500;margin-bottom:4vh}
 .evt-type-badge::before{content:"";display:inline-block;width:2rem;height:1px;background:var(--amber);margin-right:1rem;vertical-align:middle}
 .evt-content-big{font-size:clamp(2.5rem,6vw,8rem);color:var(--cream);font-weight:900;line-height:1.2;max-width:85%;position:relative;z-index:1}
-.pay-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2vh;max-width:90%;position:relative;z-index:1;margin-top:2vh}
-.pay-item{background:rgba(196,128,58,.1);border:1px solid rgba(196,128,58,.3);padding:2vh 2.5vh;border-radius:12px;font-size:3.2vh;color:var(--cream);font-weight:700;letter-spacing:.05em;text-align:center}
+.pay-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2.5vh;max-width:96%;position:relative;z-index:1;margin-top:3vh}
+.pay-item{background:rgba(242,234,216,.06);border:1px solid rgba(242,234,216,.12);padding:2.5vh 2vh;border-radius:16px;font-size:3vh;color:var(--cream);font-weight:700;letter-spacing:.05em;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.8vh;min-height:14vh}
+.pay-item.local{background:rgba(61,92,53,.3);border:1px solid rgba(90,138,78,.5)}
+.pay-item.cashback{background:rgba(196,128,58,.2);border:1px solid rgba(196,128,58,.6)}
 .pay-special{background:rgba(61,92,53,.25);border:1px solid rgba(90,138,78,.5)}
-.pay-note{display:block;font-size:1.6vh;color:var(--dust);font-weight:400;margin-top:.5vh;letter-spacing:.08em}
+.pay-note{font-size:1.8vh;font-weight:400;letter-spacing:.08em;opacity:.75}
+.pay-badge{font-size:1.7vh;padding:.5vh 1.6vh;border-radius:20px;font-weight:600;letter-spacing:.05em}
+.pay-badge.local{background:rgba(90,138,78,.35);color:#8fba7a}
+.pay-badge.cashback{background:rgba(196,128,58,.35);color:var(--amber-l)}
 </style></head><body>
 <a href="index.html" class="home-btn"><span class="arrow">←</span> 홈으로</a>
 <div class="slide-container">
@@ -99,13 +104,18 @@ async function loadEventSlides(){
       const d=document.createElement('div');
       d.className='page evt-page';
       if(ev.type==='결제수단'){
-        d.dataset.time='9000';
+        d.dataset.time='10000';
+        const cashSet=['한밭페이','품앗이페이','대전사랑카드'];
+        const localSet=['한밭페이','품앗이페이','대전사랑카드','온누리상품권','제로페이'];
         const items=ev.content.split('|').map(item=>{
           const p=item.split(':');
           const nm=p[0].trim();
-          const nt=p[1]?p[1].trim():'';
-          return '<div class="pay-item'+(nt?' pay-special':'')+'">'
-            +nm+(nt?'<span class="pay-note">'+nt+'</span>':'')+'</div>';
+          const nt=p.slice(1).join(':').trim();
+          const isCb=cashSet.some(x=>nm.includes(x));
+          const isLc=localSet.some(x=>nm.includes(x));
+          const cls=isCb?'cashback':isLc?'local':'';
+          return '<div class="pay-item'+(cls?' '+cls:'')+'">'+nm
+            +(nt?'<span class="pay-badge'+(cls?' '+cls:'')+'">'+nt+'</span>':'')+'</div>';
         }).join('');
         d.innerHTML='<span class="deco">결</span>'
           +'<div class="evt-type-badge">결제 수단 안내</div>'
