@@ -2193,11 +2193,21 @@ async function loadBizinfoGrants() {
   if (error) { wrap.innerHTML = '<div class="empty-row">공고 로딩 실패</div>'; return; }
   if (!data || !data.length) { wrap.innerHTML = '<div class="empty-row">조사된 공고 없음 (브리핑 실행 후 갱신됨)</div>'; return; }
 
+  // 중앙부처 + 대전만 표시 (경기·충청·전라 등 타 지자체 제외)
+  const EXCLUDE_REGIONS = ['경기','충청','충남','충북','전라','전북','전남','경상','경북','경남','강원','제주','인천','부산','대구','광주','울산','세종','서울'];
+  const filtered = data.filter(g => {
+    const author = g.author || '';
+    if (author.includes('대전')) return true;
+    return !EXCLUDE_REGIONS.some(k => author.includes(k));
+  });
+
   const latest = data[0].fetched_at;
   const el = document.getElementById('bizinfo-fetched-at');
   if (el) el.textContent = `(최종 조사: ${latest})`;
 
-  wrap.innerHTML = data.map(renderBizinfoCard).join('');
+  wrap.innerHTML = filtered.length
+    ? filtered.map(renderBizinfoCard).join('')
+    : '<div class="empty-row">표시할 공고 없음 (중앙부처·대전 대상)</div>';
 }
 
 async function addBizinfoToGrants(g) {
