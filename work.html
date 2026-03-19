@@ -1002,12 +1002,105 @@
     <div class="sec-header">
       <div>
         <div class="sec-label">AI경영지원실</div>
-        <div class="sec-title">AI 프로젝트 현황</div>
+        <div class="sec-title">KPI 대시보드</div>
       </div>
       <div style="display:flex;align-items:center;gap:0.8rem;">
         <span id="ai-realtime-dot" style="width:8px;height:8px;border-radius:50%;background:#6b7280;display:inline-block;" title="실시간 연결 대기중"></span>
         <button class="btn-primary" onclick="openProjectModal('ai')">+ 신규 등록</button>
       </div>
+    </div>
+
+    <!-- KPI 대시보드 -->
+    <div class="kpi-grid" id="kpi-dashboard">
+      <div class="kpi-cell">
+        <div class="kpi-num" id="kpi-revenue">20.8</div>
+        <div class="kpi-unit">억원</div>
+        <div class="kpi-label">2025 연매출 (지족점)</div>
+        <div class="kpi-sub" id="kpi-revenue-yoy" style="color:#ef4444;font-size:0.8rem;">▼ 7.7% vs 2024</div>
+      </div>
+      <div class="kpi-cell">
+        <div class="kpi-num" id="kpi-daily">573</div>
+        <div class="kpi-unit">만원</div>
+        <div class="kpi-label">일평균 매출</div>
+        <div class="kpi-sub" id="kpi-daily-yoy" style="color:#ef4444;font-size:0.8rem;">▼ 7.4% vs 2024</div>
+      </div>
+      <div class="kpi-cell">
+        <div class="kpi-num" id="kpi-ticket">24,445</div>
+        <div class="kpi-unit">원</div>
+        <div class="kpi-label">객단가</div>
+        <div class="kpi-sub" id="kpi-ticket-yoy" style="color:#22c55e;font-size:0.8rem;">▲ 0.5% vs 2024</div>
+      </div>
+      <div class="kpi-cell">
+        <div class="kpi-num" id="kpi-txn">85,125</div>
+        <div class="kpi-unit">건</div>
+        <div class="kpi-label">연간 거래건수</div>
+        <div class="kpi-sub" id="kpi-txn-yoy" style="color:#ef4444;font-size:0.8rem;">▼ 8.1% vs 2024</div>
+      </div>
+    </div>
+
+    <!-- 월별 매출 차트 -->
+    <div class="card" style="padding:1.2rem;margin-bottom:1.5rem;">
+      <div class="card-title">2025 월별 매출 추이</div>
+      <div id="monthly-chart" style="display:flex;align-items:flex-end;gap:4px;height:180px;padding-top:1rem;"></div>
+      <div id="monthly-labels" style="display:flex;gap:4px;margin-top:4px;"></div>
+    </div>
+
+    <!-- 요일별 패턴 -->
+    <div class="card" style="padding:1.2rem;margin-bottom:1.5rem;">
+      <div class="card-title">2025 요일별 평균 매출</div>
+      <div id="weekday-chart" style="display:flex;align-items:flex-end;gap:8px;height:150px;padding-top:1rem;justify-content:space-around;"></div>
+    </div>
+
+    <!-- 연도별 비교 테이블 -->
+    <div class="card" style="padding:1.2rem;margin-bottom:2rem;overflow-x:auto;">
+      <div class="card-title">연도별 비교</div>
+      <table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
+        <thead>
+          <tr style="border-bottom:1px solid rgba(196,128,58,0.3);">
+            <th style="text-align:left;padding:0.5rem;">연도</th>
+            <th style="text-align:right;padding:0.5rem;">연매출</th>
+            <th style="text-align:right;padding:0.5rem;">일평균</th>
+            <th style="text-align:right;padding:0.5rem;">객단가</th>
+            <th style="text-align:right;padding:0.5rem;">거래건수</th>
+            <th style="text-align:right;padding:0.5rem;">현금%</th>
+            <th style="text-align:right;padding:0.5rem;">카드%</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid rgba(196,128,58,0.1);">
+            <td style="padding:0.5rem;font-weight:600;">2025</td>
+            <td style="text-align:right;padding:0.5rem;">20.8억</td>
+            <td style="text-align:right;padding:0.5rem;">573만</td>
+            <td style="text-align:right;padding:0.5rem;">24,445</td>
+            <td style="text-align:right;padding:0.5rem;">85,125</td>
+            <td style="text-align:right;padding:0.5rem;">5.2%</td>
+            <td style="text-align:right;padding:0.5rem;">91.2%</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(196,128,58,0.1);">
+            <td style="padding:0.5rem;">2024</td>
+            <td style="text-align:right;padding:0.5rem;">22.5억</td>
+            <td style="text-align:right;padding:0.5rem;">619만</td>
+            <td style="text-align:right;padding:0.5rem;">24,321</td>
+            <td style="text-align:right;padding:0.5rem;">92,647</td>
+            <td style="text-align:right;padding:0.5rem;">5.9%</td>
+            <td style="text-align:right;padding:0.5rem;">92.1%</td>
+          </tr>
+          <tr>
+            <td style="padding:0.5rem;">2023</td>
+            <td style="text-align:right;padding:0.5rem;">27.0억</td>
+            <td style="text-align:right;padding:0.5rem;">747만</td>
+            <td style="text-align:right;padding:0.5rem;">25,860</td>
+            <td style="text-align:right;padding:0.5rem;">104,237</td>
+            <td style="text-align:right;padding:0.5rem;">5.8%</td>
+            <td style="text-align:right;padding:0.5rem;">94.1%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 프로젝트 현황 제목 -->
+    <div class="sec-header" style="margin-top:1rem;">
+      <div><div class="sec-title">AI 프로젝트 현황</div></div>
     </div>
 
     <div class="proj-section">
@@ -1458,6 +1551,51 @@ function initApp() {
   // 발주처
   loadSuppliers();
 }
+
+// ══ KPI 대시보드 차트 ═════════════════════════════════════
+function renderKPICharts() {
+  // 월별 매출 차트
+  const monthly = [
+    {m:'1월',v:183.7},{m:'2월',v:159.1},{m:'3월',v:180.8},{m:'4월',v:163.5},
+    {m:'5월',v:157.8},{m:'6월',v:153.4},{m:'7월',v:176.9},{m:'8월',v:196.3},
+    {m:'9월',v:195.5},{m:'10월',v:177.1},{m:'11월',v:173.0},{m:'12월',v:163.9}
+  ];
+  const maxM = Math.max(...monthly.map(d=>d.v));
+  const chartEl = document.getElementById('monthly-chart');
+  const labelEl = document.getElementById('monthly-labels');
+  if(chartEl && labelEl){
+    chartEl.innerHTML = monthly.map(d=>{
+      const h = (d.v/maxM*160);
+      const color = d.v===maxM ? 'var(--amber)' : 'rgba(196,128,58,0.5)';
+      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;">
+        <div style="font-size:0.65rem;color:var(--muted);margin-bottom:2px;">${d.v}</div>
+        <div style="width:100%;height:${h}px;background:${color};border-radius:3px 3px 0 0;min-width:16px;"></div>
+      </div>`;
+    }).join('');
+    labelEl.innerHTML = monthly.map(d=>`<div style="flex:1;text-align:center;font-size:0.65rem;color:var(--muted);">${d.m.replace('월','')}</div>`).join('');
+  }
+
+  // 요일별 패턴
+  const weekday = [
+    {d:'월',v:569},{d:'화',v:563},{d:'수',v:505},{d:'목',v:534},
+    {d:'금',v:707},{d:'토',v:622},{d:'일',v:513}
+  ];
+  const maxW = Math.max(...weekday.map(d=>d.v));
+  const wEl = document.getElementById('weekday-chart');
+  if(wEl){
+    wEl.innerHTML = weekday.map(d=>{
+      const h = (d.v/maxW*120);
+      const color = d.v===maxW ? 'var(--amber)' : 'rgba(196,128,58,0.4)';
+      return `<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;flex:1;">
+        <div style="font-size:0.75rem;color:var(--muted);margin-bottom:2px;">${d.v}만</div>
+        <div style="width:70%;height:${h}px;background:${color};border-radius:3px 3px 0 0;"></div>
+        <div style="font-size:0.8rem;margin-top:4px;font-weight:${d.d==='금'?'700':'400'};color:${d.d==='금'?'var(--amber)':'var(--text)'};">${d.d}</div>
+      </div>`;
+    }).join('');
+  }
+}
+// 페이지 로드 시 차트 렌더링
+document.addEventListener('DOMContentLoaded', renderKPICharts);
 
 // ══ 오늘의경영 ═══════════════════════════════════════════
 
