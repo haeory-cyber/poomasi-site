@@ -1,0 +1,9 @@
+{
+  "name": "탄소중립 실천 - 품앗이생협",
+  "short_name": "탄소중립실천",
+  "start_url": "/carbon/",
+  "display": "standalone",
+  "background_color": "#f5f5f5",
+  "theme_color": "#2d8f4e",
+  "icons": []
+}

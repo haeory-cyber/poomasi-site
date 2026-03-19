@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>탄소중립 실천 - 품앗이생협</title>
+  <link rel="manifest" href="/carbon/manifest.json">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #333; }
+
+    .header {
+      background: linear-gradient(135deg, #2d8f4e, #1a6b35);
+      color: white; padding: 20px; text-align: center;
+    }
+    .header h1 { font-size: 1.4em; margin-bottom: 4px; }
+    .header p { font-size: 0.85em; opacity: 0.9; }
+
+    .summary {
+      background: white; margin: 16px; border-radius: 12px; padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .summary-grid {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; text-align: center;
+    }
+    .summary-item .number { font-size: 1.8em; font-weight: bold; color: #2d8f4e; }
+    .summary-item .label { font-size: 0.75em; color: #888; margin-top: 4px; }
+
+    .scan-btn {
+      display: block; margin: 16px auto; padding: 16px 40px;
+      background: #2d8f4e; color: white; border: none; border-radius: 50px;
+      font-size: 1.1em; font-weight: bold; cursor: pointer;
+      box-shadow: 0 4px 12px rgba(45,143,78,0.3);
+    }
+    .scan-btn:active { transform: scale(0.97); }
+
+    .section { margin: 16px; }
+    .section h2 { font-size: 1em; color: #555; margin-bottom: 12px; }
+
+    .activity-list { list-style: none; }
+    .activity-item {
+      background: white; border-radius: 10px; padding: 14px 16px;
+      margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .activity-item .info .name { font-weight: 600; font-size: 0.95em; }
+    .activity-item .info .time { font-size: 0.75em; color: #999; margin-top: 2px; }
+    .activity-item .points { color: #2d8f4e; font-weight: bold; font-size: 1.1em; }
+
+    .login-screen {
+      text-align: center; padding: 60px 20px;
+    }
+    .login-screen h2 { margin-bottom: 12px; color: #333; }
+    .login-screen p { color: #888; margin-bottom: 30px; font-size: 0.9em; }
+    .kakao-btn {
+      display: inline-block; padding: 14px 40px;
+      background: #FEE500; color: #3C1E1E; border: none; border-radius: 8px;
+      font-size: 1em; font-weight: bold; cursor: pointer; text-decoration: none;
+    }
+
+    .nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: white; border-top: 1px solid #eee;
+      display: flex; justify-content: space-around; padding: 10px 0;
+    }
+    .nav a {
+      text-decoration: none; color: #999; text-align: center; font-size: 0.75em;
+    }
+    .nav a.active { color: #2d8f4e; }
+    .nav a div { font-size: 1.5em; margin-bottom: 2px; }
+
+    body { padding-bottom: 70px; }
+
+    .activity-types { margin: 16px; }
+    .type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .type-card {
+      background: white; border-radius: 12px; padding: 16px; text-align: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .type-card .icon { font-size: 2em; margin-bottom: 8px; }
+    .type-card .name { font-weight: 600; font-size: 0.9em; margin-bottom: 4px; }
+    .type-card .pts { color: #2d8f4e; font-weight: bold; font-size: 0.85em; }
+
+    #app-main { display: none; }
+    #login-screen { display: block; }
+  </style>
+</head>
+<body>
+
+<!-- 로그인 화면 -->
+<div id="login-screen" class="login-screen">
+  <div style="font-size: 3em; margin-bottom: 20px;">&#127807;</div>
+  <h2>탄소중립 실천포인트</h2>
+  <p>매장에서 친환경 실천을 인증하고<br>탄소중립포인트를 받으세요!</p>
+  <a href="javascript:demoLogin()" class="kakao-btn">카카오로 시작하기</a>
+  <div style="margin-top: 12px; font-size: 0.8em; color: #aaa;">(현재 데모 모드)</div>
+  <div style="margin-top: 40px; color: #bbb; font-size: 0.8em;">
+    품앗이생협 탄소중립실천포인트 플랫폼
+  </div>
+</div>
+
+<!-- 메인 화면 (로그인 후) -->
+<div id="app-main">
+  <div class="header">
+    <h1>&#127807; 탄소중립 실천</h1>
+    <p id="user-greeting">환영합니다</p>
+  </div>
+
+  <div class="summary">
+    <div class="summary-grid">
+      <div class="summary-item">
+        <div class="number" id="total-points">0</div>
+        <div class="label">누적 포인트</div>
+      </div>
+      <div class="summary-item">
+        <div class="number" id="total-count">0</div>
+        <div class="label">실천 횟수</div>
+      </div>
+      <div class="summary-item">
+        <div class="number" id="co2-reduced">0g</div>
+        <div class="label">CO2 감축</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="scan-btn" onclick="location.href='/carbon/scan.html'">QR 스캔하기</button>
+
+  <div class="activity-types">
+    <h2 style="font-size:1em; color:#555; margin-bottom:12px;">실천항목</h2>
+    <div class="type-grid">
+      <div class="type-card"><div class="icon">&#128722;</div><div class="name">장바구니 이용</div><div class="pts">+50P</div></div>
+      <div class="type-card"><div class="icon">&#129379;</div><div class="name">개인용기 포장</div><div class="pts">+500P</div></div>
+      <div class="type-card"><div class="icon">&#127793;</div><div class="name">친환경제품 구매</div><div class="pts">+500P</div></div>
+      <div class="type-card"><div class="icon">&#129704;</div><div class="name">리필스테이션</div><div class="pts">+500P</div></div>
+      <div class="type-card"><div class="icon">&#128241;</div><div class="name">전자영수증</div><div class="pts">+10P</div></div>
+      <div class="type-card"><div class="icon">&#127794;</div><div class="name">나무심기</div><div class="pts">+3,000P</div></div>
+      <div class="type-card"><div class="icon">&#9851;&#65039;</div><div class="name">재활용품 배출</div><div class="pts">+300P</div></div>
+      <div class="type-card"><div class="icon">&#128230;</div><div class="name">재생원료 제품</div><div class="pts">+100P</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>최근 실천 이력</h2>
+    <ul class="activity-list" id="activity-list">
+      <li class="activity-item">
+        <div class="info">
+          <div class="name">아직 실천 기록이 없습니다</div>
+          <div class="time">QR을 스캔해 첫 실천을 시작하세요</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- 하단 네비게이션 -->
+<nav class="nav" id="nav" style="display:none;">
+  <a href="/carbon/" class="active"><div>&#127968;</div>홈</a>
+  <a href="/carbon/scan.html"><div>&#128247;</div>스캔</a>
+  <a href="/carbon/history.html"><div>&#128203;</div>이력</a>
+  <a href="/carbon/stores.html"><div>&#128205;</div>매장</a>
+</nav>
+
+<script>
+// 데모 모드 — API 연결 전 화면 확인용
+function demoLogin() {
+  localStorage.setItem('carbon_user_id', 'demo');
+  localStorage.setItem('carbon_user_name', '후니님');
+  showMain();
+}
+
+function showMain() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-main').style.display = 'block';
+  document.getElementById('nav').style.display = 'flex';
+  const name = localStorage.getItem('carbon_user_name') || '사용자';
+  document.getElementById('user-greeting').textContent = name + '님, 환영합니다';
+
+  // 데모 데이터
+  document.getElementById('total-points').textContent = '1,550';
+  document.getElementById('total-count').textContent = '5';
+  document.getElementById('co2-reduced').textContent = '2.3kg';
+
+  document.getElementById('activity-list').innerHTML = [
+    { name: '장바구니 이용', time: '2026-03-19 14:30', points: 50, store: '품앗이마을 지족점' },
+    { name: '개인용기 포장', time: '2026-03-19 14:30', points: 500, store: '품앗이마을 지족점' },
+    { name: '친환경제품 구매', time: '2026-03-18 11:20', points: 500, store: '품앗이마을 관저점' },
+    { name: '리필스테이션', time: '2026-03-18 11:20', points: 500, store: '품앗이마을 관저점' },
+  ].map(a => `
+    <li class="activity-item">
+      <div class="info">
+        <div class="name">${a.name}</div>
+        <div class="time">${a.time} | ${a.store}</div>
+      </div>
+      <div class="points">+${a.points}P</div>
+    </li>
+  `).join('');
+}
+
+// 이미 로그인된 경우
+if (localStorage.getItem('carbon_user_id')) {
+  showMain();
+}
+</script>
+</body>
+</html>
