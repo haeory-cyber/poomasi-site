@@ -311,6 +311,37 @@
     margin-bottom: 1rem;
   }
 
+  /* ── 지점 탭 ───────────────────────────────────────── */
+  .branch-tabs {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .branch-btn {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--dust);
+    padding: 0.5rem 1.2rem;
+    font-size: 0.82rem;
+    font-family: 'Noto Sans KR', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.03em;
+  }
+
+  .branch-btn:hover {
+    border-color: var(--amber);
+    color: var(--cream);
+  }
+
+  .branch-btn.active {
+    background: rgba(196,128,58,0.15);
+    border-color: var(--amber);
+    color: var(--amber);
+    font-weight: 500;
+  }
+
   /* ── 오늘의경영 ─────────────────────────────────────── */
   .kpi-grid {
     display: grid;
@@ -854,6 +885,13 @@
       <div class="sec-label">경영 현황</div>
       <input class="date-input" type="date" id="today-date">
       <button class="btn-sm" onclick="loadToday()">조회</button>
+    </div>
+
+    <!-- 지점 선택 탭 -->
+    <div class="branch-tabs" id="branch-tabs">
+      <button class="branch-btn active" data-branch="all" onclick="switchBranch('all', this)">전체</button>
+      <button class="branch-btn" data-branch="jijok" onclick="switchBranch('jijok', this)">지족점</button>
+      <button class="branch-btn" data-branch="gwanjeo" onclick="switchBranch('gwanjeo', this)">관저점</button>
     </div>
 
     <!-- KPI 바 -->
@@ -1599,11 +1637,21 @@ document.addEventListener('DOMContentLoaded', renderKPICharts);
 
 // ══ 오늘의경영 ═══════════════════════════════════════════
 
+let currentBranch = 'all';
+
+function switchBranch(branch, btn) {
+  currentBranch = branch;
+  document.querySelectorAll('.branch-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadToday();
+}
+
 async function loadToday() {
   const date = document.getElementById('today-date').value;
+  const branch = currentBranch;
 
   // KPI
-  const { data: ds } = await sb.from('daily_sales').select('*').eq('date', date).maybeSingle();
+  const { data: ds } = await sb.from('daily_sales').select('*').eq('date', date).eq('branch', branch).maybeSingle();
   if (ds) {
     document.getElementById('kpi-revenue').textContent    = fmtKrw(ds.revenue);
     document.getElementById('kpi-customers').textContent  = ds.customers;
@@ -1615,10 +1663,11 @@ async function loadToday() {
   } else {
     ['kpi-revenue','kpi-customers','kpi-avg-basket','kpi-carbon','kpi-nopack','kpi-farmers']
       .forEach(id => document.getElementById(id).textContent = '—');
+    const tEl=document.getElementById('kpi-carbon-detail');if(tEl)tEl.textContent='';
   }
 
   // 농가별 판매
-  const { data: fs } = await sb.from('farmer_sales').select('*').eq('date', date).order('rank', { ascending: true });
+  const { data: fs } = await sb.from('farmer_sales').select('*').eq('date', date).eq('branch', branch).order('rank', { ascending: true });
   const fWrap = document.getElementById('farmer-table-wrap');
   if (!fs || fs.length === 0) {
     fWrap.innerHTML = '<div class="empty-row">해당 날짜 데이터 없음</div>';
@@ -1646,7 +1695,7 @@ async function loadToday() {
   // 최근 7일
   const from7 = new Date(date);
   from7.setDate(from7.getDate() - 6);
-  const { data: weekly } = await sb.from('daily_sales').select('date,revenue,customers').gte('date', from7.toISOString().slice(0,10)).order('date', { ascending: true });
+  const { data: weekly } = await sb.from('daily_sales').select('date,revenue,customers').eq('branch', branch).gte('date', from7.toISOString().slice(0,10)).order('date', { ascending: true });
   const wWrap = document.getElementById('weekly-table-wrap');
   if (!weekly || weekly.length === 0) {
     wWrap.innerHTML = '<div class="empty-row">최근 7일 데이터 없음</div>';
