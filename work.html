@@ -948,6 +948,7 @@
       <button class="tab-btn"       onclick="switchTab('suppliers', event)">발주</button>
       <button class="tab-btn"       onclick="switchTab('feedback', event)">조합원말씀</button>
       <button class="tab-btn"       onclick="switchTab('notice', event)">사무국공지</button>
+      <button class="tab-btn"       onclick="switchTab('attend', event)">출퇴근부</button>
       <button class="tab-btn"       onclick="switchTab('archive', event)">자료실</button>
     </nav>
   </div>
@@ -1605,6 +1606,78 @@
     <div id="notice-list"><div class="loading-row">로딩 중…</div></div>
   </section>
 
+  <!-- ══ TAB: 출퇴근부 ══ -->
+  <section class="tab-content" id="tab-attend">
+    <div class="sec-header">
+      <div>
+        <div class="sec-label">ATTENDANCE</div>
+        <div class="sec-title">출퇴근부</div>
+      </div>
+      <div style="display:flex;gap:0.5rem;align-items:center;">
+        <select id="attend-store-filter" onchange="loadAttendance()" style="padding:0.4rem 0.6rem;background:var(--surface);color:var(--cream);border:1px solid var(--border);border-radius:4px;font-size:0.8rem;">
+          <option value="">전체 매장</option>
+          <option value="지족점">지족점</option>
+          <option value="관저점">관저점</option>
+        </select>
+        <input type="date" id="attend-date-filter" onchange="loadAttendance()" style="padding:0.4rem 0.6rem;background:var(--surface);color:var(--cream);border:1px solid var(--border);border-radius:4px;font-size:0.8rem;">
+      </div>
+    </div>
+
+    <!-- 오늘 요약 -->
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="card-title">오늘 출근 현황</div>
+      <div id="attend-summary" style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:0.5rem;">
+        <div class="loading-row">로딩 중…</div>
+      </div>
+    </div>
+
+    <!-- 출퇴근 기록 테이블 -->
+    <div class="card">
+      <div class="card-title">출퇴근 기록</div>
+      <div style="overflow-x:auto;margin-top:0.5rem;">
+        <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border);color:var(--dust);text-align:left;">
+              <th style="padding:0.5rem 0.4rem;">이름</th>
+              <th style="padding:0.5rem 0.4rem;">매장</th>
+              <th style="padding:0.5rem 0.4rem;">날짜</th>
+              <th style="padding:0.5rem 0.4rem;">출근</th>
+              <th style="padding:0.5rem 0.4rem;">퇴근</th>
+              <th style="padding:0.5rem 0.4rem;">근무(분)</th>
+            </tr>
+          </thead>
+          <tbody id="attend-tbody">
+            <tr><td colspan="6" class="loading-row">로딩 중…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 월간 급여 요약 -->
+    <div class="card" style="margin-top:1rem;">
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+        월간 급여 요약
+        <select id="attend-month-filter" onchange="loadMonthlySummary()" style="padding:0.3rem 0.5rem;background:var(--surface);color:var(--cream);border:1px solid var(--border);border-radius:4px;font-size:0.78rem;"></select>
+      </div>
+      <div style="overflow-x:auto;margin-top:0.5rem;">
+        <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border);color:var(--dust);text-align:left;">
+              <th style="padding:0.5rem 0.4rem;">이름</th>
+              <th style="padding:0.5rem 0.4rem;">매장</th>
+              <th style="padding:0.5rem 0.4rem;">출근일수</th>
+              <th style="padding:0.5rem 0.4rem;">총근무(시간)</th>
+              <th style="padding:0.5rem 0.4rem;">예상급여</th>
+            </tr>
+          </thead>
+          <tbody id="attend-monthly-tbody">
+            <tr><td colspan="5" class="loading-row">로딩 중…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
   <!-- ══ TAB: 자료실 ══ -->
   <section class="tab-content" id="tab-archive">
     <div class="sec-header">
@@ -1731,7 +1804,7 @@ sb.auth.getSession().then(({ data: { session } }) => {
 });
 
 // ── 탭 전환 ──────────────────────────────────────────────
-const TAB_IDS = { today: 'tab-today', action: 'tab-action', sms: 'tab-sms', event: 'tab-event', suppliers: 'tab-suppliers', feedback: 'tab-feedback', notice: 'tab-notice', project: 'tab-project', grant: 'tab-grant', ai: 'tab-ai', archive: 'tab-archive' };
+const TAB_IDS = { today: 'tab-today', action: 'tab-action', sms: 'tab-sms', event: 'tab-event', suppliers: 'tab-suppliers', feedback: 'tab-feedback', notice: 'tab-notice', project: 'tab-project', grant: 'tab-grant', ai: 'tab-ai', attend: 'tab-attend', archive: 'tab-archive' };
 
 function switchTab(key, evt) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -1740,6 +1813,7 @@ function switchTab(key, evt) {
   if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
   if (key === 'sms') loadFarmerList();
   if (key === 'feedback') loadFeedback();
+  if (key === 'attend') { initAttendTab(); loadAttendance(); loadMonthlySummary(); }
 }
 
 // ── 공통 유틸 ─────────────────────────────────────────────
@@ -3418,6 +3492,98 @@ async function fbToOrder(id, btn) {
     if (badge && count > 0) { badge.textContent = count; badge.style.display = 'inline'; }
   } catch(e) {}
 })();
+
+// ── 출퇴근부 ──────────────────────────────────────────────
+let employeeMap = {};
+
+function initAttendTab() {
+  const dateInput = document.getElementById('attend-date-filter');
+  if (!dateInput.value) dateInput.value = new Date().toISOString().slice(0, 10);
+  const monthSel = document.getElementById('attend-month-filter');
+  if (monthSel.options.length === 0) {
+    const now = new Date();
+    for (let i = 0; i < 6; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const val = d.toISOString().slice(0, 7);
+      const label = d.getFullYear() + '년 ' + (d.getMonth() + 1) + '월';
+      monthSel.add(new Option(label, val));
+    }
+  }
+}
+
+async function loadEmployees() {
+  if (Object.keys(employeeMap).length > 0) return;
+  const { data } = await sb.from('employee').select('*');
+  if (data) data.forEach(e => { employeeMap[e.id] = e; });
+}
+
+async function loadAttendance() {
+  await loadEmployees();
+  const store = document.getElementById('attend-store-filter').value;
+  const date = document.getElementById('attend-date-filter').value;
+  let q = sb.from('attendance').select('*').order('check_in', { ascending: false });
+  if (store) q = q.eq('store', store);
+  if (date) q = q.eq('date', date);
+  q = q.limit(100);
+  const { data, error } = await q;
+  const tbody = document.getElementById('attend-tbody');
+  if (error || !data) { tbody.innerHTML = '<tr><td colspan="6" style="padding:0.8rem;color:var(--dust);">조회 실패</td></tr>'; return; }
+  if (data.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="padding:0.8rem;color:var(--dust);">기록 없음</td></tr>'; return; }
+  tbody.innerHTML = data.map(r => {
+    const emp = employeeMap[r.employee_id] || {};
+    const ci = r.check_in ? new Date(r.check_in).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '-';
+    const co = r.check_out ? new Date(r.check_out).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '근무중';
+    const mins = r.work_minutes != null ? r.work_minutes : '-';
+    return '<tr style="border-bottom:1px solid var(--border);">' +
+      '<td style="padding:0.5rem 0.4rem;">' + (emp.name || r.employee_id) + '</td>' +
+      '<td style="padding:0.5rem 0.4rem;">' + (r.store || '-') + '</td>' +
+      '<td style="padding:0.5rem 0.4rem;">' + (r.date || '-') + '</td>' +
+      '<td style="padding:0.5rem 0.4rem;color:#4ade80;">' + ci + '</td>' +
+      '<td style="padding:0.5rem 0.4rem;color:' + (r.check_out ? '#f87171' : 'var(--amber)') + ';">' + co + '</td>' +
+      '<td style="padding:0.5rem 0.4rem;">' + mins + '</td></tr>';
+  }).join('');
+
+  // 오늘 요약
+  const today = new Date().toISOString().slice(0, 10);
+  const summaryEl = document.getElementById('attend-summary');
+  const todayData = date === today ? data : [];
+  const checkedIn = todayData.filter(r => r.check_in && !r.check_out).length;
+  const done = todayData.filter(r => r.check_out).length;
+  const total = Object.values(employeeMap).filter(e => e.is_active).length;
+  summaryEl.innerHTML =
+    '<div style="text-align:center;padding:0.5rem 1rem;"><div style="font-size:1.5rem;font-weight:700;color:#4ade80;">' + checkedIn + '</div><div style="font-size:0.72rem;color:var(--dust);">근무중</div></div>' +
+    '<div style="text-align:center;padding:0.5rem 1rem;"><div style="font-size:1.5rem;font-weight:700;color:var(--dust);">' + done + '</div><div style="font-size:0.72rem;color:var(--dust);">퇴근</div></div>' +
+    '<div style="text-align:center;padding:0.5rem 1rem;"><div style="font-size:1.5rem;font-weight:700;color:var(--cream);">' + total + '</div><div style="font-size:0.72rem;color:var(--dust);">전체 직원</div></div>';
+}
+
+async function loadMonthlySummary() {
+  await loadEmployees();
+  const month = document.getElementById('attend-month-filter').value;
+  if (!month) return;
+  const startDate = month + '-01';
+  const endDate = month + '-31';
+  const { data } = await sb.from('attendance').select('*').gte('date', startDate).lte('date', endDate);
+  const tbody = document.getElementById('attend-monthly-tbody');
+  if (!data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="padding:0.8rem;color:var(--dust);">기록 없음</td></tr>'; return; }
+  const summary = {};
+  data.forEach(r => {
+    if (!summary[r.employee_id]) summary[r.employee_id] = { days: new Set(), totalMin: 0 };
+    summary[r.employee_id].days.add(r.date);
+    if (r.work_minutes) summary[r.employee_id].totalMin += r.work_minutes;
+  });
+  tbody.innerHTML = Object.entries(summary).map(([eid, s]) => {
+    const emp = employeeMap[eid] || {};
+    const hours = (s.totalMin / 60).toFixed(1);
+    const wage = emp.hourly_wage || 10320;
+    const pay = Math.round(s.totalMin / 60 * wage).toLocaleString('ko-KR');
+    return '<tr style="border-bottom:1px solid var(--border);">' +
+      '<td style="padding:0.5rem 0.4rem;">' + (emp.name || eid) + '</td>' +
+      '<td style="padding:0.5rem 0.4rem;">' + (emp.store || '-') + '</td>' +
+      '<td style="padding:0.5rem 0.4rem;">' + s.days.size + '일</td>' +
+      '<td style="padding:0.5rem 0.4rem;">' + hours + '시간</td>' +
+      '<td style="padding:0.5rem 0.4rem;color:var(--amber);">₩' + pay + '</td></tr>';
+  }).join('');
+}
 </script>
 </body>
 </html>
