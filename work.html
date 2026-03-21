@@ -251,6 +251,28 @@
     font-weight: 700;
   }
 
+  .sub-tab-bar {
+    display: flex;
+    gap: 0;
+    padding: 0 2rem;
+    background: rgba(30,25,20,0.6);
+    border-bottom: 1px solid rgba(196,128,58,0.08);
+  }
+  .sub-tab-btn {
+    background: none;
+    border: none;
+    color: var(--dust);
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.78rem;
+    padding: 0.6rem 1.2rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .sub-tab-btn:hover { color: var(--cream); }
+  .sub-tab-btn.active { color: var(--amber); border-bottom-color: var(--amber); font-weight: 600; }
+
   /* Content area */
   .tab-content {
     padding: 2rem;
@@ -393,6 +415,8 @@
     .app-header { padding: 0 1rem; }
     .tab-bar { padding: 0 0.5rem; overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .tab-btn { padding: 0.85rem 0.8rem; font-size: 0.8rem; flex-shrink: 0; }
+    .sub-tab-bar { padding: 0 0.5rem; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .sub-tab-btn { padding: 0.5rem 0.7rem; font-size: 0.72rem; flex-shrink: 0; }
     .sticky-nav {
       width: 100%;
     }
@@ -940,17 +964,13 @@
     <nav class="tab-bar">
       <button class="tab-btn active" onclick="switchTab('today', event)">오늘의경영</button>
       <button class="tab-btn"       onclick="switchTab('action', event)">오늘할일</button>
-      <button class="tab-btn"       onclick="switchTab('project', event)">프로젝트관리</button>
-      <button class="tab-btn"       onclick="switchTab('grant', event)">지원사업</button>
-      <button class="tab-btn"       onclick="switchTab('ai', event)">AI경영지원실</button>
-      <button class="tab-btn"       onclick="switchTab('sms', event)">이음SMS</button>
-      <button class="tab-btn"       onclick="switchTab('event', event)">이벤트 등록</button>
-      <button class="tab-btn"       onclick="switchTab('suppliers', event)">발주</button>
-      <button class="tab-btn"       onclick="switchTab('feedback', event)">조합원말씀</button>
-      <button class="tab-btn"       onclick="switchTab('notice', event)">사무국공지</button>
-      <button class="tab-btn"       onclick="switchTab('attend', event)">출퇴근부</button>
+      <button class="tab-btn"       onclick="switchTab('store', event)">매장운영</button>
+      <button class="tab-btn"       onclick="switchTab('mgmt', event)">경영관리</button>
+      <button class="tab-btn"       onclick="switchTab('comm', event)">소통</button>
       <button class="tab-btn"       onclick="switchTab('archive', event)">자료실</button>
     </nav>
+    <!-- 서브탭 바 -->
+    <nav class="sub-tab-bar" id="sub-tab-bar" style="display:none;"></nav>
   </div>
 
   <!-- ══ TAB: 오늘의경영 ══════════════════════════════════ -->
@@ -1806,14 +1826,66 @@ sb.auth.getSession().then(({ data: { session } }) => {
 // ── 탭 전환 ──────────────────────────────────────────────
 const TAB_IDS = { today: 'tab-today', action: 'tab-action', sms: 'tab-sms', event: 'tab-event', suppliers: 'tab-suppliers', feedback: 'tab-feedback', notice: 'tab-notice', project: 'tab-project', grant: 'tab-grant', ai: 'tab-ai', attend: 'tab-attend', archive: 'tab-archive' };
 
+const SUB_TABS = {
+  store: [
+    { key: 'suppliers', label: '발주' },
+    { key: 'sms', label: '이음SMS' },
+    { key: 'event', label: '이벤트 등록' },
+    { key: 'attend', label: '출퇴근부' }
+  ],
+  mgmt: [
+    { key: 'project', label: '프로젝트관리' },
+    { key: 'grant', label: '지원사업' },
+    { key: 'ai', label: 'AI경영지원실' }
+  ],
+  comm: [
+    { key: 'feedback', label: '조합원말씀' },
+    { key: 'notice', label: '사무국공지' }
+  ]
+};
+
 function switchTab(key, evt) {
+  const subBar = document.getElementById('sub-tab-bar');
+
+  // 그룹 탭이면 서브탭 표시 후 첫 번째 서브탭 활성화
+  if (SUB_TABS[key]) {
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
+    const subs = SUB_TABS[key];
+    subBar.innerHTML = subs.map((s, i) =>
+      '<button class="sub-tab-btn' + (i === 0 ? ' active' : '') + '" onclick="switchGroupSub(\'' + s.key + '\', event)">' + s.label + '</button>'
+    ).join('');
+    subBar.style.display = 'flex';
+    switchGroupSub(subs[0].key, null);
+    return;
+  }
+
+  // 일반 탭
+  subBar.style.display = 'none';
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
   document.getElementById(TAB_IDS[key]).classList.add('active');
   if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
+  onTabLoad(key);
+}
+
+function switchGroupSub(key, evt) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.sub-tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById(TAB_IDS[key]).classList.add('active');
+  if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
+  onTabLoad(key);
+}
+
+function onTabLoad(key) {
   if (key === 'sms') loadFarmerList();
   if (key === 'feedback') loadFeedback();
   if (key === 'attend') { initAttendTab(); loadAttendance(); loadMonthlySummary(); }
+  if (key === 'suppliers') { if (typeof switchSubTab === 'function') switchSubTab('dashboard'); }
+  if (key === 'project') { if (typeof loadProjects === 'function') loadProjects('general'); }
+  if (key === 'grant') { if (typeof loadGrants === 'function') loadGrants(); }
+  if (key === 'notice') { if (typeof loadNotices === 'function') loadNotices(); }
+  if (key === 'ai') { if (typeof loadProjects === 'function') loadProjects('ai'); if (typeof initAiRealtime === 'function' && !aiRealtimeChannel) initAiRealtime(); }
 }
 
 // ── 공통 유틸 ─────────────────────────────────────────────
@@ -3364,21 +3436,7 @@ async function loadNotices() {
   }).join('');
 }
 
-// ══ 탭 전환 시 데이터 로딩 연결 ══════════════════════════
-
-const origSwitchTab = switchTab;
-switchTab = function(tab, evt) {
-  origSwitchTab(tab, null);
-  if (tab === 'suppliers') switchSubTab('dashboard');
-  if (tab === 'project') loadProjects('general');
-  if (tab === 'grant')   loadGrants();
-  if (tab === 'notice')  loadNotices();
-  if (tab === 'feedback') loadFeedback();
-  if (tab === 'ai') {
-    loadProjects('ai');
-    if (!aiRealtimeChannel) initAiRealtime();
-  }
-};
+// ══ 탭 전환 시 데이터 로딩 — onTabLoad()로 통합됨 ══════════════════════════
 
 // ── 조합원말씀 ──────────────────────────────────────────────
 const FB_CAT_LABEL = { item_request: '물건 요청', suggestion: '건의', complaint: '매장 불만', staff_complaint: '직원 관련' };
