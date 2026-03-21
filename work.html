@@ -946,6 +946,7 @@
       <button class="tab-btn"       onclick="switchTab('sms', event)">이음SMS</button>
       <button class="tab-btn"       onclick="switchTab('event', event)">이벤트 등록</button>
       <button class="tab-btn"       onclick="switchTab('suppliers', event)">발주</button>
+      <button class="tab-btn"       onclick="switchTab('feedback', event)">조합원말씀</button>
       <button class="tab-btn"       onclick="switchTab('notice', event)">사무국공지</button>
     </nav>
   </div>
@@ -1545,6 +1546,33 @@
     </div>
   </section>
 
+  <!-- ══ TAB: 조합원말씀 ══ -->
+  <section class="tab-content" id="tab-feedback">
+    <div class="sec-header">
+      <div>
+        <div class="sec-label">FEEDBACK</div>
+        <div class="sec-title">조합원 말씀 <span id="fb-badge" style="background:var(--red);color:#fff;font-size:.7rem;padding:.15rem .5rem;border-radius:10px;margin-left:.5rem;display:none">0</span></div>
+      </div>
+      <div style="display:flex;gap:.5rem;align-items:center;">
+        <select class="form-input" id="fb-filter" onchange="loadFeedback()" style="padding:.4rem .6rem;font-size:.78rem;width:auto;">
+          <option value="all">전체</option>
+          <option value="item_request">물건 요청</option>
+          <option value="suggestion">건의</option>
+          <option value="complaint">매장 불만</option>
+          <option value="staff_complaint">직원 관련</option>
+        </select>
+        <select class="form-input" id="fb-status-filter" onchange="loadFeedback()" style="padding:.4rem .6rem;font-size:.78rem;width:auto;">
+          <option value="new">미처리</option>
+          <option value="in_progress">처리중</option>
+          <option value="done">완료</option>
+          <option value="all">전체</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="fb-list"><div class="loading-row">로딩 중…</div></div>
+  </section>
+
   <!-- ══ TAB: 사무국공지 ══ -->
   <section class="tab-content" id="tab-notice">
     <div class="sec-header">
@@ -1629,7 +1657,7 @@ sb.auth.getSession().then(({ data: { session } }) => {
 });
 
 // ── 탭 전환 ──────────────────────────────────────────────
-const TAB_IDS = { today: 'tab-today', action: 'tab-action', sms: 'tab-sms', event: 'tab-event', suppliers: 'tab-suppliers', notice: 'tab-notice', project: 'tab-project', grant: 'tab-grant', ai: 'tab-ai' };
+const TAB_IDS = { today: 'tab-today', action: 'tab-action', sms: 'tab-sms', event: 'tab-event', suppliers: 'tab-suppliers', feedback: 'tab-feedback', notice: 'tab-notice', project: 'tab-project', grant: 'tab-grant', ai: 'tab-ai' };
 
 function switchTab(key, evt) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -1637,6 +1665,7 @@ function switchTab(key, evt) {
   document.getElementById(TAB_IDS[key]).classList.add('active');
   if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
   if (key === 'sms') loadFarmerList();
+  if (key === 'feedback') loadFeedback();
 }
 
 // ── 공통 유틸 ─────────────────────────────────────────────
@@ -3196,11 +3225,125 @@ switchTab = function(tab, evt) {
   if (tab === 'project') loadProjects('general');
   if (tab === 'grant')   loadGrants();
   if (tab === 'notice')  loadNotices();
+  if (tab === 'feedback') loadFeedback();
   if (tab === 'ai') {
     loadProjects('ai');
     if (!aiRealtimeChannel) initAiRealtime();
   }
 };
+
+// ── 조합원말씀 ──────────────────────────────────────────────
+const FB_CAT_LABEL = { item_request: '물건 요청', suggestion: '건의', complaint: '매장 불만', staff_complaint: '직원 관련' };
+const FB_STATUS_LABEL = { new: '미처리', in_progress: '처리중', done: '완료' };
+
+async function loadFeedback() {
+  const listEl = document.getElementById('fb-list');
+  listEl.innerHTML = '<div class="loading-row">로딩 중…</div>';
+
+  const catFilter = document.getElementById('fb-filter').value;
+  const statusFilter = document.getElementById('fb-status-filter').value;
+
+  let query = sb.from('customer_feedback').select('*').order('created_at', { ascending: false });
+
+  if (catFilter !== 'all') query = query.eq('category', catFilter);
+  if (statusFilter !== 'all') query = query.eq('status', statusFilter);
+
+  // owner_only visibility 체크: 현재 사용자 이메일 확인
+  const { data: { session } } = await sb.auth.getSession();
+  const userEmail = session?.user?.email || '';
+  const isOwner = (userEmail === 'haeory@gmail.com' || userEmail === 'banyasol1207@gmail.com');
+
+  const { data, error } = await query.limit(50);
+
+  if (error) { listEl.innerHTML = '<div class="loading-row">로드 실패</div>'; return; }
+
+  // owner_only 필터링 (owner가 아니면 숨김)
+  const filtered = isOwner ? data : data.filter(r => r.visibility !== 'owner_only');
+
+  // 미처리 배지 업데이트
+  const { count } = await sb.from('customer_feedback').select('*', { count: 'exact', head: true }).eq('status', 'new');
+  const badge = document.getElementById('fb-badge');
+  if (count > 0) { badge.textContent = count; badge.style.display = 'inline'; }
+  else { badge.style.display = 'none'; }
+
+  if (!filtered.length) { listEl.innerHTML = '<div class="loading-row">접수된 건이 없습니다</div>'; return; }
+
+  listEl.innerHTML = filtered.map(r => {
+    const catColor = r.category === 'complaint' || r.category === 'staff_complaint' ? 'var(--red)' : 'var(--amber)';
+    const date = new Date(r.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const contactLine = r.contact ? `<div style="font-size:.72rem;color:var(--dust);margin-top:.3rem;">연락처: ${r.contact}</div>` : '';
+    const noteLine = r.note ? `<div style="font-size:.78rem;color:var(--green-light);margin-top:.3rem;padding:.3rem .5rem;background:rgba(61,92,53,.15);border-radius:2px;">메모: ${r.note}</div>` : '';
+    const ownerTag = r.visibility === 'owner_only' ? ' <span style="font-size:.65rem;color:var(--red);">[비공개]</span>' : '';
+
+    return `<div class="card" style="margin-bottom:.8rem;padding:1rem;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.5rem;">
+        <div>
+          <span style="font-size:.72rem;color:${catColor};border:1px solid ${catColor};padding:.1rem .4rem;border-radius:2px;">${FB_CAT_LABEL[r.category] || r.category}</span>${ownerTag}
+          <span style="font-size:.7rem;color:var(--dust);margin-left:.5rem;">${date}</span>
+        </div>
+        <div style="display:flex;gap:.3rem;">
+          ${r.status === 'new' ? `<button class="btn-sm" onclick="updateFbStatus('${r.id}','in_progress')" style="font-size:.7rem;padding:.2rem .5rem;">처리중</button>` : ''}
+          ${r.status !== 'done' ? `<button class="btn-sm" onclick="updateFbStatus('${r.id}','done')" style="font-size:.7rem;padding:.2rem .5rem;background:var(--green);color:#fff;">완료</button>` : `<span style="font-size:.7rem;color:var(--green-light);">완료</span>`}
+        </div>
+      </div>
+      <div style="font-size:.88rem;line-height:1.5;white-space:pre-wrap;">${escapeHtml(r.content)}</div>
+      ${contactLine}
+      ${noteLine}
+      ${r.status !== 'done' ? `<div style="margin-top:.5rem;display:flex;gap:.3rem;">
+        <input class="form-input" id="fb-note-${r.id}" placeholder="메모 추가" style="flex:1;padding:.3rem .5rem;font-size:.78rem;" value="${escapeHtml(r.note || '')}">
+        <button class="btn-sm" onclick="saveFbNote('${r.id}')" style="font-size:.7rem;padding:.2rem .5rem;">저장</button>
+        ${r.category === 'item_request' ? `<button class="btn-sm" onclick="fbToOrder('${r.id}', this)" style="font-size:.7rem;padding:.2rem .5rem;background:var(--amber);color:var(--earth);">발주연동</button>` : ''}
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function escapeHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+async function updateFbStatus(id, status) {
+  const update = { status };
+  if (status === 'done') update.resolved_at = new Date().toISOString();
+  const { error } = await sb.from('customer_feedback').update(update).eq('id', id);
+  if (error) { toast('상태 변경 실패'); return; }
+  toast(FB_STATUS_LABEL[status] + '로 변경');
+  loadFeedback();
+}
+
+async function saveFbNote(id) {
+  const note = document.getElementById('fb-note-' + id).value.trim();
+  const { error } = await sb.from('customer_feedback').update({ note }).eq('id', id);
+  if (error) { toast('메모 저장 실패'); return; }
+  toast('메모 저장됨');
+  loadFeedback();
+}
+
+async function fbToOrder(id, btn) {
+  const { data } = await sb.from('customer_feedback').select('content').eq('id', id).single();
+  if (!data) { toast('데이터 조회 실패'); return; }
+
+  // 발주 탭으로 이동하고 내용 자동 입력
+  switchTab('suppliers', null);
+  switchSubTab('order');
+  const memoEl = document.getElementById('order-memo');
+  if (memoEl) memoEl.value = '[고객요청] ' + data.content;
+  toast('발주 탭으로 이동 — 내용이 입력됐습니다');
+
+  // 피드백 상태를 처리중으로 변경
+  await sb.from('customer_feedback').update({ status: 'in_progress', note: '발주 연동됨' }).eq('id', id);
+}
+
+// 앱 로드 시 미처리 건수 배지 표시
+(async function initFbBadge() {
+  try {
+    const { count } = await sb.from('customer_feedback').select('*', { count: 'exact', head: true }).eq('status', 'new');
+    const badge = document.getElementById('fb-badge');
+    if (badge && count > 0) { badge.textContent = count; badge.style.display = 'inline'; }
+  } catch(e) {}
+})();
 </script>
 </body>
 </html>
