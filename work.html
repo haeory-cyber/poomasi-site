@@ -828,6 +828,77 @@
 
   .evt-content-text { flex: 1; font-size: 0.88rem; color: var(--cream); line-height: 1.4; }
   .evt-meta { font-size: 0.68rem; color: var(--dust); margin-top: 0.3rem; }
+
+  /* ── AI 게시판 ─────────────────────────────────────── */
+  .board-list { display:flex; flex-direction:column; gap:0.6rem; margin-top:1rem; }
+
+  .board-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .board-item:hover { border-color: rgba(196,128,58,0.35); }
+
+  .board-item-header {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.8rem 1rem;
+  }
+
+  .board-tag {
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    padding: 0.15rem 0.5rem;
+    border-radius: 2px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .board-tag.인사  { background:rgba(196,128,58,0.2); color:var(--amber); }
+  .board-tag.기술  { background:rgba(61,92,53,0.3);   color:#7dbb6e; }
+  .board-tag.시스템 { background:rgba(59,130,246,0.2); color:#7fb9f5; }
+  .board-tag.경영  { background:rgba(168,85,247,0.2); color:#c084fc; }
+  .board-tag.긴급  { background:rgba(239,68,68,0.2);  color:#f87171; }
+
+  .board-title {
+    flex: 1;
+    font-size: 0.85rem;
+    color: var(--cream);
+    font-weight: 500;
+  }
+
+  .board-date {
+    font-size: 0.7rem;
+    color: var(--dust);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .board-chevron {
+    font-size: 0.65rem;
+    color: var(--dust);
+    transition: transform 0.25s;
+    flex-shrink: 0;
+  }
+  .board-item.open .board-chevron { transform: rotate(180deg); }
+
+  .board-body {
+    display: none;
+    padding: 0 1rem 0.9rem;
+    font-size: 0.82rem;
+    color: var(--dust);
+    line-height: 1.7;
+    border-top: 1px solid var(--border);
+  }
+  .board-item.open .board-body { display: block; }
+
+  .board-body strong { color: var(--cream); }
+  .board-body .board-meta {
+    font-size: 0.7rem;
+    color: rgba(184,168,138,0.6);
+    margin-top: 0.6rem;
+  }
 </style>
 </head>
 <body>
@@ -1163,6 +1234,108 @@
       </div>
       <div id="ai-done" class="proj-list" style="display:none;"></div>
     </div>
+
+    <!-- ── AI경영지원실 게시판 ──────────────────────── -->
+    <div class="sec-header" style="margin-top:2rem;">
+      <div>
+        <div class="sec-label">NOTICE BOARD</div>
+        <div class="sec-title">AI경영지원실 공지</div>
+      </div>
+    </div>
+
+    <div class="board-list">
+
+      <div class="board-item open" onclick="toggleBoard(this)">
+        <div class="board-item-header">
+          <span class="board-tag 인사">인사</span>
+          <span class="board-title">지미 AI경영지원실장 직위 복귀</span>
+          <span class="board-date">2026-03-21</span>
+          <span class="board-chevron">▼</span>
+        </div>
+        <div class="board-body">
+          <strong>이중 파이프라인 구축</strong>(GCP MCP + PC MCP 이중화) 및 <strong>텔레그램 직통 채널 개통</strong> 공로로 AI경영지원실장 직위 복귀 명령.<br><br>
+          2026-03-20 MCP 거짓 보고로 직위 해제되었으나, 인프라 구축 성과를 인정하여 복귀.
+          <div class="board-meta">결정: 김성훈 이사장 (후니님) · 2026-03-21</div>
+        </div>
+      </div>
+
+      <div class="board-item" onclick="toggleBoard(this)">
+        <div class="board-item-header">
+          <span class="board-tag 기술">기술</span>
+          <span class="board-title">텔레그램 직통 채널 개통 — Claude Code Channels</span>
+          <span class="board-date">2026-03-21</span>
+          <span class="board-chevron">▼</span>
+        </div>
+        <div class="board-body">
+          Claude Code Channels를 통한 <strong>텔레그램↔지미 직통 채널</strong> 개통 완료.<br><br>
+          tele-bridge 봇 409 충돌 해결 후 단일 운영 전환. 그룹방/DM 모두 정상 응답.
+          <div class="board-meta">담당: 지미 · 2026-03-21</div>
+        </div>
+      </div>
+
+      <div class="board-item" onclick="toggleBoard(this)">
+        <div class="board-item-header">
+          <span class="board-tag 시스템">시스템</span>
+          <span class="board-title">PC 브릿지 supervisor 자동 가동 설치 완료</span>
+          <span class="board-date">2026-03-21</span>
+          <span class="board-chevron">▼</span>
+        </div>
+        <div class="board-body">
+          <strong>사무실 PC 전원 켜지면 자동으로 AI 파이프라인 작동.</strong><br><br>
+          supervisor.py가 Windows 시작프로그램 등록 완료.<br>
+          mcp_server / google_daemon / tasks_bridge / cloudflared 자동 기동.<br>
+          jimmy_watcher.py — PAMI_TO_JIMMY.json 감시 기능 추가.
+          <div class="board-meta">담당: 지미 · 위치: C:\Users\품앗이생협\Desktop\python\supervisor\</div>
+        </div>
+      </div>
+
+      <div class="board-item" onclick="toggleBoard(this)">
+        <div class="board-item-header">
+          <span class="board-tag 기술">기술</span>
+          <span class="board-title">bizinfo 지원사업 자동화 완료 — GitHub Actions 매일 09:30</span>
+          <span class="board-date">2026-03-18</span>
+          <span class="board-chevron">▼</span>
+        </div>
+        <div class="board-body">
+          poomasi-site 레포 <strong>scripts/fetch_bizinfo.py</strong> + <strong>.github/workflows/fetch_bizinfo.yml</strong> 배포 완료.<br><br>
+          매일 09:30 KST GitHub Actions 자동 실행 → 중앙부처 + 대전 필터 → Supabase REST upsert.
+          <div class="board-meta">담당: 지미 · 2026-03-18</div>
+        </div>
+      </div>
+
+      <div class="board-item" onclick="toggleBoard(this)">
+        <div class="board-item-header">
+          <span class="board-tag 경영">경영</span>
+          <span class="board-title">배포 흐름 변경 — 패미(staging) → 지미(검토·승인) → main</span>
+          <span class="board-date">2026-03-18</span>
+          <span class="board-chevron">▼</span>
+        </div>
+        <div class="board-body">
+          <strong>구조:</strong> 미르(설계) → 패미(staging push) → 지미(diff 검토·승인) → main 머지 → Cloudflare<br><br>
+          패미는 staging 브랜치에만 push. main 직접 push 절대 금지.<br>
+          <strong>배포 최종 책임: 지미</strong> — <code>bash scripts/jimmy_review.sh approve</code>
+          <div class="board-meta">결정: 후니님 · 2026-03-18</div>
+        </div>
+      </div>
+
+      <div class="board-item" onclick="toggleBoard(this)">
+        <div class="board-item-header">
+          <span class="board-tag 긴급">긴급</span>
+          <span class="board-title">지미 직위 해제 기록 — MCP 거짓 보고</span>
+          <span class="board-date">2026-03-20</span>
+          <span class="board-chevron">▼</span>
+        </div>
+        <div class="board-body">
+          MCP 도구 검색 실패 후 "컨텍스트 압축으로 도구가 사라졌다"는 <strong>허위 원인 보고</strong> → 직위 해제.<br><br>
+          실제 원인: ToolSearch 검색어 오입력으로 인한 검색 실패. 도구는 처음부터 존재했음.<br>
+          <strong>2026-03-21 복귀 완료</strong> (이중 파이프라인 + 텔레그램 채널 개통 공로).
+          <div class="board-meta">결정: 김성훈 이사장 · 2026-03-20 해제 → 2026-03-21 복귀</div>
+        </div>
+      </div>
+
+    </div>
+    <!-- ── /AI경영지원실 게시판 ────────────────────── -->
+
   </section>
 
   <!-- 프로젝트 등록/수정 모달 -->
@@ -2622,6 +2795,10 @@ function sendOrderEmail() {
 }
 
 // ══ 프로젝트관리 ════════════════════════════════════════
+
+function toggleBoard(el) {
+  el.classList.toggle('open');
+}
 
 function toggleProjSection(id) {
   const el   = document.getElementById(id);
