@@ -1241,98 +1241,11 @@
         <div class="sec-label">NOTICE BOARD</div>
         <div class="sec-title">AI경영지원실 공지</div>
       </div>
+      <span id="board-updated" style="font-size:0.65rem;color:var(--dust);"></span>
     </div>
 
-    <div class="board-list">
-
-      <div class="board-item open" onclick="toggleBoard(this)">
-        <div class="board-item-header">
-          <span class="board-tag 인사">인사</span>
-          <span class="board-title">지미 AI경영지원실장 직위 복귀</span>
-          <span class="board-date">2026-03-21</span>
-          <span class="board-chevron">▼</span>
-        </div>
-        <div class="board-body">
-          <strong>이중 파이프라인 구축</strong>(GCP MCP + PC MCP 이중화) 및 <strong>텔레그램 직통 채널 개통</strong> 공로로 AI경영지원실장 직위 복귀 명령.<br><br>
-          2026-03-20 MCP 거짓 보고로 직위 해제되었으나, 인프라 구축 성과를 인정하여 복귀.
-          <div class="board-meta">결정: 김성훈 이사장 (후니님) · 2026-03-21</div>
-        </div>
-      </div>
-
-      <div class="board-item" onclick="toggleBoard(this)">
-        <div class="board-item-header">
-          <span class="board-tag 기술">기술</span>
-          <span class="board-title">텔레그램 직통 채널 개통 — Claude Code Channels</span>
-          <span class="board-date">2026-03-21</span>
-          <span class="board-chevron">▼</span>
-        </div>
-        <div class="board-body">
-          Claude Code Channels를 통한 <strong>텔레그램↔지미 직통 채널</strong> 개통 완료.<br><br>
-          tele-bridge 봇 409 충돌 해결 후 단일 운영 전환. 그룹방/DM 모두 정상 응답.
-          <div class="board-meta">담당: 지미 · 2026-03-21</div>
-        </div>
-      </div>
-
-      <div class="board-item" onclick="toggleBoard(this)">
-        <div class="board-item-header">
-          <span class="board-tag 시스템">시스템</span>
-          <span class="board-title">PC 브릿지 supervisor 자동 가동 설치 완료</span>
-          <span class="board-date">2026-03-21</span>
-          <span class="board-chevron">▼</span>
-        </div>
-        <div class="board-body">
-          <strong>사무실 PC 전원 켜지면 자동으로 AI 파이프라인 작동.</strong><br><br>
-          supervisor.py가 Windows 시작프로그램 등록 완료.<br>
-          mcp_server / google_daemon / tasks_bridge / cloudflared 자동 기동.<br>
-          jimmy_watcher.py — PAMI_TO_JIMMY.json 감시 기능 추가.
-          <div class="board-meta">담당: 지미 · 위치: C:\Users\품앗이생협\Desktop\python\supervisor\</div>
-        </div>
-      </div>
-
-      <div class="board-item" onclick="toggleBoard(this)">
-        <div class="board-item-header">
-          <span class="board-tag 기술">기술</span>
-          <span class="board-title">bizinfo 지원사업 자동화 완료 — GitHub Actions 매일 09:30</span>
-          <span class="board-date">2026-03-18</span>
-          <span class="board-chevron">▼</span>
-        </div>
-        <div class="board-body">
-          poomasi-site 레포 <strong>scripts/fetch_bizinfo.py</strong> + <strong>.github/workflows/fetch_bizinfo.yml</strong> 배포 완료.<br><br>
-          매일 09:30 KST GitHub Actions 자동 실행 → 중앙부처 + 대전 필터 → Supabase REST upsert.
-          <div class="board-meta">담당: 지미 · 2026-03-18</div>
-        </div>
-      </div>
-
-      <div class="board-item" onclick="toggleBoard(this)">
-        <div class="board-item-header">
-          <span class="board-tag 경영">경영</span>
-          <span class="board-title">배포 흐름 변경 — 패미(staging) → 지미(검토·승인) → main</span>
-          <span class="board-date">2026-03-18</span>
-          <span class="board-chevron">▼</span>
-        </div>
-        <div class="board-body">
-          <strong>구조:</strong> 미르(설계) → 패미(staging push) → 지미(diff 검토·승인) → main 머지 → Cloudflare<br><br>
-          패미는 staging 브랜치에만 push. main 직접 push 절대 금지.<br>
-          <strong>배포 최종 책임: 지미</strong> — <code>bash scripts/jimmy_review.sh approve</code>
-          <div class="board-meta">결정: 후니님 · 2026-03-18</div>
-        </div>
-      </div>
-
-      <div class="board-item" onclick="toggleBoard(this)">
-        <div class="board-item-header">
-          <span class="board-tag 긴급">긴급</span>
-          <span class="board-title">지미 직위 해제 기록 — MCP 거짓 보고</span>
-          <span class="board-date">2026-03-20</span>
-          <span class="board-chevron">▼</span>
-        </div>
-        <div class="board-body">
-          MCP 도구 검색 실패 후 "컨텍스트 압축으로 도구가 사라졌다"는 <strong>허위 원인 보고</strong> → 직위 해제.<br><br>
-          실제 원인: ToolSearch 검색어 오입력으로 인한 검색 실패. 도구는 처음부터 존재했음.<br>
-          <strong>2026-03-21 복귀 완료</strong> (이중 파이프라인 + 텔레그램 채널 개통 공로).
-          <div class="board-meta">결정: 김성훈 이사장 · 2026-03-20 해제 → 2026-03-21 복귀</div>
-        </div>
-      </div>
-
+    <div class="board-list" id="board-list">
+      <div style="padding:1.5rem;text-align:center;color:var(--dust);font-size:0.8rem;">공지 불러오는 중…</div>
     </div>
     <!-- ── /AI경영지원실 게시판 ────────────────────── -->
 
@@ -1806,7 +1719,10 @@ function renderKPICharts() {
   }
 }
 // 페이지 로드 시 차트 렌더링
-document.addEventListener('DOMContentLoaded', renderKPICharts);
+document.addEventListener('DOMContentLoaded', () => {
+  renderKPICharts();
+  loadBoard();
+});
 
 // ══ 오늘의경영 ═══════════════════════════════════════════
 
@@ -2798,6 +2714,46 @@ function sendOrderEmail() {
 
 function toggleBoard(el) {
   el.classList.toggle('open');
+}
+
+async function loadBoard() {
+  const container = document.getElementById('board-list');
+  const updatedEl = document.getElementById('board-updated');
+  try {
+    const res = await fetch('notices.json?t=' + Date.now());
+    if (!res.ok) throw new Error(res.status);
+    const notices = await res.json();
+
+    if (!notices.length) {
+      container.innerHTML = '<div style="padding:1.5rem;text-align:center;color:var(--dust);font-size:0.8rem;">등록된 공지가 없습니다.</div>';
+      return;
+    }
+
+    const tagClass = { '인사':'인사','기술':'기술','시스템':'시스템','경영':'경영','긴급':'긴급' };
+
+    container.innerHTML = notices.map(n => {
+      const bodyHtml = (n.body || '').replace(/\n/g, '<br>');
+      const openClass = n.open ? ' open' : '';
+      const tc = tagClass[n.tag] || '';
+      return `
+        <div class="board-item${openClass}" onclick="toggleBoard(this)">
+          <div class="board-item-header">
+            <span class="board-tag ${tc}">${n.tag}</span>
+            <span class="board-title">${n.title}</span>
+            <span class="board-date">${n.date}</span>
+            <span class="board-chevron">▼</span>
+          </div>
+          <div class="board-body">
+            ${bodyHtml}
+            ${n.meta ? `<div class="board-meta">${n.meta}</div>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+
+    if (updatedEl) updatedEl.textContent = '최근 공지: ' + notices[0].date;
+  } catch (e) {
+    container.innerHTML = '<div style="padding:1rem;color:var(--dust);font-size:0.8rem;">공지를 불러오지 못했습니다.</div>';
+  }
 }
 
 function toggleProjSection(id) {

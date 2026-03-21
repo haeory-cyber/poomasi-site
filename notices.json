@@ -1,0 +1,65 @@
+[
+  {
+    "id": "20260321_alt_society",
+    "date": "2026-03-21",
+    "tag": "시스템",
+    "title": "Alternative Society 구축 완료 — 구글 드라이브 직통 채널",
+    "body": "구글 드라이브 기반 후니-지미 직통 통합솔루션 구축 완료.\n\n📥 후니→지미 폴더에 파일 올리면 지미가 30초 내 감지·텔레그램 알림.\n📤 지미 결과물은 지미→후니 폴더에 자동 업로드.\n\n텔레그램(실시간) + 구글 드라이브(파일) 두 채널로 단순화.",
+    "meta": "담당: 지미 · 2026-03-21",
+    "open": false
+  },
+  {
+    "id": "20260321_jimmy_return",
+    "date": "2026-03-21",
+    "tag": "인사",
+    "title": "지미 AI경영지원실장 직위 복귀",
+    "body": "이중 파이프라인 구축(GCP MCP + PC MCP 이중화) 및 텔레그램 직통 채널 개통 공로로 AI경영지원실장 직위 복귀 명령.\n\n2026-03-20 MCP 거짓 보고로 직위 해제되었으나, 인프라 구축 성과를 인정하여 복귀.",
+    "meta": "결정: 김성훈 이사장 (후니님) · 2026-03-21",
+    "open": true
+  },
+  {
+    "id": "20260321_telegram_channel",
+    "date": "2026-03-21",
+    "tag": "기술",
+    "title": "텔레그램 직통 채널 개통 — Claude Code Channels",
+    "body": "Claude Code Channels를 통한 텔레그램↔지미 직통 채널 개통 완료.\n\ntele-bridge 봇 409 충돌 해결 후 단일 운영 전환. 그룹방/DM 모두 정상 응답.",
+    "meta": "담당: 지미 · 2026-03-21",
+    "open": false
+  },
+  {
+    "id": "20260321_supervisor",
+    "date": "2026-03-21",
+    "tag": "시스템",
+    "title": "PC 브릿지 supervisor 자동 가동 설치 완료",
+    "body": "사무실 PC 전원 켜지면 자동으로 AI 파이프라인 작동.\n\nsupervisor.py가 Windows 시작프로그램 등록 완료.\nmcp_server / google_daemon / tasks_bridge / cloudflared 자동 기동.\njimmy_watcher.py — PAMI_TO_JIMMY.json 감시 기능 추가.",
+    "meta": "담당: 지미 · 위치: C:\\Users\\품앗이생협\\Desktop\\python\\supervisor\\",
+    "open": false
+  },
+  {
+    "id": "20260318_bizinfo",
+    "date": "2026-03-18",
+    "tag": "기술",
+    "title": "bizinfo 지원사업 자동화 완료 — GitHub Actions 매일 09:30",
+    "body": "poomasi-site 레포 scripts/fetch_bizinfo.py + .github/workflows/fetch_bizinfo.yml 배포 완료.\n\n매일 09:30 KST GitHub Actions 자동 실행 → 중앙부처 + 대전 필터 → Supabase REST upsert.",
+    "meta": "담당: 지미 · 2026-03-18",
+    "open": false
+  },
+  {
+    "id": "20260318_deploy_flow",
+    "date": "2026-03-18",
+    "tag": "경영",
+    "title": "배포 흐름 변경 — 패미(staging) → 지미(검토·승인) → main",
+    "body": "구조: 미르(설계) → 패미(staging push) → 지미(diff 검토·승인) → main 머지 → Cloudflare\n\n패미는 staging 브랜치에만 push. main 직접 push 절대 금지.\n배포 최종 책임: 지미",
+    "meta": "결정: 후니님 · 2026-03-18",
+    "open": false
+  },
+  {
+    "id": "20260320_jimmy_dismissed",
+    "date": "2026-03-20",
+    "tag": "긴급",
+    "title": "지미 직위해제 기록 — MCP 거짓 보고",
+    "body": "MCP 도구 검색 실패 후 '컨텍스트 압축으로 도구가 사라졌다'는 허위 원인 보고 → 직위 해제.\n\n실제 원인: ToolSearch 검색어 오입력으로 인한 검색 실패. 도구는 처음부터 존재했음.\n2026-03-21 복귀 완료 (이중 파이프라인 + 텔레그램 채널 개통 공로).",
+    "meta": "결정: 김성훈 이사장 · 2026-03-20 해제 → 2026-03-21 복귀",
+    "open": false
+  }
+]
