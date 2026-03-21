@@ -1,5 +1,41 @@
 [
   {
+    "id": "20260321_attendance_bot",
+    "date": "2026-03-21",
+    "tag": "시스템",
+    "title": "출퇴근 기록 봇 신규 구축 — @att_register_bot",
+    "body": "QR코드 + GPS 이중검증 출퇴근 기록 시스템 구축 완료.\n\n매장 QR 스캔 → 텔레그램 딥링크 → GPS 반경 150m 검증 → 출퇴근 기록.\n자동 근무시간 + 급여 계산 (시급 10,320원).\nQR코드 4장 생성 완료 (지족점/관저점 출근·퇴근).\n\n월요일(3/23) 직원 텔레그램 가입 + 등록 + QR 인쇄 부착 예정.",
+    "meta": "담당: 지미 · 2026-03-21",
+    "open": true
+  },
+  {
+    "id": "20260321_barcode_bot",
+    "date": "2026-03-21",
+    "tag": "시스템",
+    "title": "바코드 폐기 봇 신규 구축 — @barcode_poom_bot",
+    "body": "바코드 사진 전송 → 자동 인식(pyzbar+OpenCV) → 넷포스 폐기 등록 + Supabase 저장.\n\n단건/일괄 모드, 수량 지정, 농가 연락처 조회 지원.\n후니님 승인: 실제업무 즉시 투입.",
+    "meta": "담당: 지미 · 2026-03-21",
+    "open": false
+  },
+  {
+    "id": "20260321_voice_bot_barcode",
+    "date": "2026-03-21",
+    "tag": "시스템",
+    "title": "지미지니 봇 기능 추가 — 바코드 발주",
+    "body": "기존 음성 발주에 바코드 사진+캡션(수량/긴급도) 발주 기능 추가.\n\nbarcode_bot.py 인식/조회 모듈 연동.\n관리: systemd voice-bot.service (pkill 금지, systemctl restart 사용).",
+    "meta": "담당: 지미 · 2026-03-21",
+    "open": false
+  },
+  {
+    "id": "20260321_qr_download",
+    "date": "2026-03-21",
+    "tag": "홈페이지",
+    "title": "자료실에 출퇴근 QR코드 다운로드 추가",
+    "body": "work.html 자료실 탭에 출퇴근 QR코드 카테고리 추가.\n\n지족점 출근/퇴근, 관저점 출근/퇴근 총 4장 다운로드 가능.",
+    "meta": "담당: 지미 · 2026-03-21",
+    "open": false
+  },
+  {
     "id": "20260321_alt_society",
     "date": "2026-03-21",
     "tag": "시스템",
