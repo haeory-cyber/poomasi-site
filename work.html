@@ -948,6 +948,7 @@
       <button class="tab-btn"       onclick="switchTab('suppliers', event)">발주</button>
       <button class="tab-btn"       onclick="switchTab('feedback', event)">조합원말씀</button>
       <button class="tab-btn"       onclick="switchTab('notice', event)">사무국공지</button>
+      <button class="tab-btn"       onclick="switchTab('archive', event)">자료실</button>
     </nav>
   </div>
 
@@ -1602,6 +1603,44 @@
 
     <!-- 목록 -->
     <div id="notice-list"><div class="loading-row">로딩 중…</div></div>
+  </section>
+
+  <!-- ══ TAB: 자료실 ══ -->
+  <section class="tab-content" id="tab-archive" style="display:none;">
+    <div class="sec-header">
+      <div>
+        <div class="sec-label">ARCHIVE</div>
+        <div class="sec-title">자료실</div>
+      </div>
+    </div>
+    <p style="font-size:0.82rem;color:var(--dust);margin-bottom:1.5rem;">양식, 안내물, 참고자료를 내려받을 수 있습니다.</p>
+
+    <!-- 카테고리: 조합원말씀 관련 -->
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="card-title" style="margin-bottom:0.8rem;">조합원말씀 양식</div>
+      <div id="archive-feedback" style="display:flex;flex-direction:column;gap:0.5rem;">
+        <a href="print_qr_notice.html" target="_blank" style="display:flex;align-items:center;gap:0.6rem;padding:0.6rem 0.8rem;background:var(--surface);border-radius:4px;color:var(--cream);text-decoration:none;font-size:0.85rem;border:1px solid var(--border);transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--amber)'" onmouseout="this.style.borderColor='var(--border)'">
+          <span style="font-size:1.1rem;">📋</span>
+          <div>
+            <div style="font-weight:500;">QR 안내물 (인쇄용)</div>
+            <div style="font-size:0.72rem;color:var(--dust);">매장 카운터·입구 부착용 — A4 인쇄</div>
+          </div>
+        </a>
+        <a href="print_paper_form.html" target="_blank" style="display:flex;align-items:center;gap:0.6rem;padding:0.6rem 0.8rem;background:var(--surface);border-radius:4px;color:var(--cream);text-decoration:none;font-size:0.85rem;border:1px solid var(--border);transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--amber)'" onmouseout="this.style.borderColor='var(--border)'">
+          <span style="font-size:1.1rem;">✍️</span>
+          <div>
+            <div style="font-weight:500;">수기 양식 (인쇄용)</div>
+            <div style="font-size:0.72rem;color:var(--dust);">카운터 비치용 종이 카드 — A4에 2장</div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 카테고리: 기타 (나중에 추가) -->
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="card-title" style="margin-bottom:0.8rem;">경영 자료</div>
+      <div style="font-size:0.82rem;color:var(--dust);padding:0.5rem;">등록된 자료가 없습니다.</div>
+    </div>
   </section>
 </div>
 
