@@ -1731,7 +1731,7 @@ sb.auth.getSession().then(({ data: { session } }) => {
 });
 
 // ── 탭 전환 ──────────────────────────────────────────────
-const TAB_IDS = { today: 'tab-today', action: 'tab-action', sms: 'tab-sms', event: 'tab-event', suppliers: 'tab-suppliers', feedback: 'tab-feedback', notice: 'tab-notice', project: 'tab-project', grant: 'tab-grant', ai: 'tab-ai' };
+const TAB_IDS = { today: 'tab-today', action: 'tab-action', sms: 'tab-sms', event: 'tab-event', suppliers: 'tab-suppliers', feedback: 'tab-feedback', notice: 'tab-notice', project: 'tab-project', grant: 'tab-grant', ai: 'tab-ai', archive: 'tab-archive' };
 
 function switchTab(key, evt) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
