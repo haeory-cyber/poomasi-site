@@ -1843,6 +1843,15 @@ const SUB_TABS = {
   ]
 };
 
+function adjustContentPadding() {
+  const nav = document.querySelector('.sticky-nav');
+  if (!nav) return;
+  const h = nav.offsetHeight;
+  document.querySelectorAll('.tab-content').forEach(el => {
+    el.style.paddingTop = (h + 16) + 'px';
+  });
+}
+
 function switchTab(key, evt) {
   const subBar = document.getElementById('sub-tab-bar');
 
@@ -1866,6 +1875,7 @@ function switchTab(key, evt) {
   document.getElementById(TAB_IDS[key]).classList.add('active');
   if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
   onTabLoad(key);
+  requestAnimationFrame(adjustContentPadding);
 }
 
 function switchGroupSub(key, evt) {
@@ -1874,6 +1884,7 @@ function switchGroupSub(key, evt) {
   document.getElementById(TAB_IDS[key]).classList.add('active');
   if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
   onTabLoad(key);
+  requestAnimationFrame(adjustContentPadding);
 }
 
 function onTabLoad(key) {
@@ -1968,6 +1979,7 @@ function renderKPICharts() {
 }
 // 페이지 로드 시 차트 렌더링
 document.addEventListener('DOMContentLoaded', () => {
+  adjustContentPadding();
   renderKPICharts();
   loadBoard();
 
