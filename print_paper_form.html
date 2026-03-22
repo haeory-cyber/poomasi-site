@@ -36,16 +36,15 @@
   @media print {
     body { padding: 0; background: #fff; }
     .no-print { display: none !important; }
-    .page { box-shadow: none; page-break-after: avoid; }
+    .page { box-shadow: none; padding: 0; max-height: 277mm; }
     @page { size: A4; margin: 10mm; }
   }
 
   .page {
-    padding: 15mm 20mm;
-    min-height: 297mm;
+    padding: 10mm 15mm;
     display: flex;
     flex-direction: column;
-    gap: 8mm;
+    gap: 6mm;
   }
 
   .card {
