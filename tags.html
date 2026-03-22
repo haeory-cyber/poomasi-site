@@ -110,43 +110,6 @@
   .search-item .si-farmer { font-size: 0.75rem; color: var(--dust); }
   .search-item .si-price { font-size: 0.85rem; color: var(--amber); font-weight: 700; }
 
-  /* ── BATCH MODE ── */
-  .batch-controls {
-    display: flex; gap: 0.8rem; margin-bottom: 1rem; align-items: center;
-  }
-  .batch-controls input {
-    flex: 1; padding: 0.6rem 1rem;
-    background: var(--soil); border: 1px solid rgba(196,128,58,0.25);
-    border-radius: 6px; color: var(--cream); font-size: 0.85rem;
-    font-family: inherit; outline: none;
-  }
-  .batch-controls input::placeholder { color: var(--dust); opacity: 0.6; }
-  .batch-controls input:focus { border-color: var(--amber); }
-
-  .batch-table {
-    width: 100%; border-collapse: collapse; margin-bottom: 1.5rem;
-  }
-  .batch-table th {
-    text-align: left; font-size: 0.7rem; color: var(--dust);
-    letter-spacing: 0.1em; padding: 0.5rem 0.6rem;
-    border-bottom: 1px solid rgba(196,128,58,0.2);
-  }
-  .batch-table td {
-    padding: 0.55rem 0.6rem; font-size: 0.85rem;
-    border-bottom: 1px solid rgba(242,234,216,0.05);
-  }
-  .batch-table tr:hover td { background: rgba(196,128,58,0.04); }
-  .batch-table input[type="checkbox"] {
-    accent-color: var(--amber); width: 16px; height: 16px; cursor: pointer;
-  }
-  .batch-table .td-farmer { color: var(--dust); font-size: 0.8rem; }
-  .batch-table .td-price { color: var(--amber); font-weight: 700; }
-
-  .selected-count {
-    font-size: 0.8rem; color: var(--dust); margin-bottom: 1rem;
-  }
-  .selected-count span { color: var(--amber); font-weight: 700; }
-
   /* ── BUTTONS ── */
   .btn {
     padding: 0.7rem 2rem; border: none; border-radius: 6px;
@@ -283,8 +246,8 @@
   <p class="subtitle">65×38mm 라벨 · A4 용지 18매</p>
 
   <div class="mode-tabs">
-    <button class="mode-tab active" data-mode="quick">빠른 인쇄</button>
-    <button class="mode-tab" data-mode="batch">일괄 인쇄</button>
+    <button class="mode-tab active" data-mode="quick">기존 상품</button>
+    <button class="mode-tab" data-mode="batch">신규 입력</button>
   </div>
 
   <!-- ── QUICK MODE ── -->
@@ -302,24 +265,32 @@
     </div>
   </div>
 
-  <!-- ── BATCH MODE ── -->
+  <!-- ── NEW INPUT MODE ── -->
   <div class="panel" id="panel-batch">
-    <div class="batch-controls">
-      <input type="text" id="batch-filter" placeholder="상품명으로 필터...">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-bottom:1.5rem;">
+      <div style="grid-column:1/-1;">
+        <label style="display:block;font-size:0.72rem;color:var(--dust);letter-spacing:0.08em;margin-bottom:0.3rem;">상품명</label>
+        <input type="text" id="new-name" placeholder="예: 못난이사과" autocomplete="off" style="width:100%;padding:0.65rem 0.8rem;background:var(--soil);border:1px solid rgba(196,128,58,0.25);border-radius:6px;color:var(--cream);font-size:0.9rem;font-family:inherit;outline:none;">
+      </div>
+      <div>
+        <label style="display:block;font-size:0.72rem;color:var(--dust);letter-spacing:0.08em;margin-bottom:0.3rem;">생산자</label>
+        <input type="text" id="new-farmer" placeholder="예: 채수천" style="width:100%;padding:0.65rem 0.8rem;background:var(--soil);border:1px solid rgba(196,128,58,0.25);border-radius:6px;color:var(--cream);font-size:0.9rem;font-family:inherit;outline:none;">
+      </div>
+      <div>
+        <label style="display:block;font-size:0.72rem;color:var(--dust);letter-spacing:0.08em;margin-bottom:0.3rem;">단위</label>
+        <input type="text" id="new-unit" placeholder="예: 1kg" style="width:100%;padding:0.65rem 0.8rem;background:var(--soil);border:1px solid rgba(196,128,58,0.25);border-radius:6px;color:var(--cream);font-size:0.9rem;font-family:inherit;outline:none;">
+      </div>
+      <div>
+        <label style="display:block;font-size:0.72rem;color:var(--dust);letter-spacing:0.08em;margin-bottom:0.3rem;">가격 (원)</label>
+        <input type="number" id="new-price" placeholder="예: 4900" style="width:100%;padding:0.65rem 0.8rem;background:var(--soil);border:1px solid rgba(196,128,58,0.25);border-radius:6px;color:var(--cream);font-size:0.9rem;font-family:inherit;outline:none;">
+      </div>
     </div>
-    <div class="selected-count">선택: <span id="sel-count">0</span>개</div>
-    <table class="batch-table">
-      <thead><tr>
-        <th style="width:36px"><input type="checkbox" id="chk-all"></th>
-        <th>상품명</th>
-        <th>생산자</th>
-        <th>단위</th>
-        <th style="text-align:right">가격</th>
-      </tr></thead>
-      <tbody id="batch-body"></tbody>
-    </table>
     <div class="print-row">
-      <button class="btn btn-print" id="btn-batch-print" disabled>선택 인쇄</button>
+      <button class="btn btn-print" id="btn-new-print">인쇄</button>
+    </div>
+    <div class="tag-preview" id="new-preview" style="display:none">
+      <div class="tag-preview-title">미리보기</div>
+      <div class="preview-grid" id="new-preview-grid"></div>
     </div>
   </div>
 </div>
@@ -342,7 +313,6 @@ async function loadProducts() {
     { headers: HEADERS }
   );
   allProducts = await r.json();
-  renderBatchTable(allProducts);
 }
 
 // ── Format price ──
@@ -442,54 +412,33 @@ btnQuickPrint.addEventListener('click', () => {
   printTags([quickSelected]);
 });
 
-// ── BATCH MODE ──
-const batchFilter = document.getElementById('batch-filter');
-const batchBody = document.getElementById('batch-body');
-const chkAll = document.getElementById('chk-all');
-const selCount = document.getElementById('sel-count');
-const btnBatchPrint = document.getElementById('btn-batch-print');
+// ── NEW INPUT MODE ──
+const newPreview = document.getElementById('new-preview');
+const newPreviewGrid = document.getElementById('new-preview-grid');
 
-function renderBatchTable(list) {
-  batchBody.innerHTML = '';
-  list.forEach(p => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><input type="checkbox" class="chk-item" data-id="${p.id}"></td>
-      <td>${p.product_name}</td>
-      <td class="td-farmer">${p.farmer_name || ''}</td>
-      <td>${p.unit || ''}</td>
-      <td class="td-price" style="text-align:right">${fmtPrice(p.price)}원</td>`;
-    batchBody.appendChild(tr);
+function readNewForm() {
+  const name = document.getElementById('new-name').value.trim();
+  const farmer = document.getElementById('new-farmer').value.trim();
+  const unit = document.getElementById('new-unit').value.trim();
+  const price = document.getElementById('new-price').value.trim();
+  if (!name) return null;
+  return { product_name: name, farmer_name: farmer, unit: unit, price: price ? Number(price) : null };
+}
+
+['new-name', 'new-farmer', 'new-unit', 'new-price'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    const p = readNewForm();
+    if (!p) { newPreview.style.display = 'none'; return; }
+    newPreview.style.display = 'block';
+    newPreviewGrid.innerHTML = tagHTML(p);
+    renderQRCodes(newPreviewGrid);
   });
-  updateSelCount();
-}
-
-batchFilter.addEventListener('input', () => {
-  const q = batchFilter.value.trim().toLowerCase();
-  const filtered = q
-    ? allProducts.filter(p => p.product_name.toLowerCase().includes(q))
-    : allProducts;
-  renderBatchTable(filtered);
 });
 
-chkAll.addEventListener('change', () => {
-  batchBody.querySelectorAll('.chk-item').forEach(c => { c.checked = chkAll.checked; });
-  updateSelCount();
-});
-
-batchBody.addEventListener('change', updateSelCount);
-
-function updateSelCount() {
-  const n = batchBody.querySelectorAll('.chk-item:checked').length;
-  selCount.textContent = n;
-  btnBatchPrint.disabled = n === 0;
-}
-
-btnBatchPrint.addEventListener('click', () => {
-  const ids = new Set();
-  batchBody.querySelectorAll('.chk-item:checked').forEach(c => ids.add(Number(c.dataset.id)));
-  const selected = allProducts.filter(p => ids.has(p.id));
-  if (selected.length) printTags(selected);
+document.getElementById('btn-new-print').addEventListener('click', () => {
+  const p = readNewForm();
+  if (!p) { document.getElementById('new-name').focus(); return; }
+  printTags([p]);
 });
 
 // ── PRINT ──
