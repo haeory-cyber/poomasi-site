@@ -36,19 +36,17 @@
   @media print {
     body { padding: 0; background: #fff; }
     .no-print { display: none !important; }
-    .page { box-shadow: none; }
-    @page { size: A4; margin: 15mm; }
+    .page { box-shadow: none; padding: 0; max-height: 257mm; }
+    @page { size: A4; margin: 20mm; }
   }
 
   .page {
-    padding: 15mm 20mm;
-    height: 267mm;
+    padding: 10mm 20mm;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
-    overflow: hidden;
   }
 
   .brand {
