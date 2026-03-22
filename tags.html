@@ -407,7 +407,7 @@ let quickSelected = null;
 // ── Search products from Supabase ──
 async function searchProducts(q) {
   const r = await fetch(
-    `${SB_URL}/rest/v1/products?product_name=ilike.*${encodeURIComponent(q)}*&select=id,product_name,farmer_name,unit,price,barcode,category&limit=15`,
+    `${SB_URL}/rest/v1/products?product_name=ilike.*${encodeURIComponent(q)}*&select=id,product_name,farmer_name,unit,price,barcode,category,sales_count&order=sales_count.desc.nullslast&limit=15`,
     { headers: HEADERS }
   );
   return await r.json();
