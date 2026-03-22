@@ -1580,8 +1580,7 @@
           <option value="all">전체</option>
           <option value="item_request">물건 요청</option>
           <option value="suggestion">건의</option>
-          <option value="complaint">매장 불만</option>
-          <option value="staff_complaint">직원 관련</option>
+          <option value="complaint">직원 서비스</option>
         </select>
         <select class="form-input" id="fb-status-filter" onchange="loadFeedback()" style="padding:.4rem .6rem;font-size:.78rem;width:auto;">
           <option value="new">미처리</option>
@@ -3439,7 +3438,7 @@ async function loadNotices() {
 // ══ 탭 전환 시 데이터 로딩 — onTabLoad()로 통합됨 ══════════════════════════
 
 // ── 조합원말씀 ──────────────────────────────────────────────
-const FB_CAT_LABEL = { item_request: '물건 요청', suggestion: '건의', complaint: '매장 불만', staff_complaint: '직원 관련' };
+const FB_CAT_LABEL = { item_request: '물건 요청', suggestion: '건의', complaint: '직원 서비스' };
 const FB_STATUS_LABEL = { new: '미처리', in_progress: '처리중', done: '완료' };
 
 async function loadFeedback() {
@@ -3475,7 +3474,7 @@ async function loadFeedback() {
   if (!filtered.length) { listEl.innerHTML = '<div class="loading-row">접수된 건이 없습니다</div>'; return; }
 
   listEl.innerHTML = filtered.map(r => {
-    const catColor = r.category === 'complaint' || r.category === 'staff_complaint' ? 'var(--red)' : 'var(--amber)';
+    const catColor = r.category === 'complaint' ? 'var(--red)' : 'var(--amber)';
     const date = new Date(r.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     const contactLine = r.contact ? `<div style="font-size:.72rem;color:var(--dust);margin-top:.3rem;">연락처: ${r.contact}</div>` : '';
     const noteLine = r.note ? `<div style="font-size:.78rem;color:var(--green-light);margin-top:.3rem;padding:.3rem .5rem;background:rgba(61,92,53,.15);border-radius:2px;">메모: ${r.note}</div>` : '';
