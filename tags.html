@@ -302,6 +302,18 @@
       <input type="text" id="quick-search" placeholder="상품명 검색..." autocomplete="off">
     </div>
     <div class="search-results" id="quick-results"></div>
+    <div id="quick-edit" style="display:none;margin-bottom:1.5rem;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
+        <div>
+          <label style="display:block;font-size:0.72rem;color:var(--dust);letter-spacing:0.08em;margin-bottom:0.3rem;">생산자</label>
+          <input type="text" id="q-farmer" placeholder="생산자" style="width:100%;padding:0.65rem 0.8rem;background:var(--soil);border:1px solid rgba(196,128,58,0.25);border-radius:6px;color:var(--cream);font-size:0.9rem;font-family:inherit;outline:none;">
+        </div>
+        <div>
+          <label style="display:block;font-size:0.72rem;color:var(--dust);letter-spacing:0.08em;margin-bottom:0.3rem;">가격 (원)</label>
+          <input type="number" id="q-price" placeholder="가격 입력" style="width:100%;padding:0.65rem 0.8rem;background:var(--soil);border:1px solid rgba(196,128,58,0.25);border-radius:6px;color:var(--cream);font-size:0.9rem;font-family:inherit;outline:none;">
+        </div>
+      </div>
+    </div>
     <div class="print-row">
       <button class="btn btn-print" id="btn-quick-print" disabled>인쇄</button>
     </div>
@@ -468,6 +480,7 @@ quickSearch.addEventListener('input', () => {
   quickSelected = null;
   btnQuickPrint.disabled = true;
   quickPreview.style.display = 'none';
+  quickEdit.style.display = 'none';
 
   if (!q) return;
 
@@ -487,19 +500,47 @@ quickSearch.addEventListener('input', () => {
   }, 300);
 });
 
+const qFarmer = document.getElementById('q-farmer');
+const qPrice = document.getElementById('q-price');
+const quickEdit = document.getElementById('quick-edit');
+
 function selectQuick(p, el) {
   document.querySelectorAll('.search-item').forEach(i => i.classList.remove('selected'));
   el.classList.add('selected');
   quickSelected = p;
   btnQuickPrint.disabled = false;
+
+  // Show edit fields with existing data
+  quickEdit.style.display = 'block';
+  qFarmer.value = p.farmer_name || '';
+  qPrice.value = (p.price != null && p.price > 0) ? p.price : '';
+
+  updateQuickPreview();
+}
+
+function getQuickProduct() {
+  if (!quickSelected) return null;
+  return Object.assign({}, quickSelected, {
+    farmer_name: qFarmer.value.trim(),
+    price: qPrice.value ? Number(qPrice.value) : null
+  });
+}
+
+function updateQuickPreview() {
+  const p = getQuickProduct();
+  if (!p) return;
   quickPreview.style.display = 'block';
   quickPreviewGrid.innerHTML = tagHTML(p);
   renderQRCodes(quickPreviewGrid);
 }
 
+qFarmer.addEventListener('input', updateQuickPreview);
+qPrice.addEventListener('input', updateQuickPreview);
+
 btnQuickPrint.addEventListener('click', () => {
-  if (!quickSelected) return;
-  printTags([quickSelected]);
+  const p = getQuickProduct();
+  if (!p) return;
+  printTags([p]);
 });
 
 // ── NEW INPUT MODE ──
