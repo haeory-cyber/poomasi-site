@@ -390,16 +390,15 @@ if (params.get('info')) {
     `${SITE_BASE}/work.html?qr_order=${encodeURIComponent(params.get('name') || '')}`;
 }
 
-let allProducts = [];
 let quickSelected = null;
 
-// ── Fetch all active products ──
-async function loadProducts() {
+// ── Search products from Supabase ──
+async function searchProducts(q) {
   const r = await fetch(
-    `${SB_URL}/rest/v1/products?active=eq.true&order=product_name.asc&select=id,product_name,farmer_name,unit,price,barcode`,
+    `${SB_URL}/rest/v1/products?product_name=ilike.*${encodeURIComponent(q)}*&select=id,product_name,farmer_name,unit,price,barcode,category&limit=15`,
     { headers: HEADERS }
   );
-  allProducts = await r.json();
+  return await r.json();
 }
 
 // ── Format price ──
@@ -461,8 +460,10 @@ const quickPreview = document.getElementById('quick-preview');
 const quickPreviewGrid = document.getElementById('quick-preview-grid');
 const btnQuickPrint = document.getElementById('btn-quick-print');
 
+let _searchTimer = null;
 quickSearch.addEventListener('input', () => {
-  const q = quickSearch.value.trim().toLowerCase();
+  clearTimeout(_searchTimer);
+  const q = quickSearch.value.trim();
   quickResults.innerHTML = '';
   quickSelected = null;
   btnQuickPrint.disabled = true;
@@ -470,20 +471,20 @@ quickSearch.addEventListener('input', () => {
 
   if (!q) return;
 
-  const matches = allProducts.filter(p =>
-    p.product_name.toLowerCase().includes(q)
-  ).slice(0, 10);
-
-  matches.forEach(p => {
-    const div = document.createElement('div');
-    div.className = 'search-item';
-    div.innerHTML = `
-      <span class="si-name">${p.product_name}</span>
-      <span class="si-farmer">${p.farmer_name || ''}</span>
-      <span class="si-price">${fmtPrice(p.price)}원</span>`;
-    div.addEventListener('click', () => selectQuick(p, div));
-    quickResults.appendChild(div);
-  });
+  _searchTimer = setTimeout(async () => {
+    const matches = await searchProducts(q);
+    quickResults.innerHTML = '';
+    matches.forEach(p => {
+      const div = document.createElement('div');
+      div.className = 'search-item';
+      div.innerHTML = `
+        <span class="si-name">${p.product_name}</span>
+        <span class="si-farmer">${p.category || ''}</span>
+        <span class="si-price">${p.unit || ''}</span>`;
+      div.addEventListener('click', () => selectQuick(p, div));
+      quickResults.appendChild(div);
+    });
+  }, 300);
 });
 
 function selectQuick(p, el) {
@@ -550,7 +551,7 @@ function printTags(products) {
 }
 
 // ── INIT ──
-loadProducts();
+// Products are searched on-demand via Supabase API
 </script>
 </body>
 </html>
