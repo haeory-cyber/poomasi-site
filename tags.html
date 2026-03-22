@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>가격표 인쇄 — 품앗이소비자생활협동조합</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<style>
+  :root {
+    --earth: #0f0b07;
+    --soil: #1e1510;
+    --bark: #2d1f14;
+    --amber: #c4803a;
+    --amber-light: #e8a55a;
+    --green: #3d5c35;
+    --green-light: #5a8a4e;
+    --cream: #f2ead8;
+    --dust: #b8a88a;
+    --white: #faf7f0;
+    --gold-bar: #C8900A;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--earth);
+    color: var(--cream);
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 1.5rem 3rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  nav::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(to bottom, rgba(15,11,7,0.9), transparent);
+    pointer-events: none;
+  }
+  .nav-logo {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.85rem; font-weight: 700; letter-spacing: 0.15em;
+    color: var(--amber); position: relative; text-decoration: none;
+  }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; position: relative; }
+  .nav-links a {
+    color: var(--dust); text-decoration: none; font-size: 0.75rem;
+    letter-spacing: 0.1em; transition: color 0.3s;
+  }
+  .nav-links a:hover { color: var(--cream); }
+
+  /* ── UI CONTAINER ── */
+  .ui-wrap {
+    max-width: 900px; margin: 0 auto; padding: 7rem 2rem 3rem;
+  }
+
+  h1 {
+    font-size: 1.6rem; font-weight: 700; color: var(--cream);
+    margin-bottom: 0.3rem;
+  }
+  .subtitle {
+    font-size: 0.8rem; color: var(--dust); letter-spacing: 0.1em;
+    margin-bottom: 2rem;
+  }
+
+  /* ── MODE TABS ── */
+  .mode-tabs {
+    display: flex; gap: 0; margin-bottom: 2rem;
+    border-bottom: 1px solid rgba(196,128,58,0.2);
+  }
+  .mode-tab {
+    padding: 0.7rem 1.8rem; cursor: pointer;
+    font-size: 0.85rem; color: var(--dust); letter-spacing: 0.05em;
+    border-bottom: 2px solid transparent; transition: all 0.2s;
+    background: none; border-top: none; border-left: none; border-right: none;
+    font-family: inherit;
+  }
+  .mode-tab.active {
+    color: var(--amber); border-bottom-color: var(--amber); font-weight: 500;
+  }
+
+  /* ── QUICK MODE ── */
+  .search-row {
+    display: flex; gap: 0.8rem; margin-bottom: 1.5rem; align-items: center;
+  }
+  .search-row input {
+    flex: 1; padding: 0.7rem 1rem;
+    background: var(--soil); border: 1px solid rgba(196,128,58,0.25);
+    border-radius: 6px; color: var(--cream); font-size: 0.9rem;
+    font-family: inherit; outline: none;
+  }
+  .search-row input::placeholder { color: var(--dust); opacity: 0.6; }
+  .search-row input:focus { border-color: var(--amber); }
+
+  .search-results {
+    display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1.5rem;
+  }
+  .search-item {
+    display: flex; align-items: center; gap: 0.8rem;
+    padding: 0.6rem 1rem; background: var(--soil);
+    border: 1px solid rgba(196,128,58,0.15); border-radius: 6px;
+    cursor: pointer; transition: border-color 0.2s;
+  }
+  .search-item:hover { border-color: var(--amber); }
+  .search-item.selected { border-color: var(--amber); background: rgba(196,128,58,0.08); }
+  .search-item .si-name { flex: 1; font-size: 0.9rem; font-weight: 500; }
+  .search-item .si-farmer { font-size: 0.75rem; color: var(--dust); }
+  .search-item .si-price { font-size: 0.85rem; color: var(--amber); font-weight: 700; }
+
+  /* ── BATCH MODE ── */
+  .batch-controls {
+    display: flex; gap: 0.8rem; margin-bottom: 1rem; align-items: center;
+  }
+  .batch-controls input {
+    flex: 1; padding: 0.6rem 1rem;
+    background: var(--soil); border: 1px solid rgba(196,128,58,0.25);
+    border-radius: 6px; color: var(--cream); font-size: 0.85rem;
+    font-family: inherit; outline: none;
+  }
+  .batch-controls input::placeholder { color: var(--dust); opacity: 0.6; }
+  .batch-controls input:focus { border-color: var(--amber); }
+
+  .batch-table {
+    width: 100%; border-collapse: collapse; margin-bottom: 1.5rem;
+  }
+  .batch-table th {
+    text-align: left; font-size: 0.7rem; color: var(--dust);
+    letter-spacing: 0.1em; padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid rgba(196,128,58,0.2);
+  }
+  .batch-table td {
+    padding: 0.55rem 0.6rem; font-size: 0.85rem;
+    border-bottom: 1px solid rgba(242,234,216,0.05);
+  }
+  .batch-table tr:hover td { background: rgba(196,128,58,0.04); }
+  .batch-table input[type="checkbox"] {
+    accent-color: var(--amber); width: 16px; height: 16px; cursor: pointer;
+  }
+  .batch-table .td-farmer { color: var(--dust); font-size: 0.8rem; }
+  .batch-table .td-price { color: var(--amber); font-weight: 700; }
+
+  .selected-count {
+    font-size: 0.8rem; color: var(--dust); margin-bottom: 1rem;
+  }
+  .selected-count span { color: var(--amber); font-weight: 700; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    padding: 0.7rem 2rem; border: none; border-radius: 6px;
+    font-size: 0.85rem; font-weight: 500; cursor: pointer;
+    font-family: inherit; letter-spacing: 0.05em; transition: all 0.2s;
+  }
+  .btn-print {
+    background: var(--amber); color: var(--earth);
+  }
+  .btn-print:hover { background: var(--amber-light); }
+  .btn-print:disabled { opacity: 0.4; cursor: default; }
+
+  .print-row {
+    display: flex; gap: 1rem; align-items: center;
+  }
+
+  /* ── TAG PREVIEW (screen) ── */
+  .tag-preview {
+    margin-top: 2rem; padding: 1.5rem;
+    background: var(--soil); border: 1px solid rgba(196,128,58,0.15);
+    border-radius: 8px;
+  }
+  .tag-preview-title {
+    font-size: 0.75rem; color: var(--dust); letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+  }
+  .preview-grid {
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+  }
+
+  /* ── SINGLE TAG (65×38mm) ── */
+  .tag {
+    width: 65mm; height: 38mm;
+    border: 1px solid #ccc; border-radius: 3px;
+    background: #fff; color: #000;
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .tag-body {
+    flex: 1; padding: 2.5mm 3mm 1mm;
+    display: flex; flex-direction: column;
+  }
+  .tag-top {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 1mm;
+  }
+  .tag-farmer {
+    font-size: 7pt; color: #888; font-weight: 400;
+    max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .tag-logo {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 6.5pt; color: var(--gold-bar); font-weight: 700;
+    letter-spacing: 0.05em; white-space: nowrap;
+  }
+  .tag-product {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    font-size: 14pt; font-weight: 900; text-align: center;
+    line-height: 1.2; padding: 0 1mm;
+    word-break: keep-all;
+  }
+  .tag-product.long { font-size: 11pt; }
+  .tag-bottom {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    gap: 2mm; padding: 0 3mm 1.5mm;
+  }
+  .tag-qr {
+    width: 12mm; height: 12mm; flex-shrink: 0;
+  }
+  .tag-qr canvas, .tag-qr img { width: 100%; height: 100%; }
+  .tag-bottom-right {
+    display: flex; align-items: baseline; gap: 2mm;
+  }
+  .tag-unit {
+    font-size: 7pt; color: #888;
+  }
+  .tag-price {
+    font-size: 15pt; font-weight: 900; color: #000;
+    letter-spacing: -0.02em;
+  }
+  .tag-bar {
+    height: 6mm; background: var(--gold-bar); width: 100%;
+    flex-shrink: 0;
+  }
+
+  /* ── PRINT SHEET ── */
+  .print-sheet { display: none; }
+
+  @media print {
+    body { background: #fff !important; }
+    nav, .ui-wrap { display: none !important; }
+    .print-sheet {
+      display: block !important;
+    }
+    .print-page {
+      width: 210mm; height: 297mm;
+      padding: 5mm 7mm;
+      display: grid;
+      grid-template-columns: repeat(3, 65mm);
+      grid-template-rows: repeat(6, 38mm);
+      gap: 1.5mm 2mm;
+      justify-content: center;
+      align-content: start;
+      page-break-after: always;
+    }
+    .print-page:last-child { page-break-after: avoid; }
+    .tag { border: 0.5pt solid #ddd; }
+
+    @page {
+      size: A4;
+      margin: 5mm 0;
+    }
+  }
+
+  /* ── HIDDEN PANELS ── */
+  .panel { display: none; }
+  .panel.active { display: block; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">품앗이생협</a>
+  <ul class="nav-links">
+    <li><a href="index.html">홈</a></li>
+    <li><a href="market.html">직매장</a></li>
+    <li><a href="work.html">사무국</a></li>
+  </ul>
+</nav>
+
+<div class="ui-wrap">
+  <h1>가격표 인쇄</h1>
+  <p class="subtitle">65×38mm 라벨 · A4 용지 18매</p>
+
+  <div class="mode-tabs">
+    <button class="mode-tab active" data-mode="quick">빠른 인쇄</button>
+    <button class="mode-tab" data-mode="batch">일괄 인쇄</button>
+  </div>
+
+  <!-- ── QUICK MODE ── -->
+  <div class="panel active" id="panel-quick">
+    <div class="search-row">
+      <input type="text" id="quick-search" placeholder="상품명 검색..." autocomplete="off">
+    </div>
+    <div class="search-results" id="quick-results"></div>
+    <div class="print-row">
+      <button class="btn btn-print" id="btn-quick-print" disabled>인쇄</button>
+    </div>
+    <div class="tag-preview" id="quick-preview" style="display:none">
+      <div class="tag-preview-title">미리보기</div>
+      <div class="preview-grid" id="quick-preview-grid"></div>
+    </div>
+  </div>
+
+  <!-- ── BATCH MODE ── -->
+  <div class="panel" id="panel-batch">
+    <div class="batch-controls">
+      <input type="text" id="batch-filter" placeholder="상품명으로 필터...">
+    </div>
+    <div class="selected-count">선택: <span id="sel-count">0</span>개</div>
+    <table class="batch-table">
+      <thead><tr>
+        <th style="width:36px"><input type="checkbox" id="chk-all"></th>
+        <th>상품명</th>
+        <th>생산자</th>
+        <th>단위</th>
+        <th style="text-align:right">가격</th>
+      </tr></thead>
+      <tbody id="batch-body"></tbody>
+    </table>
+    <div class="print-row">
+      <button class="btn btn-print" id="btn-batch-print" disabled>선택 인쇄</button>
+    </div>
+  </div>
+</div>
+
+<!-- Print target (hidden on screen) -->
+<div class="print-sheet" id="print-sheet"></div>
+
+<script>
+const SB_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
+const SB_KEY = ['sb_publi','shable_SKtfO63ApOP3DyJKu_2ypw_JK4dsdUG'].join('');
+const HEADERS = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
+
+let allProducts = [];
+let quickSelected = null;
+
+// ── Fetch all active products ──
+async function loadProducts() {
+  const r = await fetch(
+    `${SB_URL}/rest/v1/products?active=eq.true&order=product_name.asc&select=id,product_name,farmer_name,unit,price`,
+    { headers: HEADERS }
+  );
+  allProducts = await r.json();
+  renderBatchTable(allProducts);
+}
+
+// ── Format price ──
+function fmtPrice(n) {
+  return n != null ? n.toLocaleString('ko-KR') : '-';
+}
+
+// ── Build a single tag HTML ──
+const SITE_BASE = 'https://poomasi.org';
+
+function tagHTML(p) {
+  const longClass = p.product_name.length > 6 ? ' long' : '';
+  const qrUrl = `${SITE_BASE}/work.html?qr_order=${encodeURIComponent(p.product_name)}`;
+  return `<div class="tag">
+    <div class="tag-body">
+      <div class="tag-top">
+        <span class="tag-farmer">${p.farmer_name || ''}</span>
+        <span class="tag-logo">품앗이마을</span>
+      </div>
+      <div class="tag-product${longClass}">${p.product_name}</div>
+    </div>
+    <div class="tag-bottom">
+      <div class="tag-qr" data-qr="${qrUrl.replace(/"/g, '&quot;')}"></div>
+      <div class="tag-bottom-right">
+        <span class="tag-unit">${p.unit || ''}</span>
+        <span class="tag-price">${fmtPrice(p.price)}</span>
+      </div>
+    </div>
+    <div class="tag-bar"></div>
+  </div>`;
+}
+
+function renderQRCodes(container) {
+  container.querySelectorAll('.tag-qr[data-qr]').forEach(el => {
+    if (el.querySelector('img')) return;
+    const qr = qrcode(0, 'M');
+    qr.addData(el.dataset.qr);
+    qr.make();
+    el.innerHTML = qr.createImgTag(2, 0);
+  });
+}
+
+// ── MODE TABS ──
+document.querySelectorAll('.mode-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-' + tab.dataset.mode).classList.add('active');
+  });
+});
+
+// ── QUICK MODE ──
+const quickSearch = document.getElementById('quick-search');
+const quickResults = document.getElementById('quick-results');
+const quickPreview = document.getElementById('quick-preview');
+const quickPreviewGrid = document.getElementById('quick-preview-grid');
+const btnQuickPrint = document.getElementById('btn-quick-print');
+
+quickSearch.addEventListener('input', () => {
+  const q = quickSearch.value.trim().toLowerCase();
+  quickResults.innerHTML = '';
+  quickSelected = null;
+  btnQuickPrint.disabled = true;
+  quickPreview.style.display = 'none';
+
+  if (!q) return;
+
+  const matches = allProducts.filter(p =>
+    p.product_name.toLowerCase().includes(q)
+  ).slice(0, 10);
+
+  matches.forEach(p => {
+    const div = document.createElement('div');
+    div.className = 'search-item';
+    div.innerHTML = `
+      <span class="si-name">${p.product_name}</span>
+      <span class="si-farmer">${p.farmer_name || ''}</span>
+      <span class="si-price">${fmtPrice(p.price)}원</span>`;
+    div.addEventListener('click', () => selectQuick(p, div));
+    quickResults.appendChild(div);
+  });
+});
+
+function selectQuick(p, el) {
+  document.querySelectorAll('.search-item').forEach(i => i.classList.remove('selected'));
+  el.classList.add('selected');
+  quickSelected = p;
+  btnQuickPrint.disabled = false;
+  quickPreview.style.display = 'block';
+  quickPreviewGrid.innerHTML = tagHTML(p);
+  renderQRCodes(quickPreviewGrid);
+}
+
+btnQuickPrint.addEventListener('click', () => {
+  if (!quickSelected) return;
+  printTags([quickSelected]);
+});
+
+// ── BATCH MODE ──
+const batchFilter = document.getElementById('batch-filter');
+const batchBody = document.getElementById('batch-body');
+const chkAll = document.getElementById('chk-all');
+const selCount = document.getElementById('sel-count');
+const btnBatchPrint = document.getElementById('btn-batch-print');
+
+function renderBatchTable(list) {
+  batchBody.innerHTML = '';
+  list.forEach(p => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="checkbox" class="chk-item" data-id="${p.id}"></td>
+      <td>${p.product_name}</td>
+      <td class="td-farmer">${p.farmer_name || ''}</td>
+      <td>${p.unit || ''}</td>
+      <td class="td-price" style="text-align:right">${fmtPrice(p.price)}원</td>`;
+    batchBody.appendChild(tr);
+  });
+  updateSelCount();
+}
+
+batchFilter.addEventListener('input', () => {
+  const q = batchFilter.value.trim().toLowerCase();
+  const filtered = q
+    ? allProducts.filter(p => p.product_name.toLowerCase().includes(q))
+    : allProducts;
+  renderBatchTable(filtered);
+});
+
+chkAll.addEventListener('change', () => {
+  batchBody.querySelectorAll('.chk-item').forEach(c => { c.checked = chkAll.checked; });
+  updateSelCount();
+});
+
+batchBody.addEventListener('change', updateSelCount);
+
+function updateSelCount() {
+  const n = batchBody.querySelectorAll('.chk-item:checked').length;
+  selCount.textContent = n;
+  btnBatchPrint.disabled = n === 0;
+}
+
+btnBatchPrint.addEventListener('click', () => {
+  const ids = new Set();
+  batchBody.querySelectorAll('.chk-item:checked').forEach(c => ids.add(Number(c.dataset.id)));
+  const selected = allProducts.filter(p => ids.has(p.id));
+  if (selected.length) printTags(selected);
+});
+
+// ── PRINT ──
+function printTags(products) {
+  const sheet = document.getElementById('print-sheet');
+  const perPage = 18;
+  let html = '';
+
+  for (let i = 0; i < products.length; i += perPage) {
+    const page = products.slice(i, i + perPage);
+    html += '<div class="print-page">';
+    page.forEach(p => { html += tagHTML(p); });
+    html += '</div>';
+  }
+
+  sheet.innerHTML = html;
+  renderQRCodes(sheet);
+  setTimeout(() => window.print(), 300);
+}
+
+// ── INIT ──
+loadProducts();
+</script>
+</body>
+</html>

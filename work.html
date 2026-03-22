@@ -1970,6 +1970,19 @@ function renderKPICharts() {
 document.addEventListener('DOMContentLoaded', () => {
   renderKPICharts();
   loadBoard();
+
+  // QR 태그 스캔 → 발주 자동 진입
+  const params = new URLSearchParams(location.search);
+  const qrProduct = params.get('qr_order');
+  if (qrProduct) {
+    switchTab('store', null);
+    document.querySelectorAll('.tab-btn').forEach(b => { if (b.textContent.includes('매장운영')) b.classList.add('active'); });
+    setTimeout(() => {
+      switchSubTab('order');
+      const ta = document.getElementById('order-message');
+      if (ta) ta.value = `[품앗이소비자생활협동조합 현장발주 요청]\n\n안녕하세요. 품앗이소비자생활협동조합입니다.\n아래와 같이 발주 요청드립니다.\n\n품목: ${qrProduct}\n수량:\n납품일:\n\n감사합니다.`;
+    }, 300);
+  }
 });
 
 // ══ 오늘의경영 ═══════════════════════════════════════════
