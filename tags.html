@@ -150,45 +150,44 @@
     font-family: 'Noto Sans KR', sans-serif;
   }
   .tag-body {
-    flex: 1; padding: 2.5mm 3mm 1mm;
-    display: flex; flex-direction: column;
+    flex: 1; padding: 2mm 3mm 1mm;
+    display: flex; gap: 2mm;
   }
-  .tag-top {
-    display: flex; justify-content: space-between; align-items: flex-start;
-    margin-bottom: 1mm;
+  .tag-left {
+    flex: 1; display: flex; flex-direction: column; min-width: 0;
   }
   .tag-farmer {
     font-size: 7pt; color: #888; font-weight: 400;
-    max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    margin-bottom: 0.5mm;
+  }
+  .tag-product {
+    flex: 1; display: flex; align-items: center; justify-content: flex-start;
+    font-size: 16pt; font-weight: 900; text-align: left;
+    line-height: 1.15; word-break: keep-all;
+  }
+  .tag-product.long { font-size: 12pt; }
+  .tag-right {
+    width: 16mm; flex-shrink: 0;
+    display: flex; flex-direction: column; align-items: flex-end;
   }
   .tag-logo {
     font-family: 'Noto Serif KR', serif;
-    font-size: 6.5pt; color: var(--gold-bar); font-weight: 700;
+    font-size: 6pt; color: var(--gold-bar); font-weight: 700;
     letter-spacing: 0.05em; white-space: nowrap;
   }
-  .tag-product {
-    flex: 1; display: flex; align-items: center; justify-content: center;
-    font-size: 14pt; font-weight: 900; text-align: center;
-    line-height: 1.2; padding: 0 1mm;
-    word-break: keep-all;
-  }
-  .tag-product.long { font-size: 11pt; }
-  .tag-bottom {
-    display: flex; justify-content: space-between; align-items: flex-end;
-    gap: 2mm; padding: 0 3mm 1.5mm;
-  }
   .tag-qr {
-    width: 12mm; height: 12mm; flex-shrink: 0;
+    width: 8mm; height: 8mm; flex-shrink: 0; margin: 1mm 0;
   }
   .tag-qr canvas, .tag-qr img { width: 100%; height: 100%; }
-  .tag-bottom-right {
-    display: flex; align-items: baseline; gap: 2mm;
+  .tag-price-area {
+    text-align: right;
   }
   .tag-unit {
-    font-size: 7pt; color: #888;
+    font-size: 6pt; color: #888; display: block;
   }
   .tag-price {
-    font-size: 15pt; font-weight: 900; color: #000;
+    font-size: 13pt; font-weight: 900; color: #000;
     letter-spacing: -0.02em;
   }
   .tag-bar {
@@ -428,17 +427,17 @@ function tagHTML(p) {
   const qrUrl = `${SITE_BASE}/tags.html?${qrParams.toString()}`;
   return `<div class="tag">
     <div class="tag-body">
-      <div class="tag-top">
-        <span class="tag-farmer">${p.farmer_name || ''}</span>
-        <span class="tag-logo">품앗이마을</span>
+      <div class="tag-left">
+        <div class="tag-farmer">${p.farmer_name || ''}</div>
+        <div class="tag-product${longClass}">${p.product_name}</div>
       </div>
-      <div class="tag-product${longClass}">${p.product_name}</div>
-    </div>
-    <div class="tag-bottom">
-      <div class="tag-qr" data-qr="${qrUrl.replace(/"/g, '&quot;')}"></div>
-      <div class="tag-bottom-right">
-        <span class="tag-unit">${p.unit || ''}</span>
-        <span class="tag-price">${fmtPrice(p.price)}</span>
+      <div class="tag-right">
+        <span class="tag-logo">품앗이마을</span>
+        <div class="tag-qr" data-qr="${qrUrl.replace(/"/g, '&quot;')}"></div>
+        <div class="tag-price-area">
+          <span class="tag-unit">${p.unit || ''}</span>
+          <span class="tag-price">${fmtPrice(p.price)}</span>
+        </div>
       </div>
     </div>
     <div class="tag-bar"></div>
