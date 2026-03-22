@@ -228,6 +228,52 @@
   /* ── HIDDEN PANELS ── */
   .panel { display: none; }
   .panel.active { display: block; }
+
+  /* ── PRODUCT INFO VIEW (QR scan landing) ── */
+  .info-view {
+    max-width: 480px; margin: 0 auto; padding: 7rem 2rem 3rem;
+    text-align: center;
+  }
+  .info-card {
+    background: var(--soil); border: 1px solid rgba(196,128,58,0.2);
+    border-radius: 12px; padding: 2rem 1.5rem; margin-bottom: 1.5rem;
+  }
+  .info-logo {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.8rem; color: var(--gold-bar); font-weight: 700;
+    letter-spacing: 0.1em; margin-bottom: 1.5rem;
+  }
+  .info-product {
+    font-size: 1.8rem; font-weight: 900; color: var(--cream);
+    margin-bottom: 0.8rem; word-break: keep-all;
+  }
+  .info-farmer {
+    font-size: 0.9rem; color: var(--dust); margin-bottom: 1.2rem;
+  }
+  .info-divider {
+    height: 1px; background: rgba(196,128,58,0.15); margin: 1.2rem 0;
+  }
+  .info-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 0.4rem 0;
+  }
+  .info-label { font-size: 0.8rem; color: var(--dust); }
+  .info-value { font-size: 0.95rem; color: var(--cream); font-weight: 500; }
+  .info-price-big {
+    font-size: 2rem; font-weight: 900; color: var(--amber);
+  }
+  .info-bar {
+    height: 4px; background: var(--gold-bar); border-radius: 2px;
+    margin-top: 1.5rem;
+  }
+  .info-order-btn {
+    display: inline-block; margin-top: 1rem; padding: 0.8rem 2.5rem;
+    background: var(--green); color: var(--cream); border: none;
+    border-radius: 8px; font-size: 0.9rem; font-weight: 500;
+    font-family: inherit; cursor: pointer; text-decoration: none;
+    transition: background 0.2s;
+  }
+  .info-order-btn:hover { background: var(--green-light); }
 </style>
 </head>
 <body>
@@ -268,7 +314,11 @@
   <!-- ── NEW INPUT MODE ── -->
   <div class="panel" id="panel-batch">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-bottom:1.5rem;">
-      <div style="grid-column:1/-1;">
+      <div>
+        <label style="display:block;font-size:0.72rem;color:var(--dust);letter-spacing:0.08em;margin-bottom:0.3rem;">바코드</label>
+        <input type="text" id="new-barcode" placeholder="바코드 스캔 또는 입력" autocomplete="off" style="width:100%;padding:0.65rem 0.8rem;background:var(--soil);border:1px solid rgba(196,128,58,0.25);border-radius:6px;color:var(--cream);font-size:0.9rem;font-family:inherit;outline:none;">
+      </div>
+      <div>
         <label style="display:block;font-size:0.72rem;color:var(--dust);letter-spacing:0.08em;margin-bottom:0.3rem;">상품명</label>
         <input type="text" id="new-name" placeholder="예: 못난이사과" autocomplete="off" style="width:100%;padding:0.65rem 0.8rem;background:var(--soil);border:1px solid rgba(196,128,58,0.25);border-radius:6px;color:var(--cream);font-size:0.9rem;font-family:inherit;outline:none;">
       </div>
@@ -295,6 +345,26 @@
   </div>
 </div>
 
+<!-- Product info view (QR scan landing) -->
+<div class="info-view" id="info-view" style="display:none">
+  <div class="info-card">
+    <div class="info-logo">품앗이마을</div>
+    <div class="info-product" id="info-product"></div>
+    <div class="info-farmer" id="info-farmer"></div>
+    <div class="info-divider"></div>
+    <div class="info-row">
+      <span class="info-label">단위</span>
+      <span class="info-value" id="info-unit"></span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">가격</span>
+      <span class="info-price-big" id="info-price"></span>
+    </div>
+    <div class="info-bar"></div>
+  </div>
+  <a class="info-order-btn" id="info-order-link" href="#">현장 발주</a>
+</div>
+
 <!-- Print target (hidden on screen) -->
 <div class="print-sheet" id="print-sheet"></div>
 
@@ -302,6 +372,23 @@
 const SB_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
 const SB_KEY = ['sb_publi','shable_SKtfO63ApOP3DyJKu_2ypw_JK4dsdUG'].join('');
 const HEADERS = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
+const SITE_BASE = 'https://poomasi.org';
+
+// ── Product info view (QR scan landing) ──
+const params = new URLSearchParams(location.search);
+if (params.get('info')) {
+  document.querySelector('nav').style.display = 'none';
+  document.querySelector('.ui-wrap').style.display = 'none';
+  const iv = document.getElementById('info-view');
+  iv.style.display = 'block';
+  document.getElementById('info-product').textContent = params.get('name') || '';
+  document.getElementById('info-farmer').textContent = params.get('farmer') ? '생산자: ' + params.get('farmer') : '';
+  document.getElementById('info-unit').textContent = params.get('unit') || '';
+  const price = params.get('price');
+  document.getElementById('info-price').textContent = price ? Number(price).toLocaleString('ko-KR') + '원' : '';
+  document.getElementById('info-order-link').href =
+    `${SITE_BASE}/work.html?qr_order=${encodeURIComponent(params.get('name') || '')}`;
+}
 
 let allProducts = [];
 let quickSelected = null;
@@ -309,7 +396,7 @@ let quickSelected = null;
 // ── Fetch all active products ──
 async function loadProducts() {
   const r = await fetch(
-    `${SB_URL}/rest/v1/products?active=eq.true&order=product_name.asc&select=id,product_name,farmer_name,unit,price`,
+    `${SB_URL}/rest/v1/products?active=eq.true&order=product_name.asc&select=id,product_name,farmer_name,unit,price,barcode`,
     { headers: HEADERS }
   );
   allProducts = await r.json();
@@ -321,11 +408,13 @@ function fmtPrice(n) {
 }
 
 // ── Build a single tag HTML ──
-const SITE_BASE = 'https://poomasi.org';
-
 function tagHTML(p) {
   const longClass = p.product_name.length > 6 ? ' long' : '';
-  const qrUrl = `${SITE_BASE}/work.html?qr_order=${encodeURIComponent(p.product_name)}`;
+  const qrParams = new URLSearchParams({ info: '1', name: p.product_name });
+  if (p.farmer_name) qrParams.set('farmer', p.farmer_name);
+  if (p.unit) qrParams.set('unit', p.unit);
+  if (p.price != null) qrParams.set('price', p.price);
+  const qrUrl = `${SITE_BASE}/tags.html?${qrParams.toString()}`;
   return `<div class="tag">
     <div class="tag-body">
       <div class="tag-top">
@@ -417,15 +506,16 @@ const newPreview = document.getElementById('new-preview');
 const newPreviewGrid = document.getElementById('new-preview-grid');
 
 function readNewForm() {
+  const barcode = document.getElementById('new-barcode').value.trim();
   const name = document.getElementById('new-name').value.trim();
   const farmer = document.getElementById('new-farmer').value.trim();
   const unit = document.getElementById('new-unit').value.trim();
   const price = document.getElementById('new-price').value.trim();
   if (!name) return null;
-  return { product_name: name, farmer_name: farmer, unit: unit, price: price ? Number(price) : null };
+  return { product_name: name, farmer_name: farmer, unit: unit, price: price ? Number(price) : null, barcode: barcode };
 }
 
-['new-name', 'new-farmer', 'new-unit', 'new-price'].forEach(id => {
+['new-barcode', 'new-name', 'new-farmer', 'new-unit', 'new-price'].forEach(id => {
   document.getElementById(id).addEventListener('input', () => {
     const p = readNewForm();
     if (!p) { newPreview.style.display = 'none'; return; }
