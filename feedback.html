@@ -135,18 +135,6 @@
     color: var(--amber-light);
   }
 
-  .cat-btn.staff-complaint {
-    grid-column: 1 / -1;
-    font-size: 0.75rem;
-    color: var(--dust);
-    background: rgba(184,58,42,0.08);
-  }
-
-  .cat-btn.staff-complaint.active {
-    background: rgba(184,58,42,0.15);
-    border-color: var(--red);
-    color: var(--red);
-  }
 
   textarea {
     width: 100%;
@@ -259,8 +247,7 @@
     <div class="cat-group">
       <button class="cat-btn" onclick="pickCat(this, 'item_request')">필요한 물건 요청</button>
       <button class="cat-btn" onclick="pickCat(this, 'suggestion')">건의 / 아이디어</button>
-      <button class="cat-btn" onclick="pickCat(this, 'complaint')">매장 불만</button>
-      <button class="cat-btn staff-complaint" onclick="pickCat(this, 'staff_complaint')">직원 관련 (완전 익명 보장)</button>
+      <button class="cat-btn" onclick="pickCat(this, 'complaint')">직원 서비스</button>
     </div>
 
     <label>내용을 적어주세요</label>
@@ -294,17 +281,6 @@ function pickCat(el, cat) {
   el.classList.add('active');
   selectedCat = cat;
 
-  // 직원 관련 불만이면 연락처 숨김
-  const contactArea = document.getElementById('contact');
-  if (cat === 'staff_complaint') {
-    contactArea.value = '';
-    contactArea.parentElement.querySelector('label') || null;
-    contactArea.style.display = 'none';
-    contactArea.previousElementSibling.style.display = 'none';
-  } else {
-    contactArea.style.display = '';
-    contactArea.previousElementSibling.style.display = '';
-  }
 }
 
 async function submitFeedback() {
@@ -320,7 +296,7 @@ async function submitFeedback() {
   btn.textContent = '보내는 중…';
   msgEl.textContent = '';
 
-  const visibility = selectedCat === 'staff_complaint' ? 'owner_only' : 'all';
+  const visibility = 'all';
 
   const { error } = await sb.from('customer_feedback').insert({
     category: selectedCat,
