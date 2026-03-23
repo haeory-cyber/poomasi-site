@@ -2264,8 +2264,8 @@ async function loadUnifiedTasks() {
   } else if (currentActionSub === 'tomorrow') {
     query = query.or(`scheduled_date.eq.${tomorrowStr},and(due_date.eq.${tomorrowStr},scheduled_date.is.null)`);
   } else {
-    // 이번주: 주간 범위 + 과거 미완료 + 날짜 미지정 미완료
-    query = query.or(`and(scheduled_date.gte.${mondayStr},scheduled_date.lte.${sundayStr}),and(scheduled_date.lt.${mondayStr},status.neq.done),and(scheduled_date.is.null,due_date.gte.${mondayStr},due_date.lte.${sundayStr}),and(scheduled_date.is.null,due_date.is.null,status.neq.done)`);
+    // 이번주: 주간 범위 + 과거 미완료 + 날짜 미지정 (완료 포함)
+    query = query.or(`and(scheduled_date.gte.${mondayStr},scheduled_date.lte.${sundayStr}),and(scheduled_date.lt.${mondayStr},status.neq.done),and(scheduled_date.is.null,due_date.gte.${mondayStr},due_date.lte.${sundayStr}),and(scheduled_date.is.null,due_date.is.null)`);
   }
 
   query = query.order('scheduled_date', { ascending: true, nullsFirst: false }).order('priority', { ascending: true });
@@ -2276,45 +2276,20 @@ async function loadUnifiedTasks() {
   let html = '';
   if (items.length === 0) {
     html = '<div class="empty-row">항목 없음</div>';
-  } else if (currentActionSub === 'week') {
-    // 날짜별 그룹핑
-    const grouped = {};
-    const overdue = [];
-    items.forEach(item => {
-      const d = item.scheduled_date || item.due_date || 'unscheduled';
-      if (d < today && item.status !== 'done') {
-        overdue.push(item);
-      } else {
-        if (!grouped[d]) grouped[d] = [];
-        grouped[d].push(item);
-      }
+  } else {
+    // 상태별 그룹 (이번주/오늘/내일 공통)
+    const overdue = items.filter(i => {
+      const d = i.scheduled_date || i.due_date;
+      return d && d < today && i.status !== 'done';
     });
+    const progressItems = items.filter(i => i.status === 'in_progress' && !overdue.includes(i));
+    const todoItems = items.filter(i => i.status === 'todo' && !overdue.includes(i));
+    const doneItems = items.filter(i => i.status === 'done');
 
-    if (overdue.length > 0) {
+    if (overdue.length) {
       html += `<div class="day-header" style="color:#ef4444;">⚠️ 놓친 항목 — ${overdue.length}건</div>`;
       html += overdue.map(renderUnifiedItem).join('');
     }
-
-    const dates = Object.keys(grouped).sort();
-    dates.forEach(d => {
-      if (d === 'unscheduled') return;
-      const dt = new Date(d);
-      const dayLabel = `${d.slice(5)} (${DAYS_KR[dt.getDay()]})`;
-      const isToday = d === today;
-      html += `<div class="day-header">${isToday ? '▶ 오늘 ' : ''}${dayLabel}</div>`;
-      html += grouped[d].map(renderUnifiedItem).join('');
-    });
-
-    if (grouped['unscheduled']) {
-      html += `<div class="day-header">날짜 미지정</div>`;
-      html += grouped['unscheduled'].map(renderUnifiedItem).join('');
-    }
-  } else {
-    // 오늘/내일: 상태별 그룹
-    const todoItems = items.filter(i => i.status === 'todo');
-    const progressItems = items.filter(i => i.status === 'in_progress');
-    const doneItems = items.filter(i => i.status === 'done');
-
     if (progressItems.length) {
       html += `<div class="day-header">🔄 진행중 — ${progressItems.length}건</div>`;
       html += progressItems.map(renderUnifiedItem).join('');
@@ -2324,7 +2299,7 @@ async function loadUnifiedTasks() {
       html += todoItems.map(renderUnifiedItem).join('');
     }
     if (doneItems.length) {
-      html += `<div class="day-header" style="opacity:0.6;">✅ 완료 — ${doneItems.length}건</div>`;
+      html += `<div class="day-header" style="opacity:0.5;">✅ 완료 — ${doneItems.length}건</div>`;
       html += doneItems.map(renderUnifiedItem).join('');
     }
   }
