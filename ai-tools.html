@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI도구 — 품앗이생협</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;700;900&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --earth: #0f0b07;
+    --soil:  #1e1510;
+    --bark:  #2d1f14;
+    --amber: #c4803a;
+    --amber-light: #e8a55a;
+    --green: #3d5c35;
+    --green-light: #5a8a4e;
+    --cream: #f2ead8;
+    --dust:  #b8a88a;
+    --red:   #b83a2a;
+    --white: #faf7f0;
+    --panel: rgba(30,21,16,0.85);
+    --surface: rgba(45,31,20,0.8);
+    --border: rgba(184,168,138,0.2);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--earth);
+    color: var(--cream);
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* ── 로딩/비인증 ── */
+  #auth-gate {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-size: 0.9rem;
+    color: var(--dust);
+  }
+
+  #app { display: none; }
+
+  /* ── 헤더 ── */
+  .top-bar {
+    background: var(--soil);
+    border-bottom: 1px solid rgba(196,128,58,0.12);
+    padding: 0.8rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .top-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .top-bar h1 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--amber);
+  }
+
+  .back-link {
+    font-size: 0.78rem;
+    color: var(--dust);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    padding: 0.3rem 0.8rem;
+    transition: all 0.2s;
+  }
+
+  .back-link:hover {
+    color: var(--cream);
+    border-color: var(--amber);
+  }
+
+  /* ── 섹션 ── */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+
+  .section {
+    margin-bottom: 2.5rem;
+  }
+
+  .section-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--amber);
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(196,128,58,0.15);
+  }
+
+  /* ── 카드 그리드 ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.2rem 1.4rem;
+    transition: border-color 0.2s;
+  }
+
+  .card:hover {
+    border-color: var(--amber);
+  }
+
+  .card-say {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.95rem;
+    color: var(--white);
+    margin-bottom: 0.5rem;
+  }
+
+  .card-say::before {
+    content: '"';
+    color: var(--amber);
+  }
+
+  .card-say::after {
+    content: '"';
+    color: var(--amber);
+  }
+
+  .card-desc {
+    font-size: 0.78rem;
+    color: var(--dust);
+    line-height: 1.5;
+  }
+
+  .card-tool {
+    display: inline-block;
+    font-size: 0.65rem;
+    color: var(--amber);
+    background: rgba(196,128,58,0.1);
+    border: 1px solid rgba(196,128,58,0.2);
+    padding: 0.15rem 0.5rem;
+    margin-top: 0.5rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── 도구 리스트 ── */
+  .tool-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .tool-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 0.8rem 1.2rem;
+    text-decoration: none;
+    color: var(--cream);
+    transition: border-color 0.2s;
+  }
+
+  .tool-item:hover {
+    border-color: var(--amber);
+  }
+
+  .tool-icon {
+    font-size: 1.4rem;
+    width: 2rem;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .tool-info {
+    flex: 1;
+  }
+
+  .tool-name {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--white);
+  }
+
+  .tool-detail {
+    font-size: 0.72rem;
+    color: var(--dust);
+    margin-top: 0.15rem;
+  }
+
+  .tool-arrow {
+    color: var(--dust);
+    font-size: 0.8rem;
+  }
+
+  /* ── AI팀 ── */
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.8rem;
+  }
+
+  .team-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1rem 1.2rem;
+    text-align: center;
+  }
+
+  .team-name {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 0.3rem;
+  }
+
+  .team-role {
+    font-size: 0.72rem;
+    color: var(--dust);
+    margin-bottom: 0.4rem;
+  }
+
+  .team-status {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.5rem;
+    display: inline-block;
+  }
+
+  .status-on {
+    color: var(--green-light);
+    border: 1px solid rgba(90,138,78,0.3);
+    background: rgba(90,138,78,0.1);
+  }
+
+  .status-off {
+    color: var(--dust);
+    border: 1px solid var(--border);
+    background: rgba(184,168,138,0.05);
+  }
+
+  /* ── 모바일 ── */
+  @media (max-width: 600px) {
+    .top-bar { padding: 0.6rem 1rem; }
+    .container { padding: 1.2rem 1rem; }
+    .card-grid { grid-template-columns: 1fr; }
+    .team-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div id="auth-gate">로그인 확인 중...</div>
+
+<div id="app">
+  <header class="top-bar">
+    <div class="top-bar-left">
+      <h1>AI도구</h1>
+    </div>
+    <a class="back-link" href="work.html">경영판으로</a>
+  </header>
+
+  <!-- ═══ AI에게 말하기 ═══ -->
+  <div class="container">
+    <div class="section">
+      <h2 class="section-title">AI에게 말하기</h2>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-say">배포해</div>
+          <div class="card-desc">홈페이지 수정사항을 사이트에 반영합니다. 백업, 보안검사, 승인 후 배포.</div>
+          <span class="card-tool">/deploy</span>
+        </div>
+        <div class="card">
+          <div class="card-say">체크리스트 봐</div>
+          <div class="card-desc">지원사업 신청 진행상황을 확인하고 다음 할 일을 보여줍니다.</div>
+          <span class="card-tool">/grant</span>
+        </div>
+        <div class="card">
+          <div class="card-say">메일 확인해</div>
+          <div class="card-desc">이메일 수신함을 확인합니다. 지원사업 회신, 녹색매장 답변 등.</div>
+          <span class="card-tool">Gmail</span>
+        </div>
+        <div class="card">
+          <div class="card-say">이번주 일정 뭐 있어</div>
+          <div class="card-desc">구글 캘린더에서 일정을 조회합니다.</div>
+          <span class="card-tool">Calendar</span>
+        </div>
+        <div class="card">
+          <div class="card-say">전단지 만들어</div>
+          <div class="card-desc">Canva로 홍보물, 전단지, 안내문을 디자인합니다.</div>
+          <span class="card-tool">Canva</span>
+        </div>
+        <div class="card">
+          <div class="card-say">이 사이트 내용 긁어와</div>
+          <div class="card-desc">웹페이지 내용을 수집합니다. 공고문, 참고자료 등.</div>
+          <span class="card-tool">Firecrawl</span>
+        </div>
+        <div class="card">
+          <div class="card-say">패미한테 이거 시켜</div>
+          <div class="card-desc">PC의 패미에게 코딩 작업을 넘깁니다.</div>
+          <span class="card-tool">pami_call</span>
+        </div>
+        <div class="card">
+          <div class="card-say">발표자료 만들어</div>
+          <div class="card-desc">사업계획서, 제안서 PPT를 제작합니다.</div>
+          <span class="card-tool">slides-grab</span>
+        </div>
+        <div class="card">
+          <div class="card-say">드라이브에서 찾아봐</div>
+          <div class="card-desc">구글 드라이브에서 파일을 검색하고 가져옵니다.</div>
+          <span class="card-tool">Google Drive</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 매장 도구 ═══ -->
+    <div class="section">
+      <h2 class="section-title">매장 도구</h2>
+      <div class="tool-list">
+        <a class="tool-item" href="tags.html" target="_blank">
+          <span class="tool-icon">🏷</span>
+          <div class="tool-info">
+            <div class="tool-name">가격태그 인쇄</div>
+            <div class="tool-detail">상품 가격태그를 만들어 프린터로 인쇄합니다</div>
+          </div>
+          <span class="tool-arrow">→</span>
+        </a>
+        <div class="tool-item">
+          <span class="tool-icon">📷</span>
+          <div class="tool-info">
+            <div class="tool-name">바코드 폐기 봇</div>
+            <div class="tool-detail">텔레그램 @barcode_poom_bot — 바코드 사진 찍으면 넷포스 폐기 등록</div>
+          </div>
+        </div>
+        <div class="tool-item">
+          <span class="tool-icon">🎤</span>
+          <div class="tool-info">
+            <div class="tool-name">음성 발주</div>
+            <div class="tool-detail">텔레그램 @jimmy_jini_bot — 음성으로 발주 등록</div>
+          </div>
+        </div>
+        <div class="tool-item">
+          <span class="tool-icon">📱</span>
+          <div class="tool-info">
+            <div class="tool-name">출퇴근 기록</div>
+            <div class="tool-detail">텔레그램 @att_register_bot — QR+GPS 출퇴근 인증</div>
+          </div>
+        </div>
+        <a class="tool-item" href="feedback.html" target="_blank">
+          <span class="tool-icon">💬</span>
+          <div class="tool-info">
+            <div class="tool-name">조합원말씀</div>
+            <div class="tool-detail">조합원 의견 접수 폼 (QR코드로 매장 비치)</div>
+          </div>
+          <span class="tool-arrow">→</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- ═══ AI팀 현황 ═══ -->
+    <div class="section">
+      <h2 class="section-title">AI팀 현황</h2>
+      <div class="team-grid">
+        <div class="team-card">
+          <div class="team-name">지미</div>
+          <div class="team-role">AI경영지원실장 (GCP Opus)</div>
+          <span class="team-status status-on">가동중</span>
+        </div>
+        <div class="team-card">
+          <div class="team-name">패미</div>
+          <div class="team-role">코딩 실행 (PC Sonnet)</div>
+          <span class="team-status status-off">대기</span>
+        </div>
+        <div class="team-card">
+          <div class="team-name">미르</div>
+          <div class="team-role">설계/방향 (웹 Claude)</div>
+          <span class="team-status status-off">대기</span>
+        </div>
+        <div class="team-card">
+          <div class="team-name">피제</div>
+          <div class="team-role">Google 서비스 (PC Gemini)</div>
+          <span class="team-status status-off">대기</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRuaXZoY3BqcmhrbWVrY2ZxZ2RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NTc5MjMsImV4cCI6MjA4NzIzMzkyM30.yJ0_4Sg78p7oY89q7go3ab26PCPHnk1Q4ObZJIZEULA';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+sb.auth.getSession().then(({ data: { session } }) => {
+  if (session) {
+    document.getElementById('auth-gate').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+  } else {
+    document.getElementById('auth-gate').textContent = '로그인이 필요합니다.';
+    setTimeout(() => { window.location.href = 'work.html'; }, 1500);
+  }
+});
+</script>
+</body>
+</html>
