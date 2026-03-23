@@ -563,7 +563,93 @@
   @keyframes pulse-green { 0%,100%{opacity:1} 50%{opacity:0.4} }
   .realtime-on { background:#4ade80 !important; animation:pulse-green 2s infinite; }
 
-  /* ── 액션플랜 ──────────────────────────────────────── */
+  /* ── 통합 업무 허브 ──────────────────────────────────── */
+  .action-sub-btn {
+    padding: 0.5rem 1.2rem;
+    background: transparent;
+    border: none;
+    color: var(--dust);
+    font-size: 0.85rem;
+    font-family: 'Noto Sans KR', sans-serif;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+  }
+  .action-sub-btn.active {
+    color: var(--amber);
+    border-bottom-color: var(--amber);
+    font-weight: 600;
+  }
+  .action-sub-btn:hover { color: var(--cream); }
+
+  .source-badge {
+    display: inline-block;
+    padding: 0.1rem 0.45rem;
+    font-size: 0.7rem;
+    border-radius: 3px;
+    margin-right: 0.3rem;
+    font-weight: 500;
+  }
+  .source-calendar { background: rgba(74,222,128,0.15); color: #4ade80; }
+  .source-email { background: rgba(96,165,250,0.15); color: #60a5fa; }
+  .source-grant { background: rgba(251,191,36,0.15); color: #fbbf24; }
+  .source-infra { background: rgba(248,113,113,0.15); color: #f87171; }
+  .source-manual { background: rgba(196,128,58,0.15); color: var(--amber); }
+  .source-ai_ops { background: rgba(167,139,250,0.15); color: #a78bfa; }
+
+  .priority-urgent { border-left: 3px solid #ef4444; }
+  .priority-high { border-left: 3px solid #f59e0b; }
+  .priority-normal { border-left: 3px solid transparent; }
+
+  .status-btn {
+    width: 22px; height: 22px;
+    border: 2px solid rgba(196,128,58,0.4);
+    border-radius: 4px;
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem;
+    transition: all 0.2s;
+  }
+  .status-btn.status-todo { border-color: rgba(196,128,58,0.3); }
+  .status-btn.status-in_progress { border-color: #60a5fa; background: rgba(96,165,250,0.15); }
+  .status-btn.status-done { border-color: #4ade80; background: rgba(74,222,128,0.15); }
+
+  .day-header {
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--amber);
+    background: rgba(196,128,58,0.06);
+    border-bottom: 1px solid rgba(196,128,58,0.15);
+  }
+
+  .deadline-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid rgba(184,168,138,0.06);
+    font-size: 0.82rem;
+  }
+  .deadline-date { color: var(--dust); font-size: 0.75rem; }
+  .deadline-urgent { color: #ef4444; font-weight: 600; }
+
+  .email-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid rgba(184,168,138,0.06);
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: background 0.2s;
+  }
+  .email-row:hover { background: rgba(196,128,58,0.06); }
+
   .action-form {
     display: grid;
     grid-template-columns: auto 1fr auto auto;
@@ -1018,47 +1104,57 @@
     </div>
   </section>
 
-  <!-- ══ TAB: 액션플랜 ════════════════════════════════════ -->
+  <!-- ══ TAB: 통합 업무 허브 ════════════════════════════════════ -->
   <section class="tab-content" id="tab-action">
     <div class="sec-header">
       <div>
-        <div class="sec-label">액션플랜</div>
-        <div class="sec-title">오늘 할 일</div>
+        <div class="sec-label">통합 업무 허브</div>
+        <div class="sec-title">할 일</div>
       </div>
     </div>
 
-    <!-- 검색/필터 -->
-    <div style="display:flex;gap:0.6rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap;">
-      <input class="form-input" type="text" id="action-search" placeholder="키워드 검색 (내용·메모)" style="flex:1;min-width:160px;padding:0.6rem 1rem;font-size:0.85rem;">
-      <select class="select-input" id="action-month" style="min-width:110px;">
-        <option value="">전체 월</option>
-      </select>
-      <button class="btn-sm" onclick="searchActions()">검색</button>
-      <button class="btn-sm" onclick="clearSearch()">초기화</button>
+    <!-- 서브탭: 이번주 / 내일 / 오늘 -->
+    <div style="display:flex;gap:0;margin-bottom:1rem;border-bottom:2px solid rgba(196,128,58,0.3);">
+      <button class="action-sub-btn active" onclick="switchActionSub('week',this)">이번주</button>
+      <button class="action-sub-btn" onclick="switchActionSub('tomorrow',this)">내일</button>
+      <button class="action-sub-btn" onclick="switchActionSub('today',this)">오늘</button>
     </div>
 
-    <div class="card" style="margin-bottom:1.5rem;">
+    <!-- 할일 추가 폼 -->
+    <div class="card" style="margin-bottom:1rem;">
       <div class="action-form">
-        <select class="select-input" id="action-type">
-          <option value="store">매장</option>
-          <option value="homepage">홈페이지</option>
-          <option value="automation">자동화</option>
-          <option value="office">사무</option>
-          <option value="general">기타</option>
+        <select class="select-input" id="action-category" style="min-width:90px;">
+          <option value="매장">매장</option>
+          <option value="홈페이지">홈페이지</option>
+          <option value="자동화">자동화</option>
+          <option value="사무">사무</option>
+          <option value="지원사업">지원사업</option>
+          <option value="인프라">인프라</option>
+          <option value="기타">기타</option>
         </select>
-        <input class="form-input" type="text" id="action-content" placeholder="할 일을 입력하세요" style="padding:0.6rem 1rem;">
+        <input class="form-input" type="text" id="action-content" placeholder="할 일을 입력하세요" style="flex:1;padding:0.6rem 1rem;">
         <input class="date-input" type="date" id="action-date">
-        <button class="btn-primary" onclick="addActionItem()">추가</button>
+        <button class="btn-primary" onclick="addUnifiedTask()">추가</button>
+      </div>
+      <div style="margin-top:0.5rem;text-align:right;">
+        <button class="btn-secondary" onclick="toggleEmailImport()" style="font-size:0.85rem;padding:0.3rem 0.8rem;">📧 이메일에서 가져오기</button>
       </div>
     </div>
 
+    <!-- 이메일에서 가져오기 -->
+    <div id="email-import-panel" style="display:none;margin-bottom:1rem;">
+      <div class="card" id="email-import-list">
+        <div class="loading-row">메일 로딩 중…</div>
+      </div>
+    </div>
+
+    <!-- 할일 목록 -->
     <div class="card" id="action-list">
       <div class="loading-row">데이터 로딩 중…</div>
     </div>
 
-    <!-- 이번 달 요약 -->
-    <div class="card" id="action-summary" style="margin-top:1.5rem;">
-      <div class="loading-row">요약 로딩 중…</div>
+    <!-- 마감 임박 -->
+    <div class="card" id="deadline-list" style="margin-top:1rem;">
     </div>
   </section>
 
@@ -2090,211 +2186,275 @@ async function loadToday() {
   }
 }
 
-// ══ 액션플랜 ════════════════════════════════════════════
+// ══ 통합 업무 허브 ════════════════════════════════════════════
 
-const typeBadge = { store: '매장', homepage: '홈페이지', automation: '자동화', office: '사무', general: '기타' };
+let currentActionSub = 'week';
 
-function renderActionItem(item) {
-  const memo = item.memo ? `<div class="action-memo">📝 ${item.memo}</div>` : '';
-  return `<div class="action-item ${item.is_done ? 'action-done' : ''}" id="ai-${item.id}">
-    <input type="checkbox" class="action-check" ${item.is_done ? 'checked' : ''} onchange="toggleAction(${item.id}, this.checked, event)">
-    <div class="action-body">
+const SOURCE_ICONS = {
+  calendar: '📅', email: '📧', grant: '📋', infra: '⚙️', manual: '📝', ai_ops: '🤖'
+};
+const SOURCE_LABELS = {
+  calendar: '일정', email: '이메일', grant: '지원사업', infra: '인프라', manual: '수동', ai_ops: 'AI운영'
+};
+const STATUS_ICONS = { todo: '⬜', in_progress: '🔄', done: '✅' };
+const STATUS_NEXT  = { todo: 'in_progress', in_progress: 'done', done: 'todo' };
+const DAYS_KR = ['일','월','화','수','목','금','토'];
+
+function switchActionSub(key, btn) {
+  currentActionSub = key;
+  document.querySelectorAll('.action-sub-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  loadUnifiedTasks();
+}
+
+function renderUnifiedItem(item) {
+  const sourceClass = `source-${item.source}`;
+  const priorityClass = `priority-${item.priority || 'normal'}`;
+  const statusClass = `status-${item.status}`;
+  const icon = SOURCE_ICONS[item.source] || '📝';
+  const label = item.category || SOURCE_LABELS[item.source] || '';
+  const memo = item.memo ? `<div style="font-size:0.75rem;color:var(--dust);margin-top:0.2rem;">📝 ${item.memo}</div>` : '';
+  const dueStr = item.due_date ? `<span class="deadline-date" style="margin-left:0.5rem;">${item.due_date}</span>` : '';
+  const doneStyle = item.status === 'done' ? 'opacity:0.5;text-decoration:line-through;' : '';
+
+  return `<div class="action-item ${priorityClass}" data-id="${item.id}" style="${doneStyle}">
+    <button class="status-btn ${statusClass}" onclick="cycleStatus('${item.id}','${item.status}')" title="상태 변경">
+      ${STATUS_ICONS[item.status]}
+    </button>
+    <div class="action-body" style="flex:1;">
       <div class="action-content">
-        <span class="type-badge type-${item.type}">${typeBadge[item.type] || item.type}</span>
-        ${item.content}
+        <span class="source-badge ${sourceClass}">${icon} ${label}</span>
+        ${item.title}${dueStr}
       </div>
+      ${item.description ? `<div style="font-size:0.73rem;color:var(--dust);margin-top:0.15rem;">${item.description}</div>` : ''}
       ${memo}
-      <div class="action-meta">${item.date}${item.done_at ? ' · 완료: ' + item.done_at.slice(0,16).replace('T',' ') : ''}</div>
     </div>
-    <button class="btn-del" onclick="deleteAction(${item.id})" title="삭제">✕</button>
+    ${item.source === 'manual' ? `<button class="btn-del" onclick="deleteUnifiedTask('${item.id}')" title="삭제">✕</button>` : ''}
   </div>`;
 }
 
-async function loadActions() {
+async function loadUnifiedTasks() {
   const wrap = document.getElementById('action-list');
+  const deadlineWrap = document.getElementById('deadline-list');
   wrap.innerHTML = '<div class="loading-row">로딩 중…</div>';
 
-  // 미완료: 오늘 이전 날짜 포함 이월
-  const { data: undone } = await sb.from('action_items')
-    .select('*').eq('is_done', false)
-    .lte('date', todayStr()).order('date', { ascending: true });
+  const today = todayStr();
+  const todayDate = new Date(today);
 
-  // 완료: 최근 30개
-  const { data: done } = await sb.from('action_items')
-    .select('*').eq('is_done', true)
-    .order('done_at', { ascending: false }).limit(30);
+  // 이번주 범위 (월~일)
+  const dayOfWeek = todayDate.getDay();
+  const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+  const monday = new Date(todayDate);
+  monday.setDate(todayDate.getDate() + mondayOffset);
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  const mondayStr = monday.toISOString().slice(0,10);
+  const sundayStr = sunday.toISOString().slice(0,10);
 
-  const undoneList = undone || [];
-  const doneList   = done   || [];
+  const tomorrow = new Date(todayDate);
+  tomorrow.setDate(todayDate.getDate() + 1);
+  const tomorrowStr = tomorrow.toISOString().slice(0,10);
+
+  let query = sb.from('unified_tasks').select('*');
+
+  if (currentActionSub === 'today') {
+    // 오늘 항목 + 과거 미완료
+    query = query.or(`scheduled_date.eq.${today},and(scheduled_date.lt.${today},status.neq.done)`);
+  } else if (currentActionSub === 'tomorrow') {
+    query = query.or(`scheduled_date.eq.${tomorrowStr},and(due_date.eq.${tomorrowStr},scheduled_date.is.null)`);
+  } else {
+    // 이번주: 주간 범위 + 과거 미완료 + 날짜 미지정 미완료
+    query = query.or(`and(scheduled_date.gte.${mondayStr},scheduled_date.lte.${sundayStr}),and(scheduled_date.lt.${mondayStr},status.neq.done),and(scheduled_date.is.null,due_date.gte.${mondayStr},due_date.lte.${sundayStr}),and(scheduled_date.is.null,due_date.is.null,status.neq.done)`);
+  }
+
+  query = query.order('scheduled_date', { ascending: true, nullsFirst: false }).order('priority', { ascending: true });
+
+  const { data, error } = await query;
+  const items = data || [];
 
   let html = '';
+  if (items.length === 0) {
+    html = '<div class="empty-row">항목 없음</div>';
+  } else if (currentActionSub === 'week') {
+    // 날짜별 그룹핑
+    const grouped = {};
+    const overdue = [];
+    items.forEach(item => {
+      const d = item.scheduled_date || item.due_date || 'unscheduled';
+      if (d < today && item.status !== 'done') {
+        overdue.push(item);
+      } else {
+        if (!grouped[d]) grouped[d] = [];
+        grouped[d].push(item);
+      }
+    });
 
-  // 미완료 섹션
-  html += `<div class="action-section-header">📋 미완료 — ${undoneList.length}건</div>`;
-  if (undoneList.length === 0) {
-    html += '<div class="empty-row">미완료 항목 없음</div>';
-  } else {
-    html += undoneList.map(renderActionItem).join('');
-  }
+    if (overdue.length > 0) {
+      html += `<div class="day-header" style="color:#ef4444;">⚠️ 놓친 항목 — ${overdue.length}건</div>`;
+      html += overdue.map(renderUnifiedItem).join('');
+    }
 
-  // 완료 섹션 (기본 숨김)
-  html += `<div class="action-section-header" onclick="toggleDoneSection()" style="margin-top:1.5rem;">✅ 완료 — ${doneList.length}건 <span id="done-toggle-hint" style="font-size:0.75rem;color:var(--dust);">(펼치기)</span></div>`;
-  html += `<div id="done-section" style="display:none;">`;
-  if (doneList.length === 0) {
-    html += '<div class="empty-row">완료 항목 없음</div>';
+    const dates = Object.keys(grouped).sort();
+    dates.forEach(d => {
+      if (d === 'unscheduled') return;
+      const dt = new Date(d);
+      const dayLabel = `${d.slice(5)} (${DAYS_KR[dt.getDay()]})`;
+      const isToday = d === today;
+      html += `<div class="day-header">${isToday ? '▶ 오늘 ' : ''}${dayLabel}</div>`;
+      html += grouped[d].map(renderUnifiedItem).join('');
+    });
+
+    if (grouped['unscheduled']) {
+      html += `<div class="day-header">날짜 미지정</div>`;
+      html += grouped['unscheduled'].map(renderUnifiedItem).join('');
+    }
   } else {
-    html += doneList.map(renderActionItem).join('');
+    // 오늘/내일: 상태별 그룹
+    const todoItems = items.filter(i => i.status === 'todo');
+    const progressItems = items.filter(i => i.status === 'in_progress');
+    const doneItems = items.filter(i => i.status === 'done');
+
+    if (progressItems.length) {
+      html += `<div class="day-header">🔄 진행중 — ${progressItems.length}건</div>`;
+      html += progressItems.map(renderUnifiedItem).join('');
+    }
+    if (todoItems.length) {
+      html += `<div class="day-header">📋 미착수 — ${todoItems.length}건</div>`;
+      html += todoItems.map(renderUnifiedItem).join('');
+    }
+    if (doneItems.length) {
+      html += `<div class="day-header" style="opacity:0.6;">✅ 완료 — ${doneItems.length}건</div>`;
+      html += doneItems.map(renderUnifiedItem).join('');
+    }
   }
-  html += '</div>';
 
   wrap.innerHTML = html;
-  loadActionSummary();
-  initMonthDropdown();
+
+  // 마감 임박 (이번주 뷰에서만)
+  if (currentActionSub === 'week' && deadlineWrap) {
+    const { data: deadlines } = await sb.from('unified_tasks')
+      .select('*')
+      .not('due_date', 'is', null)
+      .neq('status', 'done')
+      .gte('due_date', today)
+      .order('due_date', { ascending: true })
+      .limit(10);
+
+    if (deadlines && deadlines.length > 0) {
+      let dhtml = `<div class="day-header">🔥 마감 임박</div>`;
+      deadlines.forEach(d => {
+        const daysLeft = Math.ceil((new Date(d.due_date) - new Date(today)) / 86400000);
+        const urgentClass = daysLeft <= 3 ? 'deadline-urgent' : '';
+        const icon = SOURCE_ICONS[d.source] || '📋';
+        dhtml += `<div class="deadline-item">
+          <span>${icon} ${d.title}</span>
+          <span class="deadline-date ${urgentClass}">${d.due_date} (D-${daysLeft})</span>
+        </div>`;
+      });
+      deadlineWrap.innerHTML = dhtml;
+    } else {
+      deadlineWrap.innerHTML = '';
+    }
+  } else if (deadlineWrap) {
+    deadlineWrap.innerHTML = '';
+  }
 }
 
-function toggleDoneSection() {
-  const section = document.getElementById('done-section');
-  const hint    = document.getElementById('done-toggle-hint');
-  if (!section) return;
-  const hidden = section.style.display === 'none';
-  section.style.display = hidden ? 'block' : 'none';
-  if (hint) hint.textContent = hidden ? '(접기)' : '(펼치기)';
+async function cycleStatus(id, current) {
+  const next = STATUS_NEXT[current] || 'todo';
+  const updates = { status: next, updated_at: new Date().toISOString() };
+  if (next === 'done') updates.done_at = new Date().toISOString();
+  if (next === 'todo') { updates.done_at = null; }
+
+  const { error } = await sb.from('unified_tasks').update(updates).eq('id', id);
+  if (error) { toast('상태 변경 실패: ' + error.message); return; }
+  loadUnifiedTasks();
 }
 
-async function addActionItem() {
-  const type    = document.getElementById('action-type').value;
-  const content = document.getElementById('action-content').value.trim();
-  const date    = document.getElementById('action-date').value;
+async function addUnifiedTask() {
+  const category = document.getElementById('action-category').value;
+  const content  = document.getElementById('action-content').value.trim();
+  const date     = document.getElementById('action-date').value || todayStr();
 
   if (!content) { toast('내용을 입력하세요.'); return; }
 
-  const { error } = await sb.from('action_items').insert({ type, content, date });
+  const { error } = await sb.from('unified_tasks').insert({
+    source: 'manual',
+    source_id: 'manual:' + Date.now(),
+    title: content,
+    category: category,
+    status: 'todo',
+    priority: 'normal',
+    scheduled_date: date,
+    due_date: date
+  });
   if (error) { toast('저장 실패: ' + error.message); return; }
   document.getElementById('action-content').value = '';
-  toast('액션 추가됨');
-  loadActions();
+  toast('할일 추가됨');
+  loadUnifiedTasks();
 }
 
-async function toggleAction(id, done, evt) {
-  if (done) {
-    // 메모 입력 UI 표시
-    const item = evt.target.closest('.action-item');
-    if (item) {
-      const existing = item.querySelector('.memo-input-row');
-      if (existing) existing.remove();
-      const memoRow = document.createElement('div');
-      memoRow.className = 'memo-input-row';
-      memoRow.style.cssText = 'display:flex;gap:0.5rem;align-items:flex-start;margin-top:0.5rem;';
-      memoRow.innerHTML = `
-        <textarea placeholder="완료 메모 (선택사항)" style="flex:1;background:rgba(15,11,7,0.8);border:1px solid rgba(196,128,58,0.2);color:var(--cream);padding:0.4rem 0.6rem;font-size:0.8rem;font-family:'Noto Sans KR',sans-serif;resize:none;height:50px;outline:none;" id="memo-ta-${id}"></textarea>
-        <button class="btn-primary" style="padding:0.4rem 0.8rem;font-size:0.78rem;" onclick="saveDone(${id})">저장</button>
-      `;
-      item.querySelector('.action-body').appendChild(memoRow);
-    }
-  } else {
-    const { error } = await sb.from('action_items').update({ is_done: false, done_at: null, memo: null }).eq('id', id);
-    if (error) { toast('저장 실패: ' + error.message); return; }
-    loadActions();
-  }
-}
-
-async function saveDone(id) {
-  const ta   = document.getElementById(`memo-ta-${id}`);
-  const memo = ta ? ta.value.trim() : '';
-  const { error } = await sb.from('action_items').update({
-    is_done: true,
-    done_at: new Date().toISOString(),
-    memo: memo || null
-  }).eq('id', id);
-  if (error) { toast('저장 실패: ' + error.message); return; }
-  toast('완료 저장됨');
-  loadActions();
-}
-
-async function deleteAction(id) {
-  await sb.from('action_items').delete().eq('id', id);
+async function deleteUnifiedTask(id) {
+  if (!confirm('삭제하시겠습니까?')) return;
+  await sb.from('unified_tasks').delete().eq('id', id);
   toast('삭제됨');
-  loadActions();
+  loadUnifiedTasks();
 }
 
-async function searchActions() {
-  const keyword = document.getElementById('action-search').value.trim();
-  const month   = document.getElementById('action-month').value;
-  const wrap    = document.getElementById('action-list');
-
-  if (!keyword && !month) { loadActions(); return; }
-
-  wrap.innerHTML = '<div class="loading-row">검색 중…</div>';
-
-  let query = sb.from('action_items').select('*');
-  if (keyword) {
-    query = query.or(`content.ilike.%${keyword}%,memo.ilike.%${keyword}%`);
-  }
-  if (month) {
-    query = query.like('date', `${month}%`);
-  }
-  query = query.order('date', { ascending: true });
-
-  const { data, error } = await query;
-  if (error || !data || data.length === 0) {
-    wrap.innerHTML = '<div class="empty-row">검색 결과 없음</div>';
+// 이메일에서 가져오기
+async function toggleEmailImport() {
+  const panel = document.getElementById('email-import-panel');
+  if (panel.style.display !== 'none') {
+    panel.style.display = 'none';
     return;
   }
-  wrap.innerHTML = `
-    <div class="action-section-header">🔍 검색 결과 — ${data.length}건</div>
-    ${data.map(renderActionItem).join('')}
-  `;
-}
+  panel.style.display = 'block';
+  const wrap = document.getElementById('email-import-list');
+  wrap.innerHTML = '<div class="loading-row">메일 로딩 중…</div>';
 
-function clearSearch() {
-  document.getElementById('action-search').value = '';
-  document.getElementById('action-month').value  = '';
-  loadActions();
-}
+  const { data } = await sb.from('recent_emails')
+    .select('*')
+    .eq('is_registered', false)
+    .order('date', { ascending: false })
+    .limit(15);
 
-async function loadActionSummary() {
-  const summaryWrap = document.getElementById('action-summary');
-  if (!summaryWrap) return;
-  const monthStr = todayStr().slice(0, 7);
-
-  const { data: doneData   } = await sb.from('action_items').select('type').eq('is_done', true).like('date', `${monthStr}%`);
-  const { data: undoneData } = await sb.from('action_items').select('type').eq('is_done', false).like('date', `${monthStr}%`);
-
-  const done   = doneData   || [];
-  const undone = undoneData || [];
-
-  const typeCounts = {};
-  [...done, ...undone].forEach(item => {
-    typeCounts[item.type] = (typeCounts[item.type] || 0) + 1;
-  });
-
-  const typeLabels = { store: '매장', homepage: '홈페이지', automation: '자동화', office: '사무', general: '기타' };
-  const typeDist   = Object.entries(typeLabels).map(([k, v]) => `${v} ${typeCounts[k] || 0}`).join(' / ');
-
-  summaryWrap.innerHTML = `
-    <div class="card-title">이번 달 요약 (${monthStr})</div>
-    <div style="font-size:0.85rem;color:var(--dust);line-height:2;">
-      <div>완료: <span style="color:var(--green-light)">${done.length}건</span></div>
-      <div>미완료: <span style="color:var(--amber)">${undone.length}건</span></div>
-      <div style="font-size:0.78rem;margin-top:0.3rem;">type별: ${typeDist}</div>
-    </div>
-  `;
-}
-
-function initMonthDropdown() {
-  const sel = document.getElementById('action-month');
-  if (!sel) return;
-  const today  = new Date();
-  const months = [];
-  for (let i = 0; i < 6; i++) {
-    const d   = new Date(today.getFullYear(), today.getMonth() - i, 1);
-    const val = d.toISOString().slice(0, 7);
-    months.push(val);
+  if (!data || data.length === 0) {
+    wrap.innerHTML = '<div class="empty-row">등록 가능한 메일 없음</div>';
+    return;
   }
-  const currentVal = sel.value;
-  sel.innerHTML = '<option value="">전체 월</option>' +
-    months.map(m => `<option value="${m}"${m === currentVal ? ' selected' : ''}>${m}</option>`).join('');
+
+  wrap.innerHTML = `<div class="day-header">📧 최근 메일 — 클릭하여 할일 등록</div>` +
+    data.map(e => `<div class="email-row" onclick="registerEmail('${e.message_id}', '${(e.subject||'').replace(/'/g,"\\'")}')">
+      <div style="flex:1;">
+        <div style="font-size:0.82rem;color:var(--cream);">${e.subject || '(제목 없음)'}</div>
+        <div style="font-size:0.72rem;color:var(--dust);">${e.from_name || e.from_email || ''}</div>
+      </div>
+      <span style="font-size:0.7rem;color:var(--dust);">${(e.date||'').slice(0,10)}</span>
+    </div>`).join('');
 }
+
+async function registerEmail(messageId, subject) {
+  const { error: e1 } = await sb.from('unified_tasks').insert({
+    source: 'email',
+    source_id: 'email:' + messageId,
+    title: subject,
+    category: '이메일',
+    status: 'todo',
+    priority: 'normal',
+    scheduled_date: todayStr()
+  });
+  if (!e1) {
+    await sb.from('recent_emails').update({ is_registered: true }).eq('message_id', messageId);
+    toast('메일 할일 등록됨');
+    toggleEmailImport();
+    loadUnifiedTasks();
+  } else {
+    toast('등록 실패: ' + e1.message);
+  }
+}
+
+// 기존 loadActions를 loadUnifiedTasks로 대체
+function loadActions() { loadUnifiedTasks(); }
 
 // ══ 이음SMS ════════════════════════════════════════════
 
