@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>가격표 인쇄 — 품앗이소비자생활협동조합</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;400;500;700&family=Noto+Serif+KR:wght@200&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 <style>
   :root {
@@ -140,60 +140,62 @@
     display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
   }
 
-  /* ── SINGLE TAG (65×38mm) ── */
+  /* ── SINGLE TAG (65×38mm) — 코워크 서식 기준 ── */
   .tag {
     width: 65mm; height: 38mm;
-    border: 1px solid #ccc; border-radius: 3px;
-    background: #fff; color: #000;
+    border: 1px solid #ccc;
+    background: #fff; color: #262626;
     position: relative; overflow: hidden;
-    display: flex; flex-direction: column;
     font-family: 'Noto Sans KR', sans-serif;
   }
-  .tag-body {
-    flex: 1; padding: 1.5mm 3mm 1mm;
-    display: flex; gap: 1.5mm;
+  /* 하단 골드바 */
+  .tag-bar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 6mm; background: var(--gold-bar);
   }
-  .tag-left {
-    flex: 1; display: flex; flex-direction: column; min-width: 0;
+  /* 상단 헤더: 업체명 + 매장명 */
+  .tag-header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 1.5mm 3mm 0;
   }
   .tag-farmer {
-    font-size: 10pt; color: #888; font-weight: 400;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    margin-bottom: 0mm;
-  }
-  .tag-product {
-    flex: 1; display: flex; align-items: flex-start; justify-content: flex-start;
-    font-weight: 900; text-align: left;
-    line-height: 1.1; word-break: keep-all;
-    padding-top: 0.5mm;
-    overflow: hidden; white-space: nowrap;
-  }
-  .tag-right {
-    width: 16mm; flex-shrink: 0;
-    display: flex; flex-direction: column; align-items: flex-end;
+    font-weight: 100; font-size: 7px; color: #262626;
+    max-width: 35mm; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
   }
   .tag-logo {
     font-family: 'Noto Serif KR', serif;
-    font-size: 8pt; color: var(--gold-bar); font-weight: 700;
-    letter-spacing: 0.05em; white-space: nowrap;
+    font-weight: 200; font-size: 6.5px; color: var(--gold-bar);
+    flex-shrink: 0;
+  }
+  /* 중앙: 상품명 + QR */
+  .tag-body {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 1.5mm 3mm 0; min-height: 13mm;
+  }
+  .tag-product {
+    font-weight: 500; font-size: 11.5px; line-height: 1.3;
+    color: #262626; flex: 1; margin-right: 1mm;
+    display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden;
+    word-break: keep-all; overflow-wrap: break-word;
   }
   .tag-qr {
-    width: 8mm; height: 8mm; flex-shrink: 0; margin: 0.5mm 0;
+    width: 6.5mm; height: 6.5mm; flex-shrink: 0;
   }
-  .tag-qr canvas, .tag-qr img { width: 100%; height: 100%; }
+  .tag-qr canvas, .tag-qr img { width: 100%; height: 100%; image-rendering: pixelated; }
+  /* 하단: 용량 + 가격 (골드바 위) */
   .tag-price-area {
-    text-align: right; margin-top: auto;
+    position: absolute; bottom: 6mm; right: 3mm;
+    text-align: right; padding-bottom: 0.5mm;
   }
   .tag-unit {
-    font-size: 9pt; color: #888; display: block;
+    font-weight: 400; font-size: 7px; color: #262626;
+    margin-bottom: 0.3mm;
   }
   .tag-price {
-    font-size: 14pt; font-weight: 900; color: #000;
-    letter-spacing: -0.03em; white-space: nowrap;
-  }
-  .tag-bar {
-    height: 6mm; background: var(--gold-bar); width: 100%;
-    flex-shrink: 0;
+    font-weight: 700; font-size: 12px; color: #262626;
+    white-space: nowrap;
   }
 
   /* ── PRINT SHEET ── */
@@ -218,7 +220,8 @@
       overflow: hidden;
     }
     .print-page:last-child { page-break-after: avoid; }
-    .tag { border: 0.5pt solid #ddd; }
+    .tag { border: 0.5pt solid #ddd; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .tag-bar { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
     @page {
       size: A4;
@@ -453,19 +456,17 @@ function tagHTML(p) {
   if (p.price != null) qrParams.set('price', p.price);
   const qrUrl = `${SITE_BASE}/tags.html?${qrParams.toString()}`;
   return `<div class="tag">
+    <div class="tag-header">
+      <span class="tag-farmer">${p.farmer_name || ''}</span>
+      <span class="tag-logo">품앗이마을</span>
+    </div>
     <div class="tag-body">
-      <div class="tag-left">
-        <div class="tag-farmer">${p.farmer_name || ''}</div>
-        <div class="tag-product">${displayName}</div>
-      </div>
-      <div class="tag-right">
-        <span class="tag-logo">품앗이마을</span>
-        <div class="tag-qr" data-qr="${qrUrl.replace(/"/g, '&quot;')}"></div>
-        <div class="tag-price-area">
-          <span class="tag-unit">${p.unit || ''}</span>
-          <span class="tag-price">${fmtPrice(p.price)}</span>
-        </div>
-      </div>
+      <span class="tag-product">${displayName}</span>
+      <div class="tag-qr" data-qr="${qrUrl.replace(/"/g, '&quot;')}"></div>
+    </div>
+    <div class="tag-price-area">
+      <div class="tag-unit">${p.unit || ''}</div>
+      <div class="tag-price">${fmtPrice(p.price)}</div>
     </div>
     <div class="tag-bar"></div>
   </div>`;
@@ -481,16 +482,9 @@ function renderQRCodes(container) {
   });
 }
 
-// 상품명 자동 폰트 축소 — 넘치면 1pt씩 줄여서 한 줄 유지
+// 상품명은 고정 11.5px + 최대 2줄 줄바꿈 (코워크 서식 기준)
 function autoFitProductNames(container) {
-  container.querySelectorAll('.tag-product').forEach(el => {
-    el.style.fontSize = '22pt';
-    let size = 22;
-    while (el.scrollWidth > el.clientWidth && size > 8) {
-      size -= 0.5;
-      el.style.fontSize = size + 'pt';
-    }
-  });
+  // 코워크 서식: 폰트 축소 안 함, CSS -webkit-line-clamp: 2로 처리
 }
 
 // ── MODE TABS ──
