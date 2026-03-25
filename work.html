@@ -3491,7 +3491,7 @@ async function loadOrderDashboard() {
   wrap.innerHTML = '<div class="loading-row">로딩 중…</div>';
 
   const { data, error } = await sb.from('staff_data')
-    .select('id, farmer_name, item_name, qty, urgency, created_at')
+    .select('id, farmer_name, item_name, qty, urgency, created_at, order_comment')
     .eq('status', '대기')
     .order('created_at', { ascending: false });
 
@@ -3521,9 +3521,33 @@ async function loadOrderDashboard() {
     const itemRows = items.map(i => {
       const urg = i.urgency ? `<span style="font-size:0.7rem;color:${urgencyColor[i.urgency] || 'var(--dust)'};margin-left:0.3rem;">${i.urgency}</span>` : '';
       const dt = i.created_at ? new Date(i.created_at).toLocaleString('ko-KR', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }) : '';
-      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.3rem 0;border-bottom:1px solid rgba(184,168,138,0.06);font-size:0.82rem;">
-        <span style="color:var(--cream);">${i.item_name || '—'}${urg}</span>
-        <span style="color:var(--dust);">${i.qty || ''}개 <span style="font-size:0.72rem;margin-left:0.3rem;">${dt}</span></span>
+      const hasComment = i.order_comment ? true : false;
+      const commentDisplay = hasComment
+        ? `<div style="font-size:0.75rem;color:var(--amber);background:rgba(196,128,58,0.08);padding:0.25rem 0.5rem;border-radius:4px;margin-top:0.2rem;">💬 ${i.order_comment}</div>`
+        : '';
+      return `<div style="padding:0.3rem 0;border-bottom:1px solid rgba(184,168,138,0.06);font-size:0.82rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:var(--cream);">${i.item_name || '—'}${urg}</span>
+          <span style="display:flex;align-items:center;gap:0.4rem;">
+            <span style="color:var(--dust);">${i.qty || ''}개 <span style="font-size:0.72rem;margin-left:0.3rem;">${dt}</span></span>
+            <button onclick="toggleOrderComment(${i.id})" style="font-size:0.68rem;color:${hasComment ? 'var(--amber)' : 'var(--dust)'};background:none;border:1px solid ${hasComment ? 'rgba(196,128,58,0.4)' : 'rgba(184,168,138,0.2)'};padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;" title="코멘트">${hasComment ? '✏️' : '💬'}</button>
+          </span>
+        </div>
+        ${commentDisplay}
+        <div id="order-comment-${i.id}" style="display:none;margin-top:0.3rem;">
+          <div style="display:flex;gap:0.3rem;flex-wrap:wrap;margin-bottom:0.3rem;">
+            <button onclick="setQuickComment(${i.id},'생산중단')" style="font-size:0.7rem;color:var(--red);background:rgba(184,58,42,0.1);border:1px solid rgba(184,58,42,0.3);padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;">생산중단</button>
+            <button onclick="setQuickComment(${i.id},'품절')" style="font-size:0.7rem;color:var(--red);background:rgba(184,58,42,0.1);border:1px solid rgba(184,58,42,0.3);padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;">품절</button>
+            <button onclick="setQuickComment(${i.id},'수량조정 필요')" style="font-size:0.7rem;color:var(--amber);background:rgba(196,128,58,0.1);border:1px solid rgba(196,128,58,0.3);padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;">수량조정</button>
+            <button onclick="setQuickComment(${i.id},'납기지연')" style="font-size:0.7rem;color:var(--amber);background:rgba(196,128,58,0.1);border:1px solid rgba(196,128,58,0.3);padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;">납기지연</button>
+            <button onclick="setQuickComment(${i.id},'대체상품 확인')" style="font-size:0.7rem;color:var(--dust);background:rgba(184,168,138,0.1);border:1px solid rgba(184,168,138,0.2);padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;">대체상품</button>
+          </div>
+          <div style="display:flex;gap:0.3rem;">
+            <input type="text" id="order-comment-input-${i.id}" placeholder="코멘트 입력…" value="${(i.order_comment || '').replace(/"/g, '&quot;')}" style="flex:1;font-size:0.78rem;padding:0.3rem 0.5rem;background:var(--surface);border:1px solid rgba(196,128,58,0.2);border-radius:4px;color:var(--cream);outline:none;" onkeydown="if(event.key==='Enter')saveOrderComment(${i.id})">
+            <button onclick="saveOrderComment(${i.id})" style="font-size:0.72rem;color:var(--amber);background:rgba(196,128,58,0.15);border:1px solid rgba(196,128,58,0.3);padding:0.2rem 0.5rem;border-radius:4px;cursor:pointer;white-space:nowrap;">저장</button>
+            ${hasComment ? `<button onclick="deleteOrderComment(${i.id})" style="font-size:0.72rem;color:var(--red);background:rgba(184,58,42,0.1);border:1px solid rgba(184,58,42,0.3);padding:0.2rem 0.5rem;border-radius:4px;cursor:pointer;">삭제</button>` : ''}
+          </div>
+        </div>
       </div>`;
     }).join('');
 
@@ -3540,6 +3564,42 @@ async function loadOrderDashboard() {
       ${itemRows}
     </div>`;
   }).join('');
+}
+
+function toggleOrderComment(id) {
+  const el = document.getElementById('order-comment-' + id);
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  if (el.style.display === 'block') {
+    const input = document.getElementById('order-comment-input-' + id);
+    if (input) input.focus();
+  }
+}
+
+function setQuickComment(id, text) {
+  const input = document.getElementById('order-comment-input-' + id);
+  if (input) {
+    input.value = input.value ? input.value + ', ' + text : text;
+    input.focus();
+  }
+}
+
+async function saveOrderComment(id) {
+  const input = document.getElementById('order-comment-input-' + id);
+  if (!input) return;
+  const comment = input.value.trim();
+  if (!comment) { toast('코멘트를 입력하세요.'); return; }
+  const { error } = await sb.from('staff_data').update({ order_comment: comment }).eq('id', id);
+  if (error) { toast('저장 실패: ' + error.message); return; }
+  toast('코멘트 저장됨 ✓');
+  loadOrderDashboard();
+}
+
+async function deleteOrderComment(id) {
+  const { error } = await sb.from('staff_data').update({ order_comment: null }).eq('id', id);
+  if (error) { toast('삭제 실패: ' + error.message); return; }
+  toast('코멘트 삭제됨');
+  loadOrderDashboard();
 }
 
 function goToOrder(supplierName) {
