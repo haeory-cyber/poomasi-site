@@ -58,16 +58,17 @@
   }
   .tag-bar { height: 6mm; background: var(--gold-bar); width: 100%; flex-shrink: 0; }
   .print-page {
-    width: 210mm; height: 297mm; padding: 5mm 7mm;
+    width: 210mm; height: 297mm; padding: 5mm;
     display: grid; grid-template-columns: repeat(3, 65mm);
     grid-template-rows: repeat(6, 38mm); gap: 1.5mm 2mm;
-    justify-content: center; align-content: start;
+    justify-content: center; align-content: center;
     page-break-after: always;
+    overflow: hidden;
   }
   .print-page:last-child { page-break-after: avoid; }
   @media print {
     .info-bar { display: none !important; }
-    @page { size: A4; margin: 5mm 0; }
+    @page { size: A4; margin: 0; }
   }
 </style>
 </head>

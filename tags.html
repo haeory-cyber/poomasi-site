@@ -207,21 +207,22 @@
     }
     .print-page {
       width: 210mm; height: 297mm;
-      padding: 5mm 7mm;
+      padding: 5mm;
       display: grid;
       grid-template-columns: repeat(3, 65mm);
       grid-template-rows: repeat(6, 38mm);
       gap: 1.5mm 2mm;
       justify-content: center;
-      align-content: start;
+      align-content: center;
       page-break-after: always;
+      overflow: hidden;
     }
     .print-page:last-child { page-break-after: avoid; }
     .tag { border: 0.5pt solid #ddd; }
 
     @page {
       size: A4;
-      margin: 5mm 0;
+      margin: 0;
     }
   }
 
