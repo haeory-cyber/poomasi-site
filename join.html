@@ -500,6 +500,81 @@
     border-radius: 20px;
     margin-top: 6px;
   }
+
+  /* 본인인증 */
+  .verify-box {
+    background: white;
+    border: 2px solid var(--fog);
+    border-radius: 4px;
+    padding: 32px;
+    text-align: center;
+    margin-bottom: 40px;
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+  .verify-box.verified {
+    border-color: var(--moss);
+    background: rgba(74,103,65,0.03);
+  }
+  .verify-box h3 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 16px;
+    color: var(--soil);
+    margin-bottom: 8px;
+  }
+  .verify-box p {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 20px;
+    line-height: 1.7;
+  }
+  .btn-kakao {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #FEE500;
+    color: #3C1E1E;
+    border: none;
+    padding: 14px 32px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn-kakao:hover { opacity: 0.85; }
+  .btn-kakao:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .verify-result {
+    display: none;
+    margin-top: 16px;
+    padding: 16px;
+    background: rgba(74,103,65,0.06);
+    border-radius: 4px;
+    text-align: left;
+  }
+  .verify-result .badge {
+    display: inline-block;
+    background: var(--moss);
+    color: white;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+  }
+  .verify-result dl {
+    display: grid;
+    grid-template-columns: 70px 1fr;
+    gap: 6px 12px;
+    font-size: 13px;
+  }
+  .verify-result dt { color: #888; }
+  .verify-result dd { color: var(--soil); font-weight: 500; }
+  input[readonly] {
+    background: var(--cream) !important;
+    color: #666 !important;
+  }
 </style>
 </head>
 <body>
@@ -556,8 +631,28 @@
   <!-- 가입 폼 -->
   <form id="joinForm" novalidate>
 
+    <!-- 0. 본인인증 -->
+    <div class="verify-box" id="verifyBox">
+      <h3>본인인증</h3>
+      <p>조합원 가입을 위해 본인 확인이 필요합니다.<br>카카오 계정으로 간편하게 인증해주세요.</p>
+      <button type="button" class="btn-kakao" id="btnKakaoAuth" onclick="startKakaoAuth()">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#3C1E1E" d="M9 1C4.58 1 1 3.79 1 7.21c0 2.17 1.45 4.08 3.64 5.18l-.93 3.44c-.08.3.26.54.52.37l4.12-2.74c.21.02.43.03.65.03 4.42 0 8-2.79 8-6.28S13.42 1 9 1"/></svg>
+        카카오 본인인증
+      </button>
+      <div class="verify-result" id="verifyResult">
+        <span class="badge">본인확인 완료</span>
+        <dl>
+          <dt>성명</dt><dd id="vName">-</dd>
+          <dt>연락처</dt><dd id="vPhone">-</dd>
+          <dt>생년월일</dt><dd id="vBirth">-</dd>
+        </dl>
+      </div>
+    </div>
+    <input type="hidden" name="kakao_ci" id="kakaoCi">
+    <input type="hidden" name="kakao_id" id="kakaoId">
+
     <!-- 1. 인적사항 -->
-    <div class="section">
+    <div class="section" id="sectionPersonal">
       <div class="section-title">
         <span class="section-num">1</span>
         인적사항
@@ -693,10 +788,11 @@
       <div class="agree-box">
         <h4>개인정보 수집·이용 동의</h4>
         <p>
-          수집 항목: 성명, 생년월일, 연락처, 이메일, 주소<br>
-          수집 목적: 조합원 관리, 사업 안내, 이용실적 분석<br>
+          수집 항목: 성명, 생년월일, 연락처, 이메일, 주소, CI(연계정보)<br>
+          수집 목적: 조합원 본인확인, 회원 식별·중복가입 방지, 조합원 관리, 사업 안내<br>
           보유 기간: 조합원 자격 유지 기간 + 5년<br>
-          제3자 제공: 없음 (조합 내부 사용 한정)
+          제3자 제공: 없음 (조합 내부 사용 한정)<br>
+          CI(연계정보): 카카오 본인인증을 통해 수집되며, 회원 비교·식별 목적으로만 사용됩니다.
         </p>
       </div>
 
@@ -749,12 +845,113 @@
 </div>
 
 <script>
+  // === 카카오 본인인증 (REST API 직접 리다이렉트) ===
+  const KAKAO_REST_KEY = 'd312e73c18347168e7fd2d2c56fde2b6';
+  const REDIRECT_URI = window.location.origin + '/join.html';
+
+  function startKakaoAuth() {
+    const authUrl = 'https://kauth.kakao.com/oauth/authorize'
+      + '?client_id=' + KAKAO_REST_KEY
+      + '&redirect_uri=' + encodeURIComponent(REDIRECT_URI)
+      + '&response_type=code'
+      + '&scope=account_ci,name,phone_number,birthyear,birthday';
+    window.location.href = authUrl;
+  }
+
+  // === 인증 콜백 처리 ===
+  async function handleAuthCallback() {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    if (!code) return;
+
+    // URL 정리
+    window.history.replaceState({}, '', '/join.html');
+
+    const btn = document.getElementById('btnKakaoAuth');
+    btn.disabled = true;
+    btn.textContent = '인증 처리 중...';
+
+    try {
+      const res = await fetch('/api/kakao-auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, redirect_uri: REDIRECT_URI })
+      });
+      const data = await res.json();
+
+      if (!data.success) {
+        throw new Error(data.error || '인증 실패');
+      }
+
+      // 본인확인 완료 처리
+      applyVerification(data);
+    } catch (err) {
+      alert('본인인증 처리 중 오류가 발생했습니다: ' + err.message);
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 18 18"><path fill="#3C1E1E" d="M9 1C4.58 1 1 3.79 1 7.21c0 2.17 1.45 4.08 3.64 5.18l-.93 3.44c-.08.3.26.54.52.37l4.12-2.74c.21.02.43.03.65.03 4.42 0 8-2.79 8-6.28S13.42 1 9 1"/></svg> 카카오 본인인증';
+    }
+  }
+
+  // === 인증 결과 적용 ===
+  function applyVerification(data) {
+    const box = document.getElementById('verifyBox');
+    const result = document.getElementById('verifyResult');
+    const btn = document.getElementById('btnKakaoAuth');
+
+    // 전화번호 포맷 변환 (+82 10-1234-5678 → 010-1234-5678)
+    let phone = data.phone || '';
+    if (phone.startsWith('+82')) {
+      phone = '0' + phone.replace('+82 ', '').replace('+82', '');
+    }
+
+    // 생년월일 조합
+    let birth = '';
+    if (data.birthyear && data.birthday) {
+      const mm = data.birthday.substring(0, 2);
+      const dd = data.birthday.substring(2, 4);
+      birth = data.birthyear + '-' + mm + '-' + dd;
+    }
+
+    // 인증 결과 표시
+    document.getElementById('vName').textContent = data.name || '-';
+    document.getElementById('vPhone').textContent = phone || '-';
+    document.getElementById('vBirth').textContent = birth || '-';
+    result.style.display = 'block';
+    btn.style.display = 'none';
+    box.classList.add('verified');
+    box.querySelector('p').textContent = '카카오 본인인증이 완료되었습니다.';
+
+    // 폼에 자동 입력 (읽기 전용)
+    const form = document.getElementById('joinForm');
+    if (data.name) {
+      form.name.value = data.name;
+      form.name.readOnly = true;
+    }
+    if (birth) {
+      form.birth.value = birth;
+      form.birth.readOnly = true;
+    }
+    if (phone) {
+      form.phone.value = phone;
+      form.phone.readOnly = true;
+    }
+
+    // CI 저장
+    document.getElementById('kakaoCi').value = data.ci || '';
+    document.getElementById('kakaoId').value = data.kakao_id || '';
+  }
+
+  // === 페이지 로드 시 콜백 확인 ===
+  handleAuthCallback();
+
+  // === 폼 제출 ===
   const form = document.getElementById('joinForm');
   const successMsg = document.getElementById('successMsg');
 
-  // 전화번호 자동 하이픈
+  // 전화번호 자동 하이픈 (본인인증 안 한 경우)
   const phoneInput = form.querySelector('input[name="phone"]');
   phoneInput.addEventListener('input', function() {
+    if (this.readOnly) return;
     let v = this.value.replace(/\D/g, '');
     if (v.length <= 3) this.value = v;
     else if (v.length <= 7) this.value = v.slice(0,3) + '-' + v.slice(3);
@@ -763,6 +960,15 @@
 
   form.addEventListener('submit', function(e) {
     e.preventDefault();
+
+    // 본인인증 확인
+    const ci = document.getElementById('kakaoCi').value;
+    const kakaoId = document.getElementById('kakaoId').value;
+    if (!ci && !kakaoId) {
+      alert('카카오 본인인증을 먼저 완료해주세요.');
+      document.getElementById('verifyBox').scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
 
     // 필수 체크
     const required = form.querySelectorAll('[required]');
@@ -794,13 +1000,15 @@
       shares: form.shares.value,
       motivation: form.motivation.value,
       agree_newsletter: form.agree3.checked,
+      kakao_id: kakaoId,
+      kakao_ci: ci,
       submitted_at: new Date().toISOString()
     };
 
     console.log('[품앗이생협 가입신청]', data);
 
-    // TODO: fetch('/api/join', { method:'POST', body: JSON.stringify(data) })
-    // 또는 Supabase insert: https://tnivhcpjrhkmekcfqgdn.supabase.co/rest/v1/members
+    // TODO: Supabase insert
+    // fetch('https://tnivhcpjrhkmekcfqgdn.supabase.co/rest/v1/members', { ... })
 
     // 성공 표시
     form.style.display = 'none';
