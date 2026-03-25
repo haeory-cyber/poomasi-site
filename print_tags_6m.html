@@ -68,6 +68,7 @@
   .print-page:last-child { page-break-after: avoid; }
   @media print {
     .info-bar { display: none !important; }
+    .print-page[style*="display: none"] { display: none !important; }
     @page { size: A4; margin: 0; }
   }
 </style>
@@ -76,7 +77,14 @@
 <div class="info-bar">
   <h1>비농산물 가격태그 (최근 6개월)</h1>
   <p>1353개 품목 · 76페이지 · 65×38mm · A4 18매/장</p>
-  <button onclick="window.print()">전체 인쇄</button>
+  <div style="display:flex;gap:0.8rem;align-items:center;justify-content:center;margin-top:0.8rem;flex-wrap:wrap;">
+    <label style="font-size:0.85rem;">페이지</label>
+    <input type="number" id="pg-from" value="1" min="1" max="76" style="width:60px;padding:0.4rem;border:1px solid #c4803a;border-radius:4px;background:#2d1f14;color:#f2ead8;text-align:center;font-size:0.9rem;">
+    <span style="font-size:0.85rem;">~</span>
+    <input type="number" id="pg-to" value="10" min="1" max="76" style="width:60px;padding:0.4rem;border:1px solid #c4803a;border-radius:4px;background:#2d1f14;color:#f2ead8;text-align:center;font-size:0.9rem;">
+    <button onclick="printRange()">선택 인쇄</button>
+  </div>
+  <p style="font-size:0.72rem;color:#b8a88a;margin-top:0.5rem;">한 번에 10페이지씩 권장 (너무 많으면 브라우저 멈춤)</p>
 </div>
 <div class="print-page">
 <div class="tag">
@@ -23233,12 +23241,11 @@
 </div>
 
 <script>
-document.querySelectorAll('.tag-qr[data-qr]').forEach(el => {
-  const qr = qrcode(0, 'M');
-  qr.addData(el.dataset.qr);
-  qr.make();
-  el.innerHTML = qr.createImgTag(2, 0);
-});
+const allPages = document.querySelectorAll('.print-page');
+const TOTAL = allPages.length;
+
+// 초기 로드: QR/폰트 처리 안 함 (무거움). 인쇄 선택 시에만 처리.
+// 화면에서는 페이지만 보여줌
 document.querySelectorAll('.tag-product').forEach(el => {
   el.style.fontSize = '22pt';
   let size = 22;
@@ -23247,6 +23254,43 @@ document.querySelectorAll('.tag-product').forEach(el => {
     el.style.fontSize = size + 'pt';
   }
 });
+
+function renderPageQR(page) {
+  page.querySelectorAll('.tag-qr[data-qr]').forEach(el => {
+    if (el.querySelector('img')) return;
+    const q = qrcode(0, 'M');
+    q.addData(el.dataset.qr);
+    q.make();
+    el.innerHTML = q.createImgTag(2, 0);
+  });
+}
+
+function printRange() {
+  const from = Math.max(1, parseInt(document.getElementById('pg-from').value) || 1);
+  const to = Math.min(TOTAL, parseInt(document.getElementById('pg-to').value) || TOTAL);
+
+  if (from > to) { alert('시작 페이지가 끝 페이지보다 큽니다.'); return; }
+  if (to - from >= 20) {
+    if (!confirm((to - from + 1) + '페이지를 인쇄합니다. 많으면 느릴 수 있습니다. 계속?')) return;
+  }
+
+  // 선택 범위만 보이기 + QR 생성
+  allPages.forEach((p, i) => {
+    const pageNum = i + 1;
+    if (pageNum >= from && pageNum <= to) {
+      p.style.display = '';
+      renderPageQR(p);
+    } else {
+      p.style.display = 'none';
+    }
+  });
+
+  setTimeout(() => {
+    window.print();
+    // 인쇄 후 전체 다시 보이기
+    allPages.forEach(p => p.style.display = '');
+  }, 500);
+}
 </script>
 </body>
 </html>
