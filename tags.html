@@ -418,10 +418,35 @@ function fmtPrice(n) {
   return n != null ? n.toLocaleString('ko-KR') + '원' : '-';
 }
 
+// ── 상품명 정리: 별표, 생산자 중복, 용량/단위 제거 ──
+function cleanProductName(name, farmer) {
+  if (!name) return '';
+  // 1. 앞뒤 별표 제거
+  name = name.replace(/^\*+|\*+$/g, '').trim();
+  // 2. 괄호 안 생산자명 제거
+  if (farmer) {
+    name = name.replace(/\(([^)]+)\)/g, (m, inner) => {
+      if (farmer.includes(inner) || inner.includes(farmer)) return '';
+      return m;
+    });
+  }
+  // 3. 상품명 안에 생산자명 직접 포함 시 제거
+  if (farmer && farmer.length >= 2) {
+    name = name.replace(farmer, '');
+  }
+  // 4. 괄호 안 용량/단위 제거: (70mlx30포), (375ml/유기), (500g) 등
+  name = name.replace(/\([\d.,]+\s*(ml|mL|g|kg|L|l|입|포|봉|팩|개|매|ea)[\w/×x*]*\)/gi, '');
+  // 5. 끝에 붙은 용량: 상품명500g, 상품명 70mlx30포
+  name = name.replace(/\s*[\d.,]+\s*(ml|mL|g|kg|L|l|입|포|봉|팩|개|매|ea)[\w/×x*]*\s*$/gi, '');
+  // 6. 빈 괄호, 잔여 별표 정리
+  name = name.replace(/\(\s*\)/g, '').replace(/^\*+|\*+$/g, '').trim();
+  return name || '(상품명없음)';
+}
+
 // ── Build a single tag HTML ──
 function tagHTML(p) {
-  const longClass = '';
-  const qrParams = new URLSearchParams({ info: '1', name: p.product_name });
+  const displayName = cleanProductName(p.product_name, p.farmer_name);
+  const qrParams = new URLSearchParams({ info: '1', name: displayName });
   if (p.farmer_name) qrParams.set('farmer', p.farmer_name);
   if (p.unit) qrParams.set('unit', p.unit);
   if (p.price != null) qrParams.set('price', p.price);
@@ -430,7 +455,7 @@ function tagHTML(p) {
     <div class="tag-body">
       <div class="tag-left">
         <div class="tag-farmer">${p.farmer_name || ''}</div>
-        <div class="tag-product${longClass}">${p.product_name}</div>
+        <div class="tag-product">${displayName}</div>
       </div>
       <div class="tag-right">
         <span class="tag-logo">품앗이마을</span>
