@@ -3820,8 +3820,21 @@ async function loadAttendance() {
   q = q.limit(100);
   const { data, error } = await q;
   const tbody = document.getElementById('attend-tbody');
-  if (error || !data) { tbody.innerHTML = '<tr><td colspan="6" style="padding:0.8rem;color:var(--dust);">조회 실패</td></tr>'; return; }
-  if (data.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="padding:0.8rem;color:var(--dust);">기록 없음</td></tr>'; return; }
+  const summaryEl = document.getElementById('attend-summary');
+  const total = Object.values(employeeMap).filter(e => e.is_active).length;
+  if (error || !data) {
+    tbody.innerHTML = '<tr><td colspan="6" style="padding:0.8rem;color:var(--dust);">조회 실패</td></tr>';
+    summaryEl.innerHTML = '<div style="color:var(--dust);font-size:0.82rem;">조회 실패</div>';
+    return;
+  }
+  if (data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="padding:0.8rem;color:var(--dust);">기록 없음</td></tr>';
+    summaryEl.innerHTML =
+      '<div style="text-align:center;padding:0.5rem 1rem;"><div style="font-size:1.5rem;font-weight:700;color:var(--dust);">0</div><div style="font-size:0.72rem;color:var(--dust);">근무중</div></div>' +
+      '<div style="text-align:center;padding:0.5rem 1rem;"><div style="font-size:1.5rem;font-weight:700;color:var(--dust);">0</div><div style="font-size:0.72rem;color:var(--dust);">퇴근</div></div>' +
+      '<div style="text-align:center;padding:0.5rem 1rem;"><div style="font-size:1.5rem;font-weight:700;color:var(--cream);">' + total + '</div><div style="font-size:0.72rem;color:var(--dust);">전체 직원</div></div>';
+    return;
+  }
   tbody.innerHTML = data.map(r => {
     const emp = employeeMap[r.employee_id] || {};
     const ci = r.check_in ? new Date(r.check_in).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '-';
@@ -3838,11 +3851,9 @@ async function loadAttendance() {
 
   // 오늘 요약
   const today = new Date().toISOString().slice(0, 10);
-  const summaryEl = document.getElementById('attend-summary');
   const todayData = date === today ? data : [];
   const checkedIn = todayData.filter(r => r.check_in && !r.check_out).length;
   const done = todayData.filter(r => r.check_out).length;
-  const total = Object.values(employeeMap).filter(e => e.is_active).length;
   summaryEl.innerHTML =
     '<div style="text-align:center;padding:0.5rem 1rem;"><div style="font-size:1.5rem;font-weight:700;color:#4ade80;">' + checkedIn + '</div><div style="font-size:0.72rem;color:var(--dust);">근무중</div></div>' +
     '<div style="text-align:center;padding:0.5rem 1rem;"><div style="font-size:1.5rem;font-weight:700;color:var(--dust);">' + done + '</div><div style="font-size:0.72rem;color:var(--dust);">퇴근</div></div>' +
