@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>로컬의 반격 — 품앗이소비자생활협동조합</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23c4803a'/><text x='16' y='22' text-anchor='middle' font-size='18' fill='%230f0b07'>品</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;700;900&family=Noto+Sans+KR:wght@300;400;500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 <style>
@@ -335,6 +336,7 @@
     padding: 2.5rem;
     position: relative;
     background: rgba(15,11,7,0.5);
+    backdrop-filter: blur(8px);
   }
 
   .contrast-block::before {
@@ -538,7 +540,7 @@
 
   .stat-num {
     font-family: 'DM Serif Display', serif;
-    font-size: 2.8rem;
+    font-size: 3.6rem;
     color: var(--amber);
     line-height: 1;
   }
@@ -604,7 +606,8 @@
 
   .door:hover {
     background: rgba(44,31,20,0.9);
-    transform: translateY(-4px);
+    transform: translateY(-6px);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.4);
   }
 
   .door-number {
@@ -1507,19 +1510,19 @@
     <div>
       <div class="footer-col-title">직매장</div>
       <ul class="footer-links">
-        <li><a href="#">오늘의 농산물</a></li>
-        <li><a href="#">농가 소개</a></li>
+        <li><a href="market.html">오늘의 농산물</a></li>
+        <li><a href="market.html">농가 소개</a></li>
         <li><a href="market.html#nopack">무포장 안내</a></li>
-        <li><a href="#">탄소 리포트</a></li>
+        <li><a href="annual_report.html">탄소 리포트</a></li>
       </ul>
     </div>
     <div>
       <div class="footer-col-title">협동</div>
       <ul class="footer-links">
         <li><a href="join.html">조합원 가입</a></li>
-        <li><a href="#">활동 소식</a></li>
-        <li><a href="#">로컬 네트워크</a></li>
-        <li><a href="#">Data 공유</a></li>
+        <li><a href="feedback.html">조합원말씀</a></li>
+        <li><a href="poomasi_philosophy.html">로컬 네트워크</a></li>
+        <li><a href="poomasi_philosophy.html">Data 공유</a></li>
       </ul>
     </div>
     <div>
@@ -1550,6 +1553,38 @@
   }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
   reveals.forEach(el => observer.observe(el));
+
+  // Stats count-up animation
+  const countObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target;
+      if (el.dataset.counted) return;
+      el.dataset.counted = '1';
+      const raw = el.textContent.trim();
+      const match = raw.match(/^([0-9,.]+)/);
+      if (!match) return;
+      const numStr = match[1];
+      const hasComma = numStr.includes(',');
+      const hasDot = numStr.includes('.') && !hasComma;
+      const target = parseFloat(numStr.replace(/,/g, ''));
+      const decimals = hasDot ? (numStr.split('.')[1] || '').length : 0;
+      const suffix = raw.replace(numStr, '');
+      const duration = 1200;
+      const start = performance.now();
+      function tick(now) {
+        const p = Math.min((now - start) / duration, 1);
+        const ease = 1 - Math.pow(1 - p, 3);
+        let val = target * ease;
+        let display = decimals > 0 ? val.toFixed(decimals) : Math.round(val).toString();
+        if (hasComma) display = Number(display).toLocaleString();
+        el.textContent = display + suffix;
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    });
+  }, { threshold: 0.3 });
+  document.querySelectorAll('.stat-num, .lab-num, .fm-stat-num, .fm-big').forEach(el => countObserver.observe(el));
 
   // ── 이벤트 티커 ────────────────────────────────────
   (async function loadTicker() {
