@@ -18,7 +18,7 @@
     --cream: #f2ead8;
     --dust: #b8a88a;
     --white: #faf7f0;
-    --gold-bar: #C8900A;
+    --gold-bar: #E8A020;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -153,6 +153,7 @@
   .tag-bar {
     height: 6mm; background: var(--gold-bar);
     width: 100%; flex-shrink: 0;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
   /* 상단 헤더: 업체명 + 매장명 */
   .tag-header {
@@ -160,41 +161,35 @@
     padding: 1.5mm 3mm 0;
   }
   .tag-farmer {
-    font-weight: 100; font-size: 7px; color: #262626;
-    max-width: 42mm; white-space: nowrap;
-    overflow: hidden; text-overflow: ellipsis;
+    font-size: 7pt; color: #888; font-weight: 400;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    max-width: 42mm;
   }
   .tag-logo {
     font-family: 'Noto Serif KR', serif;
-    font-weight: 200; font-size: 6.5px; color: var(--gold-bar);
-    flex-shrink: 0;
+    font-size: 8pt; color: var(--gold-bar); font-weight: 700;
+    letter-spacing: 0.05em; white-space: nowrap; flex-shrink: 0;
   }
   /* 상품명: 전체 너비 사용 */
   .tag-product {
-    font-weight: 500; font-size: 11.5px; line-height: 1.3;
-    color: #262626; padding: 0.5mm 3mm 0;
-    overflow: hidden; white-space: nowrap;
+    padding: 0.5mm 3mm 0.5mm;
+    font-weight: 900; text-align: left; line-height: 1.2;
+    max-height: 10mm;
     word-break: keep-all;
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
   }
   /* 하단: QR(좌) + 가격(우) */
   .tag-bottom {
     flex: 1; display: flex; justify-content: space-between; align-items: flex-end;
     padding: 0 3mm 0.5mm;
   }
-  .tag-qr {
-    width: 12mm; height: 12mm; flex-shrink: 0;
-  }
+  .tag-qr { width: 12mm; height: 12mm; flex-shrink: 0; }
   .tag-qr canvas, .tag-qr img { width: 100%; height: 100%; image-rendering: pixelated; }
-  .tag-price-area {
-    text-align: right;
-  }
-  .tag-unit {
-    font-weight: 400; font-size: 9px; color: #262626;
-    margin-bottom: 0.3mm;
-  }
+  .tag-price-area { text-align: right; }
+  .tag-unit { font-size: 12pt; color: #888; display: block; }
   .tag-price {
-    font-weight: 700; font-size: 16px; color: #262626;
-    white-space: nowrap;
+    font-size: 20pt; font-weight: 900; color: #000;
+    letter-spacing: -0.03em; white-space: nowrap;
   }
 
   /* ── PRINT SHEET ── */
@@ -227,6 +222,48 @@
       margin: 0;
     }
   }
+
+  /* ── CART ── */
+  .cart-section {
+    margin-top: 2rem; padding: 1.2rem;
+    background: var(--soil); border: 1px solid rgba(196,128,58,0.2);
+    border-radius: 8px;
+  }
+  .cart-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 0.8rem;
+  }
+  .cart-header h3 { font-size: 0.85rem; color: var(--cream); font-weight: 500; }
+  .cart-actions { display: flex; gap: 0.5rem; }
+  .cart-item {
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.5rem 0.6rem; margin-bottom: 0.4rem;
+    background: rgba(196,128,58,0.05); border: 1px solid rgba(196,128,58,0.1);
+    border-radius: 6px;
+  }
+  .cart-item .ci-name { flex: 1; font-size: 0.82rem; color: var(--cream); }
+  .cart-item .ci-price { font-size: 0.82rem; color: var(--amber); font-weight: 600; }
+  .cart-item .ci-remove {
+    width: 22px; height: 22px; border: none; border-radius: 50%;
+    background: rgba(196,128,58,0.15); color: var(--dust); font-size: 0.7rem;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .cart-item .ci-remove:hover { background: rgba(200,80,80,0.3); color: #e88; }
+  .cart-empty { text-align: center; color: var(--dust); font-size: 0.8rem; padding: 1rem; }
+  .btn-sm {
+    padding: 0.35rem 0.8rem; border: 1px solid rgba(196,128,58,0.3);
+    border-radius: 6px; background: transparent; color: var(--dust);
+    font-size: 0.75rem; cursor: pointer; font-family: inherit; transition: all 0.15s;
+  }
+  .btn-sm:hover { border-color: var(--amber); color: var(--cream); }
+  .btn-add {
+    padding: 0.5rem 1.2rem; background: var(--green); color: var(--cream);
+    border: none; border-radius: 6px; font-size: 0.82rem; font-weight: 500;
+    cursor: pointer; font-family: inherit; transition: background 0.2s;
+  }
+  .btn-add:hover { background: var(--green-light); }
+  .btn-add:disabled { opacity: 0.4; cursor: default; }
 
   /* ── HIDDEN PANELS ── */
   .panel { display: none; }
@@ -375,7 +412,7 @@
       </div>
     </div>
     <div class="print-row">
-      <button class="btn btn-print" id="btn-quick-print" disabled>인쇄</button>
+      <button class="btn-add" id="btn-quick-add" disabled onclick="addToCart('quick')">+ 선택 추가</button>
     </div>
     <div class="tag-preview" id="quick-preview" style="display:none">
       <div class="tag-preview-title">미리보기</div>
@@ -408,11 +445,25 @@
       </div>
     </div>
     <div class="print-row">
-      <button class="btn btn-print" id="btn-new-print">인쇄</button>
+      <button class="btn-add" id="btn-new-add" onclick="addToCart('new')">+ 추가</button>
     </div>
     <div class="tag-preview" id="new-preview" style="display:none">
       <div class="tag-preview-title">미리보기</div>
       <div class="preview-grid" id="new-preview-grid"></div>
+    </div>
+  </div>
+
+  <!-- ── CART (장바구니) ── -->
+  <div class="cart-section" id="cart-section">
+    <div class="cart-header">
+      <h3>인쇄 목록 (<span id="cart-count">0</span>건)</h3>
+      <div class="cart-actions">
+        <button class="btn-sm" onclick="clearCart()">전체 삭제</button>
+        <button class="btn btn-print" id="btn-cart-print" disabled onclick="printCart()">인쇄</button>
+      </div>
+    </div>
+    <div id="cart-list">
+      <div class="cart-empty">상품을 검색하여 추가하세요</div>
     </div>
   </div>
 </div>
@@ -639,6 +690,54 @@ if (params.get('orders')) {
 }
 
 let quickSelected = null;
+const cart = [];  // 장바구니
+
+function renderCart() {
+  const list = document.getElementById('cart-list');
+  const count = document.getElementById('cart-count');
+  const btn = document.getElementById('btn-cart-print');
+  count.textContent = cart.length;
+  btn.disabled = cart.length === 0;
+
+  if (cart.length === 0) {
+    list.innerHTML = '<div class="cart-empty">상품을 검색하여 추가하세요</div>';
+    return;
+  }
+  list.innerHTML = cart.map((p, i) => `
+    <div class="cart-item">
+      <span class="ci-name">${cleanProductName(p.product_name, p.farmer_name)}</span>
+      <span class="ci-price">${fmtPrice(p.price)}</span>
+      <button class="ci-remove" onclick="removeFromCart(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function addToCart(mode) {
+  let p;
+  if (mode === 'quick') {
+    p = getQuickProduct();
+  } else {
+    p = readNewForm();
+  }
+  if (!p) return;
+  cart.push(JSON.parse(JSON.stringify(p)));
+  renderCart();
+}
+
+function removeFromCart(idx) {
+  cart.splice(idx, 1);
+  renderCart();
+}
+
+function clearCart() {
+  cart.length = 0;
+  renderCart();
+}
+
+function printCart() {
+  if (cart.length === 0) return;
+  printTags(cart);
+}
 
 // ── Search products from Supabase ──
 async function searchProducts(q) {
@@ -741,9 +840,16 @@ function renderQRCodes(container) {
   });
 }
 
-// 상품명은 고정 11.5px + 최대 2줄 줄바꿈 (코워크 서식 기준)
+// 상품명 폰트 자동 축소 (print_tags_6m.html과 동일)
 function autoFitProductNames(container) {
-  // 코워크 서식: 폰트 축소 안 함, CSS -webkit-line-clamp: 2로 처리
+  container.querySelectorAll('.tag-product').forEach(el => {
+    el.style.fontSize = '18pt';
+    let size = 18;
+    while (el.scrollWidth > el.clientWidth && size > 10) {
+      size -= 0.5;
+      el.style.fontSize = size + 'pt';
+    }
+  });
 }
 
 // ── MODE TABS ──
@@ -761,7 +867,7 @@ const quickSearch = document.getElementById('quick-search');
 const quickResults = document.getElementById('quick-results');
 const quickPreview = document.getElementById('quick-preview');
 const quickPreviewGrid = document.getElementById('quick-preview-grid');
-const btnQuickPrint = document.getElementById('btn-quick-print');
+const btnQuickAdd = document.getElementById('btn-quick-add');
 
 let _searchTimer = null;
 quickSearch.addEventListener('input', () => {
@@ -769,7 +875,7 @@ quickSearch.addEventListener('input', () => {
   const q = quickSearch.value.trim();
   quickResults.innerHTML = '';
   quickSelected = null;
-  btnQuickPrint.disabled = true;
+  btnQuickAdd.disabled = true;
   quickPreview.style.display = 'none';
   quickEdit.style.display = 'none';
 
@@ -799,7 +905,7 @@ function selectQuick(p, el) {
   document.querySelectorAll('.search-item').forEach(i => i.classList.remove('selected'));
   el.classList.add('selected');
   quickSelected = p;
-  btnQuickPrint.disabled = false;
+  btnQuickAdd.disabled = false;
 
   // Show edit fields with existing data
   quickEdit.style.display = 'block';
