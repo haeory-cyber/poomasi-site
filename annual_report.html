@@ -318,6 +318,16 @@ section { padding: 8rem 0; max-width: 1100px; margin: 0 auto; padding-left: 4rem
 .status-on { color: var(--green-soft); }
 .status-going { color: #F39C12; }
 .status-ready { color: rgba(255,255,255,0.35); }
+.vision-manifesto { margin: 3rem 0; padding: 3rem 0; border-top: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.08); }
+.vm-headline { font-family: 'Noto Serif KR', serif; font-size: 1.15rem; font-weight: 700; color: var(--green-soft); line-height: 1.8; margin-bottom: 2.5rem; }
+.vm-row { display: grid; grid-template-columns: 80px 1fr; gap: 1.5rem; margin-bottom: 1.8rem; }
+.vm-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.15em; color: var(--green-soft); padding-top: 0.2rem; }
+.vm-body { font-size: 0.88rem; color: rgba(255,255,255,0.55); line-height: 1.9; }
+.vm-body strong { color: rgba(255,255,255,0.75); font-weight: 500; }
+.vm-bullets { list-style: none; padding: 0; }
+.vm-bullets li { font-size: 0.85rem; color: rgba(255,255,255,0.5); line-height: 1.9; padding-left: 1rem; position: relative; }
+.vm-bullets li::before { content: '·'; position: absolute; left: 0; color: var(--green-soft); }
+.vm-target { margin-top: 2rem; font-size: 0.78rem; color: rgba(255,255,255,0.35); letter-spacing: 0.1em; text-align: center; }
 .final-quote { text-align: center; padding: 4rem 2rem; }
 .final-quote p { font-family: 'Noto Serif KR', serif; font-size: clamp(1.3rem, 3vw, 2rem); color: rgba(255,255,255,0.75); line-height: 1.7; margin-bottom: 1rem; }
 .final-quote .sub { font-size: 0.85rem; color: rgba(255,255,255,0.3); letter-spacing: 0.1em; }
@@ -815,6 +825,30 @@ footer a:hover { text-decoration: underline; }
     <div class="chapter-label reveal">5장 &nbsp; 다음</div>
     <h2 class="section-title reveal">로컬푸드 2.0</h2>
     <p class="section-sub reveal" style="color:rgba(255,255,255,0.4);">3년을 버텼다. 흑자로 돌아섰다. 이제 반격이다.</p>
+
+    <div class="vision-manifesto reveal">
+      <div class="vm-headline">팀빌딩의 핵심은 AI와, AI를 이해하는 사람의 협동이다.</div>
+      <div class="vm-row">
+        <div class="vm-label">VISION</div>
+        <div class="vm-body"><strong>로컬 데이터 소버린티</strong> — 지역의 데이터를 지역이 소유하고, 분석하고, 결정에 쓴다. 빅테크와 중앙정부에 종속되지 않는다.</div>
+      </div>
+      <div class="vm-row">
+        <div class="vm-label">MISSION</div>
+        <div class="vm-body"><strong>기본기술</strong> — 기본소득처럼, 기술의 혜택을 지역 주민 모두가 기본으로 누린다. 잘 몰라도, 관심 없어도 혜택은 받는다.</div>
+      </div>
+      <div class="vm-row">
+        <div class="vm-label">PRINCIPLE</div>
+        <div class="vm-body">
+          <ul class="vm-bullets">
+            <li>방향과 철학 없는 기술은 흉기다 — 기술에는 나침반이 있어야 한다</li>
+            <li>당위로 밀어붙이지 않는다 — 하고 싶게 하거나, 안 해도 되게 한다</li>
+            <li>AI가 짐을 들어줘서 → 활동가가 힘을 회복하고 → 진짜 싸움에 집중한다</li>
+          </ul>
+        </div>
+      </div>
+      <div class="vm-target">활동가 → 조합원 → 지역 주민 전체</div>
+    </div>
+
     <div class="vision-grid reveal">
       <div class="vision-card">
         <div class="step">1</div>
