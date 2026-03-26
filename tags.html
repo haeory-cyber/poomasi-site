@@ -277,6 +277,39 @@
     transition: background 0.2s;
   }
   .info-order-btn:hover { background: var(--green-light); }
+  /* 현장발주 인라인 폼 */
+  .field-order-form { margin-top: 1.2rem; text-align: left; }
+  .field-order-form .fo-label {
+    font-size: 0.75rem; color: var(--dust); letter-spacing: 0.06em; margin-bottom: 0.4rem; display: block;
+  }
+  .fo-urgency-group { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+  .fo-urgency-btn {
+    flex: 1; padding: 0.6rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600;
+    font-family: inherit; cursor: pointer; border: 1.5px solid rgba(184,168,138,0.2);
+    background: transparent; color: var(--dust); transition: all 0.15s;
+  }
+  .fo-urgency-btn.selected { color: var(--cream); }
+  .fo-urgency-btn[data-urg="긴급"].selected { background: var(--red); border-color: var(--red); }
+  .fo-urgency-btn[data-urg="보통"].selected { background: var(--amber); border-color: var(--amber); color: #0f0b07; }
+  .fo-urgency-btn[data-urg="대비"].selected { background: var(--green); border-color: var(--green); }
+  .fo-qty-row { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1rem; }
+  .fo-qty-input {
+    width: 80px; padding: 0.6rem 0.8rem; background: var(--soil);
+    border: 1px solid rgba(196,128,58,0.25); border-radius: 6px;
+    color: var(--cream); font-size: 1.1rem; font-weight: 700;
+    font-family: inherit; outline: none; text-align: center;
+  }
+  .fo-submit {
+    width: 100%; padding: 0.8rem; background: var(--green); color: var(--cream);
+    border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600;
+    font-family: inherit; cursor: pointer; transition: background 0.2s;
+  }
+  .fo-submit:hover { background: var(--green-light); }
+  .fo-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+  .fo-done {
+    text-align: center; padding: 1rem; color: var(--green);
+    font-size: 0.95rem; font-weight: 500;
+  }
 </style>
 </head>
 <body>
@@ -377,7 +410,22 @@
     </div>
     <div class="info-bar"></div>
   </div>
-  <a class="info-order-btn" id="info-order-link" href="#">현장 발주</a>
+  <button class="info-order-btn" id="info-order-toggle" onclick="document.getElementById('field-order-form').style.display='block';this.style.display='none';">현장 발주</button>
+  <div class="field-order-form" id="field-order-form" style="display:none">
+    <span class="fo-label">긴급도</span>
+    <div class="fo-urgency-group">
+      <button type="button" class="fo-urgency-btn" data-urg="긴급" onclick="selectUrgency(this)">긴급</button>
+      <button type="button" class="fo-urgency-btn" data-urg="보통" onclick="selectUrgency(this)">보통</button>
+      <button type="button" class="fo-urgency-btn" data-urg="대비" onclick="selectUrgency(this)">대비</button>
+    </div>
+    <span class="fo-label">수량</span>
+    <div class="fo-qty-row">
+      <input type="number" class="fo-qty-input" id="fo-qty" min="1" value="1" inputmode="numeric">
+      <span style="color:var(--dust);font-size:0.85rem;">개</span>
+    </div>
+    <button type="button" class="fo-submit" id="fo-submit-btn" onclick="submitFieldOrder()">발주 등록</button>
+    <div class="fo-done" id="fo-done" style="display:none"></div>
+  </div>
 </div>
 
 <!-- Print target (hidden on screen) -->
@@ -388,6 +436,45 @@ const SB_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
 const SB_KEY = ['sb_publi','shable_SKtfO63ApOP3DyJKu_2ypw_JK4dsdUG'].join('');
 const HEADERS = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
 const SITE_BASE = 'https://poomasi.org';
+
+// ── 현장발주 인라인 폼 ──
+let _selectedUrgency = null;
+function selectUrgency(btn) {
+  document.querySelectorAll('.fo-urgency-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  _selectedUrgency = btn.dataset.urg;
+}
+async function submitFieldOrder() {
+  if (!_selectedUrgency) { alert('긴급도를 선택하세요'); return; }
+  const qty = parseInt(document.getElementById('fo-qty').value) || 0;
+  if (qty < 1) { alert('수량을 입력하세요'); return; }
+  const data = window._fieldOrderData || {};
+  if (!data.item_name) { alert('상품 정보가 없습니다'); return; }
+
+  const btn = document.getElementById('fo-submit-btn');
+  btn.disabled = true; btn.textContent = '등록 중...';
+
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/staff_data`, {
+      method: 'POST',
+      headers: { ...HEADERS, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({
+        item_name: data.item_name,
+        farmer_name: data.farmer_name,
+        qty: qty,
+        urgency: _selectedUrgency,
+        status: '대기'
+      })
+    });
+    if (!r.ok) throw new Error(r.status);
+    document.getElementById('fo-done').style.display = 'block';
+    document.getElementById('fo-done').textContent = `${_selectedUrgency} · ${data.item_name} ${qty}개 — 발주 등록 완료`;
+    btn.style.display = 'none';
+  } catch (e) {
+    alert('등록 실패: ' + e.message);
+    btn.disabled = false; btn.textContent = '발주 등록';
+  }
+}
 
 // ── Product info view (QR scan landing) ──
 const params = new URLSearchParams(location.search);
@@ -410,8 +497,8 @@ if (params.get('barcode')) {
         document.getElementById('info-farmer').textContent = p.farmer_name ? '생산자: ' + p.farmer_name : '';
         document.getElementById('info-unit').textContent = p.unit || '';
         document.getElementById('info-price').textContent = p.price ? Number(p.price).toLocaleString('ko-KR') + '원' : '';
-        document.getElementById('info-order-link').href =
-          `${SITE_BASE}/work.html?qr_order=${encodeURIComponent(dname)}`;
+        // 현장발주용 데이터 저장
+        window._fieldOrderData = { item_name: dname, farmer_name: p.farmer_name || '' };
       } else {
         document.getElementById('info-product').textContent = '상품을 찾을 수 없습니다 (바코드: ' + bc + ')';
       }
@@ -430,8 +517,7 @@ if (params.get('barcode')) {
   document.getElementById('info-unit').textContent = params.get('unit') || '';
   const price = params.get('price');
   document.getElementById('info-price').textContent = price ? Number(price).toLocaleString('ko-KR') + '원' : '';
-  document.getElementById('info-order-link').href =
-    `${SITE_BASE}/work.html?qr_order=${encodeURIComponent(params.get('name') || '')}`;
+  window._fieldOrderData = { item_name: params.get('name') || '', farmer_name: params.get('farmer') || '' };
 }
 
 let quickSelected = null;
