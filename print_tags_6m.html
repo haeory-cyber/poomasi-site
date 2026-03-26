@@ -49,7 +49,7 @@
     word-break: keep-all;
     overflow: hidden;
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-    max-height: 2.4em;
+    max-height: 2.5em;
   }
   /* 하단: QR(좌) + 가격(우) */
   .tag-bottom {
@@ -20342,14 +20342,17 @@ function buildPages(tags) {
     slice.forEach(t => page.appendChild(t.cloneNode(true)));
     area.appendChild(page);
   }
-  // 폰트 자동 축소 (2줄 기준: scrollHeight > maxHeight면 축소)
+  // 폰트 자동 축소 (2줄 이내 수용될 때까지)
   area.querySelectorAll('.tag-product').forEach(el => {
-    el.style.fontSize = '13pt';
     let size = 13;
-    const maxH = parseFloat(getComputedStyle(el).maxHeight) || el.clientHeight;
-    while (el.scrollHeight > maxH + 1 && size > 9) {
+    el.style.fontSize = size + 'pt';
+    // line-height 1.15 기준 2줄 최대 높이
+    const lineH = size * 1.15;
+    let maxH = lineH * 2 + 2;  // 약간 여유
+    while (el.scrollHeight > maxH && size > 7) {
       size -= 0.5;
       el.style.fontSize = size + 'pt';
+      maxH = size * 1.15 * 2 + 2;
     }
   });
   // QR 즉시 렌더링
