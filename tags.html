@@ -421,28 +421,53 @@ function fmtPrice(n) {
   return n != null ? n.toLocaleString('ko-KR') + '원' : '-';
 }
 
+// ── farmer 핵심 이름 추출: (주)기운찬→기운찬, 함지박(주)→함지박 ──
+function farmerCore(name) {
+  if (!name) return '';
+  return name.replace(/\(주\)|\(유\)|\(사\)|\(영\)|\(합\)|주식회사|유한회사|사단법인|영농조합법인|농업회사법인|영농|조합법인|법인|협동조합|조합/g, '').trim();
+}
+
 // ── 상품명 정리: 별표, 생산자 중복, 용량/단위 제거 ──
 function cleanProductName(name, farmer) {
   if (!name) return '';
+  const fcore = farmerCore(farmer);
+
   // 1. 앞뒤 별표 제거
   name = name.replace(/^\*+|\*+$/g, '').trim();
-  // 2. 괄호 안 생산자명 제거
-  if (farmer) {
+
+  // 2. farmer 핵심 이름으로 괄호/접두 제거
+  if (fcore && fcore.length >= 2) {
+    // (기운찬) 형태
+    name = name.replace(new RegExp('\\(' + fcore.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\)', 'g'), '');
+    // 기운찬) 형태 (맨 앞, 여는 괄호 없이)
+    const fcoreEsc = fcore.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    if (name.match(new RegExp('^' + fcoreEsc + '\\)'))) {
+      name = name.slice(fcore.length + 1);
+    }
+    // 상품명 중간/끝에 farmer 핵심 이름 직접 포함
+    name = name.replace(new RegExp(fcoreEsc, 'g'), '');
+  }
+
+  // 3. 괄호 안 farmer 원본명 또는 핵심명 매칭 시 제거
+  if (farmer || fcore) {
     name = name.replace(/\(([^)]+)\)/g, (m, inner) => {
-      if (farmer.includes(inner) || inner.includes(farmer)) return '';
+      if (farmer && (farmer.includes(inner) || inner.includes(farmer))) return '';
+      if (fcore && (fcore.includes(inner) || inner.includes(fcore))) return '';
       return m;
     });
   }
-  // 3. 상품명 안에 생산자명 직접 포함 시 제거
+
+  // 4. farmer 전체 이름 제거 (아직 남아있으면)
   if (farmer && farmer.length >= 2) {
     name = name.replace(farmer, '');
   }
-  // 4. 괄호 안 용량/단위 제거: (70mlx30포), (375ml/유기), (500g) 등
+
+  // 5. 괄호 안 용량/단위 제거: (70mlx30포), (375ml/유기), (500g) 등
   name = name.replace(/\([\d.,]+\s*(ml|mL|g|kg|L|l|입|포|봉|팩|개|매|ea)[\w/×x*]*\)/gi, '');
-  // 5. 끝에 붙은 용량: 상품명500g, 상품명 70mlx30포
+  // 6. 끝에 붙은 용량: 상품명500g, 상품명 70mlx30포
   name = name.replace(/\s*[\d.,]+\s*(ml|mL|g|kg|L|l|입|포|봉|팩|개|매|ea)[\w/×x*]*\s*$/gi, '');
-  // 6. 빈 괄호, 잔여 별표 정리
-  name = name.replace(/\(\s*\)/g, '').replace(/^\*+|\*+$/g, '').trim();
+  // 7. 빈 괄호, 잔여 별표, 앞쪽 잔여 닫는 괄호 정리
+  name = name.replace(/\(\s*\)/g, '').replace(/^\*+|\*+$/g, '').replace(/^[)\s]+/, '').trim();
   return name || '(상품명없음)';
 }
 
