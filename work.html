@@ -1540,127 +1540,83 @@
     <div class="sec-header">
       <div>
         <div class="sec-label">ORDER</div>
-        <div class="sec-title">발주</div>
+        <div class="sec-title">발주 관리</div>
       </div>
+      <button class="btn-sm" onclick="loadUnifiedOrders()">↻ 새로고침</button>
     </div>
 
-    <!-- 서브탭 바 -->
-    <div style="display:flex;gap:0;border-bottom:1px solid rgba(196,128,58,0.25);margin-bottom:1.5rem;">
-      <button class="sub-tab-btn active" id="stab-dashboard" onclick="switchSubTab('dashboard')" style="background:none;border:none;color:var(--dust);font-size:0.8rem;letter-spacing:0.08em;padding:0.5rem 1rem;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;">발주현황</button>
-      <button class="sub-tab-btn" id="stab-order" onclick="switchSubTab('order')" style="background:none;border:none;color:var(--dust);font-size:0.8rem;letter-spacing:0.08em;padding:0.5rem 1rem;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;">발주하기</button>
-      <button class="sub-tab-btn" id="stab-tele" onclick="switchSubTab('tele')" style="background:none;border:none;color:var(--dust);font-size:0.8rem;letter-spacing:0.08em;padding:0.5rem 1rem;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;">발주내역</button>
-      <button class="sub-tab-btn" id="stab-suppliers" onclick="switchSubTab('suppliers')" style="background:none;border:none;color:var(--dust);font-size:0.8rem;letter-spacing:0.08em;padding:0.5rem 1rem;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;">발주처관리</button>
+    <!-- 상태 필터 버튼 -->
+    <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center;">
+      <button id="ofilter-wait" class="btn-sm" style="border:1px solid var(--amber);color:var(--amber);font-weight:600;padding:0.45rem 1rem;font-size:0.82rem;" onclick="setOrderFilter('대기')">
+        요청대기 <span id="ofilter-wait-count" style="font-weight:700;margin-left:0.3rem;">0</span>
+      </button>
+      <button id="ofilter-done" class="btn-sm" style="padding:0.45rem 1rem;font-size:0.82rem;" onclick="setOrderFilter('발주완료')">
+        발주완료 <span id="ofilter-done-count" style="font-weight:700;margin-left:0.3rem;">0</span>
+      </button>
+      <button id="ofilter-all" class="btn-sm" style="padding:0.45rem 1rem;font-size:0.82rem;" onclick="setOrderFilter('전체')">
+        전체 <span id="ofilter-all-count" style="font-weight:700;margin-left:0.3rem;">0</span>
+      </button>
     </div>
 
-    <!-- ── 서브패널: 발주처관리 ── -->
-    <div id="sub-suppliers" style="display:none;">
-      <div class="sec-header" style="margin-bottom:1rem;">
-        <div></div>
-        <button class="btn-sm" onclick="showAddSupplier()">+ 추가</button>
-      </div>
+    <!-- 거래처별 카드 영역 -->
+    <div id="unified-order-cards"><div class="loading-row">로딩 중…</div></div>
 
-      <!-- 추가 폼 (기본 숨김) -->
-      <div class="card" id="supplier-add-form" style="display:none;margin-bottom:1.5rem;">
-        <div class="card-title">새 발주처</div>
-        <!-- POS 농가 검색 -->
-        <div style="margin-bottom:1rem;">
-          <label class="form-label">POS 농가에서 검색</label>
+    <!-- ── 발주처 관리 (접힌 섹션) ── -->
+    <div style="margin-top:2rem;border-top:1px solid rgba(196,128,58,0.15);padding-top:1rem;">
+      <div onclick="toggleSupplierSection()" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:0.7rem 1rem;background:var(--surface);border-radius:6px;">
+        <span style="font-size:0.88rem;font-weight:600;color:var(--cream);">발주처 관리</span>
+        <span id="supplier-section-arrow" style="color:var(--dust);font-size:0.8rem;transition:transform 0.2s;">▼</span>
+      </div>
+      <div id="supplier-section-body" style="display:none;margin-top:0.8rem;">
+        <div class="sec-header" style="margin-bottom:1rem;">
+          <div></div>
+          <button class="btn-sm" onclick="showAddSupplier()">+ 추가</button>
+        </div>
+
+        <!-- 추가 폼 (기본 숨김) -->
+        <div class="card" id="supplier-add-form" style="display:none;margin-bottom:1.5rem;">
+          <div class="card-title">새 발주처</div>
+          <div style="margin-bottom:1rem;">
+            <label class="form-label">POS 농가에서 검색</label>
+            <div style="display:flex;gap:0.5rem;">
+              <input class="form-input" id="sup-farmer-search" placeholder="농가명 검색…" style="padding:0.55rem 0.8rem;font-size:0.85rem;flex:1;">
+              <button class="btn-sm" onclick="searchFarmerForSupplier()">검색</button>
+            </div>
+            <div id="sup-farmer-results" style="margin-top:0.4rem;max-height:120px;overflow-y:auto;display:none;background:rgba(61,56,48,0.5);border:1px solid rgba(196,128,58,0.15);border-radius:6px;padding:0.4rem;"></div>
+            <div style="font-size:0.72rem;color:var(--dust);margin-top:0.3rem;">POS에 없으면 아래에 직접 입력하세요</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+            <div>
+              <label class="form-label">업체명 *</label>
+              <input class="form-input" id="sup-name" placeholder="업체명" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+            </div>
+            <div>
+              <label class="form-label">전화번호</label>
+              <input class="form-input" id="sup-phone" placeholder="010-0000-0000" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+            </div>
+            <div>
+              <label class="form-label">이메일</label>
+              <input class="form-input" id="sup-email" placeholder="example@email.com" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+            </div>
+            <div>
+              <label class="form-label">메모</label>
+              <input class="form-input" id="sup-note" placeholder="담당자명 등" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+            </div>
+            <div>
+              <label class="form-label">카카오 ID</label>
+              <input class="form-input" id="sup-kakao" placeholder="카카오톡 ID (선택)" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+            </div>
+          </div>
           <div style="display:flex;gap:0.5rem;">
-            <input class="form-input" id="sup-farmer-search" placeholder="농가명 검색…" style="padding:0.55rem 0.8rem;font-size:0.85rem;flex:1;">
-            <button class="btn-sm" onclick="searchFarmerForSupplier()">검색</button>
-          </div>
-          <div id="sup-farmer-results" style="margin-top:0.4rem;max-height:120px;overflow-y:auto;display:none;background:rgba(61,56,48,0.5);border:1px solid rgba(196,128,58,0.15);border-radius:6px;padding:0.4rem;"></div>
-          <div style="font-size:0.72rem;color:var(--dust);margin-top:0.3rem;">POS에 없으면 아래에 직접 입력하세요</div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
-          <div>
-            <label class="form-label">업체명 *</label>
-            <input class="form-input" id="sup-name" placeholder="업체명" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
-          </div>
-          <div>
-            <label class="form-label">전화번호</label>
-            <input class="form-input" id="sup-phone" placeholder="010-0000-0000" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
-          </div>
-          <div>
-            <label class="form-label">이메일</label>
-            <input class="form-input" id="sup-email" placeholder="example@email.com" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
-          </div>
-          <div>
-            <label class="form-label">메모</label>
-            <input class="form-input" id="sup-note" placeholder="담당자명 등" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
-          </div>
-          <div>
-            <label class="form-label">카카오 ID</label>
-            <input class="form-input" id="sup-kakao" placeholder="카카오톡 ID (선택)" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+            <button class="btn-primary" onclick="addSupplier()">저장</button>
+            <button class="btn-sm" onclick="hideAddSupplier()">취소</button>
           </div>
         </div>
-        <div style="display:flex;gap:0.5rem;">
-          <button class="btn-primary" onclick="addSupplier()">저장</button>
-          <button class="btn-sm" onclick="hideAddSupplier()">취소</button>
+
+        <!-- 목록 -->
+        <div class="card">
+          <div id="supplier-list"><div class="loading-row">로딩 중…</div></div>
         </div>
-      </div>
-
-      <!-- 목록 -->
-      <div class="card">
-        <div id="supplier-list"><div class="loading-row">로딩 중…</div></div>
-      </div>
-    </div>
-
-    <!-- ── 서브패널: 발주현황 (대시보드) ── -->
-    <div id="sub-dashboard">
-      <div class="sec-header" style="margin-bottom:1rem;">
-        <div style="font-size:0.8rem;color:var(--dust);">거래처별 발주 대기 현황</div>
-        <button class="btn-sm" onclick="loadOrderDashboard()">↻ 새로고침</button>
-      </div>
-      <div id="order-dashboard"><div class="loading-row">로딩 중…</div></div>
-    </div>
-
-    <!-- ── 서브패널: 발주내역 ── -->
-    <div id="sub-tele" style="display:none;">
-      <div class="sec-header" style="margin-bottom:1rem;">
-        <div style="font-size:0.8rem;color:var(--dust);">현장 직원 발주 요청</div>
-        <button class="btn-sm" onclick="loadTeleOrders()">↻ 새로고침</button>
-      </div>
-      <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem;">
-        <button id="tele-filter-all"   class="btn-sm" style="border-bottom:2px solid var(--amber);color:var(--amber);" onclick="setTeleFilter('전체')">전체</button>
-        <button id="tele-filter-wait"  class="btn-sm" style="border-bottom:2px solid transparent;" onclick="setTeleFilter('대기')">대기</button>
-        <button id="tele-filter-done"  class="btn-sm" style="border-bottom:2px solid transparent;" onclick="setTeleFilter('발주완료')">발주완료</button>
-      </div>
-      <div id='tele-bulk-bar' style='display:none;align-items:center;gap:0.7rem;margin-bottom:0.7rem;padding:0.5rem 0.7rem;background:rgba(184,168,138,0.10);border:1px solid var(--amber);border-radius:6px;'><span style='font-size:0.8rem;color:var(--cream);'><span id='tele-chk-count'>0</span>개 선택됨</span><button onclick='teleBulkDelete()' style='font-size:0.75rem;color:#fff;background:var(--red);border:1px solid var(--red);padding:0.3rem 0.7rem;border-radius:4px;cursor:pointer;font-weight:600;'>일괄 삭제(입고완료)</button><button onclick='teleToggleAll()' style='font-size:0.75rem;color:var(--amber);background:transparent;border:1px solid var(--amber);padding:0.3rem 0.7rem;border-radius:4px;cursor:pointer;'>전체선택</button></div>
-      <div class="card">
-        <div id="tele-list"><div class="loading-row">로딩 중…</div></div>
-      </div>
-    </div>
-
-    <!-- ── 서브패널: 발주하기 ── -->
-    <div id="sub-order" style="display:none;">
-      <div class="card" style="margin-bottom:1rem;">
-        <div class="card-title" style="margin-bottom:0.8rem;">발주처 선택</div>
-        <select class="form-input" id="order-supplier-select" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
-          <option value="">-- 발주처 선택 --</option>
-        </select>
-        <div id="order-supplier-phone" style="font-size:0.78rem;color:var(--dust);margin-top:0.4rem;"></div>
-        <div id="order-item-info" style="font-size:0.75rem;color:var(--amber);margin-top:0.3rem;"></div>
-        <div id="order-item-ref" style="display:none;max-height:180px;overflow-y:auto;background:rgba(61,56,48,0.5);border:1px solid rgba(196,128,58,0.15);border-radius:6px;padding:0.6rem 0.8rem;margin-top:0.5rem;"></div>
-      </div>
-      <div class="card">
-        <div class="card-title" style="margin-bottom:0.8rem;">발주 내용</div>
-        <textarea class="form-input" id="order-message" rows="7" style="width:100%;padding:0.6rem 0.8rem;font-size:0.85rem;resize:vertical;">[품앗이소비자생활협동조합 발주 요청]
-
-안녕하세요. 품앗이소비자생활협동조합입니다.
-아래와 같이 발주 요청드립니다.
-
-품목:
-수량:
-납품일:
-
-감사합니다.</textarea>
-        <div style="display:flex;gap:0.5rem;margin-top:1rem;">
-          <button class="btn-primary" onclick="sendOrderSms()">📨 문자발송</button>
-          <button class="btn-sm" onclick="sendOrderKakao()">💬 카톡발주</button>
-          <button class="btn-sm" onclick="sendOrderEmail()">✉ 이메일발송</button>
-        </div>
-        <div id="order-result" style="margin-top:0.8rem;font-size:0.82rem;color:var(--dust);"></div>
       </div>
     </div>
   </section>
@@ -2024,7 +1980,7 @@ function onTabLoad(key) {
   if (key === 'sms') loadFarmerList();
   if (key === 'feedback') loadFeedback();
   if (key === 'attend') { initAttendTab(); loadAttendance(); loadMonthlySummary(); }
-  if (key === 'suppliers') { if (typeof switchSubTab === 'function') switchSubTab('dashboard'); }
+  if (key === 'suppliers') { if (typeof loadUnifiedOrders === 'function') loadUnifiedOrders(); }
   if (key === 'project') { if (typeof loadProjects === 'function') loadProjects('general'); }
   if (key === 'grant') { if (typeof loadGrants === 'function') loadGrants(); }
   if (key === 'notice') { if (typeof loadNotices === 'function') loadNotices(); }
@@ -2123,9 +2079,8 @@ document.addEventListener('DOMContentLoaded', () => {
     switchTab('store', null);
     document.querySelectorAll('.tab-btn').forEach(b => { if (b.textContent.includes('매장운영')) b.classList.add('active'); });
     setTimeout(() => {
-      switchSubTab('order');
-      const ta = document.getElementById('order-message');
-      if (ta) ta.value = `[품앗이소비자생활협동조합 현장발주 요청]\n\n안녕하세요. 품앗이소비자생활협동조합입니다.\n아래와 같이 발주 요청드립니다.\n\n품목: ${qrProduct}\n수량:\n납품일:\n\n감사합니다.`;
+      // 통합 발주 구조에서는 발주 탭으로 이동만
+      loadUnifiedOrders();
     }, 300);
   }
 });
@@ -2866,240 +2821,273 @@ async function deleteSupplier(id) {
   loadSuppliers();
 }
 
-// ══ 서브탭 전환 ══
+// ══ 발주처 관리 섹션 토글 ══
+function toggleSupplierSection() {
+  const body = document.getElementById('supplier-section-body');
+  const arrow = document.getElementById('supplier-section-arrow');
+  if (!body) return;
+  const isHidden = body.style.display === 'none';
+  body.style.display = isHidden ? 'block' : 'none';
+  if (arrow) arrow.textContent = isHidden ? '▲' : '▼';
+  if (isHidden) loadSuppliers();
+}
+
+// ══ 서브탭 전환 (하위호환용) ══
 function switchSubTab(key) {
-  ['dashboard', 'suppliers', 'tele', 'order'].forEach(k => {
-    const el = document.getElementById(`sub-${k}`);
-    if (el) el.style.display = k === key ? '' : 'none';
-    const btn = document.getElementById(`stab-${k}`);
-    if (btn) {
-      btn.style.color = k === key ? 'var(--amber)' : 'var(--dust)';
-      btn.style.borderBottom = k === key ? '2px solid var(--amber)' : '2px solid transparent';
-    }
-  });
-  if (key === 'dashboard') loadOrderDashboard();
-  if (key === 'tele') loadTeleOrders();
-  if (key === 'order') loadSupplierDropdown();
-  if (key === 'suppliers') loadSuppliers();
+  // 통합 구조에서는 loadUnifiedOrders로 리다이렉트
+  loadUnifiedOrders();
 }
 
-// ══ 텔레발주 ══
-let _teleAllData = [];
-let _teleFilter = '전체';
+// ══ 통합 발주 관리 ══
+let _unifiedOrderData = [];
+let _unifiedFilter = '대기';
+let _supplierCache = {};
 
-function setTeleFilter(f) {
-  _teleFilter = f;
-  ['전체','대기','발주완료'].forEach(k => {
-    const key = k === '전체' ? 'all' : k === '대기' ? 'wait' : 'done';
-    const btn = document.getElementById('tele-filter-' + key);
+function setOrderFilter(f) {
+  _unifiedFilter = f;
+  ['대기','발주완료','전체'].forEach(k => {
+    const key = k === '대기' ? 'wait' : k === '발주완료' ? 'done' : 'all';
+    const btn = document.getElementById('ofilter-' + key);
     if (btn) {
-      btn.style.color = k === f ? 'var(--amber)' : 'var(--dust)';
-      btn.style.borderBottom = k === f ? '2px solid var(--amber)' : '2px solid transparent';
+      const isActive = k === f;
+      btn.style.border = isActive ? '1px solid var(--amber)' : '1px solid rgba(196,128,58,0.3)';
+      btn.style.color = isActive ? 'var(--amber)' : 'var(--dust)';
+      btn.style.fontWeight = isActive ? '600' : '400';
     }
   });
-  renderTeleOrders();
+  renderUnifiedOrders();
 }
 
-function renderTeleOrders() {
-  const wrap = document.getElementById('tele-list');
-  const urgencyColor = { '긴급': 'var(--red)', '보통': 'var(--amber)', '대비': 'var(--green-light)', '여유': 'var(--green-light)' };
-  const filtered = _teleAllData.filter(r => {
-    if (_teleFilter === '전체') return true;
-    if (_teleFilter === '발주완료') return r.status === '발주완료';
+async function loadUnifiedOrders() {
+  const wrap = document.getElementById('unified-order-cards');
+  if (!wrap) return;
+  wrap.innerHTML = '<div class="loading-row">로딩 중…</div>';
+
+  // 발주 데이터 + 거래처 데이터 병렬 로드
+  const [orderRes, supplierRes] = await Promise.all([
+    sb.from('staff_data')
+      .select('id, created_at, farmer_name, item_name, qty, urgency, content, status, order_comment')
+      .order('created_at', { ascending: false }),
+    sb.from('suppliers')
+      .select('id, name, phone, email, kakao_id, note')
+      .eq('is_active', true)
+  ]);
+
+  _unifiedOrderData = orderRes.data || [];
+  _supplierCache = {};
+  (supplierRes.data || []).forEach(s => { _supplierCache[s.name] = s; });
+
+  // 카운트 업데이트
+  const waitCount = _unifiedOrderData.filter(r => r.status !== '발주완료').length;
+  const doneCount = _unifiedOrderData.filter(r => r.status === '발주완료').length;
+  const allCount = _unifiedOrderData.length;
+  const setCount = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = n; };
+  setCount('ofilter-wait-count', waitCount);
+  setCount('ofilter-done-count', doneCount);
+  setCount('ofilter-all-count', allCount);
+
+  renderUnifiedOrders();
+}
+
+function renderUnifiedOrders() {
+  const wrap = document.getElementById('unified-order-cards');
+  if (!wrap) return;
+
+  // 필터 적용
+  const filtered = _unifiedOrderData.filter(r => {
+    if (_unifiedFilter === '전체') return true;
+    if (_unifiedFilter === '발주완료') return r.status === '발주완료';
     return r.status !== '발주완료';
   });
+
   if (filtered.length === 0) {
-    wrap.innerHTML = '<div class="empty-row">현장 요청 없음</div>';
+    wrap.innerHTML = '<div class="card"><div class="empty-row">' +
+      (_unifiedFilter === '대기' ? '대기 중인 발주가 없습니다.' : _unifiedFilter === '발주완료' ? '발주완료 건이 없습니다.' : '발주 내역이 없습니다.') +
+      '</div></div>';
     return;
   }
-  wrap.innerHTML = filtered.map(r => {
-    const color = urgencyColor[r.urgency] || 'var(--dust)';
-    const dt = r.created_at ? new Date(r.created_at).toLocaleString('ko-KR', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }) : '';
-    const isDone = r.status === '발주완료';
-    const statusBadge = isDone
-      ? `<span style="font-size:0.72rem;color:var(--amber);border:1px solid var(--amber);padding:0.1rem 0.45rem;border-radius:3px;">발주완료</span>`
-      : `<span style="font-size:0.72rem;color:var(--dust);border:1px solid var(--dust);padding:0.1rem 0.45rem;border-radius:3px;">대기</span>`;
-    const doneBtn = isDone ? '' : `<button class="btn-sm" style="font-size:0.72rem;" onclick="teleMarkDone('${r.id}')">✓ 발주완료 처리</button>`;
-    return `<div data-status="${r.status || ''}" style="padding:0.75rem 0;border-bottom:1px solid rgba(184,168,138,0.08);">
-      <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.3rem;flex-wrap:wrap;">
-        <input type='checkbox' class='tele-chk' data-id='${r.id}' style='accent-color:var(--amber);width:18px;height:18px;cursor:pointer;flex-shrink:0;'>
-        <span style="font-size:0.78rem;color:var(--dust);">${r.farmer_name || ''}</span>
-        <span style="font-size:0.85rem;color:var(--cream);">${r.item_name || '—'}</span>
-        ${r.qty ? `<span style="font-size:0.78rem;color:var(--cream);">${r.qty}개</span>` : ''}
-        <span style="font-size:0.72rem;color:${color};border:1px solid ${color};padding:0.1rem 0.45rem;border-radius:3px;">${r.urgency || ''}</span>
-        ${statusBadge}
-        <span style="font-size:0.72rem;color:var(--dust);margin-left:auto;">${dt}</span>
+
+  // 거래처별 그룹화
+  const grouped = {};
+  filtered.forEach(r => {
+    const key = r.farmer_name || '(미지정)';
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(r);
+  });
+
+  // 긴급 건 있는 거래처 우선 정렬
+  const sortedEntries = Object.entries(grouped).sort((a, b) => {
+    const aUrgent = a[1].filter(i => i.urgency === '긴급').length;
+    const bUrgent = b[1].filter(i => i.urgency === '긴급').length;
+    if (bUrgent !== aUrgent) return bUrgent - aUrgent;
+    return b[1].length - a[1].length;
+  });
+
+  const urgencyColor = { '긴급': 'var(--red)', '보통': 'var(--amber)', '대비': 'var(--green-light)', '여유': 'var(--green-light)' };
+
+  wrap.innerHTML = sortedEntries.map(([supplier, items]) => {
+    const urgentCount = items.filter(i => i.urgency === '긴급').length;
+    const totalQty = items.reduce((sum, i) => sum + (i.qty || 0), 0);
+    const sup = _supplierCache[supplier];
+    const hasWaiting = items.some(i => i.status !== '발주완료');
+
+    const urgentBadge = urgentCount > 0
+      ? `<span style="font-size:0.72rem;color:#fff;background:var(--red);padding:0.15rem 0.5rem;border-radius:10px;font-weight:600;">긴급 ${urgentCount}</span>`
+      : '';
+    const contactInfo = sup
+      ? `<span style="font-size:0.72rem;color:var(--dust);margin-left:0.5rem;">${sup.phone || ''}</span>`
+      : '';
+
+    const itemRows = items.map(i => {
+      const urg = i.urgency
+        ? `<span style="font-size:0.7rem;color:${urgencyColor[i.urgency] || 'var(--dust)'};border:1px solid ${urgencyColor[i.urgency] || 'var(--dust)'};padding:0.08rem 0.35rem;border-radius:3px;">${i.urgency}</span>`
+        : '';
+      const dt = i.created_at ? new Date(i.created_at).toLocaleString('ko-KR', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }) : '';
+      const isDone = i.status === '발주완료';
+      const statusTag = isDone
+        ? `<span style="font-size:0.7rem;color:var(--green-light);border:1px solid var(--green-light);padding:0.08rem 0.35rem;border-radius:3px;">완료</span>`
+        : '';
+      const hasComment = i.order_comment ? true : false;
+      const commentDisplay = hasComment
+        ? `<div style="font-size:0.75rem;color:var(--amber);background:rgba(196,128,58,0.08);padding:0.25rem 0.5rem;border-radius:4px;margin-top:0.2rem;">💬 ${i.order_comment}</div>`
+        : '';
+
+      return `<div style="padding:0.4rem 0;border-bottom:1px solid rgba(184,168,138,0.06);font-size:0.82rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.3rem;">
+          <div style="display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;">
+            <span style="color:var(--cream);font-weight:500;">${i.item_name || '—'}</span>
+            ${i.qty ? `<span style="color:var(--dust);">${i.qty}개</span>` : ''}
+            ${urg}
+            ${statusTag}
+            <span style="font-size:0.72rem;color:var(--dust);">${i.content || ''}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.4rem;">
+            <span style="font-size:0.72rem;color:var(--dust);">${dt}</span>
+            <button onclick="toggleOrderComment(${i.id})" style="font-size:0.68rem;color:${hasComment ? 'var(--amber)' : 'var(--dust)'};background:none;border:1px solid ${hasComment ? 'rgba(196,128,58,0.4)' : 'rgba(184,168,138,0.2)'};padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;" title="코멘트">${hasComment ? '✏️' : '💬'}</button>
+          </div>
+        </div>
+        ${commentDisplay}
+        <div id="order-comment-${i.id}" style="display:none;margin-top:0.3rem;">
+          <div style="display:flex;gap:0.3rem;flex-wrap:wrap;margin-bottom:0.3rem;">
+            <button onclick="setQuickComment(${i.id},'생산중단')" style="font-size:0.7rem;color:var(--red);background:rgba(184,58,42,0.1);border:1px solid rgba(184,58,42,0.3);padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;">생산중단</button>
+            <button onclick="setQuickComment(${i.id},'품절')" style="font-size:0.7rem;color:var(--red);background:rgba(184,58,42,0.1);border:1px solid rgba(184,58,42,0.3);padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;">품절</button>
+            <button onclick="setQuickComment(${i.id},'수량조정 필요')" style="font-size:0.7rem;color:var(--amber);background:rgba(196,128,58,0.1);border:1px solid rgba(196,128,58,0.3);padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;">수량조정</button>
+            <button onclick="setQuickComment(${i.id},'납기지연')" style="font-size:0.7rem;color:var(--amber);background:rgba(196,128,58,0.1);border:1px solid rgba(196,128,58,0.3);padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;">납기지연</button>
+            <button onclick="setQuickComment(${i.id},'대체상품 확인')" style="font-size:0.7rem;color:var(--dust);background:rgba(184,168,138,0.1);border:1px solid rgba(184,168,138,0.2);padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;">대체상품</button>
+          </div>
+          <div style="display:flex;gap:0.3rem;">
+            <input type="text" id="order-comment-input-${i.id}" placeholder="코멘트 입력…" value="${(i.order_comment || '').replace(/"/g, '&quot;')}" style="flex:1;font-size:0.78rem;padding:0.3rem 0.5rem;background:var(--surface);border:1px solid rgba(196,128,58,0.2);border-radius:4px;color:var(--cream);outline:none;" onkeydown="if(event.key==='Enter')saveOrderComment(${i.id})">
+            <button onclick="saveOrderComment(${i.id})" style="font-size:0.72rem;color:var(--amber);background:rgba(196,128,58,0.15);border:1px solid rgba(196,128,58,0.3);padding:0.2rem 0.5rem;border-radius:4px;cursor:pointer;white-space:nowrap;">저장</button>
+            ${hasComment ? `<button onclick="deleteOrderComment(${i.id})" style="font-size:0.72rem;color:var(--red);background:rgba(184,58,42,0.1);border:1px solid rgba(184,58,42,0.3);padding:0.2rem 0.5rem;border-radius:4px;cursor:pointer;">삭제</button>` : ''}
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    // 발주 메시지 영역 ID
+    const msgId = 'order-msg-' + supplier.replace(/[^a-zA-Z0-9가-힣]/g, '_');
+    const resultId = 'order-result-' + supplier.replace(/[^a-zA-Z0-9가-힣]/g, '_');
+
+    // 카드 하단 버튼들
+    const actionButtons = hasWaiting ? `
+      <div style="display:flex;gap:0.5rem;margin-top:0.8rem;flex-wrap:wrap;align-items:flex-start;">
+        <button class="btn-sm" style="font-size:0.78rem;background:rgba(196,128,58,0.15);border-color:var(--amber);color:var(--amber);" onclick="generateOrderMessage('${supplier.replace(/'/g, "\\'")}', '${msgId}')">발주 메시지 생성</button>
+        <button class="btn-sm" style="font-size:0.78rem;background:var(--green);color:#fff;border-color:var(--green);" onclick="markSupplierDone('${supplier.replace(/'/g, "\\'")}')">발주완료 처리</button>
       </div>
-      <div style="font-size:0.8rem;color:var(--dust);margin-bottom:0.4rem;">${r.content || ''}</div>
-      <div style="display:flex;gap:0.5rem;">${doneBtn}</div>
+      <div id="${msgId}-area" style="display:none;margin-top:0.8rem;">
+        <textarea id="${msgId}" rows="6" style="width:100%;background:rgba(15,11,7,0.8);border:1px solid rgba(196,128,58,0.2);color:var(--cream);padding:0.6rem 0.8rem;font-family:'Noto Sans KR',sans-serif;font-size:0.85rem;resize:vertical;outline:none;margin-bottom:0.5rem;"></textarea>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+          <button class="btn-primary" style="font-size:0.78rem;" onclick="sendCardSms('${supplier.replace(/'/g, "\\'")}', '${msgId}')">📨 문자발송</button>
+          <button class="btn-sm" style="font-size:0.78rem;" onclick="sendCardKakao('${supplier.replace(/'/g, "\\'")}', '${msgId}')">💬 카톡발주</button>
+          <button class="btn-sm" style="font-size:0.78rem;" onclick="sendCardEmail('${supplier.replace(/'/g, "\\'")}', '${msgId}')">✉ 이메일</button>
+        </div>
+        <div id="${resultId}" style="margin-top:0.5rem;font-size:0.8rem;color:var(--dust);"></div>
+      </div>` : '';
+
+    return `<div class="card" style="margin-bottom:1rem;border-left:${urgentCount > 0 ? '3px solid var(--red)' : '3px solid transparent'};">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem;flex-wrap:wrap;gap:0.3rem;">
+        <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+          <span style="font-size:1rem;">📦</span>
+          <span class="card-title" style="margin-bottom:0;font-size:0.95rem;">${supplier}</span>
+          ${urgentBadge}
+          <span style="font-size:0.78rem;color:var(--dust);">${items.length}건 · ${totalQty}개</span>
+          ${contactInfo}
+        </div>
+      </div>
+      ${itemRows}
+      ${actionButtons}
     </div>`;
   }).join('');
 }
 
-async function loadTeleOrders() {
-  const wrap = document.getElementById('tele-list');
-  wrap.innerHTML = '<div class="loading-row">로딩 중…</div>';
-  const { data, error } = await sb.from('staff_data')
-    .select('id, created_at, farmer_name, item_name, qty, urgency, content, status')
-    .order('created_at', { ascending: false });
-  if (error || !data) {
-    wrap.innerHTML = '<div class="empty-row">현장 요청 없음</div>';
-    return;
+// ══ 카드 인라인 발주 메시지 생성 ══
+async function generateOrderMessage(supplierName, msgId) {
+  const areaEl = document.getElementById(msgId + '-area');
+  const msgEl = document.getElementById(msgId);
+  if (!areaEl || !msgEl) return;
+  areaEl.style.display = 'block';
+  msgEl.value = '메시지 생성 중…';
+
+  // 해당 거래처 대기 건 가져오기
+  const waitItems = _unifiedOrderData.filter(r => r.farmer_name === supplierName && r.status !== '발주완료');
+
+  let itemLines = '';
+  if (waitItems.length > 0) {
+    itemLines = waitItems.map(t => {
+      const urg = t.urgency === '긴급' ? ' [긴급]' : t.urgency === '대비' ? ' [대비]' : '';
+      return `  - ${t.item_name}: ${t.qty || ''}개${urg}`;
+    }).join('\n');
   }
-  _teleAllData = data;
-  renderTeleOrders();
-}
 
-async function teleMarkDone(id) {
-  const { error } = await sb.from('staff_data').update({ status: '발주완료' }).eq('id', id);
-  if (error) { alert('처리 실패: ' + error.message); return; }
-  await loadTeleOrders();
-}
-
-async function teleDelete(id) {
-  if (!confirm('입고완료 처리 후 삭제합니다. 계속할까요?')) return;
-  const { error } = await sb.from('staff_data').delete().eq('id', id);
-  if (error) { alert('삭제 실패: ' + error.message); return; }
-  await loadTeleOrders();
-}
-
-document.getElementById('tele-list')?.addEventListener('change', function(e) {
-  if (!e.target.classList.contains('tele-chk')) return;
-  const checked = document.querySelectorAll('#tele-list .tele-chk:checked').length;
-  const bar = document.getElementById('tele-bulk-bar');
-  const chkCount = document.getElementById('tele-chk-count');
-  if (chkCount) chkCount.textContent = checked;
-  if (bar) bar.style.display = checked > 0 ? 'flex' : 'none';
-});
-
-async function teleBulkDelete() {
-  const checkboxes = document.querySelectorAll('#tele-list .tele-chk:checked');
-  if (checkboxes.length === 0) return;
-  if (!confirm(`${checkboxes.length}개 항목을 입고완료 처리 후 삭제합니다. 계속할까요?`)) return;
-  const ids = Array.from(checkboxes).map(cb => cb.dataset.id);
-  const { error } = await sb.from('staff_data').delete().in('id', ids);
-  if (error) { alert('삭제 실패: ' + error.message); return; }
-  const bulkBar = document.getElementById('tele-bulk-bar');
-  if (bulkBar) bulkBar.style.display = 'none';
-  await loadTeleOrders();
-}
-
-function teleToggleAll() {
-  const checkboxes = document.querySelectorAll('#tele-list .tele-chk');
-  const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-  checkboxes.forEach(cb => { cb.checked = !allChecked; });
-  const checked = allChecked ? 0 : checkboxes.length;
-  const chkCountEl = document.getElementById('tele-chk-count');
-  const bulkBarEl = document.getElementById('tele-bulk-bar');
-  if (chkCountEl) chkCountEl.textContent = checked;
-  if (bulkBarEl) bulkBarEl.style.display = checked > 0 ? 'flex' : 'none';
-}
-
-// ══ 발주하기 ══
-async function loadSupplierDropdown() {
-  const sel = document.getElementById('order-supplier-select');
-  sel.innerHTML = '<option value="">-- 발주처 선택 --</option>';
-  const { data } = await sb.from('suppliers').select('id, name, phone, email, kakao_id, note').eq('is_active', true).order('name');
-  if (!data) return;
-  data.forEach(s => {
-    const opt = document.createElement('option');
-    opt.value = s.id;
-    opt.textContent = s.name + (s.phone ? ' (' + s.phone + ')' : '');
-    opt.dataset.phone = s.phone || '';
-    opt.dataset.email = s.email || '';
-    opt.dataset.kakaoId = s.kakao_id || '';
-    opt.dataset.name = s.name;
-    sel.appendChild(opt);
-  });
-  sel.onchange = () => {
-    const opt = sel.options[sel.selectedIndex];
-    document.getElementById('order-supplier-phone').textContent = opt.dataset.phone ? '📞 ' + opt.dataset.phone : '';
-    if (opt && opt.value) loadOrderItemSuggestion(opt.dataset.name || opt.textContent.split(' (')[0]);
-  };
-}
-
-async function loadOrderItemSuggestion(supplierName) {
-  const msgEl = document.getElementById('order-message');
-  const infoEl = document.getElementById('order-item-info');
-  if (infoEl) infoEl.textContent = '품목 조회 중…';
-
-  // pos_transactions에서 최근 30일 해당 농가 품목별 판매수량 집계
+  // POS 판매 참고 데이터
   const from30 = new Date(); from30.setDate(from30.getDate() - 30);
-  const { data, error } = await sb
-    .from('pos_transactions')
+  const { data: posData } = await sb.from('pos_transactions')
     .select('item_name, unit, qty')
     .eq('farmer_name', supplierName)
     .gte('sold_at', from30.toISOString());
 
-  if (error || !data || data.length === 0) {
-    if (infoEl) infoEl.textContent = '최근 30일 거래 내역 없음';
-    return;
-  }
-
-  // 품목별 집계
-  const itemMap = {};
-  data.forEach(r => {
-    const key = r.item_name + (r.unit ? ' (' + r.unit + ')' : '');
-    itemMap[key] = (itemMap[key] || 0) + (r.qty || 0);
-  });
-  const sorted = Object.entries(itemMap).sort((a,b) => b[1] - a[1]);
-
-  // 참고용 판매내역 표시 (발주처에 전송 안 됨)
-  const refEl = document.getElementById('order-item-ref');
-  if (refEl) {
-    refEl.innerHTML = `<div style="font-size:0.78rem;color:var(--dust);margin-bottom:0.5rem;">📊 최근 30일 판매 참고 (발주처에 전송 안 됨)</div>` +
-      sorted.map(([name, qty]) =>
-        `<div style="display:flex;justify-content:space-between;padding:0.2rem 0;border-bottom:1px solid rgba(184,168,138,0.06);font-size:0.8rem;">
-          <span style="color:var(--cream);">${name}</span>
-          <span style="color:var(--amber);font-weight:600;">${qty}개</span>
-        </div>`
-      ).join('');
-    refEl.style.display = 'block';
-  }
-
-  // 텔레발주 대기 건 조회
-  const { data: teleOrders } = await sb.from('staff_data')
-    .select('id, item_name, qty, urgency')
-    .eq('farmer_name', supplierName)
-    .eq('status', '대기')
-    .order('urgency');
-
-  // 발주 템플릿 생성
-  let itemLines = '';
-  if (teleOrders && teleOrders.length > 0) {
-    // 텔레발주 대기 건이 있으면 우선 반영
-    itemLines = teleOrders.map(t => {
-      const urg = t.urgency === '긴급' ? ' [긴급]' : t.urgency === '대비' ? ' [대비]' : '';
-      return `  - ${t.item_name}: ${t.qty || ''}개${urg}`;
-    }).join('\n');
-  } else {
-    // 없으면 POS 판매내역 기준 빈칸 템플릿
+  if (!itemLines && posData && posData.length > 0) {
+    const itemMap = {};
+    posData.forEach(r => {
+      const key = r.item_name + (r.unit ? ' (' + r.unit + ')' : '');
+      itemMap[key] = (itemMap[key] || 0) + (r.qty || 0);
+    });
+    const sorted = Object.entries(itemMap).sort((a,b) => b[1] - a[1]);
     itemLines = sorted.map(([name]) => `  - ${name}: `).join('\n');
   }
-  msgEl.value = `[품앗이소비자생활협동조합 발주 요청]\n안녕하세요. 품앗이생협 지족점입니다.\n아래와 같이 발주 요청드립니다.\n\n${itemLines}\n\n감사합니다.`;
 
-  const teleCount = teleOrders ? teleOrders.length : 0;
-  if (infoEl) infoEl.textContent = teleCount > 0
-    ? `텔레발주 ${teleCount}건 반영됨 + 최근 30일 ${sorted.length}개 품목 참고`
-    : `최근 30일 판매 기준 ${sorted.length}개 품목`;
+  msgEl.value = `[품앗이소비자생활협동조합 발주 요청]\n안녕하세요. 품앗이생협 지족점입니다.\n아래와 같이 발주 요청드립니다.\n\n${itemLines}\n\n감사합니다.`;
+  msgEl.focus();
 }
 
-async function sendOrderSms() {
-  const sel = document.getElementById('order-supplier-select');
-  const opt = sel.options[sel.selectedIndex];
-  if (!opt || !opt.value) { toast('발주처를 선택하세요.'); return; }
-  const phone = opt.dataset.phone;
-  if (!phone) { toast('선택한 발주처에 전화번호가 없습니다.'); return; }
-  const message = document.getElementById('order-message').value.trim();
+// ══ 거래처 일괄 발주완료 처리 ══
+async function markSupplierDone(supplierName) {
+  const waitItems = _unifiedOrderData.filter(r => r.farmer_name === supplierName && r.status !== '발주완료');
+  if (waitItems.length === 0) { toast('대기 건이 없습니다.'); return; }
+  if (!confirm(`${supplierName}의 대기 ${waitItems.length}건을 모두 발주완료 처리하시겠습니까?`)) return;
+
+  const ids = waitItems.map(i => i.id);
+  const { error } = await sb.from('staff_data').update({ status: '발주완료' }).in('id', ids);
+  if (error) { toast('처리 실패: ' + error.message); return; }
+  toast(`${supplierName} ${waitItems.length}건 발주완료 ✓`);
+  loadUnifiedOrders();
+}
+
+// ══ 카드 내 SMS/카톡/이메일 발송 ══
+async function sendCardSms(supplierName, msgId) {
+  const sup = _supplierCache[supplierName];
+  if (!sup || !sup.phone) { toast('해당 거래처에 전화번호가 없습니다.'); return; }
+  const message = document.getElementById(msgId).value.trim();
   if (!message) { toast('발주 내용을 입력하세요.'); return; }
 
   const apiKey    = localStorage.getItem('solapi_key');
   const apiSecret = localStorage.getItem('solapi_secret');
   const fromNum   = localStorage.getItem('solapi_from') || '0427160019';
-  if (!apiKey || !apiSecret) { toast('⚙ 이음SMS 탭에서 Solapi API 설정을 먼저 저장하세요.'); return; }
+  if (!apiKey || !apiSecret) { toast('이음SMS 탭에서 Solapi API 설정을 먼저 저장하세요.'); return; }
 
-  const resultDiv = document.getElementById('order-result');
-  resultDiv.textContent = '발송 중…';
+  const resultId = 'order-result-' + supplierName.replace(/[^a-zA-Z0-9가-힣]/g, '_');
+  const resultDiv = document.getElementById(resultId);
+  if (resultDiv) resultDiv.textContent = '발송 중…';
 
   const date = new Date().toISOString();
   const salt = Math.random().toString(36).substring(2, 14);
@@ -3110,49 +3098,36 @@ async function sendOrderSms() {
     const resp = await fetch('https://api.solapi.com/messages/v4/send-many', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': auth },
-      body: JSON.stringify({ messages: [{ to: phone.replace(/-/g,''), from: fromNum.replace(/-/g,''), text: message }] }),
+      body: JSON.stringify({ messages: [{ to: sup.phone.replace(/-/g,''), from: fromNum.replace(/-/g,''), text: message }] }),
     });
     const result = await resp.json();
-    if (!resp.ok) { resultDiv.textContent = '오류: ' + (result.message || resp.status); return; }
+    if (!resp.ok) { if (resultDiv) resultDiv.textContent = '오류: ' + (result.message || resp.status); return; }
     toast('발주 문자 발송 완료');
-    resultDiv.textContent = '✓ 발송 완료';
+    if (resultDiv) resultDiv.textContent = '✓ 발송 완료';
     await sb.from('sms_history').insert({ member_ids: [], message, sender: fromNum });
   } catch(e) {
-    resultDiv.textContent = '네트워크 오류: ' + e.message;
+    if (resultDiv) resultDiv.textContent = '네트워크 오류: ' + e.message;
   }
 }
 
-function sendOrderKakao() {
-  const sel = document.getElementById('order-supplier-select');
-  const opt = sel.options[sel.selectedIndex];
-  if (!opt || !opt.value) { toast('발주처를 선택하세요.'); return; }
-  const message = document.getElementById('order-message').value.trim();
+function sendCardKakao(supplierName, msgId) {
+  const message = document.getElementById(msgId).value.trim();
   if (!message) { toast('발주 내용을 입력하세요.'); return; }
-  // 클립보드 복사
   navigator.clipboard.writeText(message).then(() => {
     toast('발주 내용 복사됨 ✓ 카카오톡에서 담당자에게 붙여넣기하세요.');
   }).catch(() => {
     toast('복사 실패 — 직접 내용을 선택하여 복사해주세요.');
   });
-  // 카카오톡 앱 실행 (모바일)
-  const kakaoId = opt.dataset.kakaoId;
-  if (kakaoId) {
-    setTimeout(() => { window.location.href = 'kakaotalk://launch'; }, 500);
-  } else {
-    setTimeout(() => { window.location.href = 'kakaotalk://launch'; }, 500);
-  }
+  setTimeout(() => { window.location.href = 'kakaotalk://launch'; }, 500);
 }
 
-function sendOrderEmail() {
-  const sel = document.getElementById('order-supplier-select');
-  const opt = sel.options[sel.selectedIndex];
-  if (!opt || !opt.value) { toast('발주처를 선택하세요.'); return; }
-  const email = opt.dataset.email;
-  if (!email) { toast('선택한 발주처에 이메일이 없습니다.'); return; }
-  const message = document.getElementById('order-message').value.trim();
+function sendCardEmail(supplierName, msgId) {
+  const sup = _supplierCache[supplierName];
+  if (!sup || !sup.email) { toast('해당 거래처에 이메일이 없습니다.'); return; }
+  const message = document.getElementById(msgId).value.trim();
   const subject = encodeURIComponent('[품앗이생협] 발주 요청');
   const body = encodeURIComponent(message);
-  window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+  window.location.href = `mailto:${sup.email}?subject=${subject}&body=${body}`;
 }
 
 // ══ 프로젝트관리 ════════════════════════════════════════
@@ -3505,87 +3480,9 @@ function initAiRealtime() {
     });
 }
 
-// ══ 발주현황 대시보드 ════════════════════════════════════
-
-async function loadOrderDashboard() {
-  const wrap = document.getElementById('order-dashboard');
-  wrap.innerHTML = '<div class="loading-row">로딩 중…</div>';
-
-  const { data, error } = await sb.from('staff_data')
-    .select('id, farmer_name, item_name, qty, urgency, created_at, order_comment')
-    .eq('status', '대기')
-    .order('created_at', { ascending: false });
-
-  if (error || !data || data.length === 0) {
-    wrap.innerHTML = '<div class="card"><div class="empty-row">대기 중인 발주가 없습니다.</div></div>';
-    return;
-  }
-
-  // 거래처별 그룹화
-  const grouped = {};
-  data.forEach(r => {
-    const key = r.farmer_name || '(미지정)';
-    if (!grouped[key]) grouped[key] = [];
-    grouped[key].push(r);
-  });
-
-  const urgencyColor = { '긴급': 'var(--red)', '보통': 'var(--amber)', '대비': 'var(--green-light)' };
-
-  wrap.innerHTML = Object.entries(grouped).map(([supplier, items]) => {
-    const urgentCount = items.filter(i => i.urgency === '긴급').length;
-    const totalQty = items.reduce((sum, i) => sum + (i.qty || 0), 0);
-    const itemSummary = items.slice(0, 3).map(i => i.item_name).join(', ') + (items.length > 3 ? ` 외 ${items.length - 3}건` : '');
-    const urgentBadge = urgentCount > 0
-      ? `<span style="font-size:0.72rem;color:var(--red);border:1px solid var(--red);padding:0.1rem 0.4rem;border-radius:3px;margin-left:0.4rem;">긴급 ${urgentCount}</span>`
-      : '';
-
-    const itemRows = items.map(i => {
-      const urg = i.urgency ? `<span style="font-size:0.7rem;color:${urgencyColor[i.urgency] || 'var(--dust)'};margin-left:0.3rem;">${i.urgency}</span>` : '';
-      const dt = i.created_at ? new Date(i.created_at).toLocaleString('ko-KR', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }) : '';
-      const hasComment = i.order_comment ? true : false;
-      const commentDisplay = hasComment
-        ? `<div style="font-size:0.75rem;color:var(--amber);background:rgba(196,128,58,0.08);padding:0.25rem 0.5rem;border-radius:4px;margin-top:0.2rem;">💬 ${i.order_comment}</div>`
-        : '';
-      return `<div style="padding:0.3rem 0;border-bottom:1px solid rgba(184,168,138,0.06);font-size:0.82rem;">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span style="color:var(--cream);">${i.item_name || '—'}${urg}</span>
-          <span style="display:flex;align-items:center;gap:0.4rem;">
-            <span style="color:var(--dust);">${i.qty || ''}개 <span style="font-size:0.72rem;margin-left:0.3rem;">${dt}</span></span>
-            <button onclick="toggleOrderComment(${i.id})" style="font-size:0.68rem;color:${hasComment ? 'var(--amber)' : 'var(--dust)'};background:none;border:1px solid ${hasComment ? 'rgba(196,128,58,0.4)' : 'rgba(184,168,138,0.2)'};padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;" title="코멘트">${hasComment ? '✏️' : '💬'}</button>
-          </span>
-        </div>
-        ${commentDisplay}
-        <div id="order-comment-${i.id}" style="display:none;margin-top:0.3rem;">
-          <div style="display:flex;gap:0.3rem;flex-wrap:wrap;margin-bottom:0.3rem;">
-            <button onclick="setQuickComment(${i.id},'생산중단')" style="font-size:0.7rem;color:var(--red);background:rgba(184,58,42,0.1);border:1px solid rgba(184,58,42,0.3);padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;">생산중단</button>
-            <button onclick="setQuickComment(${i.id},'품절')" style="font-size:0.7rem;color:var(--red);background:rgba(184,58,42,0.1);border:1px solid rgba(184,58,42,0.3);padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;">품절</button>
-            <button onclick="setQuickComment(${i.id},'수량조정 필요')" style="font-size:0.7rem;color:var(--amber);background:rgba(196,128,58,0.1);border:1px solid rgba(196,128,58,0.3);padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;">수량조정</button>
-            <button onclick="setQuickComment(${i.id},'납기지연')" style="font-size:0.7rem;color:var(--amber);background:rgba(196,128,58,0.1);border:1px solid rgba(196,128,58,0.3);padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;">납기지연</button>
-            <button onclick="setQuickComment(${i.id},'대체상품 확인')" style="font-size:0.7rem;color:var(--dust);background:rgba(184,168,138,0.1);border:1px solid rgba(184,168,138,0.2);padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;">대체상품</button>
-          </div>
-          <div style="display:flex;gap:0.3rem;">
-            <input type="text" id="order-comment-input-${i.id}" placeholder="코멘트 입력…" value="${(i.order_comment || '').replace(/"/g, '&quot;')}" style="flex:1;font-size:0.78rem;padding:0.3rem 0.5rem;background:var(--surface);border:1px solid rgba(196,128,58,0.2);border-radius:4px;color:var(--cream);outline:none;" onkeydown="if(event.key==='Enter')saveOrderComment(${i.id})">
-            <button onclick="saveOrderComment(${i.id})" style="font-size:0.72rem;color:var(--amber);background:rgba(196,128,58,0.15);border:1px solid rgba(196,128,58,0.3);padding:0.2rem 0.5rem;border-radius:4px;cursor:pointer;white-space:nowrap;">저장</button>
-            ${hasComment ? `<button onclick="deleteOrderComment(${i.id})" style="font-size:0.72rem;color:var(--red);background:rgba(184,58,42,0.1);border:1px solid rgba(184,58,42,0.3);padding:0.2rem 0.5rem;border-radius:4px;cursor:pointer;">삭제</button>` : ''}
-          </div>
-        </div>
-      </div>`;
-    }).join('');
-
-    return `<div class="card" style="margin-bottom:1rem;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem;">
-        <div>
-          <span class="card-title" style="margin-bottom:0;">${supplier}</span>
-          ${urgentBadge}
-          <span style="font-size:0.75rem;color:var(--dust);margin-left:0.5rem;">${items.length}건 · ${totalQty}개</span>
-        </div>
-        <button class="btn-sm" style="font-size:0.75rem;" onclick="goToOrder('${supplier.replace(/'/g, "\\'")}')">발주하기 →</button>
-      </div>
-      <div style="font-size:0.78rem;color:var(--dust);margin-bottom:0.4rem;">${itemSummary}</div>
-      ${itemRows}
-    </div>`;
-  }).join('');
-}
+// ══ 발주현황 — 통합 구조에서는 loadUnifiedOrders 사용 ══
+// loadOrderDashboard는 하위호환용
+function loadOrderDashboard() { loadUnifiedOrders(); }
 
 function toggleOrderComment(id) {
   const el = document.getElementById('order-comment-' + id);
@@ -3613,30 +3510,20 @@ async function saveOrderComment(id) {
   const { error } = await sb.from('staff_data').update({ order_comment: comment }).eq('id', id);
   if (error) { toast('저장 실패: ' + error.message); return; }
   toast('코멘트 저장됨 ✓');
-  loadOrderDashboard();
+  loadUnifiedOrders();
 }
 
 async function deleteOrderComment(id) {
   const { error } = await sb.from('staff_data').update({ order_comment: null }).eq('id', id);
   if (error) { toast('삭제 실패: ' + error.message); return; }
   toast('코멘트 삭제됨');
-  loadOrderDashboard();
+  loadUnifiedOrders();
 }
 
 function goToOrder(supplierName) {
-  switchSubTab('order');
-  // 드롭다운에서 해당 거래처 자동 선택
-  setTimeout(() => {
-    const sel = document.getElementById('order-supplier-select');
-    if (!sel) return;
-    for (let i = 0; i < sel.options.length; i++) {
-      if (sel.options[i].dataset.name === supplierName || sel.options[i].textContent.startsWith(supplierName)) {
-        sel.selectedIndex = i;
-        sel.dispatchEvent(new Event('change'));
-        break;
-      }
-    }
-  }, 300);
+  // 통합 구조에서는 해당 거래처 메시지 생성 바로 실행
+  const msgId = 'order-msg-' + supplierName.replace(/[^a-zA-Z0-9가-힣]/g, '_');
+  generateOrderMessage(supplierName, msgId);
 }
 
 // ══ 사무국 공지 ══════════════════════════════════════════
@@ -3787,12 +3674,10 @@ async function fbToOrder(id, btn) {
   const { data } = await sb.from('customer_feedback').select('content').eq('id', id).single();
   if (!data) { toast('데이터 조회 실패'); return; }
 
-  // 발주 탭으로 이동하고 내용 자동 입력
+  // 발주 탭으로 이동
   switchTab('suppliers', null);
-  switchSubTab('order');
-  const memoEl = document.getElementById('order-memo');
-  if (memoEl) memoEl.value = '[고객요청] ' + data.content;
-  toast('발주 탭으로 이동 — 내용이 입력됐습니다');
+  loadUnifiedOrders();
+  toast('발주 탭으로 이동했습니다');
 
   // 피드백 상태를 처리중으로 변경
   await sb.from('customer_feedback').update({ status: 'in_progress', note: '발주 연동됨' }).eq('id', id);
