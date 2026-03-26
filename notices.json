@@ -1,5 +1,14 @@
 [
   {
+    "id": "20260326_web_jimmy",
+    "date": "2026-03-26",
+    "tag": "시스템",
+    "title": "웹 지미 개통 — 폰에서 AI경영지원실장과 대화",
+    "body": "jimmy.poomasi.org에서 폰 브라우저로 AI경영지원실장 지미와 직접 대화할 수 있습니다.\n\n■ 접속: https://jimmy.poomasi.org\n■ 기능: 실시간 스트리밍 응답, 대화 맥락 유지, 파일 작업·코딩·분석 등 Claude Code 풀기능\n■ 특징: 이동 중에도 사용 가능, 네트워크 전환 시 자동 재연결\n■ 인프라: GCP → Cloudflare Tunnel HTTPS → systemd 자동 재시작",
+    "meta": "담당: 지미 · 2026-03-26",
+    "open": true
+  },
+  {
     "id": "20260325_텔레그램_봇_활용_",
     "date": "2026-03-25",
     "tag": "시스템",
