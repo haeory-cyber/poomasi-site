@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;700;900&family=Noto+Sans+KR:wght@300;400;500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 <style>
   :root {
     --earth: #0f0b07;
@@ -20,6 +21,7 @@
     --dust:  #b8a88a;
     --red:   #b83a2a;
     --white: #faf7f0;
+    --gold-bar: #E8A020;
     --panel: rgba(30,21,16,0.85);
     --surface: rgba(45,31,20,0.8);
     --border:  rgba(184,168,138,0.2);
@@ -552,6 +554,195 @@
 
   .evt-content-text { flex: 1; font-size: 0.88rem; color: var(--cream); line-height: 1.4; }
   .evt-meta { font-size: 0.68rem; color: var(--dust); margin-top: 0.3rem; }
+
+  /* ── 가격표 탭 ─────────────────────────────────────── */
+  .tag-mode-tabs {
+    display: flex; gap: 0; margin-bottom: 2rem;
+    border-bottom: 1px solid rgba(196,128,58,0.2);
+  }
+  .tag-mode-tab {
+    padding: 0.7rem 1.8rem; cursor: pointer;
+    font-size: 0.85rem; color: var(--dust); letter-spacing: 0.05em;
+    border-bottom: 2px solid transparent; transition: all 0.2s;
+    background: none; border-top: none; border-left: none; border-right: none;
+    font-family: inherit;
+  }
+  .tag-mode-tab.active {
+    color: var(--amber); border-bottom-color: var(--amber); font-weight: 500;
+  }
+
+  .tag-search-row {
+    display: flex; gap: 0.8rem; margin-bottom: 1.5rem; align-items: center;
+  }
+  .tag-search-row input {
+    flex: 1; padding: 0.7rem 1rem;
+    background: var(--soil); border: 1px solid rgba(196,128,58,0.25);
+    border-radius: 6px; color: var(--cream); font-size: 0.9rem;
+    font-family: inherit; outline: none;
+  }
+  .tag-search-row input::placeholder { color: var(--dust); opacity: 0.6; }
+  .tag-search-row input:focus { border-color: var(--amber); }
+
+  .tag-search-results {
+    display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1.5rem;
+  }
+  .tag-search-item {
+    display: flex; align-items: center; gap: 0.8rem;
+    padding: 0.6rem 1rem; background: var(--soil);
+    border: 1px solid rgba(196,128,58,0.15); border-radius: 6px;
+    cursor: pointer; transition: border-color 0.2s;
+  }
+  .tag-search-item:hover { border-color: var(--amber); }
+  .tag-search-item.selected { border-color: var(--amber); background: rgba(196,128,58,0.08); }
+  .tag-search-item .si-name { flex: 1; font-size: 0.9rem; font-weight: 500; }
+  .tag-search-item .si-farmer { font-size: 0.75rem; color: var(--dust); }
+  .tag-search-item .si-price { font-size: 0.85rem; color: var(--amber); font-weight: 700; }
+
+  .tag-btn-add {
+    padding: 0.5rem 1.2rem; background: var(--green); color: var(--cream);
+    border: none; border-radius: 6px; font-size: 0.82rem; font-weight: 500;
+    cursor: pointer; font-family: inherit; transition: background 0.2s;
+  }
+  .tag-btn-add:hover { background: var(--green-light); }
+  .tag-btn-add:disabled { opacity: 0.4; cursor: default; }
+
+  .tag-btn-print {
+    padding: 0.7rem 2rem; border: none; border-radius: 6px;
+    font-size: 0.85rem; font-weight: 500; cursor: pointer;
+    font-family: inherit; letter-spacing: 0.05em; transition: all 0.2s;
+    background: var(--amber); color: var(--earth);
+  }
+  .tag-btn-print:hover { background: var(--amber-light); }
+  .tag-btn-print:disabled { opacity: 0.4; cursor: default; }
+
+  .tag-preview {
+    margin-top: 2rem; padding: 1.5rem;
+    background: var(--soil); border: 1px solid rgba(196,128,58,0.15);
+    border-radius: 8px;
+  }
+  .tag-preview-title {
+    font-size: 0.75rem; color: var(--dust); letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+  }
+  .tag-preview-grid {
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+  }
+
+  .tag-cart-section {
+    margin-top: 2rem; padding: 1.2rem;
+    background: var(--soil); border: 1px solid rgba(196,128,58,0.2);
+    border-radius: 8px;
+  }
+  .tag-cart-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 0.8rem;
+  }
+  .tag-cart-header h3 { font-size: 0.85rem; color: var(--cream); font-weight: 500; }
+  .tag-cart-item {
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.5rem 0.6rem; margin-bottom: 0.4rem;
+    background: rgba(196,128,58,0.05); border: 1px solid rgba(196,128,58,0.1);
+    border-radius: 6px;
+  }
+  .tag-cart-item .ci-name { flex: 1; font-size: 0.82rem; color: var(--cream); }
+  .tag-cart-item .ci-price { font-size: 0.82rem; color: var(--amber); font-weight: 600; }
+  .tag-cart-item .ci-remove {
+    width: 22px; height: 22px; border: none; border-radius: 50%;
+    background: rgba(196,128,58,0.15); color: var(--dust); font-size: 0.7rem;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .tag-cart-item .ci-remove:hover { background: rgba(200,80,80,0.3); color: #e88; }
+  .tag-cart-empty { text-align: center; color: var(--dust); font-size: 0.8rem; padding: 1rem; }
+
+  .tag-panel { display: none; }
+  .tag-panel.active { display: block; }
+
+  /* ── SINGLE TAG (65x38mm) ── */
+  .tag {
+    width: 65mm; height: 38mm;
+    border: 1px solid #ccc;
+    background: #fff; color: #262626;
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .tag-bar {
+    height: 6mm; background: var(--gold-bar);
+    width: 100%; flex-shrink: 0;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .tag-header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 1.5mm 3mm 0;
+  }
+  .tag-farmer {
+    font-size: 7pt; color: #888; font-weight: 400;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    max-width: 42mm;
+  }
+  .tag-logo {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 8pt; color: var(--gold-bar); font-weight: 700;
+    letter-spacing: 0.05em; white-space: nowrap; flex-shrink: 0;
+  }
+  .tag-product {
+    padding: 0.5mm 3mm 0.5mm;
+    font-weight: 900; text-align: left; line-height: 1.2;
+    max-height: 10mm;
+    word-break: keep-all;
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  }
+  .tag-bottom {
+    flex: 1; display: flex; justify-content: space-between; align-items: flex-end;
+    padding: 0 3mm 0.5mm;
+  }
+  .tag-qr { width: 12mm; height: 12mm; flex-shrink: 0; }
+  .tag-qr canvas, .tag-qr img { width: 100%; height: 100%; image-rendering: pixelated; }
+  .tag-price-area { text-align: right; }
+  .tag-unit { font-size: 12pt; color: #888; display: block; }
+  .tag-price {
+    font-size: 20pt; font-weight: 900; color: #000;
+    letter-spacing: -0.03em; white-space: nowrap;
+  }
+
+  /* ── TAG PRINT SHEET ── */
+  .tag-print-sheet { display: none; }
+
+  @media print {
+    body { background: #fff !important; }
+    body::before { display: none !important; }
+    .home-btn, #login-screen, #app, #toast { display: none !important; }
+    .tag-print-sheet {
+      display: block !important;
+    }
+    .tag-print-page {
+      width: 210mm; height: 297mm;
+      padding: 5mm;
+      display: grid;
+      grid-template-columns: repeat(3, 65mm);
+      grid-template-rows: repeat(6, 38mm);
+      gap: 1.5mm 2mm;
+      justify-content: center;
+      align-content: center;
+      page-break-after: always;
+      overflow: hidden;
+    }
+    .tag-print-page:last-child { page-break-after: avoid; }
+    .tag { border: 0.5pt solid #ddd; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .tag-bar { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    @page {
+      size: A4;
+      margin: 0;
+    }
+  }
+
+  .tag-bulk-link {
+    display: inline-block; margin-bottom: 1.5rem;
+    font-size: 0.82rem; color: var(--amber); text-decoration: none;
+    letter-spacing: 0.05em; transition: color 0.2s;
+  }
+  .tag-bulk-link:hover { color: var(--amber-light); }
 </style>
 </head>
 <body>
@@ -593,6 +784,7 @@
 
     <nav class="tab-bar">
       <button class="tab-btn active" onclick="switchTab('suppliers', event)">발주</button>
+      <button class="tab-btn"       onclick="switchTab('tags', event)">가격표</button>
       <button class="tab-btn"       onclick="switchTab('sms', event)">이음SMS</button>
       <button class="tab-btn"       onclick="switchTab('event', event)">이벤트등록</button>
       <button class="tab-btn"       onclick="switchTab('attend', event)">출퇴근부</button>
@@ -681,6 +873,99 @@
         <div class="card">
           <div id="supplier-list"><div class="loading-row">로딩 중…</div></div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ TAB: 가격표 ═════════════════════════════════════ -->
+  <section class="tab-content" id="tab-tags">
+    <div class="sec-header">
+      <div>
+        <div class="sec-label">PRICE TAGS</div>
+        <div class="sec-title">가격표 인쇄</div>
+      </div>
+    </div>
+
+    <a class="tag-bulk-link" href="print_tags_6m.html" target="_blank">일괄인쇄 (전체 품목) &rarr;</a>
+
+    <p style="font-size:0.78rem;color:var(--dust);letter-spacing:0.05em;margin-bottom:2rem;">65&times;38mm 라벨 &middot; A4 용지 18매</p>
+
+    <div class="tag-mode-tabs">
+      <button class="tag-mode-tab active" data-tagmode="quick">기존 상품</button>
+      <button class="tag-mode-tab" data-tagmode="batch">신규 입력</button>
+    </div>
+
+    <!-- QUICK MODE -->
+    <div class="tag-panel active" id="tag-panel-quick">
+      <div class="tag-search-row">
+        <input type="text" id="tag-quick-search" placeholder="상품명 검색..." autocomplete="off">
+      </div>
+      <div class="tag-search-results" id="tag-quick-results"></div>
+      <div id="tag-quick-edit" style="display:none;margin-bottom:1.5rem;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
+          <div>
+            <label style="display:block;font-size:0.72rem;color:var(--dust);letter-spacing:0.08em;margin-bottom:0.3rem;">생산자</label>
+            <input type="text" id="tag-q-farmer" placeholder="생산자" style="width:100%;padding:0.65rem 0.8rem;background:var(--soil);border:1px solid rgba(196,128,58,0.25);border-radius:6px;color:var(--cream);font-size:0.9rem;font-family:inherit;outline:none;">
+          </div>
+          <div>
+            <label style="display:block;font-size:0.72rem;color:var(--dust);letter-spacing:0.08em;margin-bottom:0.3rem;">가격 (원)</label>
+            <input type="number" id="tag-q-price" placeholder="가격 입력" style="width:100%;padding:0.65rem 0.8rem;background:var(--soil);border:1px solid rgba(196,128,58,0.25);border-radius:6px;color:var(--cream);font-size:0.9rem;font-family:inherit;outline:none;">
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:1rem;align-items:center;">
+        <button class="tag-btn-add" id="tag-btn-quick-add" disabled onclick="tagAddToCart('quick')">+ 선택 추가</button>
+      </div>
+      <div class="tag-preview" id="tag-quick-preview" style="display:none">
+        <div class="tag-preview-title">미리보기</div>
+        <div class="tag-preview-grid" id="tag-quick-preview-grid"></div>
+      </div>
+    </div>
+
+    <!-- NEW INPUT MODE -->
+    <div class="tag-panel" id="tag-panel-batch">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-bottom:1.5rem;">
+        <div>
+          <label style="display:block;font-size:0.72rem;color:var(--dust);letter-spacing:0.08em;margin-bottom:0.3rem;">바코드</label>
+          <input type="text" id="tag-new-barcode" placeholder="바코드 스캔 또는 입력" autocomplete="off" style="width:100%;padding:0.65rem 0.8rem;background:var(--soil);border:1px solid rgba(196,128,58,0.25);border-radius:6px;color:var(--cream);font-size:0.9rem;font-family:inherit;outline:none;">
+        </div>
+        <div>
+          <label style="display:block;font-size:0.72rem;color:var(--dust);letter-spacing:0.08em;margin-bottom:0.3rem;">상품명</label>
+          <input type="text" id="tag-new-name" placeholder="예: 못난이사과" autocomplete="off" style="width:100%;padding:0.65rem 0.8rem;background:var(--soil);border:1px solid rgba(196,128,58,0.25);border-radius:6px;color:var(--cream);font-size:0.9rem;font-family:inherit;outline:none;">
+        </div>
+        <div>
+          <label style="display:block;font-size:0.72rem;color:var(--dust);letter-spacing:0.08em;margin-bottom:0.3rem;">생산자</label>
+          <input type="text" id="tag-new-farmer" placeholder="예: 채수천" style="width:100%;padding:0.65rem 0.8rem;background:var(--soil);border:1px solid rgba(196,128,58,0.25);border-radius:6px;color:var(--cream);font-size:0.9rem;font-family:inherit;outline:none;">
+        </div>
+        <div>
+          <label style="display:block;font-size:0.72rem;color:var(--dust);letter-spacing:0.08em;margin-bottom:0.3rem;">단위</label>
+          <input type="text" id="tag-new-unit" placeholder="예: 1kg" style="width:100%;padding:0.65rem 0.8rem;background:var(--soil);border:1px solid rgba(196,128,58,0.25);border-radius:6px;color:var(--cream);font-size:0.9rem;font-family:inherit;outline:none;">
+        </div>
+        <div>
+          <label style="display:block;font-size:0.72rem;color:var(--dust);letter-spacing:0.08em;margin-bottom:0.3rem;">가격 (원)</label>
+          <input type="number" id="tag-new-price" placeholder="예: 4900" style="width:100%;padding:0.65rem 0.8rem;background:var(--soil);border:1px solid rgba(196,128,58,0.25);border-radius:6px;color:var(--cream);font-size:0.9rem;font-family:inherit;outline:none;">
+        </div>
+      </div>
+      <div style="display:flex;gap:1rem;align-items:center;">
+        <button class="tag-btn-add" id="tag-btn-new-add" onclick="tagAddToCart('new')">+ 추가</button>
+      </div>
+      <div class="tag-preview" id="tag-new-preview" style="display:none">
+        <div class="tag-preview-title">미리보기</div>
+        <div class="tag-preview-grid" id="tag-new-preview-grid"></div>
+      </div>
+    </div>
+
+    <!-- CART -->
+    <div class="tag-cart-section" id="tag-cart-section">
+      <div class="tag-cart-header">
+        <h3>인쇄 목록 (<span id="tag-cart-count">0</span>건)</h3>
+        <div style="display:flex;gap:0.5rem;">
+          <button class="btn-sm" onclick="tagClearCart()">전체 삭제</button>
+          <button class="tag-btn-print" id="tag-btn-cart-print" disabled onclick="tagPrintCart()">인쇄</button>
+        </div>
+      </div>
+      <div id="tag-cart-list">
+        <div class="tag-cart-empty">상품을 검색하여 추가하세요</div>
       </div>
     </div>
   </section>
@@ -868,6 +1153,7 @@
   </section>
 </div>
 
+<div class="tag-print-sheet" id="tag-print-sheet"></div>
 <div id="toast"></div>
 
 <script>
@@ -920,7 +1206,7 @@ sb.auth.getSession().then(({ data: { session } }) => {
 });
 
 // ── 탭 전환 ──────────────────────────────────────────────
-const TAB_IDS = { suppliers: 'tab-suppliers', sms: 'tab-sms', event: 'tab-event', attend: 'tab-attend' };
+const TAB_IDS = { suppliers: 'tab-suppliers', tags: 'tab-tags', sms: 'tab-sms', event: 'tab-event', attend: 'tab-attend' };
 
 function adjustContentPadding() {
   const nav = document.querySelector('.sticky-nav');
@@ -944,6 +1230,7 @@ function onTabLoad(key) {
   if (key === 'sms') loadFarmerList();
   if (key === 'attend') { initAttendTab(); loadAttendance(); loadMonthlySummary(); }
   if (key === 'suppliers') { if (typeof loadUnifiedOrders === 'function') loadUnifiedOrders(); }
+  if (key === 'tags') { if (!_tagTabInited) { initTagTab(); _tagTabInited = true; } }
 }
 
 // ── 공통 유틸 ─────────────────────────────────────────────
@@ -1836,6 +2123,276 @@ async function loadMonthlySummary() {
   }).join('');
 }
 
+// ══ 가격표 기능 ════════════════════════════════════════
+
+const TAG_SITE_BASE = 'https://poomasi.org';
+
+// farmer 핵심 이름 추출: (주)기운찬→기운찬
+function farmerCore(name) {
+  if (!name) return '';
+  return name.replace(/\(주\)|\(유\)|\(사\)|\(영\)|\(합\)|주식회사|유한회사|사단법인|영농조합법인|농업회사법인|영농|조합법인|법인|협동조합|조합/g, '').trim();
+}
+
+// 상품명 정리: 별표, 생산자 중복, 용량/단위 제거
+function cleanProductName(name, farmer) {
+  if (!name) return '';
+  const fcore = farmerCore(farmer);
+  name = name.replace(/^\*+|\*+$/g, '').trim();
+  name = name.replace(/^\[행사\]\)?/, '').trim();
+  if (fcore && fcore.length >= 2) {
+    name = name.replace(new RegExp('\\(' + fcore.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\)', 'g'), '');
+    const fcoreEsc = fcore.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    if (name.match(new RegExp('^' + fcoreEsc + '\\)'))) {
+      name = name.slice(fcore.length + 1);
+    }
+    name = name.replace(new RegExp(fcoreEsc, 'g'), '');
+  }
+  if (farmer || fcore) {
+    name = name.replace(/\(([^)]+)\)/g, (m, inner) => {
+      if (farmer && (farmer.includes(inner) || inner.includes(farmer))) return '';
+      if (fcore && (fcore.includes(inner) || inner.includes(fcore))) return '';
+      return m;
+    });
+  }
+  if (farmer && farmer.length >= 2) {
+    name = name.replace(farmer, '');
+  }
+  name = name.replace(/\([\d.,]+\s*(ml|mL|g|kg|L|l|입|포|봉|팩|개|매|ea)[\w/×x*]*\)/gi, '');
+  name = name.replace(/\s*[\d.,]+\s*(ml|mL|g|kg|L|l|입|포|봉|팩|개|매|ea)[\w/×x*]*\s*$/gi, '');
+  name = name.replace(/\(\s*\)/g, '').replace(/^\*+|\*+$/g, '').replace(/^[)\s]+/, '').trim();
+  return name || '(상품명없음)';
+}
+
+function tagFmtPrice(n) {
+  return n != null ? n.toLocaleString('ko-KR') + '원' : '-';
+}
+
+function tagHTML(p) {
+  const displayName = cleanProductName(p.product_name, p.farmer_name);
+  const qrParams = new URLSearchParams({ info: '1', name: displayName });
+  if (p.farmer_name) qrParams.set('farmer', p.farmer_name);
+  if (p.unit) qrParams.set('unit', p.unit);
+  if (p.price != null) qrParams.set('price', p.price);
+  if (p.barcode) qrParams.set('barcode', p.barcode);
+  const qrUrl = TAG_SITE_BASE + '/tags.html?' + qrParams.toString();
+  return '<div class="tag">' +
+    '<div class="tag-header">' +
+      '<span class="tag-farmer">' + (p.farmer_name || '') + '</span>' +
+      '<span class="tag-logo">품앗이마을</span>' +
+    '</div>' +
+    '<div class="tag-product">' + displayName + '</div>' +
+    '<div class="tag-bottom">' +
+      '<div class="tag-qr" data-qr="' + qrUrl.replace(/"/g, '&quot;') + '"></div>' +
+      '<div class="tag-price-area">' +
+        '<div class="tag-unit">' + (p.unit || '') + '</div>' +
+        '<div class="tag-price">' + tagFmtPrice(p.price) + '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="tag-bar"></div>' +
+  '</div>';
+}
+
+function tagRenderQRCodes(container) {
+  container.querySelectorAll('.tag-qr[data-qr]').forEach(function(el) {
+    if (el.querySelector('img')) return;
+    var qr = qrcode(0, 'M');
+    qr.addData(el.dataset.qr);
+    qr.make();
+    el.innerHTML = qr.createImgTag(2, 0);
+  });
+}
+
+function autoFitProductNames(container) {
+  container.querySelectorAll('.tag-product').forEach(function(el) {
+    el.style.fontSize = '18pt';
+    var size = 18;
+    while (el.scrollWidth > el.clientWidth && size > 10) {
+      size -= 0.5;
+      el.style.fontSize = size + 'pt';
+    }
+  });
+}
+
+// Search products from Supabase
+async function tagSearchProducts(q) {
+  var r = await fetch(
+    SUPABASE_URL + '/rest/v1/products?product_name=ilike.*' + encodeURIComponent(q) + '*&select=id,product_name,farmer_name,unit,price,barcode,category,sales_count&order=sales_count.desc.nullslast&limit=15',
+    { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
+  );
+  return await r.json();
+}
+
+// Cart
+var tagCart = [];
+var tagQuickSelected = null;
+
+function tagRenderCart() {
+  var list = document.getElementById('tag-cart-list');
+  var count = document.getElementById('tag-cart-count');
+  var btn = document.getElementById('tag-btn-cart-print');
+  count.textContent = tagCart.length;
+  btn.disabled = tagCart.length === 0;
+  if (tagCart.length === 0) {
+    list.innerHTML = '<div class="tag-cart-empty">상품을 검색하여 추가하세요</div>';
+    return;
+  }
+  list.innerHTML = tagCart.map(function(p, i) {
+    return '<div class="tag-cart-item">' +
+      '<span class="ci-name">' + cleanProductName(p.product_name, p.farmer_name) + '</span>' +
+      '<span class="ci-price">' + tagFmtPrice(p.price) + '</span>' +
+      '<button class="ci-remove" onclick="tagRemoveFromCart(' + i + ')">✕</button>' +
+    '</div>';
+  }).join('');
+}
+
+function tagAddToCart(mode) {
+  var p;
+  if (mode === 'quick') {
+    p = tagGetQuickProduct();
+  } else {
+    p = tagReadNewForm();
+  }
+  if (!p) return;
+  tagCart.push(JSON.parse(JSON.stringify(p)));
+  tagRenderCart();
+}
+
+function tagRemoveFromCart(idx) {
+  tagCart.splice(idx, 1);
+  tagRenderCart();
+}
+
+function tagClearCart() {
+  tagCart.length = 0;
+  tagRenderCart();
+}
+
+function tagPrintCart() {
+  if (tagCart.length === 0) return;
+  tagPrintTags(tagCart);
+}
+
+function tagPrintTags(products) {
+  var sheet = document.getElementById('tag-print-sheet');
+  var perPage = 18;
+  var html = '';
+  for (var i = 0; i < products.length; i += perPage) {
+    var page = products.slice(i, i + perPage);
+    html += '<div class="tag-print-page">';
+    page.forEach(function(p) { html += tagHTML(p); });
+    html += '</div>';
+  }
+  sheet.innerHTML = html;
+  tagRenderQRCodes(sheet);
+  autoFitProductNames(sheet);
+  setTimeout(function() { window.print(); }, 300);
+}
+
+// Quick mode
+function tagSelectQuick(p, el) {
+  document.querySelectorAll('.tag-search-item').forEach(function(i) { i.classList.remove('selected'); });
+  el.classList.add('selected');
+  tagQuickSelected = p;
+  document.getElementById('tag-btn-quick-add').disabled = false;
+  var editEl = document.getElementById('tag-quick-edit');
+  editEl.style.display = 'block';
+  document.getElementById('tag-q-farmer').value = p.farmer_name || '';
+  document.getElementById('tag-q-price').value = (p.price != null && p.price > 0) ? p.price : '';
+  tagUpdateQuickPreview();
+}
+
+function tagGetQuickProduct() {
+  if (!tagQuickSelected) return null;
+  return Object.assign({}, tagQuickSelected, {
+    farmer_name: document.getElementById('tag-q-farmer').value.trim(),
+    price: document.getElementById('tag-q-price').value ? Number(document.getElementById('tag-q-price').value) : null
+  });
+}
+
+function tagUpdateQuickPreview() {
+  var p = tagGetQuickProduct();
+  if (!p) return;
+  var prev = document.getElementById('tag-quick-preview');
+  var grid = document.getElementById('tag-quick-preview-grid');
+  prev.style.display = 'block';
+  grid.innerHTML = tagHTML(p);
+  tagRenderQRCodes(grid);
+  autoFitProductNames(grid);
+}
+
+function tagReadNewForm() {
+  var barcode = document.getElementById('tag-new-barcode').value.trim();
+  var name = document.getElementById('tag-new-name').value.trim();
+  var farmer = document.getElementById('tag-new-farmer').value.trim();
+  var unit = document.getElementById('tag-new-unit').value.trim();
+  var price = document.getElementById('tag-new-price').value.trim();
+  if (!name) return null;
+  return { product_name: name, farmer_name: farmer, unit: unit, price: price ? Number(price) : null, barcode: barcode };
+}
+
+// Init tag event listeners (called once)
+function initTagTab() {
+  // Mode tabs
+  document.querySelectorAll('.tag-mode-tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.tag-mode-tab').forEach(function(t) { t.classList.remove('active'); });
+      document.querySelectorAll('.tag-panel').forEach(function(p) { p.classList.remove('active'); });
+      tab.classList.add('active');
+      document.getElementById('tag-panel-' + tab.dataset.tagmode).classList.add('active');
+    });
+  });
+
+  // Quick search
+  var tagSearchInput = document.getElementById('tag-quick-search');
+  var tagResultsEl = document.getElementById('tag-quick-results');
+  var _tagSearchTimer = null;
+
+  tagSearchInput.addEventListener('input', function() {
+    clearTimeout(_tagSearchTimer);
+    var q = tagSearchInput.value.trim();
+    tagResultsEl.innerHTML = '';
+    tagQuickSelected = null;
+    document.getElementById('tag-btn-quick-add').disabled = true;
+    document.getElementById('tag-quick-preview').style.display = 'none';
+    document.getElementById('tag-quick-edit').style.display = 'none';
+    if (!q) return;
+    _tagSearchTimer = setTimeout(async function() {
+      var matches = await tagSearchProducts(q);
+      tagResultsEl.innerHTML = '';
+      matches.forEach(function(p) {
+        var div = document.createElement('div');
+        div.className = 'tag-search-item';
+        div.innerHTML =
+          '<span class="si-name">' + p.product_name + '</span>' +
+          '<span class="si-farmer">' + (p.category || '') + '</span>' +
+          '<span class="si-price">' + (p.unit || '') + '</span>';
+        div.addEventListener('click', function() { tagSelectQuick(p, div); });
+        tagResultsEl.appendChild(div);
+      });
+    }, 300);
+  });
+
+  // Quick edit fields update preview
+  document.getElementById('tag-q-farmer').addEventListener('input', tagUpdateQuickPreview);
+  document.getElementById('tag-q-price').addEventListener('input', tagUpdateQuickPreview);
+
+  // New input mode preview
+  ['tag-new-barcode', 'tag-new-name', 'tag-new-farmer', 'tag-new-unit', 'tag-new-price'].forEach(function(id) {
+    document.getElementById(id).addEventListener('input', function() {
+      var p = tagReadNewForm();
+      var prev = document.getElementById('tag-new-preview');
+      var grid = document.getElementById('tag-new-preview-grid');
+      if (!p) { prev.style.display = 'none'; return; }
+      prev.style.display = 'block';
+      grid.innerHTML = tagHTML(p);
+      tagRenderQRCodes(grid);
+      autoFitProductNames(grid);
+    });
+  });
+}
+
+var _tagTabInited = false;
+
 // 엔터키 로그인
 document.getElementById('password').addEventListener('keydown', e => {
   if (e.key === 'Enter') doLogin();
@@ -1844,6 +2401,22 @@ document.getElementById('password').addEventListener('keydown', e => {
 // 페이지 로드 시
 document.addEventListener('DOMContentLoaded', () => {
   adjustContentPadding();
+  // tags.html에서 리다이렉트 시 가격표 탭 자동 전환
+  if (location.hash === '#tab=tags') {
+    // 로그인 후 실행되도록 약간 지연
+    var _hashCheck = setInterval(function() {
+      if (document.getElementById('app').style.display === 'block') {
+        clearInterval(_hashCheck);
+        switchTab('tags', null);
+        document.querySelectorAll('.tab-btn').forEach(function(b) {
+          b.classList.remove('active');
+          if (b.textContent.includes('가격표')) b.classList.add('active');
+        });
+      }
+    }, 200);
+    // 10초 후 체크 중단
+    setTimeout(function() { clearInterval(_hashCheck); }, 10000);
+  }
 });
 </script>
 </body>

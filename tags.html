@@ -631,8 +631,13 @@ async function loadOrdersView() {
   }
 }
 
-// ── Product info view (QR scan landing) ──
+// ── 파라미터 없이 접속 시 store.html 가격표 탭으로 리다이렉트 ──
 const params = new URLSearchParams(location.search);
+if (!params.get('orders') && !params.get('barcode') && !params.get('info')) {
+  location.href = 'store.html#tab=tags';
+}
+
+// ── Product info view (QR scan landing) ──
 if (params.get('orders')) {
   // 발주현황 모바일 뷰
   document.querySelector('nav').style.display = 'none';
