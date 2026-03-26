@@ -189,11 +189,11 @@
     text-align: right;
   }
   .tag-unit {
-    font-weight: 400; font-size: 7px; color: #262626;
+    font-weight: 400; font-size: 9px; color: #262626;
     margin-bottom: 0.3mm;
   }
   .tag-price {
-    font-weight: 700; font-size: 12px; color: #262626;
+    font-weight: 700; font-size: 16px; color: #262626;
     white-space: nowrap;
   }
 
@@ -432,8 +432,9 @@ function cleanProductName(name, farmer) {
   if (!name) return '';
   const fcore = farmerCore(farmer);
 
-  // 1. 앞뒤 별표 제거
+  // 1. 앞뒤 별표 제거 + [행사]) 접두어 제거
   name = name.replace(/^\*+|\*+$/g, '').trim();
+  name = name.replace(/^\[행사\]\)?/, '').trim();
 
   // 2. farmer 핵심 이름으로 괄호/접두 제거
   if (fcore && fcore.length >= 2) {
