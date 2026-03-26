@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>로컬의 반격 — 품앗이생협 애뉴얼 리포트 2023–2025 v2.2</title>
+<title>로컬의 반격 — 품앗이생협 애뉴얼 리포트 2023–2025 v2.3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600;700;900&family=Noto+Sans+KR:wght@300;400;500;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
@@ -857,19 +857,20 @@ footer a:hover { text-decoration: underline; }
   <div class="inner">
     <div class="chapter-label reveal">6장 &nbsp; AI 자동화</div>
     <h2 class="section-title reveal">로컬푸드 2.0을 만드는 방법</h2>
-    <p class="section-sub reveal">3년을 버티는 동안, 사람 대신 코드가 일했다. 직원 2명이 운영하는 조합이 매일 돌아갈 수 있었던 이유다.</p>
+    <p class="section-sub reveal">3년을 버티는 동안, 사람 대신 코드가 일했다. 직원 2명, AI 5명. 봇 5개, 자동화 16개가 매장을 돌린다.</p>
 
+    <!-- 인프라 · 데이터 기반 -->
     <div class="ai-grid reveal">
       <div class="ai-card">
         <div class="ai-num">01</div>
-        <div class="ai-title">MCP 인프라</div>
-        <div class="ai-desc">미르(웹 Claude) ↔ 패미(VS Code) ↔ Google 서비스 3-way 연결. 외부에서도 접근 가능한 영구 고정 URL.</div>
-        <div class="ai-tech">mcp_server.py · FastMCP · Cloudflare Named Tunnel → mcp.poomasi.org</div>
+        <div class="ai-title">AI 팀 체제</div>
+        <div class="ai-desc">지미(GCP Opus)·패미(VS Code Sonnet)·미르(웹 Claude)·터미(로컬 CLI)·피제(Gemini CLI). 5명이 24시간 분업한다. 듀얼 MCP로 GCP↔PC 양방향 연결.</div>
+        <div class="ai-tech">mcp2.poomasi.org · mcp.poomasi.org · Cloudflare Named Tunnel</div>
       </div>
       <div class="ai-card">
         <div class="ai-num">02</div>
         <div class="ai-title">POS 데이터 파이프라인</div>
-        <div class="ai-desc">매일 08:30 자동 실행. POS에서 데이터를 긁어와 분석하고, 전광판과 홈페이지를 동시에 업데이트한다.</div>
+        <div class="ai-desc">매일 08:30 자동 실행. 넷포스 POS에서 매출·품목·농가 데이터를 긁어와 분석하고, 전광판과 홈페이지를 동시에 업데이트한다.</div>
         <div class="ai-tech">netforce.py (Selenium) → scheduler.py → Cloudflare Pages</div>
       </div>
       <div class="ai-card">
@@ -878,41 +879,132 @@ footer a:hover { text-decoration: underline; }
         <div class="ai-desc">삼성 TV URL Launcher 자동 실행. 어스톤 컬러 디자인, 7슬라이드. 탄소저감량·농가수·무포장 품목 실시간 표시.</div>
         <div class="ai-tech">display.html · 자동 생성 · 매일 갱신</div>
       </div>
+    </div>
+
+    <!-- 탄소 · 환경 -->
+    <div class="ai-grid reveal">
       <div class="ai-card">
         <div class="ai-num">04</div>
         <div class="ai-title">탄소 계산 고도화</div>
-        <div class="ai-desc">구버전 단순 개수 기반에서 DEFRA 2021 국제 기준으로 전환. 중량 기반 수송 절감 + 무포장 LCA 복합 계산.</div>
-        <div class="ai-tech">DEFRA 2021 · 조합원 지오코딩 3,243명 완료</div>
+        <div class="ai-desc">DEFRA 2021 국제 기준. 중량 기반 수송 절감 + 무포장 LCA 복합 계산. 조합원 3,243명 지오코딩으로 실제 이동 거리 측정.</div>
+        <div class="ai-tech">DEFRA 2021 · 13,794건 거래 분석 · 소나무 환산</div>
       </div>
       <div class="ai-card">
         <div class="ai-num">05</div>
-        <div class="ai-title">영수증 자동화</div>
-        <div class="ai-desc">텔레그램으로 영수증 이미지를 보내면 Gemini Vision이 판독해 이카운트 ERP에 자동 입력한다.</div>
-        <div class="ai-tech">tele_receipt.py · Gemini Vision API · 이카운트 API</div>
+        <div class="ai-title">탄소중립실천포인트</div>
+        <div class="ai-desc">참여기업 신청 완료. 장바구니·개인용기·친환경제품·리필 4개 항목. 카카오싱크 CI 수집, QR 스캔 인증, 기술원 배치 전송. 연간 예상 1,213만원.</div>
+        <div class="ai-tech">FastAPI · PWA · 카카오싱크 OAuth · carbon.poomasi.org</div>
       </div>
       <div class="ai-card">
         <div class="ai-num">06</div>
-        <div class="ai-title">아침 브리핑 · Google 자동화</div>
-        <div class="ai-desc">Calendar·Gmail·매장경영정보를 매일 아침 텔레그램으로 요약 발송. Google 서비스 전반을 명령 인터페이스로 제어.</div>
-        <div class="ai-tech">morning_briefing.py · google_daemon.py · tasks.json</div>
+        <div class="ai-title">지원사업 자동 수집</div>
+        <div class="ai-desc">기업마당(bizinfo) 공고를 매일 09:30 자동 수집. 협동조합·사회적경제·탄소중립 키워드 필터링. 8개 사업 동시 추적.</div>
+        <div class="ai-tech">GitHub Actions · Supabase bizinfo_grants · 대전+중앙 필터</div>
+      </div>
+    </div>
+
+    <!-- 매장 운영 자동화 -->
+    <div class="ai-grid reveal">
+      <div class="ai-card">
+        <div class="ai-num">07</div>
+        <div class="ai-title">발주 자동화</div>
+        <div class="ai-desc">텔레그램에 "양파 5박스"라고 쓰면 공급업체·품목을 퍼지매칭(70% 임계값)해서 Supabase에 자동 등록한다. 음성 메시지도 Gemini STT로 처리.</div>
+        <div class="ai-tech">tele_order.py · voice_bot.py · Gemini 2.5 Flash STT</div>
+      </div>
+      <div class="ai-card">
+        <div class="ai-num">08</div>
+        <div class="ai-title">폐기 자동화</div>
+        <div class="ai-desc">유통기한 지난 상품 바코드를 텔레그램으로 찍으면, 상품을 인식하고 넷포스에 폐기 등록한 뒤 해당 농가에 알림을 보낸다.</div>
+        <div class="ai-tech">barcode_bot.py · pyzbar · Netforce Selenium · 농가 알림</div>
+      </div>
+      <div class="ai-card">
+        <div class="ai-num">09</div>
+        <div class="ai-title">영수증 자동화</div>
+        <div class="ai-desc">텔레그램으로 영수증 사진을 보내면 Gemini Vision이 판독. 품목·단가·수량을 추출하고 원가 대비 마진율을 자동 계산한다.</div>
+        <div class="ai-tech">tele_receipt.py · Gemini Vision API · 마진 자동 산출</div>
       </div>
     </div>
 
     <div class="ai-pipeline reveal">
-      <div class="pipe-title">POS → 전광판 자동화 파이프라인</div>
+      <div class="pipe-title">매장 운영 자동화 파이프라인</div>
       <div class="pipe-flow">
         <div class="pipe-step">넷포스 POS</div><div class="pipe-arrow">→</div>
-        <div class="pipe-step">Selenium 다운로드</div><div class="pipe-arrow">→</div>
+        <div class="pipe-step">Selenium 수집</div><div class="pipe-arrow">→</div>
         <div class="pipe-step">데이터 분석</div><div class="pipe-arrow">→</div>
-        <div class="pipe-step">display.html 생성</div><div class="pipe-arrow">→</div>
-        <div class="pipe-step">index.html 갱신</div><div class="pipe-arrow">→</div>
-        <div class="pipe-step">Cloudflare Pages 배포</div>
+        <div class="pipe-step">전광판 · 홈페이지</div><div class="pipe-arrow">→</div>
+        <div class="pipe-step">KPI 대시보드</div><div class="pipe-arrow">→</div>
+        <div class="pipe-step">Cloudflare 배포</div>
+      </div>
+    </div>
+
+    <!-- 텔레그램 봇 · 현장 도구 -->
+    <div class="ai-grid reveal">
+      <div class="ai-card">
+        <div class="ai-num">10</div>
+        <div class="ai-title">텔레그램 봇 5종</div>
+        <div class="ai-desc">지미지니(음성+바코드 통합), 바코드폐기봇, 출퇴근봇, 발주봇, 텔레브릿지(영수증+발주+AI팀 통합). 모두 systemd로 24시간 가동.</div>
+        <div class="ai-tech">@jimmy_jini_bot · @barcode_poom_bot · @att_register_bot</div>
+      </div>
+      <div class="ai-card">
+        <div class="ai-num">11</div>
+        <div class="ai-title">출퇴근 자동화</div>
+        <div class="ai-desc">QR코드 스캔 + GPS 위치 이중검증. 매장 반경 확인, QR 서명 위변조 방지. 2026년 최저임금(10,320원) 기준 급여 자동 계산.</div>
+        <div class="ai-tech">attendance_bot.py · QR+GPS 이중검증 · 지족점/관저점</div>
+      </div>
+      <div class="ai-card">
+        <div class="ai-num">12</div>
+        <div class="ai-title">배달 관리 앱</div>
+        <div class="ai-desc">배달 순서를 터치 드래그로 조정. Tmap·구글맵 내비 연동, 배달 완료 시 SMS 자동 발송. 조합원 주소·메모 Supabase 연동.</div>
+        <div class="ai-tech">delivery.html · Supabase delivery_members · Tmap API</div>
+      </div>
+    </div>
+
+    <!-- 경영 · 마케팅 · 분석 -->
+    <div class="ai-grid reveal">
+      <div class="ai-card">
+        <div class="ai-num">13</div>
+        <div class="ai-title">경영 프레임워크</div>
+        <div class="ai-desc">5단계 전략 체계 — 욕망(Level 0)→정체성→설계→실행→측정. SWOT·BMC·STP·4P 통합. KPI 엔진으로 일매출·객단가·활성조합원 비율 추적.</div>
+        <div class="ai-tech">FRAMEWORK.md · RACE · AIDAR · Flywheel 모델</div>
+      </div>
+      <div class="ai-card">
+        <div class="ai-num">14</div>
+        <div class="ai-title">POS 데이터 마이닝</div>
+        <div class="ai-desc">2023~2026년 3년치 매출 분석. 농가별·품목별·요일별 트렌드. 조합원 20,567명 활성화율 36.3% 추적. 비활성 13,103명 재활성화 전략 수립.</div>
+        <div class="ai-tech">analyze_v4.py · kpi_data.json · 월별/요일별 분석</div>
+      </div>
+      <div class="ai-card">
+        <div class="ai-num">15</div>
+        <div class="ai-title">단골매칭 · 이음SMS</div>
+        <div class="ai-desc">농가 선택하면 3회 이상 구매한 단골 조합원을 자동 추출. 체크 후 Solapi SMS 일괄 발송. 매주 일요일 구매 이력 자동 갱신.</div>
+        <div class="ai-tech">farmer_members · bulk_farmer_members.py · Solapi HMAC</div>
+      </div>
+    </div>
+
+    <div class="ai-grid reveal">
+      <div class="ai-card">
+        <div class="ai-num">16</div>
+        <div class="ai-title">조합원말씀 · 가격태그</div>
+        <div class="ai-desc">조합원 익명 피드백 폼 + 사무국 대시보드 실시간 확인. 가격태그는 Supabase 상품DB에서 QR코드 포함 A4 인쇄용 자동 생성.</div>
+        <div class="ai-tech">feedback.html · gen_print_tags.py · QR 한글 인코딩</div>
+      </div>
+    </div>
+
+    <div class="ai-pipeline reveal">
+      <div class="pipe-title">AI 팀 협업 파이프라인</div>
+      <div class="pipe-flow">
+        <div class="pipe-step">후니님 지시</div><div class="pipe-arrow">→</div>
+        <div class="pipe-step">텔레그램</div><div class="pipe-arrow">→</div>
+        <div class="pipe-step">지미 (GCP)</div><div class="pipe-arrow">→</div>
+        <div class="pipe-step">패미 (PC)</div><div class="pipe-arrow">→</div>
+        <div class="pipe-step">검증 · 배포</div><div class="pipe-arrow">→</div>
+        <div class="pipe-step">매장 · 홈페이지 · Drive</div>
       </div>
     </div>
 
     <div class="ai-quote reveal">
-      직원 2명이 운영하는 조합이 이 모든 것을 돌린다.<br>
-      <strong>자동화는 생존 전략이었다.</strong>
+      직원 2명, AI 5명. 봇 5개, 자동화 16개.<br>
+      단골매칭부터 폐기까지, <strong>코드가 매장을 돌린다.</strong>
     </div>
   </div>
 </div>
@@ -948,7 +1040,7 @@ footer a:hover { text-decoration: underline; }
 
 <footer>
   품앗이소비자생활협동조합 &nbsp;|&nbsp; 대전광역시 유성구 지족동 &nbsp;|&nbsp; poomasi.org
-  &nbsp;|&nbsp; ver 2.2 · 2026. 3. 14.
+  &nbsp;|&nbsp; ver 2.3 · 2026. 3. 26.
   &nbsp;&nbsp;·&nbsp;&nbsp;
   <a href="index.html">← 홈으로 돌아가기</a>
 </footer>
