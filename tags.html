@@ -391,7 +391,36 @@ const SITE_BASE = 'https://poomasi.org';
 
 // ── Product info view (QR scan landing) ──
 const params = new URLSearchParams(location.search);
-if (params.get('info')) {
+if (params.get('barcode')) {
+  // 바코드 기반 — Supabase에서 실시간 조회
+  document.querySelector('nav').style.display = 'none';
+  document.querySelector('.ui-wrap').style.display = 'none';
+  const iv = document.getElementById('info-view');
+  iv.style.display = 'block';
+  document.getElementById('info-product').textContent = '로딩중...';
+
+  const bc = params.get('barcode');
+  fetch(`${SB_URL}/rest/v1/products?barcode=eq.${encodeURIComponent(bc)}&select=product_name,farmer_name,unit,price,barcode&limit=1`, { headers: HEADERS })
+    .then(r => r.json())
+    .then(rows => {
+      if (rows.length) {
+        const p = rows[0];
+        const dname = cleanProductName(p.product_name, p.farmer_name);
+        document.getElementById('info-product').textContent = dname;
+        document.getElementById('info-farmer').textContent = p.farmer_name ? '생산자: ' + p.farmer_name : '';
+        document.getElementById('info-unit').textContent = p.unit || '';
+        document.getElementById('info-price').textContent = p.price ? Number(p.price).toLocaleString('ko-KR') + '원' : '';
+        document.getElementById('info-order-link').href =
+          `${SITE_BASE}/work.html?qr_order=${encodeURIComponent(dname)}`;
+      } else {
+        document.getElementById('info-product').textContent = '상품을 찾을 수 없습니다 (바코드: ' + bc + ')';
+      }
+    })
+    .catch(() => {
+      document.getElementById('info-product').textContent = '조회 실패';
+    });
+} else if (params.get('info')) {
+  // 레거시: URL 파라미터 직접 표시 (기존 QR 호환)
   document.querySelector('nav').style.display = 'none';
   document.querySelector('.ui-wrap').style.display = 'none';
   const iv = document.getElementById('info-view');
