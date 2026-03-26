@@ -26,6 +26,7 @@
     position: relative; overflow: hidden;
     display: flex; flex-direction: column;
     font-family: 'Noto Sans KR', sans-serif;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
   /* 상단 헤더: 생산자 + 품앗이마을 */
   .tag-header {
@@ -63,7 +64,7 @@
     font-size: 20pt; font-weight: 900; color: #000;
     letter-spacing: -0.03em; white-space: nowrap;
   }
-  .tag-bar { height: 6mm; background: var(--gold-bar); width: 100%; flex-shrink: 0; }
+  .tag-bar { height: 6mm; background: var(--gold-bar); width: 100%; flex-shrink: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .print-page {
     width: 210mm; height: 297mm; padding: 5mm;
     display: grid; grid-template-columns: repeat(3, 65mm);
