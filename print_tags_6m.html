@@ -47,7 +47,7 @@
     padding: 0.5mm 3mm 0;
     font-weight: 900; text-align: left; line-height: 1.1;
     word-break: keep-all;
-    overflow: hidden; white-space: nowrap;
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
   }
   /* 하단: QR(좌) + 가격(우) */
   .tag-bottom {
@@ -57,9 +57,9 @@
   .tag-qr { width: 12mm; height: 12mm; flex-shrink: 0; }
   .tag-qr canvas, .tag-qr img { width: 100%; height: 100%; }
   .tag-price-area { text-align: right; }
-  .tag-unit { font-size: 11pt; color: #888; display: block; }
+  .tag-unit { font-size: 12pt; color: #888; display: block; }
   .tag-price {
-    font-size: 18pt; font-weight: 900; color: #000;
+    font-size: 20pt; font-weight: 900; color: #000;
     letter-spacing: -0.03em; white-space: nowrap;
   }
   .tag-bar { height: 6mm; background: var(--gold-bar); width: 100%; flex-shrink: 0; }
@@ -152,7 +152,7 @@
     <span class="tag-farmer">(주)가보트레이딩</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">팜투마켓_유기농냉압착아보카도오일</div>
+  <div class="tag-product">유기농냉압착아보카도오일</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=833849006144"></div>
     <div class="tag-price-area">
@@ -212,7 +212,7 @@
     <span class="tag-farmer">(주)건강생활연구소</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">씨에코 클렌징바 2종set 패키지할인</div>
+  <div class="tag-product">클렌징바 2종set할인</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8195"></div>
     <div class="tag-price-area">
@@ -227,7 +227,7 @@
     <span class="tag-farmer">(주)건강생활연구소</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">씨에코 클렌징바 6종set 패키지할인</div>
+  <div class="tag-product">클렌징바 6종set할인</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8196"></div>
     <div class="tag-price-area">
@@ -1472,7 +1472,7 @@
     <span class="tag-farmer">관저매장</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">(100%무첨가)땅콩버터잼(크런치)</div>
+  <div class="tag-product">땅콩버터잼(크런치)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809786200176"></div>
     <div class="tag-price-area">
@@ -1502,7 +1502,7 @@
     <span class="tag-farmer">관저매장</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">(국산콩 100%)순수서리태 콩국물</div>
+  <div class="tag-product">서리태콩국물(국산콩)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809879730009"></div>
     <div class="tag-price-area">
@@ -2237,7 +2237,7 @@
     <span class="tag-farmer">나우푸드</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">그로브 아보카도오일(뉴질랜드산)</div>
+  <div class="tag-product">아보카도오일(뉴질랜드산)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=9421009000012"></div>
     <div class="tag-price-area">
@@ -3467,7 +3467,7 @@
     <span class="tag-farmer">달코미</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">(유기농)천연발효 베리깜빠뉴(비건)</div>
+  <div class="tag-product">베리깜빠뉴(비건)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=9511"></div>
     <div class="tag-price-area">
@@ -3872,7 +3872,7 @@
     <span class="tag-farmer">대전부르스주조 농업회사법인(유)</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">산소증류주 O2 황금곳간 25.3%</div>
+  <div class="tag-product">산소증류주O2(25.3%)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809792630196"></div>
     <div class="tag-price-area">
@@ -3887,7 +3887,7 @@
     <span class="tag-farmer">대전부르스주조 농업회사법인(유)</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">산소증류주 O2 황금곳간 38.3%</div>
+  <div class="tag-product">산소증류주O2(38.3%)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809792630288"></div>
     <div class="tag-price-area">
@@ -4217,7 +4217,7 @@
     <span class="tag-farmer">두레생협</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">그랑도스 디카페인 유기농 인스턴트 커피</div>
+  <div class="tag-product">디카페인유기농인스턴트커피</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=4009041108603"></div>
     <div class="tag-price-area">
@@ -5582,7 +5582,7 @@
     <span class="tag-farmer">두레생협</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">항균 은숯칫솔(성인용 이중미세모)</div>
+  <div class="tag-product">은숯칫솔(이중미세모)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809034051017"></div>
     <div class="tag-price-area">
@@ -8117,7 +8117,7 @@
     <span class="tag-farmer">새롬식품</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">우리채소가풍부한짬뽕라면(컵라면)</div>
+  <div class="tag-product">짬뽕라면(컵라면)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8804294024399"></div>
     <div class="tag-price-area">
@@ -9197,7 +9197,7 @@
     <span class="tag-farmer">씨에이치하모니</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">자연으로비파헤어컬러크림(자연갈색)</div>
+  <div class="tag-product">헤어컬러크림(자연갈색)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809228335886"></div>
     <div class="tag-price-area">
@@ -9212,7 +9212,7 @@
     <span class="tag-farmer">씨에이치하모니</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">자연으로비파헤어컬러크림(진한갈색)</div>
+  <div class="tag-product">헤어컬러크림(진한갈색)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809228335879"></div>
     <div class="tag-price-area">
@@ -9227,7 +9227,7 @@
     <span class="tag-farmer">씨에이치하모니</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">자연으로비파헤어컬러크림(흑갈색)</div>
+  <div class="tag-product">헤어컬러크림(흑갈색)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809228335862"></div>
     <div class="tag-price-area">
@@ -9242,7 +9242,7 @@
     <span class="tag-farmer">씨에이치하모니</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)자연으로에어프라이어종이호일(대형)</div>
+  <div class="tag-product">에어프라이어종이호일(대형)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809228337729"></div>
     <div class="tag-price-area">
@@ -9257,7 +9257,7 @@
     <span class="tag-farmer">씨에이치하모니</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)자연으로에어프라이어종이호일(중형)</div>
+  <div class="tag-product">에어프라이어종이호일(중형)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809228337736"></div>
     <div class="tag-price-area">
@@ -9272,7 +9272,7 @@
     <span class="tag-farmer">씨에이치하모니</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)자연으로종이호일-찜받침전용-중</div>
+  <div class="tag-product">종이호일-찜받침전용-중</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809228330119"></div>
     <div class="tag-price-area">
@@ -9287,7 +9287,7 @@
     <span class="tag-farmer">씨에이치하모니</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)자연으로종이호일-프라이팬전용-중</div>
+  <div class="tag-product">종이호일-프라이팬전용-중</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809228330096"></div>
     <div class="tag-price-area">
@@ -9557,7 +9557,7 @@
     <span class="tag-farmer">에버코스(퓨어라벨)</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">퓨어라벨 세탁세제 리필 1L(프레쉬코튼)</div>
+  <div class="tag-product">세탁세제리필1L(프레쉬코튼)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8805566605346"></div>
     <div class="tag-price-area">
@@ -9572,7 +9572,7 @@
     <span class="tag-farmer">에버코스(퓨어라벨)</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">퓨어라벨1종주방세제리필(레몬향)</div>
+  <div class="tag-product">주방세제리필(레몬향)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8805566605308"></div>
     <div class="tag-price-area">
@@ -9587,7 +9587,7 @@
     <span class="tag-farmer">에버코스(퓨어라벨)</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">퓨어라벨비건주방세제리필(얼그레이향)</div>
+  <div class="tag-product">비건주방세제리필(얼그레이)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8805566605407"></div>
     <div class="tag-price-area">
@@ -9602,7 +9602,7 @@
     <span class="tag-farmer">에버코스(퓨어라벨)</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">퓨어라벨초고농축섬유유연제리필(프레쉬코튼)</div>
+  <div class="tag-product">섬유유연제리필(프레쉬코튼)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8805566605353"></div>
     <div class="tag-price-area">
@@ -10037,7 +10037,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">국산통볶음멸치가루(오가닉)</div>
+  <div class="tag-product">국산통볶음멸치가루</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809098091059"></div>
     <div class="tag-price-area">
@@ -10052,7 +10052,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">단팥모나카(오가닉)</div>
+  <div class="tag-product">단팥모나카</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809098091158"></div>
     <div class="tag-price-area">
@@ -10067,7 +10067,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">데스티네이션 유기농 인스턴트 커피(디카페인)(오가닉)</div>
+  <div class="tag-product">유기농인스턴트커피(디카페인)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=3700110005373"></div>
     <div class="tag-price-area">
@@ -10082,7 +10082,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">데스티네이션유기농셀렉션아라비카(오가닉)</div>
+  <div class="tag-product">유기농셀렉션아라비카</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=3700110055828"></div>
     <div class="tag-price-area">
@@ -10097,7 +10097,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">로비오스유기농통밀스파게티(오가닉)</div>
+  <div class="tag-product">로비오스유기농통밀스파게티</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8018699001293"></div>
     <div class="tag-price-area">
@@ -10112,7 +10112,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">리지스 그라놀라 피스타치오&amp;패션후르츠(오가닉)</div>
+  <div class="tag-product">그라놀라 피스타치오&amp;패션후르츠</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=5060092030601"></div>
     <div class="tag-price-area">
@@ -10127,7 +10127,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">매리디안유기농스무드땅콩버터(오가닉)</div>
+  <div class="tag-product">매리디안유기농스무드땅콩버터</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=5060132280201"></div>
     <div class="tag-price-area">
@@ -10142,7 +10142,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">명인유기쌀조청(오가닉)</div>
+  <div class="tag-product">명인유기쌀조청</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809098091813"></div>
     <div class="tag-price-area">
@@ -10157,7 +10157,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">발아옥수수차(오가닉)</div>
+  <div class="tag-product">발아옥수수차</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809098093145"></div>
     <div class="tag-price-area">
@@ -10172,7 +10172,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">밤모나카(오가닉)</div>
+  <div class="tag-product">밤모나카</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809098091165"></div>
     <div class="tag-price-area">
@@ -10187,7 +10187,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">사과과즙그대로사과주스(오가닉)</div>
+  <div class="tag-product">사과과즙그대로사과주스</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809098091417"></div>
     <div class="tag-price-area">
@@ -10202,7 +10202,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">솔레르로메로유기농엑스트라버진오일</div>
+  <div class="tag-product">유기농엑스트라버진오일</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8437004324177"></div>
     <div class="tag-price-area">
@@ -10217,7 +10217,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">스펙트럼유기농카놀라오일(오가닉)</div>
+  <div class="tag-product">스펙트럼유기농카놀라오일</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=022506137103"></div>
     <div class="tag-price-area">
@@ -10232,7 +10232,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">오뚜유기농다크초콜릿(오가닉)</div>
+  <div class="tag-product">오뚜유기농다크초콜릿</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8056450920100"></div>
     <div class="tag-price-area">
@@ -10247,7 +10247,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">오뚜유기농밀크초콜릿(오가닉)</div>
+  <div class="tag-product">오뚜유기농밀크초콜릿</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8056450920117"></div>
     <div class="tag-price-area">
@@ -10277,7 +10277,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">유기농과즙그대로포도주스(오가닉)</div>
+  <div class="tag-product">유기농과즙그대로포도주스</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809098094449"></div>
     <div class="tag-price-area">
@@ -10292,7 +10292,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">유기농듀럼밀세몰리나마카로니(오가닉)</div>
+  <div class="tag-product">유기농세몰리나마카로니</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8018699006809"></div>
     <div class="tag-price-area">
@@ -10307,7 +10307,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">유기농듀럼밀세몰리나스파게티(오가닉)</div>
+  <div class="tag-product">유기농세몰리나스파게티</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8018699005093"></div>
     <div class="tag-price-area">
@@ -10322,7 +10322,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">유기농듀럼밀세몰리나펜네(오가닉)</div>
+  <div class="tag-product">유기농듀럼밀세몰리나펜네</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8018699006816"></div>
     <div class="tag-price-area">
@@ -10337,7 +10337,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">유기농듀럼밀세몰리나푸질리(오가닉)</div>
+  <div class="tag-product">유기농듀럼밀세몰리나푸질리</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8018699006793"></div>
     <div class="tag-price-area">
@@ -10352,7 +10352,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">유기농딸기잼600(오가닉)</div>
+  <div class="tag-product">유기농딸기잼600</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809098090458"></div>
     <div class="tag-price-area">
@@ -10412,7 +10412,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">유기농생강캔디(오가닉)</div>
+  <div class="tag-product">유기농생강캔디</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=4014522180108"></div>
     <div class="tag-price-area">
@@ -10427,7 +10427,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">유기농오렌지주스(오가닉)</div>
+  <div class="tag-product">유기농오렌지주스</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809098091561"></div>
     <div class="tag-price-area">
@@ -10442,7 +10442,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">유기농유칼립투스멘톨향캔디(오가닉)</div>
+  <div class="tag-product">유기농유칼립투스멘톨향캔디</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=4014522180306"></div>
     <div class="tag-price-area">
@@ -10457,7 +10457,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">유기농체리생강캔디(오가닉)</div>
+  <div class="tag-product">유기농체리생강캔디</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=4014522180207"></div>
     <div class="tag-price-area">
@@ -10472,7 +10472,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">유기농통밀푸질리(오가닉)</div>
+  <div class="tag-product">유기농통밀푸질리</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8018699006137"></div>
     <div class="tag-price-area">
@@ -10487,7 +10487,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">유기쌀올리고당(오가닉)</div>
+  <div class="tag-product">유기쌀올리고당</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809098092285"></div>
     <div class="tag-price-area">
@@ -10502,7 +10502,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">유기현미식초(오가닉)</div>
+  <div class="tag-product">유기현미식초</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809098091714"></div>
     <div class="tag-price-area">
@@ -10517,7 +10517,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">이타자유기농황설탕(오가닉)</div>
+  <div class="tag-product">이타자유기농황설탕</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809098093916"></div>
     <div class="tag-price-area">
@@ -10532,7 +10532,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">일뉴트리멘토유기농아보카도오일(오가닉)</div>
+  <div class="tag-product">유기농아보카도오일</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8024749603126"></div>
     <div class="tag-price-area">
@@ -10547,7 +10547,7 @@
     <span class="tag-farmer">유기농산</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">일토리오네유기농화이트와인식초드레싱(오가닉)</div>
+  <div class="tag-product">유기농화이트와인식초드레싱</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8014347107126"></div>
     <div class="tag-price-area">
@@ -10592,7 +10592,7 @@
     <span class="tag-farmer">이남구</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">프로폴리스(스프레이)(뜰안농장)</div>
+  <div class="tag-product">프로폴리스스프레이</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=9005"></div>
     <div class="tag-price-area">
@@ -11732,7 +11732,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)(미색)쌀빨대20cm(개별포장)</div>
+  <div class="tag-product">쌀빨대20cm(개별포장)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=6020"></div>
     <div class="tag-price-area">
@@ -11747,7 +11747,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)곽티슈</div>
+  <div class="tag-product">곽티슈</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809129293100"></div>
     <div class="tag-price-area">
@@ -11762,7 +11762,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)나무클립종이볼펜(블랙)0.7mm</div>
+  <div class="tag-product">종이볼펜(블랙)0.7mm</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=6085"></div>
     <div class="tag-price-area">
@@ -11777,7 +11777,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)네트백매쉬백어깨끈(블랙)</div>
+  <div class="tag-product">네트백매쉬백어깨끈(블랙)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=5295"></div>
     <div class="tag-price-area">
@@ -11792,7 +11792,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)다용도면포(정사각)</div>
+  <div class="tag-product">다용도면포(정사각)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=1468"></div>
     <div class="tag-price-area">
@@ -11807,7 +11807,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)다회용스테인레스빨대12mm(직선)</div>
+  <div class="tag-product">스테인레스빨대12mm(직선)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=5244"></div>
     <div class="tag-price-area">
@@ -11822,7 +11822,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)대나무섬유다회용화장솜</div>
+  <div class="tag-product">대나무섬유다회용화장솜</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=5250"></div>
     <div class="tag-price-area">
@@ -11837,7 +11837,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)러버랩고무장갑(대형)아이보리</div>
+  <div class="tag-product">러버랩고무장갑(대형)아이보리</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=4682"></div>
     <div class="tag-price-area">
@@ -11852,7 +11852,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)러버랩고무장갑(대형)체리핑크</div>
+  <div class="tag-product">러버랩고무장갑(대형)체리핑크</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=4686"></div>
     <div class="tag-price-area">
@@ -11867,7 +11867,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)러버랩고무장갑(중형)체리핑크</div>
+  <div class="tag-product">러버랩고무장갑(중형)체리핑크</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=4685"></div>
     <div class="tag-price-area">
@@ -11882,7 +11882,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)마루키즈대나무칫솔(분홍모)</div>
+  <div class="tag-product">마루키즈대나무칫솔(분홍모)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809543841536"></div>
     <div class="tag-price-area">
@@ -11897,7 +11897,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)마루키즈대나무칫솔(하늘모)</div>
+  <div class="tag-product">마루키즈대나무칫솔(하늘모)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809543841543"></div>
     <div class="tag-price-area">
@@ -11912,7 +11912,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)마루키즈대나무칫솔(하양모)</div>
+  <div class="tag-product">마루키즈대나무칫솔(하양모)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809543841550"></div>
     <div class="tag-price-area">
@@ -11927,7 +11927,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)비건샴푸바(바오밥나무(보습))</div>
+  <div class="tag-product">비건샴푸바(바오밥/보습)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809586971719"></div>
     <div class="tag-price-area">
@@ -11942,7 +11942,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)산화생분해롤백(소형)</div>
+  <div class="tag-product">산화생분해롤백(소형)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809592730324"></div>
     <div class="tag-price-area">
@@ -11957,7 +11957,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)샘스캐빈클린설거지비누(녹차)</div>
+  <div class="tag-product">샘스캐빈클린설거지비누(녹차)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=6226"></div>
     <div class="tag-price-area">
@@ -11972,7 +11972,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)샘스캐빈클린설거지비누(오트밀)</div>
+  <div class="tag-product">설거지비누(오트밀)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=6222"></div>
     <div class="tag-price-area">
@@ -11987,7 +11987,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)생분해애견배변캡슐</div>
+  <div class="tag-product">생분해애견배변캡슐</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=5731"></div>
     <div class="tag-price-area">
@@ -12002,7 +12002,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)솝슬로우어성초세안비누</div>
+  <div class="tag-product">솝슬로우어성초세안비누</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809350380273"></div>
     <div class="tag-price-area">
@@ -12017,7 +12017,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)요리용주머니(중소)</div>
+  <div class="tag-product">요리용주머니(중소)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=1900"></div>
     <div class="tag-price-area">
@@ -12032,7 +12032,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)육수용면주머니</div>
+  <div class="tag-product">육수용면주머니</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=2030"></div>
     <div class="tag-price-area">
@@ -12047,7 +12047,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)자연으로수세미</div>
+  <div class="tag-product">자연으로수세미</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809228330874"></div>
     <div class="tag-price-area">
@@ -12062,7 +12062,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)자연으로종이호일-와이드</div>
+  <div class="tag-product">자연으로종이호일-와이드</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809228330423"></div>
     <div class="tag-price-area">
@@ -12077,7 +12077,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)장바구니빅사이즈(B)</div>
+  <div class="tag-product">장바구니빅사이즈(B)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=6283"></div>
     <div class="tag-price-area">
@@ -12092,7 +12092,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)장바구니빅사이즈(D)</div>
+  <div class="tag-product">장바구니빅사이즈(D)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=6284"></div>
     <div class="tag-price-area">
@@ -12107,7 +12107,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)장바구니빅사이즈(NO12)</div>
+  <div class="tag-product">장바구니빅사이즈(NO12)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=6282"></div>
     <div class="tag-price-area">
@@ -12122,7 +12122,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)천연수세미</div>
+  <div class="tag-product">천연수세미</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=5809"></div>
     <div class="tag-price-area">
@@ -12137,7 +12137,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)페이셜솝(구아줄렌올리브(건성민감))</div>
+  <div class="tag-product">페이셜솝(올리브/건성민감)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809586970217"></div>
     <div class="tag-price-area">
@@ -12152,7 +12152,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)페이셜솝(노니타마누(문제성피부))</div>
+  <div class="tag-product">페이셜솝(노니/문제성피부)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809586970231"></div>
     <div class="tag-price-area">
@@ -12167,7 +12167,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)페이셜솝(로얄젤리프로폴리스(영양))</div>
+  <div class="tag-product">페이셜솝(로얄젤리)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809586970323"></div>
     <div class="tag-price-area">
@@ -12182,7 +12182,7 @@
     <span class="tag-farmer">제로웨이스트존</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">제로)페이셜솝(비타민나무알파비사보롤(메이크업클렌징)</div>
+  <div class="tag-product">페이셜솝(메이크업클렌징)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809586970347"></div>
     <div class="tag-price-area">
@@ -12737,7 +12737,7 @@
     <span class="tag-farmer">지족매장</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">넛츠그린 제로스파클링 자몽블랙티</div>
+  <div class="tag-product">제로스파클링자몽블랙티</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809786200206"></div>
     <div class="tag-price-area">
@@ -14177,7 +14177,7 @@
     <span class="tag-farmer">지족매장</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">퓨어라벨비건주방세제(얼그레이향)</div>
+  <div class="tag-product">비건주방세제(얼그레이향)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8805566605391"></div>
     <div class="tag-price-area">
@@ -14192,7 +14192,7 @@
     <span class="tag-farmer">지족매장</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">퓨어라벨초고농축섬유유연제(프레쉬코튼)</div>
+  <div class="tag-product">섬유유연제(프레쉬코튼)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8805566605339"></div>
     <div class="tag-price-area">
@@ -15002,7 +15002,7 @@
     <span class="tag-farmer">키다리식품(주)</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">세이면)휴계소 일품 탱글 어묵우동</div>
+  <div class="tag-product">일품탱글어묵우동</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=88093938910140"></div>
     <div class="tag-price-area">
@@ -15017,7 +15017,7 @@
     <span class="tag-farmer">키다리식품(주)</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">세이면)휴계소 일품 탱글 어묵우동</div>
+  <div class="tag-product">일품탱글어묵우동</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=88093938910140"></div>
     <div class="tag-price-area">
@@ -17072,7 +17072,7 @@
     <span class="tag-farmer">하대목장</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">수제구운밤블루베리딸기요거트(묶음)</div>
+  <div class="tag-product">블루베리딸기요거트(묶음)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809435010606"></div>
     <div class="tag-price-area">
@@ -17882,7 +17882,7 @@
     <span class="tag-farmer">행복중심</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">노스테-순한썬블럭로션(SPF28)</div>
+  <div class="tag-product">순한썬블럭로션(SPF28)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809079730519"></div>
     <div class="tag-price-area">
@@ -18077,7 +18077,7 @@
     <span class="tag-farmer">행복중심</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">디쿱유기농냉압착엑스트라버진올리브유</div>
+  <div class="tag-product">유기농엑스트라버진올리브유</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8422767002011"></div>
     <div class="tag-price-area">
@@ -18197,7 +18197,7 @@
     <span class="tag-farmer">행복중심</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">바다로부터갓구운재래고향김(전장5매)</div>
+  <div class="tag-product">재래고향김(전장5매)</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809173433026"></div>
     <div class="tag-price-area">
@@ -18407,7 +18407,7 @@
     <span class="tag-farmer">행복중심</span>
     <span class="tag-logo">품앗이마을</span>
   </div>
-  <div class="tag-product">산다화-리뉴-모이스춰라이징-리포좀크림</div>
+  <div class="tag-product">산다화 리포좀크림</div>
   <div class="tag-bottom">
     <div class="tag-qr" data-qr="https://poomasi.org/tags.html?barcode=8809229843397"></div>
     <div class="tag-price-area">
@@ -20342,9 +20342,9 @@ function buildPages(tags) {
   }
   // 폰트 자동 축소 (1줄 기준)
   area.querySelectorAll('.tag-product').forEach(el => {
-    el.style.fontSize = '22pt';
-    let size = 22;
-    while (el.scrollWidth > el.clientWidth && size > 8) {
+    el.style.fontSize = '24pt';
+    let size = 24;
+    while (el.scrollWidth > el.clientWidth && size > 12) {
       size -= 0.5;
       el.style.fontSize = size + 'pt';
     }
