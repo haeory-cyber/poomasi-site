@@ -489,9 +489,17 @@ if (params.get('barcode')) {
   const bc = params.get('barcode');
   fetch(`${SB_URL}/rest/v1/products?barcode=eq.${encodeURIComponent(bc)}&select=product_name,farmer_name,unit,price,barcode&limit=1`, { headers: HEADERS })
     .then(r => r.json())
-    .then(rows => {
+    .then(async rows => {
       if (rows.length) {
         const p = rows[0];
+        // farmer_name이 없으면 pos_transactions에서 fallback
+        if (!p.farmer_name) {
+          try {
+            const pr = await fetch(`${SB_URL}/rest/v1/pos_transactions?item_name=like.*${encodeURIComponent(p.product_name)}&select=farmer_name&limit=1&order=sold_at.desc`, { headers: HEADERS });
+            const posRows = await pr.json();
+            if (posRows.length && posRows[0].farmer_name) p.farmer_name = posRows[0].farmer_name;
+          } catch(e) {}
+        }
         const dname = cleanProductName(p.product_name, p.farmer_name);
         document.getElementById('info-product').textContent = dname;
         document.getElementById('info-farmer').textContent = p.farmer_name ? '생산자: ' + p.farmer_name : '';
