@@ -1,0 +1,1850 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>품앗이생협 매장운영</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;700;900&family=Noto+Sans+KR:wght@300;400;500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --earth: #0f0b07;
+    --soil:  #1e1510;
+    --bark:  #2d1f14;
+    --amber: #c4803a;
+    --amber-light: #e8a55a;
+    --green: #3d5c35;
+    --green-light: #5a8a4e;
+    --cream: #f2ead8;
+    --dust:  #b8a88a;
+    --red:   #b83a2a;
+    --white: #faf7f0;
+    --panel: rgba(30,21,16,0.85);
+    --surface: rgba(45,31,20,0.8);
+    --border:  rgba(184,168,138,0.2);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--earth);
+    color: var(--cream);
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* noise texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* ── LOGIN ───────────────────────────────────────────── */
+  #login-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+  }
+
+  .login-box {
+    width: 100%;
+    max-width: 420px;
+    background: var(--soil);
+    border: 1px solid rgba(196,128,58,0.2);
+    padding: 3rem 2.5rem;
+    position: relative;
+  }
+
+  .login-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(to right, var(--amber), var(--green-light));
+  }
+
+  .login-brand {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    color: var(--amber);
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  .login-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--white);
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .login-sub {
+    font-size: 0.78rem;
+    color: var(--dust);
+    text-align: center;
+    letter-spacing: 0.05em;
+    margin-bottom: 2.5rem;
+  }
+
+  .form-group { margin-bottom: 1.2rem; }
+
+  .form-label {
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--dust);
+    margin-bottom: 0.5rem;
+  }
+
+  .form-input {
+    width: 100%;
+    background: rgba(15,11,7,0.8);
+    border: 1px solid rgba(196,128,58,0.2);
+    color: var(--cream);
+    padding: 0.85rem 1rem;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+
+  .form-input:focus { border-color: var(--amber); }
+
+  .btn-login {
+    width: 100%;
+    background: var(--amber);
+    color: var(--earth);
+    border: none;
+    padding: 1rem;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    margin-top: 0.5rem;
+    transition: background 0.3s;
+  }
+
+  .btn-login:hover { background: var(--amber-light); }
+  .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .login-error {
+    margin-top: 1rem;
+    padding: 0.8rem 1rem;
+    background: rgba(184,58,42,0.15);
+    border: 1px solid rgba(184,58,42,0.3);
+    color: #e07070;
+    font-size: 0.8rem;
+    display: none;
+  }
+
+  /* ── APP ────────────────────────────────────────────── */
+  #app { display: none; min-height: 100vh; }
+
+  /* Header */
+  .sticky-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+  }
+
+  .app-header {
+    background: rgba(15,11,7,0.95);
+    border-bottom: 1px solid rgba(196,128,58,0.15);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    backdrop-filter: blur(8px);
+    position: relative;
+  }
+
+  .app-logo {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--amber);
+    letter-spacing: 0.1em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+  }
+
+  .app-logo span {
+    color: var(--dust);
+    font-weight: 300;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .user-badge {
+    font-size: 0.72rem;
+    color: var(--dust);
+    letter-spacing: 0.05em;
+  }
+
+  .btn-logout {
+    background: none;
+    border: 1px solid rgba(196,128,58,0.3);
+    color: var(--dust);
+    padding: 0.35rem 0.9rem;
+    font-size: 0.72rem;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    transition: all 0.3s;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+
+  .btn-logout:hover { border-color: var(--amber); color: var(--amber); }
+
+  /* Tabs */
+  .tab-bar {
+    background: var(--soil);
+    border-bottom: 1px solid rgba(196,128,58,0.12);
+    display: flex;
+    padding: 0 2rem;
+    gap: 0;
+  }
+
+  .tab-btn {
+    background: none;
+    border: none;
+    color: var(--dust);
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.88rem;
+    font-weight: 400;
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid transparent;
+    transition: all 0.25s;
+    white-space: nowrap;
+  }
+
+  .tab-btn:hover { color: var(--cream); }
+
+  .tab-btn.active {
+    color: var(--amber);
+    border-bottom-color: var(--amber);
+    font-weight: 700;
+  }
+
+  /* Content area */
+  .tab-content {
+    padding: 2rem;
+    padding-top: 112px;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: none;
+  }
+
+  .tab-content.active { display: block; }
+
+  /* ── SECTION HEADER ─────────────────────────────────── */
+  .sec-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+
+  .sec-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--white);
+  }
+
+  .sec-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.3em;
+    color: var(--amber);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .sec-label::before {
+    content: '';
+    width: 1.5rem;
+    height: 1px;
+    background: var(--amber);
+  }
+
+  /* ── CARDS / PANELS ─────────────────────────────────── */
+  .card {
+    background: var(--panel);
+    border: 1px solid rgba(196,128,58,0.12);
+    padding: 1.5rem;
+    position: relative;
+  }
+
+  .card-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--amber);
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+  }
+
+  .btn-sm {
+    background: none;
+    border: 1px solid rgba(196,128,58,0.3);
+    color: var(--dust);
+    padding: 0.55rem 1rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: all 0.25s;
+  }
+
+  .btn-sm:hover { border-color: var(--amber); color: var(--amber); }
+
+  .btn-primary {
+    background: var(--amber);
+    border: none;
+    color: var(--earth);
+    padding: 0.6rem 1.2rem;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: background 0.25s;
+  }
+
+  .btn-primary:hover { background: var(--amber-light); }
+
+  .btn-del {
+    background: none;
+    border: none;
+    color: rgba(184,58,42,0.4);
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 0.2rem 0.4rem;
+    transition: color 0.2s;
+    flex-shrink: 0;
+  }
+
+  .btn-del:hover { color: var(--red); }
+
+  @media (max-width: 768px) {
+    .home-btn { display: none; }
+    .app-header { padding: 0 1rem; }
+    .tab-bar { padding: 0 0.5rem; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .tab-btn { padding: 0.85rem 0.8rem; font-size: 0.8rem; flex-shrink: 0; }
+  }
+
+  /* ── 이음SMS ────────────────────────────────────────── */
+  .sms-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  @media (max-width: 900px) { .sms-layout { grid-template-columns: 1fr; } }
+
+  .sms-compose textarea {
+    width: 100%;
+    background: rgba(15,11,7,0.8);
+    border: 1px solid rgba(196,128,58,0.2);
+    color: var(--cream);
+    padding: 1rem;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.88rem;
+    line-height: 1.7;
+    resize: vertical;
+    min-height: 140px;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+
+  .sms-compose textarea:focus { border-color: var(--amber); }
+
+  .sms-char {
+    font-size: 0.7rem;
+    color: var(--dust);
+    text-align: right;
+    margin-top: 0.3rem;
+  }
+
+  .sms-char.over { color: var(--red); }
+
+  #farmer-select {
+    width: 100%;
+    background: rgba(15,11,7,0.8);
+    border: 1px solid rgba(196,128,58,0.2);
+    color: var(--cream);
+    padding: 0.5rem;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.85rem;
+    outline: none;
+    cursor: pointer;
+  }
+
+  #farmer-select option { background: #1a1510; }
+  #farmer-select option:checked { background: rgba(196,128,58,0.3); }
+
+  .customer-cb {
+    accent-color: var(--amber);
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  #sms-result-list { font-size: 0.82rem; }
+
+  /* ── LOADING / EMPTY ────────────────────────────────── */
+  .loading-row {
+    text-align: center;
+    padding: 3rem;
+    color: var(--dust);
+    font-size: 0.82rem;
+    letter-spacing: 0.1em;
+  }
+
+  .empty-row {
+    text-align: center;
+    padding: 2.5rem;
+    color: rgba(184,168,138,0.35);
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+  }
+
+  /* 홈 버튼 */
+  .home-btn {
+    position: fixed;
+    top: 16px;
+    left: 1rem;
+    z-index: 200;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.72rem;
+    font-weight: 400;
+    color: var(--dust);
+    text-decoration: none;
+    letter-spacing: 0.1em;
+    padding: 0.35rem 0.9rem;
+    background: none;
+    border: 1px solid rgba(196,128,58,0.3);
+    transition: all 0.3s;
+  }
+  .home-btn:hover {
+    border-color: var(--amber);
+    color: var(--amber);
+  }
+
+  /* toast */
+  #toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--bark);
+    border: 1px solid rgba(196,128,58,0.3);
+    color: var(--cream);
+    padding: 0.8rem 1.4rem;
+    font-size: 0.82rem;
+    letter-spacing: 0.05em;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+  }
+
+  #toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── 농가 더보기 버튼 ────────────────────────────────── */
+  .btn-farmer-toggle {
+    background: transparent;
+    border: 1px solid var(--amber);
+    color: var(--amber);
+    padding: 0.3rem 1rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: all 0.25s;
+  }
+
+  .btn-farmer-toggle:hover {
+    border-color: var(--amber);
+    background: rgba(196,128,58,0.08);
+    color: var(--amber-light);
+  }
+
+  /* ── 이벤트 등록 ─────────────────────────────────── */
+  .evt-type-row, .evt-period-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .evt-type-btn, .evt-period-btn {
+    background: none;
+    border: 1px solid rgba(196,128,58,0.25);
+    color: var(--dust);
+    padding: 0.45rem 1rem;
+    font-size: 0.78rem;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+  }
+
+  .evt-type-btn:hover, .evt-period-btn:hover {
+    border-color: var(--amber); color: var(--amber);
+  }
+
+  .evt-type-btn.selected {
+    background: var(--amber); color: var(--earth);
+    border-color: var(--amber); font-weight: 700;
+  }
+
+  .evt-period-btn.selected {
+    background: rgba(196,128,58,0.15);
+    border-color: var(--amber); color: var(--amber-light);
+  }
+
+  .evt-list-item {
+    display: flex; align-items: flex-start;
+    gap: 1rem; padding: 0.9rem 1rem;
+    border-bottom: 1px solid rgba(184,168,138,0.06);
+  }
+
+  .evt-list-item:hover { background: rgba(196,128,58,0.03); }
+
+  .evt-badge {
+    display: inline-block; padding: 0.15rem 0.6rem;
+    font-size: 0.62rem; letter-spacing: 0.1em;
+    background: rgba(196,128,58,0.15); color: var(--amber-light);
+    flex-shrink: 0; margin-top: 2px;
+  }
+
+  .evt-content-text { flex: 1; font-size: 0.88rem; color: var(--cream); line-height: 1.4; }
+  .evt-meta { font-size: 0.68rem; color: var(--dust); margin-top: 0.3rem; }
+</style>
+</head>
+<body>
+
+<a class="home-btn" href="work.html">&larr; 경영판</a>
+
+<!-- ── LOGIN ─────────────────────────────────────────────── -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-brand">품앗이소비자생활협동조합</div>
+    <div class="login-title">매장운영</div>
+    <div class="login-sub">STORE OPERATIONS</div>
+
+    <div class="form-group">
+      <label class="form-label" for="email">이메일</label>
+      <input class="form-input" type="email" id="email" placeholder="admin@poomasi.org" autocomplete="email">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="password">비밀번호</label>
+      <input class="form-input" type="password" id="password" placeholder="••••••" autocomplete="current-password">
+    </div>
+
+    <button class="btn-login" id="login-btn" onclick="doLogin()">로그인</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- ── APP ───────────────────────────────────────────────── -->
+<div id="app">
+  <div class="sticky-nav">
+    <header class="app-header">
+      <div class="app-logo" style="position:absolute;left:50%;transform:translateX(-50%);">매장운영</div>
+      <div class="header-right" style="margin-left:auto;">
+        <span class="user-badge" id="user-email"></span>
+        <button class="btn-logout" onclick="doLogout()">로그아웃</button>
+      </div>
+    </header>
+
+    <nav class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('suppliers', event)">발주</button>
+      <button class="tab-btn"       onclick="switchTab('sms', event)">이음SMS</button>
+      <button class="tab-btn"       onclick="switchTab('event', event)">이벤트등록</button>
+      <button class="tab-btn"       onclick="switchTab('attend', event)">출퇴근부</button>
+    </nav>
+  </div>
+
+  <!-- ══ TAB: 발주 ══ -->
+  <section class="tab-content active" id="tab-suppliers">
+    <div class="sec-header">
+      <div>
+        <div class="sec-label">ORDER</div>
+        <div class="sec-title">발주 관리</div>
+      </div>
+      <button class="btn-sm" onclick="loadUnifiedOrders()">↻ 새로고침</button>
+    </div>
+
+    <!-- 상태 필터 버튼 -->
+    <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center;">
+      <button id="ofilter-wait" class="btn-sm" style="border:1px solid var(--amber);color:var(--amber);font-weight:600;padding:0.45rem 1rem;font-size:0.82rem;" onclick="setOrderFilter('대기')">
+        요청대기 <span id="ofilter-wait-count" style="font-weight:700;margin-left:0.3rem;">0</span>
+      </button>
+      <button id="ofilter-done" class="btn-sm" style="padding:0.45rem 1rem;font-size:0.82rem;" onclick="setOrderFilter('발주완료')">
+        발주완료 <span id="ofilter-done-count" style="font-weight:700;margin-left:0.3rem;">0</span>
+      </button>
+      <button id="ofilter-all" class="btn-sm" style="padding:0.45rem 1rem;font-size:0.82rem;" onclick="setOrderFilter('전체')">
+        전체 <span id="ofilter-all-count" style="font-weight:700;margin-left:0.3rem;">0</span>
+      </button>
+    </div>
+
+    <!-- 거래처별 카드 영역 -->
+    <div id="unified-order-cards"><div class="loading-row">로딩 중…</div></div>
+
+    <!-- ── 발주처 관리 (접힌 섹션) ── -->
+    <div style="margin-top:2rem;border-top:1px solid rgba(196,128,58,0.15);padding-top:1rem;">
+      <div onclick="toggleSupplierSection()" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:0.7rem 1rem;background:var(--surface);border-radius:6px;">
+        <span style="font-size:0.88rem;font-weight:600;color:var(--cream);">발주처 관리</span>
+        <span id="supplier-section-arrow" style="color:var(--dust);font-size:0.8rem;transition:transform 0.2s;">▼</span>
+      </div>
+      <div id="supplier-section-body" style="display:none;margin-top:0.8rem;">
+        <div class="sec-header" style="margin-bottom:1rem;">
+          <div></div>
+          <button class="btn-sm" onclick="showAddSupplier()">+ 추가</button>
+        </div>
+
+        <!-- 추가 폼 (기본 숨김) -->
+        <div class="card" id="supplier-add-form" style="display:none;margin-bottom:1.5rem;">
+          <div class="card-title">새 발주처</div>
+          <div style="margin-bottom:1rem;">
+            <label class="form-label">POS 농가에서 검색</label>
+            <div style="display:flex;gap:0.5rem;">
+              <input class="form-input" id="sup-farmer-search" placeholder="농가명 검색…" style="padding:0.55rem 0.8rem;font-size:0.85rem;flex:1;">
+              <button class="btn-sm" onclick="searchFarmerForSupplier()">검색</button>
+            </div>
+            <div id="sup-farmer-results" style="margin-top:0.4rem;max-height:120px;overflow-y:auto;display:none;background:rgba(61,56,48,0.5);border:1px solid rgba(196,128,58,0.15);border-radius:6px;padding:0.4rem;"></div>
+            <div style="font-size:0.72rem;color:var(--dust);margin-top:0.3rem;">POS에 없으면 아래에 직접 입력하세요</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+            <div>
+              <label class="form-label">업체명 *</label>
+              <input class="form-input" id="sup-name" placeholder="업체명" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+            </div>
+            <div>
+              <label class="form-label">전화번호</label>
+              <input class="form-input" id="sup-phone" placeholder="010-0000-0000" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+            </div>
+            <div>
+              <label class="form-label">이메일</label>
+              <input class="form-input" id="sup-email" placeholder="example@email.com" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+            </div>
+            <div>
+              <label class="form-label">메모</label>
+              <input class="form-input" id="sup-note" placeholder="담당자명 등" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+            </div>
+            <div>
+              <label class="form-label">카카오 ID</label>
+              <input class="form-input" id="sup-kakao" placeholder="카카오톡 ID (선택)" style="padding:0.55rem 0.8rem;font-size:0.85rem;">
+            </div>
+          </div>
+          <div style="display:flex;gap:0.5rem;">
+            <button class="btn-primary" onclick="addSupplier()">저장</button>
+            <button class="btn-sm" onclick="hideAddSupplier()">취소</button>
+          </div>
+        </div>
+
+        <!-- 목록 -->
+        <div class="card">
+          <div id="supplier-list"><div class="loading-row">로딩 중…</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ TAB: 이음SMS ═════════════════════════════════════ -->
+  <section class="tab-content" id="tab-sms">
+    <div class="sec-header">
+      <div>
+        <div class="sec-label">이음SMS</div>
+        <div class="sec-title">농가-단골 문자 발송</div>
+      </div>
+    </div>
+
+    <div class="sms-layout">
+      <!-- 왼쪽: 농가 선택 + 단골 목록 -->
+      <div>
+        <!-- 농가 선택 -->
+        <div class="card" style="margin-bottom:1.5rem;">
+          <div class="card-title">1. 농가 선택</div>
+          <input type="text" id="farmer-search" class="form-input" placeholder="농가명 검색…" oninput="filterFarmers()" style="margin-bottom:0.7rem;padding:0.55rem 0.8rem;font-size:0.85rem;">
+          <select id="farmer-select" size="7">
+            <option value="">로딩 중…</option>
+          </select>
+          <button class="btn-primary" style="width:100%;margin-top:0.8rem;" onclick="loadTopCustomers()">단골 조회 ▶</button>
+        </div>
+
+        <!-- 단골 체크리스트 -->
+        <div class="card" id="customer-card" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;">
+            <div class="card-title" style="margin:0;">2. 단골 선택</div>
+            <button class="btn-sm" onclick="toggleSelectAll()">전체선택/해제</button>
+          </div>
+          <div id="customer-list" style="max-height:380px;overflow-y:auto;"></div>
+        </div>
+      </div>
+
+      <!-- 오른쪽: 문자 작성 + 발송 -->
+      <div>
+        <div class="card sms-compose">
+          <div class="card-title">3. 문자 작성 및 발송</div>
+
+          <div style="font-size:0.7rem;letter-spacing:0.12em;color:var(--dust);margin-bottom:0.3rem;">선택 인원</div>
+          <div id="selected-count" style="font-size:1.1rem;color:var(--amber);font-weight:600;margin-bottom:1rem;">0명 선택</div>
+
+          <textarea id="sms-message" placeholder="안녕하세요! {농가명} 농산물이 입고되었습니다…" maxlength="90" oninput="updateCharCount()"></textarea>
+          <div class="sms-char" id="sms-char-count">0 / 90</div>
+
+          <!-- API 설정 (접이식) -->
+          <details style="margin-top:1rem;">
+            <summary style="font-size:0.72rem;letter-spacing:0.1em;color:var(--dust);cursor:pointer;padding:0.4rem 0;">⚙ Solapi API 설정</summary>
+            <div style="margin-top:0.6rem;display:flex;flex-direction:column;gap:0.5rem;">
+              <input class="form-input" type="password" id="solapi-key" placeholder="API Key" style="padding:0.5rem 0.8rem;font-size:0.82rem;">
+              <input class="form-input" type="password" id="solapi-secret" placeholder="API Secret" style="padding:0.5rem 0.8rem;font-size:0.82rem;">
+              <input class="form-input" type="text" id="solapi-from" placeholder="발신번호" value="0427160019" style="padding:0.5rem 0.8rem;font-size:0.82rem;">
+              <button class="btn-sm" onclick="saveApiConfig()" style="align-self:flex-start;">저장 (localStorage)</button>
+            </div>
+          </details>
+
+          <button class="btn-primary" style="width:100%;margin-top:1rem;" onclick="sendSms()">📨 발송</button>
+
+          <!-- 발송 결과 -->
+          <div id="sms-result" style="margin-top:1rem;display:none;">
+            <div class="card-title" style="margin-bottom:0.5rem;">발송 결과</div>
+            <div id="sms-result-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ TAB: 이벤트 등록 ═════════════════════════════════ -->
+  <section class="tab-content" id="tab-event">
+    <div class="sec-header">
+      <div>
+        <div class="sec-label">EVENTS</div>
+        <div class="sec-title">이벤트 등록</div>
+      </div>
+    </div>
+
+    <!-- 등록 폼 -->
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title">새 이벤트</div>
+
+      <div style="margin-bottom:0.5rem;font-size:0.7rem;letter-spacing:0.15em;color:var(--dust);">유형</div>
+      <div class="evt-type-row">
+        <button class="evt-type-btn selected" data-type="신규입점" onclick="selectEvtType(this)">신규입점</button>
+        <button class="evt-type-btn" data-type="공동구매" onclick="selectEvtType(this)">공동구매</button>
+        <button class="evt-type-btn" data-type="할인" onclick="selectEvtType(this)">할인</button>
+        <button class="evt-type-btn" data-type="공지" onclick="selectEvtType(this)">공지</button>
+      </div>
+
+      <div style="margin-bottom:0.5rem;font-size:0.7rem;letter-spacing:0.15em;color:var(--dust);">내용</div>
+      <textarea id="evt-content" placeholder="예: 홍성 유기농 토마토 첫 입점"
+        style="width:100%;background:rgba(15,11,7,0.8);border:1px solid rgba(196,128,58,0.2);color:var(--cream);padding:0.9rem 1rem;font-family:'Noto Sans KR',sans-serif;font-size:0.88rem;line-height:1.6;resize:vertical;min-height:90px;outline:none;margin-bottom:1.2rem;transition:border-color .3s;"
+        onfocus="this.style.borderColor='var(--amber)'" onblur="this.style.borderColor='rgba(196,128,58,0.2)'"></textarea>
+
+      <div style="margin-bottom:0.5rem;font-size:0.7rem;letter-spacing:0.15em;color:var(--dust);">기간</div>
+      <div class="evt-period-row">
+        <button class="evt-period-btn selected" data-period="today" onclick="selectEvtPeriod(this)">오늘만</button>
+        <button class="evt-period-btn" data-period="week" onclick="selectEvtPeriod(this)">이번주</button>
+        <button class="evt-period-btn" data-period="month" onclick="selectEvtPeriod(this)">이번달</button>
+        <button class="evt-period-btn" data-period="always" onclick="selectEvtPeriod(this)">상시</button>
+      </div>
+
+      <button class="btn-primary" style="width:100%;margin-top:0.5rem;" onclick="submitEvent()">등록</button>
+    </div>
+
+    <!-- 활성 이벤트 목록 -->
+    <div class="card">
+      <div class="card-title">현재 활성 이벤트</div>
+      <div id="evt-list"><div class="loading-row">로딩 중…</div></div>
+    </div>
+  </section>
+
+  <!-- ══ TAB: 출퇴근부 ══ -->
+  <section class="tab-content" id="tab-attend">
+    <div class="sec-header">
+      <div>
+        <div class="sec-label">ATTENDANCE</div>
+        <div class="sec-title">출퇴근부</div>
+      </div>
+      <div style="display:flex;gap:0.5rem;align-items:center;">
+        <select id="attend-store-filter" onchange="loadAttendance()" style="padding:0.4rem 0.6rem;background:var(--surface);color:var(--cream);border:1px solid var(--border);border-radius:4px;font-size:0.8rem;">
+          <option value="">전체 매장</option>
+          <option value="지족점">지족점</option>
+          <option value="관저점">관저점</option>
+        </select>
+        <input type="date" id="attend-date-filter" onchange="loadAttendance()" style="padding:0.4rem 0.6rem;background:var(--surface);color:var(--cream);border:1px solid var(--border);border-radius:4px;font-size:0.8rem;">
+      </div>
+    </div>
+
+    <!-- 오늘 요약 -->
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="card-title">오늘 출근 현황</div>
+      <div id="attend-summary" style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:0.5rem;">
+        <div class="loading-row">로딩 중…</div>
+      </div>
+    </div>
+
+    <!-- 출퇴근 기록 테이블 -->
+    <div class="card">
+      <div class="card-title">출퇴근 기록</div>
+      <div style="overflow-x:auto;margin-top:0.5rem;">
+        <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border);color:var(--dust);text-align:left;">
+              <th style="padding:0.5rem 0.4rem;">이름</th>
+              <th style="padding:0.5rem 0.4rem;">매장</th>
+              <th style="padding:0.5rem 0.4rem;">날짜</th>
+              <th style="padding:0.5rem 0.4rem;">출근</th>
+              <th style="padding:0.5rem 0.4rem;">퇴근</th>
+              <th style="padding:0.5rem 0.4rem;">근무(분)</th>
+            </tr>
+          </thead>
+          <tbody id="attend-tbody">
+            <tr><td colspan="6" class="loading-row">로딩 중…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 월간 급여 요약 -->
+    <div class="card" style="margin-top:1rem;">
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+        월간 급여 요약
+        <select id="attend-month-filter" onchange="loadMonthlySummary()" style="padding:0.3rem 0.5rem;background:var(--surface);color:var(--cream);border:1px solid var(--border);border-radius:4px;font-size:0.78rem;"></select>
+      </div>
+      <div style="overflow-x:auto;margin-top:0.5rem;">
+        <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border);color:var(--dust);text-align:left;">
+              <th style="padding:0.5rem 0.4rem;">이름</th>
+              <th style="padding:0.5rem 0.4rem;">매장</th>
+              <th style="padding:0.5rem 0.4rem;">출근일수</th>
+              <th style="padding:0.5rem 0.4rem;">총근무(시간)</th>
+              <th style="padding:0.5rem 0.4rem;">예상급여</th>
+            </tr>
+          </thead>
+          <tbody id="attend-monthly-tbody">
+            <tr><td colspan="5" class="loading-row">로딩 중…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── Supabase 초기화 ──────────────────────────────────────
+const SUPABASE_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRuaXZoY3BqcmhrbWVrY2ZxZ2RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NTc5MjMsImV4cCI6MjA4NzIzMzkyM30.yJ0_4Sg78p7oY89q7go3ab26PCPHnk1Q4ObZJIZEULA';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ── 인증 ─────────────────────────────────────────────────
+async function doLogin() {
+  const email = document.getElementById('email').value.trim();
+  const pw    = document.getElementById('password').value;
+  const btn   = document.getElementById('login-btn');
+  const err   = document.getElementById('login-error');
+
+  err.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = '로그인 중…';
+
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
+
+  if (error) {
+    err.textContent = '로그인 실패: ' + (error.message || '이메일/비밀번호를 확인하세요.');
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '로그인';
+    return;
+  }
+
+  showApp(data.user);
+}
+
+function showApp(user) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('user-email').textContent = user.email;
+  initApp();
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('password').value = '';
+}
+
+// 세션 복원
+sb.auth.getSession().then(({ data: { session } }) => {
+  if (session) showApp(session.user);
+});
+
+// ── 탭 전환 ──────────────────────────────────────────────
+const TAB_IDS = { suppliers: 'tab-suppliers', sms: 'tab-sms', event: 'tab-event', attend: 'tab-attend' };
+
+function adjustContentPadding() {
+  const nav = document.querySelector('.sticky-nav');
+  if (!nav) return;
+  const h = nav.offsetHeight;
+  document.querySelectorAll('.tab-content').forEach(el => {
+    el.style.paddingTop = (h + 16) + 'px';
+  });
+}
+
+function switchTab(key, evt) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById(TAB_IDS[key]).classList.add('active');
+  if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
+  onTabLoad(key);
+  requestAnimationFrame(adjustContentPadding);
+}
+
+function onTabLoad(key) {
+  if (key === 'sms') loadFarmerList();
+  if (key === 'attend') { initAttendTab(); loadAttendance(); loadMonthlySummary(); }
+  if (key === 'suppliers') { if (typeof loadUnifiedOrders === 'function') loadUnifiedOrders(); }
+}
+
+// ── 공통 유틸 ─────────────────────────────────────────────
+function toast(msg, duration = 2800) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), duration);
+}
+
+function fmtKrw(n) {
+  return Number(n).toLocaleString('ko-KR');
+}
+
+function todayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+// ── 앱 초기화 ─────────────────────────────────────────────
+function initApp() {
+  // SMS
+  loadFarmerList();
+  loadApiConfig();
+
+  // 이벤트
+  loadEvents();
+
+  // 발주처
+  loadSuppliers();
+
+  // 발주
+  loadUnifiedOrders();
+
+  // QR 태그 스캔 → 발주 자동 진입
+  const params = new URLSearchParams(location.search);
+  const qrProduct = params.get('qr_order');
+  if (qrProduct) {
+    switchTab('suppliers', null);
+    document.querySelectorAll('.tab-btn').forEach(b => { if (b.textContent.includes('발주')) b.classList.add('active'); });
+  }
+
+  requestAnimationFrame(adjustContentPadding);
+}
+
+// ══ 이음SMS ════════════════════════════════════════════
+
+let allFarmerNames = [];
+let customerPool   = []; // [{member_id, member_name, purchase_count, phone}]
+
+async function loadFarmerList() {
+  try {
+    // RPC로 DISTINCT farmer_name 한 번에 가져오기
+    const { data, error } = await sb.rpc('get_farmer_names');
+    if (error) throw error;
+    const farmers = (data || []).map(r => r.farmer_name).filter(Boolean);
+    allFarmerNames = farmers;
+    renderFarmerSelect(farmers);
+  } catch(e) {
+    document.getElementById('farmer-select').innerHTML = '<option value="">로드 실패</option>';
+    console.error('loadFarmerList error:', e);
+  }
+}
+
+function renderFarmerSelect(names) {
+  const sel = document.getElementById('farmer-select');
+  sel.innerHTML = names.length
+    ? names.map(n => `<option value="${n}">${n}</option>`).join('')
+    : '<option value="">농가 없음</option>';
+}
+
+function filterFarmers() {
+  const q = document.getElementById('farmer-search').value.trim().toLowerCase();
+  renderFarmerSelect(q ? allFarmerNames.filter(n => n.toLowerCase().includes(q)) : allFarmerNames);
+}
+
+async function loadTopCustomers() {
+  const farmerName = document.getElementById('farmer-select').value;
+  if (!farmerName) { toast('농가를 선택하세요.'); return; }
+
+  const card = document.getElementById('customer-card');
+  const list = document.getElementById('customer-list');
+  card.style.display = '';
+  list.innerHTML = '<div class="loading-row">조회 중…</div>';
+
+  try {
+    // 3회 이상 구매, 상위 300명
+    const { data: fm, error: e1 } = await sb
+      .from('farmer_members')
+      .select('member_id,member_name,purchase_count')
+      .eq('farmer_name', farmerName)
+      .gte('purchase_count', 3)
+      .order('purchase_count', { ascending: false })
+      .limit(300);
+    if (e1) throw e1;
+    if (!fm || !fm.length) { list.innerHTML = '<div class="empty-row">단골 없음</div>'; return; }
+
+    // 전화번호 조회
+    const memberIds = fm.map(r => r.member_id);
+    const { data: members, error: e2 } = await sb
+      .from('members')
+      .select('member_id,member_name,phone')
+      .in('member_id', memberIds);
+    if (e2) throw e2;
+    const phoneMap = Object.fromEntries((members || []).map(m => [m.member_id, m.phone || '']));
+
+    customerPool = fm.map(r => ({
+      member_id:      r.member_id,
+      member_name:    r.member_name || r.member_id,
+      purchase_count: r.purchase_count,
+      phone:          phoneMap[r.member_id] || '',
+    }));
+
+    renderCustomerList();
+  } catch(e) {
+    list.innerHTML = `<div class="empty-row">오류: ${e.message}</div>`;
+  }
+}
+
+function renderCustomerList() {
+  const list = document.getElementById('customer-list');
+  list.innerHTML = customerPool.map((c, i) => `
+    <label style="display:flex;align-items:center;gap:0.6rem;padding:0.5rem 0;border-bottom:1px solid rgba(184,168,138,0.06);cursor:pointer;">
+      <input type="checkbox" class="customer-cb" data-idx="${i}" checked onchange="updateSelectedCount()">
+      <span style="flex:1;font-size:0.83rem;color:var(--cream);">${c.member_name}</span>
+      <span style="font-size:0.72rem;color:var(--dust);min-width:32px;text-align:right;">${c.purchase_count}회</span>
+      <span style="font-size:0.72rem;color:var(--amber-light);min-width:105px;text-align:right;">${c.phone || '번호없음'}</span>
+    </label>
+  `).join('');
+  updateSelectedCount();
+}
+
+function toggleSelectAll() {
+  const cbs = [...document.querySelectorAll('.customer-cb')];
+  const allChecked = cbs.every(cb => cb.checked);
+  cbs.forEach(cb => { cb.checked = !allChecked; });
+  updateSelectedCount();
+}
+
+function updateSelectedCount() {
+  const n = document.querySelectorAll('.customer-cb:checked').length;
+  document.getElementById('selected-count').textContent = `${n}명 선택`;
+}
+
+function updateCharCount() {
+  const msg = document.getElementById('sms-message').value;
+  const el  = document.getElementById('sms-char-count');
+  el.textContent = msg.length + ' / 90';
+  el.className = 'sms-char' + (msg.length >= 90 ? ' over' : '');
+}
+
+function saveApiConfig() {
+  localStorage.setItem('solapi_key',    document.getElementById('solapi-key').value.trim());
+  localStorage.setItem('solapi_secret', document.getElementById('solapi-secret').value.trim());
+  localStorage.setItem('solapi_from',   document.getElementById('solapi-from').value.trim());
+  toast('API 설정 저장됨');
+}
+
+function loadApiConfig() {
+  document.getElementById('solapi-key').value    = localStorage.getItem('solapi_key')    || '';
+  document.getElementById('solapi-secret').value = localStorage.getItem('solapi_secret') || '';
+  document.getElementById('solapi-from').value   = localStorage.getItem('solapi_from')   || '0427160019';
+}
+
+async function hmacSha256Hex(secret, message) {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig  = await crypto.subtle.sign('HMAC', key, enc.encode(message));
+  return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function sendSms() {
+  const message = document.getElementById('sms-message').value.trim();
+  if (!message) { toast('문자 내용을 입력하세요.'); return; }
+
+  const checked = [...document.querySelectorAll('.customer-cb:checked')];
+  if (!checked.length) { toast('수신자를 선택하세요.'); return; }
+
+  const apiKey    = localStorage.getItem('solapi_key')    || document.getElementById('solapi-key').value.trim();
+  const apiSecret = localStorage.getItem('solapi_secret') || document.getElementById('solapi-secret').value.trim();
+  const fromNum   = localStorage.getItem('solapi_from')   || document.getElementById('solapi-from').value.trim();
+
+  if (!apiKey || !apiSecret || !fromNum) {
+    toast('⚙ Solapi API 설정을 먼저 입력·저장하세요.');
+    return;
+  }
+
+  const recipients = checked
+    .map(cb => customerPool[+cb.dataset.idx])
+    .filter(c => c && c.phone);
+
+  if (!recipients.length) { toast('전화번호가 있는 수신자가 없습니다.'); return; }
+
+  const resDiv  = document.getElementById('sms-result');
+  const resList = document.getElementById('sms-result-list');
+  resDiv.style.display = '';
+  resList.innerHTML = '<div class="loading-row">발송 중…</div>';
+
+  const date = new Date().toISOString();
+  const salt = Math.random().toString(36).substring(2, 14);
+  const sig  = await hmacSha256Hex(apiSecret, date + salt);
+  const auth = `HMAC-SHA256 apiKey=${apiKey}, date=${date}, salt=${salt}, signature=${sig}`;
+
+  const messages = recipients.map(c => ({
+    to:   c.phone.replace(/-/g, ''),
+    from: fromNum.replace(/-/g, ''),
+    text: message,
+  }));
+
+  try {
+    const resp = await fetch('https://api.solapi.com/messages/v4/send-many', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': auth },
+      body: JSON.stringify({ messages }),
+    });
+    const result = await resp.json();
+
+    if (!resp.ok) {
+      resList.innerHTML = `<div class="empty-row" style="color:var(--red);">오류: ${result.message || resp.status}</div>`;
+      return;
+    }
+
+    const successCount = result.count?.success ?? result.groupInfo?.count?.total ?? recipients.length;
+    const failCount    = result.count?.fail    ?? 0;
+
+    resList.innerHTML = `
+      <div style="padding:0.6rem 0;font-size:0.85rem;">
+        <span style="color:#4caf50;">✓ 성공 ${successCount}건</span>
+        ${failCount ? `&nbsp;·&nbsp;<span style="color:var(--red);">✗ 실패 ${failCount}건</span>` : ''}
+      </div>
+      <div style="font-size:0.72rem;color:var(--dust);line-height:1.9;">
+        ${recipients.map(c => `${c.member_name} (${c.phone})`).join('<br>')}
+      </div>`;
+
+    toast(`${successCount}명 발송 완료`);
+
+    await sb.from('sms_history').insert({
+      member_ids: recipients.map(c => c.member_id),
+      message,
+      sender: fromNum,
+    });
+
+  } catch(e) {
+    resList.innerHTML = `<div class="empty-row" style="color:var(--red);">네트워크 오류: ${e.message}</div>`;
+  }
+}
+
+// ══ 이벤트 등록 ════════════════════════════════════════
+
+function selectEvtType(btn) {
+  document.querySelectorAll('.evt-type-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function selectEvtPeriod(btn) {
+  document.querySelectorAll('.evt-period-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function getEvtExpires(period) {
+  const d = new Date();
+  if (period === 'today') return d.toISOString().slice(0, 10);
+  if (period === 'week')  { d.setDate(d.getDate() + (7 - d.getDay() || 7)); return d.toISOString().slice(0, 10); }
+  if (period === 'month') { return new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().slice(0, 10); }
+  return null;
+}
+
+async function submitEvent() {
+  const typeBtn   = document.querySelector('.evt-type-btn.selected');
+  const periodBtn = document.querySelector('.evt-period-btn.selected');
+  const content   = document.getElementById('evt-content').value.trim();
+  if (!content) { toast('내용을 입력하세요.'); return; }
+  const type       = typeBtn   ? typeBtn.dataset.type   : '공지';
+  const period     = periodBtn ? periodBtn.dataset.period : 'always';
+  const expires_at = getEvtExpires(period);
+  const { error } = await sb.from('events').insert({ type, content, expires_at });
+  if (error) { toast('저장 실패: ' + error.message); return; }
+  document.getElementById('evt-content').value = '';
+  toast('이벤트 등록됨 ✓');
+  loadEvents();
+}
+
+async function loadEvents() {
+  const wrap  = document.getElementById('evt-list');
+  if (!wrap) return;
+  const today = new Date().toISOString().slice(0, 10);
+  const { data, error } = await sb.from('events')
+    .select('*')
+    .eq('is_active', true)
+    .or('expires_at.is.null,expires_at.gte.' + today)
+    .order('created_at', { ascending: false });
+  if (error || !data || data.length === 0) {
+    wrap.innerHTML = '<div class="empty-row">활성 이벤트 없음</div>';
+    return;
+  }
+  wrap.innerHTML = data.map(ev => `
+    <div class="evt-list-item">
+      <span class="evt-badge">${ev.type}</span>
+      <div style="flex:1;">
+        <div class="evt-content-text">${ev.content}</div>
+        <div class="evt-meta">${ev.created_at.slice(0,10)}${ev.expires_at ? ' ~ ' + ev.expires_at : ' (상시)'}</div>
+      </div>
+      <button class="btn-del" onclick="deactivateEvent(${ev.id})" title="삭제">✕</button>
+    </div>
+  `).join('');
+}
+
+async function deactivateEvent(id) {
+  await sb.from('events').update({ is_active: false }).eq('id', id);
+  toast('이벤트 삭제됨');
+  loadEvents();
+}
+
+// ══ 발주처 관리 ══
+async function searchFarmerForSupplier() {
+  const q = document.getElementById('sup-farmer-search').value.trim();
+  if (!q) { toast('검색어를 입력하세요.'); return; }
+  const resEl = document.getElementById('sup-farmer-results');
+  resEl.style.display = 'block';
+  resEl.innerHTML = '<div style="font-size:0.8rem;color:var(--dust);">검색 중…</div>';
+
+  const { data } = await sb.rpc('get_farmer_names');
+
+  const names = (data || []).map(r => r.farmer_name).filter(n => n && n.includes(q)).sort();
+  if (!names.length) {
+    resEl.innerHTML = '<div style="font-size:0.8rem;color:var(--dust);padding:0.3rem;">검색 결과 없음 — 아래에 직접 입력하세요</div>';
+    return;
+  }
+  resEl.innerHTML = names.map(n =>
+    `<div onclick="selectFarmerAsSupplier('${n.replace(/'/g, "\'")}')"
+      style="font-size:0.82rem;color:var(--cream);padding:0.3rem 0.5rem;cursor:pointer;border-radius:4px;"
+      onmouseover="this.style.background='rgba(196,128,58,0.15)'"
+      onmouseout="this.style.background=''">${n}</div>`
+  ).join('');
+}
+
+function selectFarmerAsSupplier(name) {
+  document.getElementById('sup-name').value = name;
+  document.getElementById('sup-farmer-results').style.display = 'none';
+  document.getElementById('sup-farmer-search').value = '';
+  toast(name + ' 선택됨');
+}
+
+function showAddSupplier() {
+  document.getElementById('supplier-add-form').style.display = 'block';
+}
+function hideAddSupplier() {
+  document.getElementById('supplier-add-form').style.display = 'none';
+  ['sup-name','sup-phone','sup-email','sup-note','sup-kakao'].forEach(id => document.getElementById(id).value = '');
+}
+
+async function addSupplier() {
+  const name  = document.getElementById('sup-name').value.trim();
+  if (!name) { toast('업체명을 입력하세요.'); return; }
+  const phone = document.getElementById('sup-phone').value.trim();
+  const email = document.getElementById('sup-email').value.trim();
+  const note  = document.getElementById('sup-note').value.trim();
+  const kakaoId = document.getElementById('sup-kakao').value.trim();
+  const { error } = await sb.from('suppliers').insert({ name, phone, email, note, kakao_id: kakaoId });
+  if (error) { toast('저장 실패: ' + error.message); return; }
+  toast('발주처 추가됨 ✓');
+  hideAddSupplier();
+  loadSuppliers();
+}
+
+async function loadSuppliers() {
+  const wrap = document.getElementById('supplier-list');
+  const { data, error } = await sb.from('suppliers')
+    .select('*')
+    .eq('is_active', true)
+    .order('name');
+  if (error || !data || data.length === 0) {
+    wrap.innerHTML = '<div class="empty-row">발주처 없음</div>';
+    return;
+  }
+  wrap.innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
+      <thead>
+        <tr style="border-bottom:1px solid rgba(184,168,138,0.15);">
+          <th style="padding:0.6rem 0.8rem;text-align:left;color:var(--dust);font-weight:400;letter-spacing:0.08em;">업체명</th>
+          <th style="padding:0.6rem 0.8rem;text-align:left;color:var(--dust);font-weight:400;">전화번호</th>
+          <th style="padding:0.6rem 0.8rem;text-align:left;color:var(--dust);font-weight:400;">이메일</th>
+          <th style="padding:0.6rem 0.8rem;text-align:left;color:var(--dust);font-weight:400;">메모</th>
+          <th style="padding:0.6rem 0.8rem;text-align:center;color:var(--dust);font-weight:400;">관리</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${data.map(s => `
+          <tr style="border-bottom:1px solid rgba(184,168,138,0.06);" id="sup-row-${s.id}">
+            <td style="padding:0.65rem 0.8rem;color:var(--cream);">${s.name}</td>
+            <td style="padding:0.65rem 0.8rem;color:var(--dust);">
+              <span id="sup-ph-${s.id}">${s.phone || '—'}</span>
+              <input id="sup-ph-input-${s.id}" class="form-input" value="${s.phone || ''}"
+                style="display:none;padding:0.3rem 0.5rem;font-size:0.8rem;width:130px;">
+            </td>
+            <td style="padding:0.65rem 0.8rem;color:var(--dust);">
+              <span id="sup-em-${s.id}">${s.email || '—'}</span>
+              <input id="sup-em-input-${s.id}" class="form-input" value="${s.email || ''}"
+                style="display:none;padding:0.3rem 0.5rem;font-size:0.8rem;width:160px;">
+            </td>
+            <td style="padding:0.65rem 0.8rem;color:var(--dust);">
+              <span id="sup-nt-${s.id}">${s.note || '—'}</span>
+              <input id="sup-nt-input-${s.id}" class="form-input" value="${s.note || ''}"
+                style="display:none;padding:0.3rem 0.5rem;font-size:0.8rem;width:120px;">
+            </td>
+            <td style="padding:0.65rem 0.8rem;text-align:center;">
+              <button class="btn-sm" id="sup-edit-btn-${s.id}" onclick="editSupplier(${s.id})"
+                style="font-size:0.72rem;padding:0.2rem 0.6rem;margin-right:0.3rem;">수정</button>
+              <button class="btn-sm" id="sup-save-btn-${s.id}" onclick="saveSupplier(${s.id})"
+                style="display:none;font-size:0.72rem;padding:0.2rem 0.6rem;margin-right:0.3rem;background:var(--green);">저장</button>
+              <button class="btn-del" onclick="deleteSupplier(${s.id})" title="삭제">✕</button>
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>`;
+}
+
+function editSupplier(id) {
+  ['ph','em','nt'].forEach(f => {
+    document.getElementById(`sup-${f}-${id}`).style.display = 'none';
+    document.getElementById(`sup-${f}-input-${id}`).style.display = 'inline-block';
+  });
+  document.getElementById(`sup-edit-btn-${id}`).style.display = 'none';
+  document.getElementById(`sup-save-btn-${id}`).style.display = 'inline-block';
+}
+
+async function saveSupplier(id) {
+  const phone = document.getElementById(`sup-ph-input-${id}`).value.trim();
+  const email = document.getElementById(`sup-em-input-${id}`).value.trim();
+  const note  = document.getElementById(`sup-nt-input-${id}`).value.trim();
+  const { error } = await sb.from('suppliers').update({ phone, email, note }).eq('id', id);
+  if (error) { toast('저장 실패: ' + error.message); return; }
+  toast('수정됨 ✓');
+  loadSuppliers();
+}
+
+async function deleteSupplier(id) {
+  if (!confirm('삭제하시겠습니까?')) return;
+  await sb.from('suppliers').update({ is_active: false }).eq('id', id);
+  toast('삭제됨');
+  loadSuppliers();
+}
+
+// ══ 발주처 관리 섹션 토글 ══
+function toggleSupplierSection() {
+  const body = document.getElementById('supplier-section-body');
+  const arrow = document.getElementById('supplier-section-arrow');
+  if (!body) return;
+  const isHidden = body.style.display === 'none';
+  body.style.display = isHidden ? 'block' : 'none';
+  if (arrow) arrow.textContent = isHidden ? '▲' : '▼';
+  if (isHidden) loadSuppliers();
+}
+
+// ══ 통합 발주 관리 ══
+let _unifiedOrderData = [];
+let _unifiedFilter = '대기';
+let _supplierCache = {};
+
+function setOrderFilter(f) {
+  _unifiedFilter = f;
+  ['대기','발주완료','전체'].forEach(k => {
+    const key = k === '대기' ? 'wait' : k === '발주완료' ? 'done' : 'all';
+    const btn = document.getElementById('ofilter-' + key);
+    if (btn) {
+      const isActive = k === f;
+      btn.style.border = isActive ? '1px solid var(--amber)' : '1px solid rgba(196,128,58,0.3)';
+      btn.style.color = isActive ? 'var(--amber)' : 'var(--dust)';
+      btn.style.fontWeight = isActive ? '600' : '400';
+    }
+  });
+  renderUnifiedOrders();
+}
+
+async function loadUnifiedOrders() {
+  const wrap = document.getElementById('unified-order-cards');
+  if (!wrap) return;
+  wrap.innerHTML = '<div class="loading-row">로딩 중…</div>';
+
+  // 발주 데이터 + 거래처 데이터 병렬 로드
+  const [orderRes, supplierRes] = await Promise.all([
+    sb.from('staff_data')
+      .select('id, created_at, farmer_name, item_name, qty, urgency, content, status, order_comment')
+      .order('created_at', { ascending: false }),
+    sb.from('suppliers')
+      .select('id, name, phone, email, kakao_id, note')
+      .eq('is_active', true)
+  ]);
+
+  _unifiedOrderData = orderRes.data || [];
+  _supplierCache = {};
+  (supplierRes.data || []).forEach(s => { _supplierCache[s.name] = s; });
+
+  // 카운트 업데이트
+  const waitCount = _unifiedOrderData.filter(r => r.status !== '발주완료').length;
+  const doneCount = _unifiedOrderData.filter(r => r.status === '발주완료').length;
+  const allCount = _unifiedOrderData.length;
+  const setCount = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = n; };
+  setCount('ofilter-wait-count', waitCount);
+  setCount('ofilter-done-count', doneCount);
+  setCount('ofilter-all-count', allCount);
+
+  renderUnifiedOrders();
+}
+
+function renderUnifiedOrders() {
+  const wrap = document.getElementById('unified-order-cards');
+  if (!wrap) return;
+
+  // 필터 적용
+  const filtered = _unifiedOrderData.filter(r => {
+    if (_unifiedFilter === '전체') return true;
+    if (_unifiedFilter === '발주완료') return r.status === '발주완료';
+    return r.status !== '발주완료';
+  });
+
+  if (filtered.length === 0) {
+    wrap.innerHTML = '<div class="card"><div class="empty-row">' +
+      (_unifiedFilter === '대기' ? '대기 중인 발주가 없습니다.' : _unifiedFilter === '발주완료' ? '발주완료 건이 없습니다.' : '발주 내역이 없습니다.') +
+      '</div></div>';
+    return;
+  }
+
+  // 거래처별 그룹화
+  const grouped = {};
+  filtered.forEach(r => {
+    const key = r.farmer_name || '(미지정)';
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(r);
+  });
+
+  // 긴급 건 있는 거래처 우선 정렬
+  const sortedEntries = Object.entries(grouped).sort((a, b) => {
+    const aUrgent = a[1].filter(i => i.urgency === '긴급').length;
+    const bUrgent = b[1].filter(i => i.urgency === '긴급').length;
+    if (bUrgent !== aUrgent) return bUrgent - aUrgent;
+    return b[1].length - a[1].length;
+  });
+
+  const urgencyColor = { '긴급': 'var(--red)', '보통': 'var(--amber)', '대비': 'var(--green-light)', '여유': 'var(--green-light)' };
+
+  wrap.innerHTML = sortedEntries.map(([supplier, items]) => {
+    const urgentCount = items.filter(i => i.urgency === '긴급').length;
+    const totalQty = items.reduce((sum, i) => sum + (i.qty || 0), 0);
+    const sup = _supplierCache[supplier];
+    const hasWaiting = items.some(i => i.status !== '발주완료');
+
+    const urgentBadge = urgentCount > 0
+      ? `<span style="font-size:0.72rem;color:#fff;background:var(--red);padding:0.15rem 0.5rem;border-radius:10px;font-weight:600;">긴급 ${urgentCount}</span>`
+      : '';
+    const contactInfo = sup
+      ? `<span style="font-size:0.72rem;color:var(--dust);margin-left:0.5rem;">${sup.phone || ''}</span>`
+      : '';
+
+    const itemRows = items.map(i => {
+      const urg = i.urgency
+        ? `<span style="font-size:0.7rem;color:${urgencyColor[i.urgency] || 'var(--dust)'};border:1px solid ${urgencyColor[i.urgency] || 'var(--dust)'};padding:0.08rem 0.35rem;border-radius:3px;">${i.urgency}</span>`
+        : '';
+      const dt = i.created_at ? new Date(i.created_at).toLocaleString('ko-KR', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }) : '';
+      const isDone = i.status === '발주완료';
+      const statusTag = isDone
+        ? `<span style="font-size:0.7rem;color:var(--green-light);border:1px solid var(--green-light);padding:0.08rem 0.35rem;border-radius:3px;">완료</span>`
+        : '';
+      const hasComment = i.order_comment ? true : false;
+      const commentDisplay = hasComment
+        ? `<div style="font-size:0.75rem;color:var(--amber);background:rgba(196,128,58,0.08);padding:0.25rem 0.5rem;border-radius:4px;margin-top:0.2rem;">💬 ${i.order_comment}</div>`
+        : '';
+
+      return `<div style="padding:0.4rem 0;border-bottom:1px solid rgba(184,168,138,0.06);font-size:0.82rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.3rem;">
+          <div style="display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;">
+            <span style="color:var(--cream);font-weight:500;">${i.item_name || '—'}</span>
+            ${i.qty ? `<span style="color:var(--dust);">${i.qty}개</span>` : ''}
+            ${urg}
+            ${statusTag}
+            <span style="font-size:0.72rem;color:var(--dust);">${i.content || ''}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.4rem;">
+            <span style="font-size:0.72rem;color:var(--dust);">${dt}</span>
+            <button onclick="toggleOrderComment(${i.id})" style="font-size:0.68rem;color:${hasComment ? 'var(--amber)' : 'var(--dust)'};background:none;border:1px solid ${hasComment ? 'rgba(196,128,58,0.4)' : 'rgba(184,168,138,0.2)'};padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;" title="코멘트">${hasComment ? '✏️' : '💬'}</button>
+          </div>
+        </div>
+        ${commentDisplay}
+        <div id="order-comment-${i.id}" style="display:none;margin-top:0.3rem;">
+          <div style="display:flex;gap:0.3rem;flex-wrap:wrap;margin-bottom:0.3rem;">
+            <button onclick="setQuickComment(${i.id},'생산중단')" style="font-size:0.7rem;color:var(--red);background:rgba(184,58,42,0.1);border:1px solid rgba(184,58,42,0.3);padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;">생산중단</button>
+            <button onclick="setQuickComment(${i.id},'품절')" style="font-size:0.7rem;color:var(--red);background:rgba(184,58,42,0.1);border:1px solid rgba(184,58,42,0.3);padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;">품절</button>
+            <button onclick="setQuickComment(${i.id},'수량조정 필요')" style="font-size:0.7rem;color:var(--amber);background:rgba(196,128,58,0.1);border:1px solid rgba(196,128,58,0.3);padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;">수량조정</button>
+            <button onclick="setQuickComment(${i.id},'납기지연')" style="font-size:0.7rem;color:var(--amber);background:rgba(196,128,58,0.1);border:1px solid rgba(196,128,58,0.3);padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;">납기지연</button>
+            <button onclick="setQuickComment(${i.id},'대체상품 확인')" style="font-size:0.7rem;color:var(--dust);background:rgba(184,168,138,0.1);border:1px solid rgba(184,168,138,0.2);padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;">대체상품</button>
+          </div>
+          <div style="display:flex;gap:0.3rem;">
+            <input type="text" id="order-comment-input-${i.id}" placeholder="코멘트 입력…" value="${(i.order_comment || '').replace(/"/g, '&quot;')}" style="flex:1;font-size:0.78rem;padding:0.3rem 0.5rem;background:var(--surface);border:1px solid rgba(196,128,58,0.2);border-radius:4px;color:var(--cream);outline:none;" onkeydown="if(event.key==='Enter')saveOrderComment(${i.id})">
+            <button onclick="saveOrderComment(${i.id})" style="font-size:0.72rem;color:var(--amber);background:rgba(196,128,58,0.15);border:1px solid rgba(196,128,58,0.3);padding:0.2rem 0.5rem;border-radius:4px;cursor:pointer;white-space:nowrap;">저장</button>
+            ${hasComment ? `<button onclick="deleteOrderComment(${i.id})" style="font-size:0.72rem;color:var(--red);background:rgba(184,58,42,0.1);border:1px solid rgba(184,58,42,0.3);padding:0.2rem 0.5rem;border-radius:4px;cursor:pointer;">삭제</button>` : ''}
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    // 발주 메시지 영역 ID
+    const msgId = 'order-msg-' + supplier.replace(/[^a-zA-Z0-9가-힣]/g, '_');
+    const resultId = 'order-result-' + supplier.replace(/[^a-zA-Z0-9가-힣]/g, '_');
+
+    // 카드 하단 버튼들
+    const actionButtons = hasWaiting ? `
+      <div style="display:flex;gap:0.5rem;margin-top:0.8rem;flex-wrap:wrap;align-items:flex-start;">
+        <button class="btn-sm" style="font-size:0.78rem;background:rgba(196,128,58,0.15);border-color:var(--amber);color:var(--amber);" onclick="generateOrderMessage('${supplier.replace(/'/g, "\\'")}', '${msgId}')">발주 메시지 생성</button>
+        <button class="btn-sm" style="font-size:0.78rem;background:var(--green);color:#fff;border-color:var(--green);" onclick="markSupplierDone('${supplier.replace(/'/g, "\\'")}')">발주완료 처리</button>
+      </div>
+      <div id="${msgId}-area" style="display:none;margin-top:0.8rem;">
+        <textarea id="${msgId}" rows="6" style="width:100%;background:rgba(15,11,7,0.8);border:1px solid rgba(196,128,58,0.2);color:var(--cream);padding:0.6rem 0.8rem;font-family:'Noto Sans KR',sans-serif;font-size:0.85rem;resize:vertical;outline:none;margin-bottom:0.5rem;"></textarea>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+          <button class="btn-primary" style="font-size:0.78rem;" onclick="sendCardSms('${supplier.replace(/'/g, "\\'")}', '${msgId}')">📨 문자발송</button>
+          <button class="btn-sm" style="font-size:0.78rem;" onclick="sendCardKakao('${supplier.replace(/'/g, "\\'")}', '${msgId}')">💬 카톡발주</button>
+          <button class="btn-sm" style="font-size:0.78rem;" onclick="sendCardEmail('${supplier.replace(/'/g, "\\'")}', '${msgId}')">✉ 이메일</button>
+        </div>
+        <div id="${resultId}" style="margin-top:0.5rem;font-size:0.8rem;color:var(--dust);"></div>
+      </div>` : '';
+
+    return `<div class="card" style="margin-bottom:1rem;border-left:${urgentCount > 0 ? '3px solid var(--red)' : '3px solid transparent'};">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem;flex-wrap:wrap;gap:0.3rem;">
+        <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+          <span style="font-size:1rem;">📦</span>
+          <span class="card-title" style="margin-bottom:0;font-size:0.95rem;">${supplier}</span>
+          ${urgentBadge}
+          <span style="font-size:0.78rem;color:var(--dust);">${items.length}건 · ${totalQty}개</span>
+          ${contactInfo}
+        </div>
+      </div>
+      ${itemRows}
+      ${actionButtons}
+    </div>`;
+  }).join('');
+}
+
+// ══ 카드 인라인 발주 메시지 생성 ══
+async function generateOrderMessage(supplierName, msgId) {
+  const areaEl = document.getElementById(msgId + '-area');
+  const msgEl = document.getElementById(msgId);
+  if (!areaEl || !msgEl) return;
+  areaEl.style.display = 'block';
+  msgEl.value = '메시지 생성 중…';
+
+  // 해당 거래처 대기 건 가져오기
+  const waitItems = _unifiedOrderData.filter(r => r.farmer_name === supplierName && r.status !== '발주완료');
+
+  let itemLines = '';
+  if (waitItems.length > 0) {
+    itemLines = waitItems.map(t => {
+      const urg = t.urgency === '긴급' ? ' [긴급]' : t.urgency === '대비' ? ' [대비]' : '';
+      return `  - ${t.item_name}: ${t.qty || ''}개${urg}`;
+    }).join('\n');
+  }
+
+  // POS 판매 참고 데이터
+  const from30 = new Date(); from30.setDate(from30.getDate() - 30);
+  const { data: posData } = await sb.from('pos_transactions')
+    .select('item_name, unit, qty')
+    .eq('farmer_name', supplierName)
+    .gte('sold_at', from30.toISOString());
+
+  if (!itemLines && posData && posData.length > 0) {
+    const itemMap = {};
+    posData.forEach(r => {
+      const key = r.item_name + (r.unit ? ' (' + r.unit + ')' : '');
+      itemMap[key] = (itemMap[key] || 0) + (r.qty || 0);
+    });
+    const sorted = Object.entries(itemMap).sort((a,b) => b[1] - a[1]);
+    itemLines = sorted.map(([name]) => `  - ${name}: `).join('\n');
+  }
+
+  msgEl.value = `[품앗이소비자생활협동조합 발주 요청]\n안녕하세요. 품앗이생협 지족점입니다.\n아래와 같이 발주 요청드립니다.\n\n${itemLines}\n\n감사합니다.`;
+  msgEl.focus();
+}
+
+// ══ 거래처 일괄 발주완료 처리 ══
+async function markSupplierDone(supplierName) {
+  const waitItems = _unifiedOrderData.filter(r => r.farmer_name === supplierName && r.status !== '발주완료');
+  if (waitItems.length === 0) { toast('대기 건이 없습니다.'); return; }
+  if (!confirm(`${supplierName}의 대기 ${waitItems.length}건을 모두 발주완료 처리하시겠습니까?`)) return;
+
+  const ids = waitItems.map(i => i.id);
+  const { error } = await sb.from('staff_data').update({ status: '발주완료' }).in('id', ids);
+  if (error) { toast('처리 실패: ' + error.message); return; }
+  toast(`${supplierName} ${waitItems.length}건 발주완료 ✓`);
+  loadUnifiedOrders();
+}
+
+// ══ 카드 내 SMS/카톡/이메일 발송 ══
+async function sendCardSms(supplierName, msgId) {
+  const sup = _supplierCache[supplierName];
+  if (!sup || !sup.phone) { toast('해당 거래처에 전화번호가 없습니다.'); return; }
+  const message = document.getElementById(msgId).value.trim();
+  if (!message) { toast('발주 내용을 입력하세요.'); return; }
+
+  const apiKey    = localStorage.getItem('solapi_key');
+  const apiSecret = localStorage.getItem('solapi_secret');
+  const fromNum   = localStorage.getItem('solapi_from') || '0427160019';
+  if (!apiKey || !apiSecret) { toast('이음SMS 탭에서 Solapi API 설정을 먼저 저장하세요.'); return; }
+
+  const resultId = 'order-result-' + supplierName.replace(/[^a-zA-Z0-9가-힣]/g, '_');
+  const resultDiv = document.getElementById(resultId);
+  if (resultDiv) resultDiv.textContent = '발송 중…';
+
+  const date = new Date().toISOString();
+  const salt = Math.random().toString(36).substring(2, 14);
+  const sig  = await hmacSha256Hex(apiSecret, date + salt);
+  const auth = `HMAC-SHA256 apiKey=${apiKey}, date=${date}, salt=${salt}, signature=${sig}`;
+
+  try {
+    const resp = await fetch('https://api.solapi.com/messages/v4/send-many', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': auth },
+      body: JSON.stringify({ messages: [{ to: sup.phone.replace(/-/g,''), from: fromNum.replace(/-/g,''), text: message }] }),
+    });
+    const result = await resp.json();
+    if (!resp.ok) { if (resultDiv) resultDiv.textContent = '오류: ' + (result.message || resp.status); return; }
+    toast('발주 문자 발송 완료');
+    if (resultDiv) resultDiv.textContent = '✓ 발송 완료';
+    await sb.from('sms_history').insert({ member_ids: [], message, sender: fromNum });
+  } catch(e) {
+    if (resultDiv) resultDiv.textContent = '네트워크 오류: ' + e.message;
+  }
+}
+
+function sendCardKakao(supplierName, msgId) {
+  const message = document.getElementById(msgId).value.trim();
+  if (!message) { toast('발주 내용을 입력하세요.'); return; }
+  navigator.clipboard.writeText(message).then(() => {
+    toast('발주 내용 복사됨 ✓ 카카오톡에서 담당자에게 붙여넣기하세요.');
+  }).catch(() => {
+    toast('복사 실패 — 직접 내용을 선택하여 복사해주세요.');
+  });
+  setTimeout(() => { window.location.href = 'kakaotalk://launch'; }, 500);
+}
+
+function sendCardEmail(supplierName, msgId) {
+  const sup = _supplierCache[supplierName];
+  if (!sup || !sup.email) { toast('해당 거래처에 이메일이 없습니다.'); return; }
+  const message = document.getElementById(msgId).value.trim();
+  const subject = encodeURIComponent('[품앗이생협] 발주 요청');
+  const body = encodeURIComponent(message);
+  window.location.href = `mailto:${sup.email}?subject=${subject}&body=${body}`;
+}
+
+// ══ 발주 코멘트 ══
+function toggleOrderComment(id) {
+  const el = document.getElementById('order-comment-' + id);
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  if (el.style.display === 'block') {
+    const input = document.getElementById('order-comment-input-' + id);
+    if (input) input.focus();
+  }
+}
+
+function setQuickComment(id, text) {
+  const input = document.getElementById('order-comment-input-' + id);
+  if (input) {
+    input.value = input.value ? input.value + ', ' + text : text;
+    input.focus();
+  }
+}
+
+async function saveOrderComment(id) {
+  const input = document.getElementById('order-comment-input-' + id);
+  if (!input) return;
+  const comment = input.value.trim();
+  if (!comment) { toast('코멘트를 입력하세요.'); return; }
+  const { error } = await sb.from('staff_data').update({ order_comment: comment }).eq('id', id);
+  if (error) { toast('저장 실패: ' + error.message); return; }
+  toast('코멘트 저장됨 ✓');
+  loadUnifiedOrders();
+}
+
+async function deleteOrderComment(id) {
+  const { error } = await sb.from('staff_data').update({ order_comment: null }).eq('id', id);
+  if (error) { toast('삭제 실패: ' + error.message); return; }
+  toast('코멘트 삭제됨');
+  loadUnifiedOrders();
+}
+
+function goToOrder(supplierName) {
+  // 통합 구조에서는 해당 거래처 메시지 생성 바로 실행
+  const msgId = 'order-msg-' + supplierName.replace(/[^a-zA-Z0-9가-힣]/g, '_');
+  generateOrderMessage(supplierName, msgId);
+}
+
+// ── 출퇴근부 ──────────────────────────────────────────────
+let employeeMap = {};
+
+function initAttendTab() {
+  const dateInput = document.getElementById('attend-date-filter');
+  if (!dateInput.value) dateInput.value = new Date().toISOString().slice(0, 10);
+  const monthSel = document.getElementById('attend-month-filter');
+  if (monthSel.options.length === 0) {
+    const now = new Date();
+    for (let i = 0; i < 6; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const val = d.toISOString().slice(0, 7);
+      const label = d.getFullYear() + '년 ' + (d.getMonth() + 1) + '월';
+      monthSel.add(new Option(label, val));
+    }
+  }
+}
+
+async function loadEmployees() {
+  if (Object.keys(employeeMap).length > 0) return;
+  const { data } = await sb.from('employee').select('*');
+  if (data) data.forEach(e => { employeeMap[e.id] = e; });
+}
+
+async function loadAttendance() {
+  await loadEmployees();
+  const store = document.getElementById('attend-store-filter').value;
+  const date = document.getElementById('attend-date-filter').value;
+  let q = sb.from('attendance').select('*').order('check_in', { ascending: false });
+  if (store) q = q.eq('store', store);
+  if (date) q = q.eq('date', date);
+  q = q.limit(100);
+  const { data, error } = await q;
+  const tbody = document.getElementById('attend-tbody');
+  const summaryEl = document.getElementById('attend-summary');
+  const total = Object.values(employeeMap).filter(e => e.is_active).length;
+  if (error || !data) {
+    tbody.innerHTML = '<tr><td colspan="6" style="padding:0.8rem;color:var(--dust);">조회 실패</td></tr>';
+    summaryEl.innerHTML = '<div style="color:var(--dust);font-size:0.82rem;">조회 실패</div>';
+    return;
+  }
+  if (data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="padding:0.8rem;color:var(--dust);">기록 없음</td></tr>';
+    summaryEl.innerHTML =
+      '<div style="text-align:center;padding:0.5rem 1rem;"><div style="font-size:1.5rem;font-weight:700;color:var(--dust);">0</div><div style="font-size:0.72rem;color:var(--dust);">근무중</div></div>' +
+      '<div style="text-align:center;padding:0.5rem 1rem;"><div style="font-size:1.5rem;font-weight:700;color:var(--dust);">0</div><div style="font-size:0.72rem;color:var(--dust);">퇴근</div></div>' +
+      '<div style="text-align:center;padding:0.5rem 1rem;"><div style="font-size:1.5rem;font-weight:700;color:var(--cream);">' + total + '</div><div style="font-size:0.72rem;color:var(--dust);">전체 직원</div></div>';
+    return;
+  }
+  tbody.innerHTML = data.map(r => {
+    const emp = employeeMap[r.employee_id] || {};
+    const ci = r.check_in ? new Date(r.check_in).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '-';
+    const co = r.check_out ? new Date(r.check_out).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '근무중';
+    const mins = r.work_minutes != null ? r.work_minutes : '-';
+    return '<tr style="border-bottom:1px solid var(--border);">' +
+      '<td style="padding:0.5rem 0.4rem;">' + (emp.name || r.employee_id) + '</td>' +
+      '<td style="padding:0.5rem 0.4rem;">' + (r.store || '-') + '</td>' +
+      '<td style="padding:0.5rem 0.4rem;">' + (r.date || '-') + '</td>' +
+      '<td style="padding:0.5rem 0.4rem;color:#4ade80;">' + ci + '</td>' +
+      '<td style="padding:0.5rem 0.4rem;color:' + (r.check_out ? '#f87171' : 'var(--amber)') + ';">' + co + '</td>' +
+      '<td style="padding:0.5rem 0.4rem;">' + mins + '</td></tr>';
+  }).join('');
+
+  // 오늘 요약
+  const today = new Date().toISOString().slice(0, 10);
+  const todayData = date === today ? data : [];
+  const checkedIn = todayData.filter(r => r.check_in && !r.check_out).length;
+  const done = todayData.filter(r => r.check_out).length;
+  summaryEl.innerHTML =
+    '<div style="text-align:center;padding:0.5rem 1rem;"><div style="font-size:1.5rem;font-weight:700;color:#4ade80;">' + checkedIn + '</div><div style="font-size:0.72rem;color:var(--dust);">근무중</div></div>' +
+    '<div style="text-align:center;padding:0.5rem 1rem;"><div style="font-size:1.5rem;font-weight:700;color:var(--dust);">' + done + '</div><div style="font-size:0.72rem;color:var(--dust);">퇴근</div></div>' +
+    '<div style="text-align:center;padding:0.5rem 1rem;"><div style="font-size:1.5rem;font-weight:700;color:var(--cream);">' + total + '</div><div style="font-size:0.72rem;color:var(--dust);">전체 직원</div></div>';
+}
+
+async function loadMonthlySummary() {
+  await loadEmployees();
+  const month = document.getElementById('attend-month-filter').value;
+  if (!month) return;
+  const startDate = month + '-01';
+  const endDate = month + '-31';
+  const { data } = await sb.from('attendance').select('*').gte('date', startDate).lte('date', endDate);
+  const tbody = document.getElementById('attend-monthly-tbody');
+  if (!data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="padding:0.8rem;color:var(--dust);">기록 없음</td></tr>'; return; }
+  const summary = {};
+  data.forEach(r => {
+    if (!summary[r.employee_id]) summary[r.employee_id] = { days: new Set(), totalMin: 0 };
+    summary[r.employee_id].days.add(r.date);
+    if (r.work_minutes) summary[r.employee_id].totalMin += r.work_minutes;
+  });
+  tbody.innerHTML = Object.entries(summary).map(([eid, s]) => {
+    const emp = employeeMap[eid] || {};
+    const hours = (s.totalMin / 60).toFixed(1);
+    const wage = emp.hourly_wage || 10320;
+    const pay = Math.round(s.totalMin / 60 * wage).toLocaleString('ko-KR');
+    return '<tr style="border-bottom:1px solid var(--border);">' +
+      '<td style="padding:0.5rem 0.4rem;">' + (emp.name || eid) + '</td>' +
+      '<td style="padding:0.5rem 0.4rem;">' + (emp.store || '-') + '</td>' +
+      '<td style="padding:0.5rem 0.4rem;">' + s.days.size + '일</td>' +
+      '<td style="padding:0.5rem 0.4rem;">' + hours + '시간</td>' +
+      '<td style="padding:0.5rem 0.4rem;color:var(--amber);">₩' + pay + '</td></tr>';
+  }).join('');
+}
+
+// 엔터키 로그인
+document.getElementById('password').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+// 페이지 로드 시
+document.addEventListener('DOMContentLoaded', () => {
+  adjustContentPadding();
+});
+</script>
+</body>
+</html>
