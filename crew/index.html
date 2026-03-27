@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>로컬크루 — 품앗이생협 디지털 전환 허브</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%230d9488'/><text x='16' y='22' text-anchor='middle' font-size='16' fill='%23f0e6d3'>C</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --ink: #0a1628;
+    --ink-light: #0f1d35;
+    --ink-mid: #162544;
+    --ink-surface: #1c2e52;
+    --teal: #2dd4bf;
+    --teal-dim: #0d9488;
+    --teal-deep: #065f56;
+    --teal-glow: rgba(45, 212, 191, 0.12);
+    --hanji: #f0e6d3;
+    --hanji-dim: #b8a88a;
+    --gold: #e8b86d;
+    --gold-dim: #c4803a;
+    --slate: #64748b;
+    --red: #ef4444;
+    --green: #22c55e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--hanji);
+    font-family: 'Noto Sans KR', sans-serif;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* ── GRID PATTERN BACKGROUND ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(45,212,191,0.04) 1px, transparent 0);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── NOISE TEXTURE ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.5;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    height: 56px;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(10, 22, 40, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(45, 212, 191, 0.08);
+  }
+
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    text-decoration: none;
+  }
+
+  .topbar-brand .logo-mark {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--teal), var(--teal-deep));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: var(--ink);
+  }
+
+  .topbar-name {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--teal);
+    letter-spacing: 0.02em;
+  }
+
+  .topbar-name span {
+    color: var(--hanji-dim);
+    font-weight: 400;
+    font-size: 0.8rem;
+    margin-left: 0.5rem;
+  }
+
+  .topbar-nav {
+    display: flex;
+    gap: 1.8rem;
+    list-style: none;
+  }
+
+  .topbar-nav a {
+    color: var(--hanji-dim);
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 400;
+    transition: color 0.2s;
+    letter-spacing: 0.01em;
+  }
+
+  .topbar-nav a:hover { color: var(--teal); }
+
+  .topbar-home {
+    color: var(--slate);
+    text-decoration: none;
+    font-size: 0.78rem;
+    transition: color 0.2s;
+  }
+  .topbar-home:hover { color: var(--teal); }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 8rem 2rem 4rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .hero-label {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--teal-dim);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .hero-label::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--teal-dim);
+  }
+
+  .hero h1 {
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--hanji);
+    margin-bottom: 1.5rem;
+  }
+
+  .hero h1 .teal { color: var(--teal); }
+  .hero h1 .gold { color: var(--gold); }
+
+  .hero-desc {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: var(--hanji-dim);
+    max-width: 600px;
+    margin-bottom: 2.5rem;
+    font-weight: 300;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 1.8rem;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.25s;
+    cursor: pointer;
+    border: none;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--teal), var(--teal-dim));
+    color: var(--ink);
+  }
+  .btn-primary:hover {
+    box-shadow: 0 0 30px rgba(45, 212, 191, 0.25);
+    transform: translateY(-1px);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--hanji-dim);
+    border: 1px solid rgba(45, 212, 191, 0.2);
+  }
+  .btn-ghost:hover {
+    border-color: var(--teal);
+    color: var(--teal);
+  }
+
+  /* ── NODE DECORATION ── */
+  .hero-nodes {
+    position: absolute;
+    top: 0; right: 0;
+    width: 400px; height: 400px;
+    pointer-events: none;
+    opacity: 0.15;
+  }
+
+  /* ── SECTIONS ── */
+  section {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+  }
+
+  .section-label {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--teal-dim);
+    margin-bottom: 0.8rem;
+  }
+
+  .section-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--hanji);
+    margin-bottom: 0.6rem;
+  }
+
+  .section-sub {
+    color: var(--hanji-dim);
+    font-size: 0.9rem;
+    font-weight: 300;
+    margin-bottom: 2.5rem;
+    line-height: 1.6;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  .divider hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(45,212,191,0.15), transparent);
+  }
+
+  /* ── REQUEST FORM ── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2rem;
+  }
+
+  .form-grid .full { grid-column: 1 / -1; }
+
+  .field label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--hanji-dim);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.02em;
+  }
+
+  .field input,
+  .field select,
+  .field textarea {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    background: var(--ink-light);
+    border: 1px solid rgba(45, 212, 191, 0.1);
+    border-radius: 8px;
+    color: var(--hanji);
+    font-size: 0.9rem;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    border-color: var(--teal-dim);
+    box-shadow: 0 0 0 3px var(--teal-glow);
+  }
+
+  .field input::placeholder,
+  .field textarea::placeholder {
+    color: var(--slate);
+  }
+
+  .field select {
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%2364748b' stroke-width='1.5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
+  }
+
+  .field select option {
+    background: var(--ink-mid);
+    color: var(--hanji);
+  }
+
+  .field textarea {
+    min-height: 140px;
+    resize: vertical;
+    line-height: 1.6;
+  }
+
+  .form-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .form-footer .hint {
+    font-size: 0.75rem;
+    color: var(--slate);
+  }
+
+  .form-msg {
+    margin-top: 1rem;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    display: none;
+  }
+
+  .form-msg.ok {
+    display: block;
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    color: var(--green);
+  }
+
+  .form-msg.err {
+    display: block;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: var(--red);
+  }
+
+  /* ── RESOURCE LIBRARY ── */
+  .resource-filters {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    padding: 0.45rem 1rem;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid rgba(45, 212, 191, 0.15);
+    background: transparent;
+    color: var(--hanji-dim);
+    transition: all 0.2s;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+
+  .filter-btn:hover,
+  .filter-btn.active {
+    background: var(--teal-glow);
+    border-color: var(--teal-dim);
+    color: var(--teal);
+  }
+
+  .resource-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.2rem;
+  }
+
+  .resource-card {
+    background: var(--ink-light);
+    border: 1px solid rgba(45, 212, 191, 0.06);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .resource-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--teal);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .resource-card:hover {
+    border-color: rgba(45, 212, 191, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  }
+
+  .resource-card:hover::before { opacity: 1; }
+
+  .resource-card .tag {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    margin-bottom: 0.8rem;
+  }
+
+  .tag-research { background: rgba(45, 212, 191, 0.1); color: var(--teal); }
+  .tag-guide { background: rgba(232, 184, 109, 0.1); color: var(--gold); }
+  .tag-case { background: rgba(139, 92, 246, 0.1); color: #a78bfa; }
+  .tag-tool { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
+
+  .resource-card h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--hanji);
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+  }
+
+  .resource-card p {
+    font-size: 0.82rem;
+    color: var(--hanji-dim);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  .resource-card .meta {
+    margin-top: 1rem;
+    font-size: 0.72rem;
+    color: var(--slate);
+    display: flex;
+    gap: 1rem;
+  }
+
+  .empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem;
+    color: var(--slate);
+    font-size: 0.9rem;
+  }
+
+  /* ── STATS ROW ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .stat-card {
+    text-align: center;
+    padding: 1.5rem;
+    background: var(--ink-light);
+    border: 1px solid rgba(45, 212, 191, 0.06);
+    border-radius: 12px;
+  }
+
+  .stat-card .num {
+    font-family: 'Outfit', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--teal);
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+
+  .stat-card .label {
+    font-size: 0.78rem;
+    color: var(--hanji-dim);
+    font-weight: 300;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+    border-top: 1px solid rgba(45, 212, 191, 0.06);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  footer .copy {
+    font-size: 0.75rem;
+    color: var(--slate);
+  }
+
+  footer a {
+    color: var(--hanji-dim);
+    text-decoration: none;
+    font-size: 0.78rem;
+    transition: color 0.2s;
+  }
+
+  footer a:hover { color: var(--teal); }
+
+  /* ── MOBILE ── */
+  @media (max-width: 768px) {
+    .topbar { padding: 0 1rem; }
+    .topbar-name span { display: none; }
+    .topbar-nav { gap: 1rem; }
+    .topbar-nav a { font-size: 0.75rem; }
+
+    .hero { padding: 6rem 1.2rem 3rem; min-height: 70vh; }
+    .hero h1 { font-size: 2rem; }
+
+    section { padding: 3rem 1.2rem; }
+
+    .form-grid { grid-template-columns: 1fr; }
+
+    .stats-row { grid-template-columns: 1fr; gap: 0.8rem; }
+
+    .resource-grid { grid-template-columns: 1fr; }
+
+    footer { flex-direction: column; text-align: center; }
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-up {
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards;
+  }
+
+  .fade-up:nth-child(2) { animation-delay: 0.1s; }
+  .fade-up:nth-child(3) { animation-delay: 0.2s; }
+  .fade-up:nth-child(4) { animation-delay: 0.3s; }
+
+  /* ── GLOW ORB DECORATION ── */
+  .glow-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .glow-orb.teal {
+    width: 300px; height: 300px;
+    background: rgba(45, 212, 191, 0.06);
+    top: 15%; right: 5%;
+  }
+
+  .glow-orb.gold {
+    width: 250px; height: 250px;
+    background: rgba(232, 184, 109, 0.04);
+    bottom: 20%; left: 10%;
+  }
+
+  /* scroll reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- Decorative orbs -->
+<div class="glow-orb teal"></div>
+<div class="glow-orb gold"></div>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <a href="/crew/" class="topbar-brand">
+    <div class="logo-mark">LC</div>
+    <div class="topbar-name">LocalCrew<span>by 품앗이생협</span></div>
+  </a>
+  <nav>
+    <ul class="topbar-nav">
+      <li><a href="#request">의뢰하기</a></li>
+      <li><a href="#library">자료실</a></li>
+      <li><a href="/" class="topbar-home">품앗이생협 &rarr;</a></li>
+    </ul>
+  </nav>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-label fade-up">Local Deep-Tech Hub</div>
+  <h1 class="fade-up">
+    지역의 문제를<br>
+    <span class="teal">기술</span>로 푸는 <span class="gold">크루</span>
+  </h1>
+  <p class="hero-desc fade-up">
+    사회적경제 현장의 반복 업무, 데이터 분석, 디지털 전환 —<br>
+    로컬크루가 AI와 기술로 함께 해결합니다.
+  </p>
+  <div class="hero-actions fade-up">
+    <a href="#request" class="btn btn-primary">의뢰하기</a>
+    <a href="#library" class="btn btn-ghost">자료실 둘러보기</a>
+  </div>
+</div>
+
+<div class="divider"><hr></div>
+
+<!-- STATS -->
+<section class="reveal">
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="num" id="stat-requests">—</div>
+      <div class="label">접수된 의뢰</div>
+    </div>
+    <div class="stat-card">
+      <div class="num" id="stat-resources">—</div>
+      <div class="label">자료실 문서</div>
+    </div>
+    <div class="stat-card">
+      <div class="num" id="stat-orgs">—</div>
+      <div class="label">참여 조직</div>
+    </div>
+  </div>
+</section>
+
+<!-- REQUEST FORM -->
+<section id="request" class="reveal">
+  <div class="section-label">Request</div>
+  <h2 class="section-title">의뢰하기</h2>
+  <p class="section-sub">
+    현장에서 겪는 어려움을 알려주세요. AI 경영지원실이 함께 방법을 찾겠습니다.
+  </p>
+
+  <form id="requestForm" autocomplete="off">
+    <div class="form-grid">
+      <div class="field">
+        <label for="req-name">이름 / 담당자</label>
+        <input type="text" id="req-name" placeholder="홍길동" required>
+      </div>
+      <div class="field">
+        <label for="req-org">소속 조직</label>
+        <input type="text" id="req-org" placeholder="품앗이생협, 한밭페이 등">
+      </div>
+      <div class="field">
+        <label for="req-type">의뢰 유형</label>
+        <select id="req-type" required>
+          <option value="" disabled selected>선택하세요</option>
+          <option value="automation">반복 업무 자동화</option>
+          <option value="data">데이터 분석 / 시각화</option>
+          <option value="web">홈페이지 / 웹서비스</option>
+          <option value="doc">서류 / 문서 작성 지원</option>
+          <option value="consult">디지털 전환 상담</option>
+          <option value="other">기타</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="req-contact">연락처 (선택)</label>
+        <input type="text" id="req-contact" placeholder="전화번호 또는 이메일">
+      </div>
+      <div class="field full">
+        <label for="req-detail">상세 내용</label>
+        <textarea id="req-detail" placeholder="어떤 문제를 겪고 계신지, 어떤 도움이 필요한지 자유롭게 적어주세요." required></textarea>
+      </div>
+    </div>
+    <div class="form-footer">
+      <span class="hint">* 제출된 내용은 AI경영지원실에서 검토 후 연락드립니다.</span>
+      <button type="submit" class="btn btn-primary" id="submitBtn">의뢰 제출</button>
+    </div>
+    <div class="form-msg" id="formMsg"></div>
+  </form>
+</section>
+
+<div class="divider"><hr></div>
+
+<!-- RESOURCE LIBRARY -->
+<section id="library" class="reveal">
+  <div class="section-label">Library</div>
+  <h2 class="section-title">자료실</h2>
+  <p class="section-sub">
+    조사 보고서, 활용 가이드, 벤치마킹 사례 등 로컬크루가 축적한 자료를 공유합니다.
+  </p>
+
+  <div class="resource-filters">
+    <button class="filter-btn active" data-filter="all">전체</button>
+    <button class="filter-btn" data-filter="research">조사/리서치</button>
+    <button class="filter-btn" data-filter="guide">가이드</button>
+    <button class="filter-btn" data-filter="case">사례</button>
+    <button class="filter-btn" data-filter="tool">도구/템플릿</button>
+  </div>
+
+  <div class="resource-grid" id="resourceGrid">
+    <!-- JS로 동적 로딩 -->
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="copy">&copy; 2026 로컬크루 — 품앗이소비자생활협동조합</div>
+  <div>
+    <a href="/">품앗이생협</a>
+  </div>
+</footer>
+
+<script>
+// ── Supabase ──
+const SB_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRuaXZoY3BqcmhrbWVrY2ZxZ2RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NTc5MjMsImV4cCI6MjA4NzIzMzkyM30.yJ0_4Sg78p7oY89q7go3ab26PCPHnk1Q4ObZJIZEULA';
+const sb = supabase.createClient(SB_URL, SB_KEY);
+
+// ── Form Submit ──
+const form = document.getElementById('requestForm');
+const msg = document.getElementById('formMsg');
+const submitBtn = document.getElementById('submitBtn');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  submitBtn.disabled = true;
+  submitBtn.textContent = '제출 중...';
+  msg.className = 'form-msg';
+  msg.style.display = 'none';
+
+  const payload = {
+    name: document.getElementById('req-name').value.trim(),
+    org: document.getElementById('req-org').value.trim(),
+    type: document.getElementById('req-type').value,
+    contact: document.getElementById('req-contact').value.trim(),
+    detail: document.getElementById('req-detail').value.trim(),
+    status: 'pending'
+  };
+
+  try {
+    const { error } = await sb.from('crew_requests').insert([payload]);
+    if (error) throw error;
+    msg.className = 'form-msg ok';
+    msg.textContent = '의뢰가 접수되었습니다. 검토 후 연락드리겠습니다.';
+    msg.style.display = 'block';
+    form.reset();
+    loadStats();
+  } catch (err) {
+    console.error(err);
+    msg.className = 'form-msg err';
+    msg.textContent = '제출 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+    msg.style.display = 'block';
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = '의뢰 제출';
+  }
+});
+
+// ── Resource Library ──
+const RESOURCES = [
+  {
+    id: 'local-support',
+    tag: 'research',
+    tagLabel: '조사/리서치',
+    title: '대전 지역 사회적경제 지원기관 현황',
+    desc: '대전 지역 내 사회적경제 지원기관, 프로그램, 타지역 벤치마킹 사례 조사 리포트.',
+    date: '2026-03-27',
+    file: 'data/research_local_support.md'
+  }
+];
+
+function renderResources(filter) {
+  const grid = document.getElementById('resourceGrid');
+  const filtered = filter === 'all' ? RESOURCES : RESOURCES.filter(r => r.tag === filter);
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div class="empty-state">해당 카테고리의 자료가 아직 없습니다.</div>';
+    return;
+  }
+
+  grid.innerHTML = filtered.map(r => `
+    <div class="resource-card" onclick="viewResource('${r.file}')">
+      <span class="tag tag-${r.tag}">${r.tagLabel}</span>
+      <h3>${r.title}</h3>
+      <p>${r.desc}</p>
+      <div class="meta">
+        <span>${r.date}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function viewResource(file) {
+  window.open(file, '_blank');
+}
+
+// Filters
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderResources(btn.dataset.filter);
+  });
+});
+
+// ── Stats ──
+async function loadStats() {
+  try {
+    const { count } = await sb.from('crew_requests').select('*', { count: 'exact', head: true });
+    document.getElementById('stat-requests').textContent = count ?? 0;
+  } catch { document.getElementById('stat-requests').textContent = '0'; }
+
+  document.getElementById('stat-resources').textContent = RESOURCES.length;
+  document.getElementById('stat-orgs').textContent = '—';
+}
+
+// ── Scroll Reveal ──
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── Init ──
+renderResources('all');
+loadStats();
+</script>
+</body>
+</html>
