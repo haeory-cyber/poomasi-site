@@ -460,6 +460,66 @@
   /* ── TASK ORDER SECTION ── */
   .task-order-section { margin-bottom: 3rem; }
 
+  .to-guide {
+    background: var(--soil);
+    border: 1px solid rgba(184,168,138,0.15);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .to-guide-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1rem;
+    color: var(--amber);
+    margin-bottom: 1rem;
+  }
+  .to-guide-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.2rem;
+  }
+  .to-guide-group {
+    background: rgba(45,31,20,0.5);
+    border-radius: 8px;
+    padding: 1rem;
+  }
+  .to-guide-role {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--amber-light);
+    margin-bottom: 0.6rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid rgba(184,168,138,0.1);
+  }
+  .to-guide-group ul {
+    list-style: none;
+    padding: 0;
+  }
+  .to-guide-group li {
+    font-size: 0.82rem;
+    color: var(--dust);
+    padding: 0.3rem 0;
+    padding-left: 1rem;
+    position: relative;
+  }
+  .to-guide-group li::before {
+    content: '"';
+    position: absolute;
+    left: 0;
+    color: var(--amber);
+    opacity: 0.5;
+  }
+  .to-guide-note {
+    font-size: 0.75rem;
+    color: var(--dust);
+    opacity: 0.6;
+    margin-top: 1rem;
+    text-align: center;
+  }
+  @media (max-width: 768px) {
+    .to-guide-grid { grid-template-columns: 1fr; }
+  }
+
   .to-login-box {
     background: var(--soil);
     border: 1px solid var(--bark);
@@ -1007,6 +1067,41 @@
   <section class="task-order-section" aria-label="업무지시">
     <h2 class="section-title">업무지시</h2>
 
+    <!-- 예시 가이드 -->
+    <div class="to-guide">
+      <h3 class="to-guide-title">이런 걸 지시할 수 있습니다</h3>
+      <div class="to-guide-grid">
+        <div class="to-guide-group">
+          <div class="to-guide-role">매장 운영</div>
+          <ul>
+            <li>홈페이지에 휴무/행사 공지 올려줘</li>
+            <li>진열 상품 정보 업데이트해줘</li>
+            <li>이번 달 매출 현황 정리해줘</li>
+            <li>조합원 총회 안내문 만들어줘</li>
+          </ul>
+        </div>
+        <div class="to-guide-group">
+          <div class="to-guide-role">행정 / 회계</div>
+          <ul>
+            <li>이번 달 출퇴근부 정리해줘</li>
+            <li>매장별 매출 비교해줘</li>
+            <li>조합원 가입 현황 정리해줘</li>
+            <li>거래명세서 양식 만들어줘</li>
+          </ul>
+        </div>
+        <div class="to-guide-group">
+          <div class="to-guide-role">경영 / 기획</div>
+          <ul>
+            <li>로컬크루 모집 공고 올려줘</li>
+            <li>회의 자료 정리해줘</li>
+            <li>지원사업 마감일 알려줘</li>
+            <li>바코드 봇이 안 돼 (장애 신고)</li>
+          </ul>
+        </div>
+      </div>
+      <p class="to-guide-note">* 이 목록은 계속 업데이트됩니다. 새로운 요청도 자유롭게 보내주세요.</p>
+    </div>
+
     <!-- Login Box -->
     <div class="to-login-box" id="to-login-box">
       <div id="to-login-form">
@@ -1284,7 +1379,8 @@
       userArea.style.display = 'block';
       formBox.style.display = 'block';
       noLoginMsg.style.display = 'none';
-      var name = (currentUser.user_metadata && currentUser.user_metadata.name) || currentUser.email;
+      var meta = currentUser.user_metadata || currentUser.raw_user_meta_data || {};
+      var name = meta.name || currentUser.email;
       document.getElementById('to-user-name').textContent = name;
     } else {
       loginForm.style.display = 'block';
@@ -1342,7 +1438,8 @@
     submitBtn.disabled = true;
     submitBtn.textContent = '등록 중...';
 
-    var userName = (currentUser.user_metadata && currentUser.user_metadata.name) || currentUser.email;
+    var umeta = currentUser.user_metadata || currentUser.raw_user_meta_data || {};
+    var userName = umeta.name || currentUser.email;
 
     try {
       var result = await sb.from('task_orders').insert({
