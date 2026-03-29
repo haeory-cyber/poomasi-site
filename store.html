@@ -788,6 +788,7 @@
       <button class="tab-btn"       onclick="switchTab('sms', event)">이음SMS</button>
       <button class="tab-btn"       onclick="switchTab('event', event)">이벤트등록</button>
       <button class="tab-btn"       onclick="switchTab('attend', event)">출퇴근부</button>
+      <button class="tab-btn"       onclick="switchTab('groupbuy', event)">공동구매</button>
     </nav>
   </div>
 
@@ -1161,6 +1162,32 @@
       </div>
     </div>
   </section>
+
+  <!-- ══ TAB: 공동구매 ══ -->
+  <section class="tab-content" id="tab-groupbuy">
+    <div class="sec-header">
+      <div>
+        <div class="sec-label">GROUP BUY</div>
+        <div class="sec-title">공동구매 관리</div>
+      </div>
+      <button class="btn-sm" onclick="loadGroupBuys()">↻ 새로고침</button>
+    </div>
+
+    <!-- 진행중 목록 -->
+    <div id="groupbuy-active-list"><div class="loading-row">로딩 중…</div></div>
+
+    <!-- 이전 공동구매 (접힌 섹션) -->
+    <div style="margin-top:2rem;border-top:1px solid rgba(196,128,58,0.15);padding-top:1rem;">
+      <div onclick="togglePastGroupBuys()" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:0.7rem 1rem;background:var(--surface);border-radius:6px;">
+        <span style="font-size:0.88rem;font-weight:600;color:var(--cream);">이전 공동구매</span>
+        <span id="past-groupbuy-arrow" style="color:var(--dust);font-size:0.8rem;transition:transform 0.2s;">▼</span>
+      </div>
+      <div id="past-groupbuy-body" style="display:none;margin-top:0.8rem;">
+        <div id="groupbuy-past-list"><div class="loading-row">로딩 중…</div></div>
+      </div>
+    </div>
+  </section>
+
 </div>
 
 <div class="tag-print-sheet" id="tag-print-sheet"></div>
@@ -1216,7 +1243,7 @@ sb.auth.getSession().then(({ data: { session } }) => {
 });
 
 // ── 탭 전환 ──────────────────────────────────────────────
-const TAB_IDS = { suppliers: 'tab-suppliers', tags: 'tab-tags', sms: 'tab-sms', event: 'tab-event', attend: 'tab-attend' };
+const TAB_IDS = { suppliers: 'tab-suppliers', tags: 'tab-tags', sms: 'tab-sms', event: 'tab-event', attend: 'tab-attend', groupbuy: 'tab-groupbuy' };
 
 function adjustContentPadding() {
   const nav = document.querySelector('.sticky-nav');
@@ -1241,6 +1268,92 @@ function onTabLoad(key) {
   if (key === 'attend') { initAttendTab(); loadAttendance(); loadMonthlySummary(); }
   if (key === 'suppliers') { if (typeof loadUnifiedOrders === 'function') loadUnifiedOrders(); }
   if (key === 'tags') { if (!_tagTabInited) { initTagTab(); _tagTabInited = true; } }
+  if (key === 'groupbuy') loadGroupBuys();
+}
+
+// ── 공동구매 ──────────────────────────────────────────────
+let _groupBuyData = [];
+
+async function loadGroupBuys() {
+  const activeEl = document.getElementById('groupbuy-active-list');
+  if (!activeEl) return;
+  activeEl.innerHTML = '<div class="loading-row">로딩 중…</div>';
+
+  const { data, error } = await sb
+    .from('group_buys')
+    .select('*')
+    .eq('is_active', true)
+    .order('status', { ascending: true })
+    .order('deadline', { ascending: true });
+
+  if (error) {
+    activeEl.innerHTML = `<div class="loading-row" style="color:var(--red);">불러오기 실패: ${error.message}</div>`;
+    return;
+  }
+
+  _groupBuyData = data || [];
+  renderGroupBuys();
+}
+
+function renderGroupBuys() {
+  const active = _groupBuyData.filter(r => r.status === '진행중');
+  const past   = _groupBuyData.filter(r => r.status !== '진행중');
+
+  document.getElementById('groupbuy-active-list').innerHTML =
+    active.length ? active.map(gbCard).join('') : '<div class="loading-row" style="color:var(--dust);">진행중인 공동구매가 없습니다.</div>';
+
+  const pastEl = document.getElementById('groupbuy-past-list');
+  if (pastEl) pastEl.innerHTML = past.length ? past.map(gbCard).join('') : '<div class="loading-row" style="color:var(--dust);">이전 공동구매가 없습니다.</div>';
+}
+
+function gbCard(r) {
+  const isActive  = r.status === '진행중';
+  const statusColor = isActive ? 'var(--amber)' : (r.status === '마감' ? 'var(--dust)' : 'var(--green, #5a9e6f)');
+  const borderColor = isActive ? 'rgba(196,128,58,0.5)' : 'rgba(100,100,100,0.25)';
+  const opacity     = isActive ? '1' : '0.6';
+
+  const deadlineStr  = r.deadline  ? new Date(r.deadline).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
+  const pickupStr    = r.pickup_date ? r.pickup_date.slice(5).replace('-', '/') + ' 수령' : '';
+
+  return `
+  <div class="card" style="margin-bottom:1rem;border:1px solid ${borderColor};opacity:${opacity};">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.6rem;">
+      <div>
+        <span style="font-size:1rem;font-weight:700;color:var(--cream);">${r.supplier}</span>
+        ${r.round ? `<span style="font-size:0.78rem;color:var(--dust);margin-left:0.4rem;">${r.round}차</span>` : ''}
+      </div>
+      <span style="font-size:0.72rem;font-weight:600;padding:0.2rem 0.6rem;border-radius:10px;background:${statusColor}22;color:${statusColor};border:1px solid ${statusColor}55;">${r.status}</span>
+    </div>
+    <div style="font-size:0.8rem;color:var(--dust);margin-bottom:0.8rem;display:flex;flex-wrap:wrap;gap:0.5rem 1.2rem;">
+      <span>마감 ${deadlineStr}</span>
+      ${pickupStr ? `<span>${pickupStr}</span>` : ''}
+    </div>
+    ${r.form_url ? `
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+      <button class="btn-sm" onclick="copyFormLink('${r.form_url}')">링크 복사</button>
+      <a href="${r.form_url}" target="_blank" class="btn-sm" style="text-decoration:none;display:inline-flex;align-items:center;">폼 열기 ↗</a>
+    </div>` : ''}
+  </div>`;
+}
+
+function copyFormLink(url) {
+  navigator.clipboard.writeText(url).then(() => toast('링크를 복사했습니다.')).catch(() => {
+    const t = document.createElement('textarea');
+    t.value = url;
+    document.body.appendChild(t);
+    t.select();
+    document.execCommand('copy');
+    document.body.removeChild(t);
+    toast('링크를 복사했습니다.');
+  });
+}
+
+function togglePastGroupBuys() {
+  const body  = document.getElementById('past-groupbuy-body');
+  const arrow = document.getElementById('past-groupbuy-arrow');
+  const open  = body.style.display === 'none';
+  body.style.display  = open ? 'block' : 'none';
+  arrow.style.transform = open ? 'rotate(180deg)' : '';
 }
 
 // ── 공통 유틸 ─────────────────────────────────────────────
