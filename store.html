@@ -1375,6 +1375,19 @@ function gbCard(r) {
   const deadlineStr  = r.deadline  ? new Date(r.deadline).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
   const pickupStr    = r.pickup_date ? r.pickup_date.slice(5).replace('-', '/') + ' 수령' : '';
 
+  // 응답수 및 items 집계 표시
+  const responseCount = r.response_count || 0;
+  const items = r.items || {};
+  const itemKeys = Object.keys(items);
+  const itemsSummaryHtml = itemKeys.length > 0
+    ? `<div style="margin-top:0.6rem;padding:0.5rem 0.6rem;background:rgba(196,128,58,0.07);border-radius:4px;border:1px solid rgba(196,128,58,0.15);">
+        <div style="font-size:0.72rem;color:var(--amber);font-weight:600;margin-bottom:0.3rem;">신청 집계 (${responseCount}명)</div>
+        ${itemKeys.map(k => `<div style="font-size:0.78rem;color:var(--cream);display:flex;justify-content:space-between;"><span>${k}</span><span style="color:var(--amber);font-weight:600;">${items[k]}개</span></div>`).join('')}
+      </div>`
+    : (responseCount > 0
+        ? `<div style="margin-top:0.5rem;font-size:0.78rem;color:var(--dust);">신청 ${responseCount}명 (집계 없음)</div>`
+        : '');
+
   return `
   <div class="card" style="margin-bottom:1rem;border:1px solid ${borderColor};opacity:${opacity};">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.6rem;">
@@ -1384,15 +1397,18 @@ function gbCard(r) {
       </div>
       <span style="font-size:0.72rem;font-weight:600;padding:0.2rem 0.6rem;border-radius:10px;background:${statusColor}22;color:${statusColor};border:1px solid ${statusColor}55;">${r.status}</span>
     </div>
-    <div style="font-size:0.8rem;color:var(--dust);margin-bottom:0.8rem;display:flex;flex-wrap:wrap;gap:0.5rem 1.2rem;">
+    <div style="font-size:0.8rem;color:var(--dust);margin-bottom:0.5rem;display:flex;flex-wrap:wrap;gap:0.5rem 1.2rem;">
       <span>마감 ${deadlineStr}</span>
       ${pickupStr ? `<span>${pickupStr}</span>` : ''}
     </div>
+    ${itemsSummaryHtml}
     ${r.form_url ? `
-    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.7rem;align-items:center;">
       <button class="btn-sm" onclick="copyFormLink('${r.form_url}')">링크 복사</button>
       <a href="${r.form_url}" target="_blank" class="btn-sm" style="text-decoration:none;display:inline-flex;align-items:center;">폼 열기 ↗</a>
+      <button class="btn-sm" style="background:rgba(90,158,111,0.15);border-color:var(--green,#5a9e6f);color:var(--green,#5a9e6f);" onclick="toggleOrderPanel(${r.id})">주문현황 ${responseCount > 0 ? responseCount + '건' : ''}</button>
     </div>` : ''}
+    <div id="gb-orders-${r.id}" style="display:none;margin-top:0.8rem;border-top:1px solid rgba(184,168,138,0.1);padding-top:0.8rem;"></div>
   </div>`;
 }
 
@@ -1406,6 +1422,85 @@ function copyFormLink(url) {
     document.body.removeChild(t);
     toast('링크를 복사했습니다.');
   });
+}
+
+// ── 주문현황 패널 ──
+async function toggleOrderPanel(gbId) {
+  const panel = document.getElementById('gb-orders-' + gbId);
+  if (!panel) return;
+  if (panel.style.display !== 'none') { panel.style.display = 'none'; return; }
+  panel.style.display = 'block';
+  panel.innerHTML = '<div style="font-size:0.8rem;color:var(--dust);">로딩 중…</div>';
+  await loadGbOrders(gbId);
+}
+
+async function loadGbOrders(gbId) {
+  const panel = document.getElementById('gb-orders-' + gbId);
+  if (!panel) return;
+  const { data, error } = await sb.from('group_buy_orders')
+    .select('*')
+    .eq('group_buy_id', gbId)
+    .order('submitted_at', { ascending: true });
+  if (error || !data) { panel.innerHTML = '<div style="font-size:0.8rem;color:var(--dust);">조회 실패</div>'; return; }
+  if (data.length === 0) { panel.innerHTML = '<div style="font-size:0.8rem;color:var(--dust);">주문 없음 — 워커 동기화 후 표시됩니다.</div>'; return; }
+  renderGbOrders(gbId, data);
+}
+
+function renderGbOrders(gbId, orders) {
+  const panel = document.getElementById('gb-orders-' + gbId);
+  if (!panel) return;
+  const paidCount = orders.filter(o => o.payment_done).length;
+  const pickedCount = orders.filter(o => o.pickup_done).length;
+
+  const rows = orders.map(o => {
+    const items = o.items || {};
+    const itemStr = Object.entries(items).map(([k, v]) => {
+      const short = k.replace(/\s*[\(（].*/, '').replace(/\s*[—\-–].*/, '').trim();
+      return short + (v && v !== '0' ? v : '');
+    }).filter(Boolean).join(', ') || '-';
+
+    return `<tr style="border-bottom:1px solid rgba(184,168,138,0.06);">
+      <td style="padding:0.4rem 0.5rem;font-size:0.82rem;color:var(--cream);font-weight:500;white-space:nowrap;">${o.orderer_name}</td>
+      <td style="padding:0.4rem 0.5rem;font-size:0.78rem;color:var(--dust);max-width:200px;overflow:hidden;text-overflow:ellipsis;">${itemStr}</td>
+      <td style="padding:0.4rem 0.5rem;font-size:0.75rem;color:var(--dust);white-space:nowrap;">${o.payment_method || '-'}</td>
+      <td style="padding:0.4rem 0.3rem;text-align:center;">
+        <input type="checkbox" ${o.payment_done ? 'checked' : ''} onchange="toggleOrderCheck(${o.id},'payment_done',this.checked)"
+          style="width:18px;height:18px;cursor:pointer;accent-color:var(--green,#5a9e6f);">
+      </td>
+      <td style="padding:0.4rem 0.3rem;text-align:center;">
+        <input type="checkbox" ${o.pickup_done ? 'checked' : ''} onchange="toggleOrderCheck(${o.id},'pickup_done',this.checked)"
+          style="width:18px;height:18px;cursor:pointer;accent-color:var(--amber);">
+      </td>
+    </tr>`;
+  }).join('');
+
+  panel.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+      <span style="font-size:0.78rem;font-weight:600;color:var(--cream);">주문현황 (${orders.length}건)</span>
+      <button class="btn-sm" style="font-size:0.7rem;" onclick="loadGbOrders(${gbId})">↻</button>
+    </div>
+    <div style="overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
+      <thead><tr style="border-bottom:1px solid rgba(196,128,58,0.15);">
+        <th style="padding:0.35rem 0.5rem;text-align:left;color:var(--dust);font-weight:500;font-size:0.72rem;">주문자</th>
+        <th style="padding:0.35rem 0.5rem;text-align:left;color:var(--dust);font-weight:500;font-size:0.72rem;">상품</th>
+        <th style="padding:0.35rem 0.5rem;text-align:left;color:var(--dust);font-weight:500;font-size:0.72rem;">결제방법</th>
+        <th style="padding:0.35rem 0.3rem;text-align:center;color:var(--dust);font-weight:500;font-size:0.72rem;">결제</th>
+        <th style="padding:0.35rem 0.3rem;text-align:center;color:var(--dust);font-weight:500;font-size:0.72rem;">수령</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    </div>
+    <div style="margin-top:0.5rem;font-size:0.75rem;color:var(--dust);display:flex;gap:1rem;">
+      <span>결제완료 <b style="color:var(--green,#5a9e6f);">${paidCount}/${orders.length}</b></span>
+      <span>수령완료 <b style="color:var(--amber);">${pickedCount}/${orders.length}</b></span>
+    </div>`;
+}
+
+async function toggleOrderCheck(orderId, field, checked) {
+  const { error } = await sb.from('group_buy_orders').update({ [field]: checked }).eq('id', orderId);
+  if (error) { toast('업데이트 실패: ' + error.message); return; }
+  toast(checked ? (field === 'payment_done' ? '결제 확인됨 ✓' : '수령 확인됨 ✓') : '체크 해제됨');
 }
 
 function togglePastGroupBuys() {
