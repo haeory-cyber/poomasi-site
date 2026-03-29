@@ -106,7 +106,7 @@ def save_to_supabase(announcements: list) -> None:
     ]
 
     resp = requests.post(
-        f'{SUPABASE_URL}/rest/v1/bizinfo_grants',
+        f'{SUPABASE_URL}/rest/v1/bizinfo_grants?on_conflict=title,fetched_at',
         json=rows,
         headers={
             'apikey':        SUPABASE_KEY,
@@ -116,8 +116,10 @@ def save_to_supabase(announcements: list) -> None:
         },
     )
 
-    if resp.status_code in (200, 201):
-        print(f'[OK] {len(rows)}건 저장 완료')
+    if resp.status_code < 300:
+        print(f'[OK] {len(rows)}건 저장(upsert) 완료')
+    elif resp.status_code == 409:
+        print(f'[WARN] 중복 공고 존재, 무시: {resp.text[:200]}')
     else:
         print(f'[ERROR] 저장 실패: {resp.status_code} {resp.text[:200]}', file=sys.stderr)
         sys.exit(1)
