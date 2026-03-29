@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI경영지원실 — 품앗이생협</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23c4803a'/><text x='16' y='22' text-anchor='middle' font-size='18' fill='%230f0b07'>品</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;700;900&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+  :root {
+    --earth: #0f0b07;
+    --soil: #1e1510;
+    --bark: #2d1f14;
+    --amber: #c4803a;
+    --amber-light: #e8a55a;
+    --green: #3d5c35;
+    --green-light: #5a8a4e;
+    --cream: #f2ead8;
+    --dust: #b8a88a;
+    --red: #b83a2a;
+    --white: #faf7f0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--earth);
+    color: var(--cream);
+    font-family: 'Noto Sans KR', sans-serif;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* ── HEADER ── */
+  header {
+    padding: 2rem 2rem 1rem;
+    border-bottom: 1px solid var(--bark);
+    position: relative;
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .back-link {
+    font-size: 0.85rem;
+    color: var(--dust);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: var(--amber); }
+
+  .header-title {
+    text-align: center;
+  }
+  .header-title h1 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--amber);
+    letter-spacing: 0.05em;
+  }
+  .header-title p {
+    font-size: 0.9rem;
+    color: var(--dust);
+    margin-top: 0.3rem;
+  }
+
+  /* ── CONTAINER ── */
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  .section-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--amber-light);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--bark);
+  }
+
+  /* ── SVG AGENT ICONS ── */
+  .agent-icon {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+  }
+  .agent-icon-sm {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+  .agent-icon-lg {
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+  }
+
+  /* ── ORG CHART ── */
+  .org-section {
+    margin-bottom: 3rem;
+  }
+
+  .org-chart {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .org-node {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: var(--soil);
+    border: 1px solid var(--bark);
+    border-radius: 10px;
+    padding: 0.6rem 1.2rem;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.15s;
+    text-decoration: none;
+    color: inherit;
+  }
+  .org-node:hover {
+    border-color: var(--amber);
+    transform: translateY(-2px);
+  }
+
+  .org-node-name {
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: var(--cream);
+  }
+  .org-node-role {
+    font-size: 0.75rem;
+    color: var(--dust);
+  }
+
+  .org-connector {
+    width: 2px;
+    height: 24px;
+    background: var(--bark);
+  }
+
+  .org-branch-connector {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    position: relative;
+  }
+  .org-branch-connector::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 25%;
+    right: 25%;
+    height: 2px;
+    background: var(--bark);
+  }
+
+  .org-teams {
+    display: flex;
+    gap: 3rem;
+    justify-content: center;
+    width: 100%;
+    margin-top: 0;
+  }
+
+  .org-team {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    flex: 1;
+    max-width: 420px;
+  }
+
+  .org-team-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--amber);
+    background: var(--bark);
+    padding: 0.25rem 0.8rem;
+    border-radius: 20px;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.05em;
+  }
+
+  .org-team-members {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    width: 100%;
+  }
+
+  .org-h-group {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* ── CARDS ── */
+  .cards-section {
+    margin-bottom: 3rem;
+  }
+
+  .team-group {
+    margin-bottom: 2rem;
+  }
+  .team-group-title {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--amber);
+    margin-bottom: 0.8rem;
+    padding-left: 0.5rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+  }
+
+  .agent-card {
+    background: var(--soil);
+    border: 1px solid var(--bark);
+    border-radius: 12px;
+    padding: 1.2rem;
+    transition: border-color 0.2s;
+  }
+  .agent-card:hover {
+    border-color: var(--amber);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 0.8rem;
+  }
+  .card-header h3 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.1rem;
+    color: var(--cream);
+  }
+  .card-header .card-role {
+    font-size: 0.8rem;
+    color: var(--dust);
+  }
+
+  .card-tasks {
+    list-style: none;
+    padding: 0;
+  }
+  .card-tasks li {
+    font-size: 0.85rem;
+    color: var(--dust);
+    padding: 0.3rem 0;
+    padding-left: 1rem;
+    position: relative;
+  }
+  .card-tasks li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    transform: translateY(-50%);
+    background: var(--amber);
+  }
+
+  /* ── GANTT ── */
+  .gantt-section {
+    margin-bottom: 3rem;
+  }
+
+  .gantt-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .gantt-row {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    min-height: 40px;
+  }
+
+  .gantt-label {
+    width: 140px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--cream);
+  }
+  .gantt-label .task-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .gantt-track {
+    flex: 1;
+    height: 28px;
+    background: var(--soil);
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--bark);
+  }
+
+  .gantt-bar {
+    position: absolute;
+    top: 3px;
+    bottom: 3px;
+    border-radius: 4px;
+    min-width: 20px;
+    display: flex;
+    align-items: center;
+    padding: 0 0.5rem;
+    font-size: 0.7rem;
+    color: var(--earth);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .gantt-bar[data-status="진행중"] { background: var(--amber); }
+  .gantt-bar[data-status="완료"] { background: var(--green-light); }
+  .gantt-bar[data-status="기획중"] { background: var(--dust); }
+
+  .gantt-header {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--bark);
+  }
+  .gantt-header-label {
+    width: 140px;
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    color: var(--dust);
+  }
+  .gantt-header-dates {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: var(--dust);
+  }
+
+  .status-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 10px;
+    font-weight: 500;
+    margin-left: 0.5rem;
+  }
+  .status-badge.진행중 { background: var(--amber); color: var(--earth); }
+  .status-badge.완료 { background: var(--green-light); color: var(--earth); }
+  .status-badge.기획중 { background: var(--dust); color: var(--earth); }
+
+  /* ── LEGEND ── */
+  .gantt-legend {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--dust);
+  }
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+  }
+
+  /* ── LOADING ── */
+  .loading-msg {
+    font-size: 0.85rem;
+    color: var(--dust);
+    text-align: center;
+    padding: 1rem;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .header-title h1 { font-size: 1.5rem; }
+    .org-teams { flex-direction: column; gap: 1.5rem; align-items: center; }
+    .org-team { max-width: 100%; }
+    .cards-grid { grid-template-columns: 1fr; }
+    .gantt-label { width: 100px; font-size: 0.7rem; }
+    .gantt-row { gap: 0.4rem; }
+    header { padding: 1.5rem 1rem 1rem; }
+    .container { padding: 1.5rem 1rem 3rem; }
+  }
+
+  /* ── FOCUS VISIBLE ── */
+  a:focus-visible, .org-node:focus-visible {
+    outline: 2px solid var(--amber);
+    outline-offset: 2px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header>
+  <div class="header-top">
+    <a href="index.html" class="back-link" aria-label="홈으로 돌아가기">&larr; 홈으로</a>
+    <span style="font-size:0.75rem;color:var(--dust);">v1.0</span>
+  </div>
+  <div class="header-title">
+    <h1>AI경영지원실</h1>
+    <p>품앗이생협 에이전트 팀 대시보드</p>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- ── 1. ORG CHART ── -->
+  <section class="org-section" aria-label="조직도">
+    <h2 class="section-title">조직도</h2>
+
+    <div class="org-chart">
+      <!-- 후니님 -->
+      <a href="#card-jimmy" class="org-node" aria-label="후니님 - 대표">
+        <svg class="agent-icon-sm" viewBox="0 0 48 48" aria-hidden="true">
+          <circle cx="24" cy="14" r="8" fill="var(--white)"/>
+          <path d="M10 42c0-10 6-16 14-16s14 6 14 16" fill="var(--white)"/>
+          <circle cx="24" cy="14" r="6" fill="var(--earth)"/>
+          <path d="M14 42c0-8 4-12 10-12s10 4 10 12" fill="var(--earth)"/>
+          <circle cx="24" cy="14" r="6" fill="var(--cream)"/>
+          <path d="M14 42c0-8 4-12 10-12s10 4 10 12" fill="var(--cream)"/>
+          <circle cx="24" cy="6" r="4" fill="var(--amber)" opacity="0.7"/>
+        </svg>
+        <div>
+          <div class="org-node-name">후니님</div>
+          <div class="org-node-role">대표</div>
+        </div>
+      </a>
+
+      <div class="org-connector"></div>
+
+      <!-- 지미 -->
+      <a href="#card-jimmy" class="org-node" style="border-color:var(--amber);" aria-label="지미 - AI경영지원실장">
+        <svg class="agent-icon" viewBox="0 0 48 48" id="icon-jimmy" aria-hidden="true">
+          <circle cx="24" cy="15" r="9" fill="var(--amber)"/>
+          <path d="M8 46c0-12 7-18 16-18s16 6 16 18" fill="var(--amber)"/>
+          <rect x="18" y="28" width="12" height="3" rx="1" fill="var(--amber-light)"/>
+          <circle cx="21" cy="14" r="1.5" fill="var(--earth)"/>
+          <circle cx="27" cy="14" r="1.5" fill="var(--earth)"/>
+        </svg>
+        <div>
+          <div class="org-node-name">지미</div>
+          <div class="org-node-role">AI경영지원실장</div>
+        </div>
+      </a>
+
+      <div class="org-connector"></div>
+
+      <!-- Branch split -->
+      <div class="org-teams">
+        <!-- 실무팀 -->
+        <div class="org-team">
+          <div class="org-team-label">실무팀</div>
+          <div class="org-h-group">
+            <a href="#card-gunho" class="org-node" aria-label="건호 - 개발팀장">
+              <svg class="agent-icon-sm" viewBox="0 0 48 48" aria-hidden="true">
+                <circle cx="24" cy="15" r="9" fill="var(--green-light)"/>
+                <path d="M8 46c0-12 7-18 16-18s16 6 16 18" fill="var(--green-light)"/>
+                <rect x="19" y="30" width="10" height="6" rx="2" fill="var(--green)" opacity="0.6"/>
+                <circle cx="21" cy="14" r="1.5" fill="var(--earth)"/>
+                <circle cx="27" cy="14" r="1.5" fill="var(--earth)"/>
+              </svg>
+              <div>
+                <div class="org-node-name">건호</div>
+                <div class="org-node-role">개발팀장</div>
+              </div>
+            </a>
+            <a href="#card-daon" class="org-node" aria-label="다온 - 문서디자인팀장">
+              <svg class="agent-icon-sm" viewBox="0 0 48 48" aria-hidden="true">
+                <circle cx="24" cy="15" r="9" fill="var(--cream)"/>
+                <path d="M8 46c0-12 7-18 16-18s16 6 16 18" fill="var(--amber-light)"/>
+                <rect x="20" y="29" width="8" height="8" rx="1" fill="var(--cream)" opacity="0.5"/>
+                <circle cx="21" cy="14" r="1.5" fill="var(--earth)"/>
+                <circle cx="27" cy="14" r="1.5" fill="var(--earth)"/>
+              </svg>
+              <div>
+                <div class="org-node-name">다온</div>
+                <div class="org-node-role">문서디자인팀장</div>
+              </div>
+            </a>
+            <a href="#card-eden" class="org-node" aria-label="이든 - 연결팀장">
+              <svg class="agent-icon-sm" viewBox="0 0 48 48" aria-hidden="true">
+                <circle cx="24" cy="15" r="9" fill="var(--dust)"/>
+                <path d="M8 46c0-12 7-18 16-18s16 6 16 18" fill="var(--dust)"/>
+                <path d="M18 32 l6-3 l6 3" stroke="var(--cream)" stroke-width="2" fill="none" opacity="0.5"/>
+                <circle cx="21" cy="14" r="1.5" fill="var(--earth)"/>
+                <circle cx="27" cy="14" r="1.5" fill="var(--earth)"/>
+              </svg>
+              <div>
+                <div class="org-node-name">이든</div>
+                <div class="org-node-role">연결팀장</div>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <!-- PDCA팀 -->
+        <div class="org-team">
+          <div class="org-team-label">PDCA팀</div>
+          <div class="org-h-group">
+            <a href="#card-gijun" class="org-node" aria-label="기준 - 기획팀장">
+              <svg class="agent-icon-sm" viewBox="0 0 48 48" aria-hidden="true">
+                <circle cx="24" cy="15" r="9" fill="var(--amber)"/>
+                <path d="M8 46c0-12 7-18 16-18s16 6 16 18" fill="var(--amber)"/>
+                <rect x="20" y="8" width="8" height="4" rx="1" fill="var(--amber-light)" opacity="0.6"/>
+                <circle cx="21" cy="14" r="1.5" fill="var(--earth)"/>
+                <circle cx="27" cy="14" r="1.5" fill="var(--earth)"/>
+              </svg>
+              <div>
+                <div class="org-node-name">기준</div>
+                <div class="org-node-role">기획팀장</div>
+              </div>
+            </a>
+            <a href="#card-sihyun" class="org-node" aria-label="시현 - 검증팀장">
+              <svg class="agent-icon-sm" viewBox="0 0 48 48" aria-hidden="true">
+                <circle cx="24" cy="15" r="9" fill="var(--red)"/>
+                <path d="M8 46c0-12 7-18 16-18s16 6 16 18" fill="var(--red)"/>
+                <path d="M19 15 l4 4 l8-8" stroke="var(--white)" stroke-width="2.5" fill="none"/>
+                <circle cx="21" cy="14" r="1.5" fill="var(--earth)"/>
+                <circle cx="27" cy="14" r="1.5" fill="var(--earth)"/>
+              </svg>
+              <div>
+                <div class="org-node-name">시현</div>
+                <div class="org-node-role">검증팀장</div>
+              </div>
+            </a>
+            <a href="#card-sima" class="org-node" aria-label="심아 - 문서검증팀장">
+              <svg class="agent-icon-sm" viewBox="0 0 48 48" aria-hidden="true">
+                <circle cx="24" cy="15" r="9" fill="var(--dust)"/>
+                <path d="M8 46c0-12 7-18 16-18s16 6 16 18" fill="var(--cream)"/>
+                <rect x="20" y="30" width="8" height="6" rx="1" fill="var(--dust)" opacity="0.5"/>
+                <circle cx="21" cy="14" r="1.5" fill="var(--earth)"/>
+                <circle cx="27" cy="14" r="1.5" fill="var(--earth)"/>
+              </svg>
+              <div>
+                <div class="org-node-name">심아</div>
+                <div class="org-node-role">문서검증팀장</div>
+              </div>
+            </a>
+            <a href="#card-hwani" class="org-node" aria-label="환이 - 개선팀장">
+              <svg class="agent-icon-sm" viewBox="0 0 48 48" aria-hidden="true">
+                <circle cx="24" cy="15" r="9" fill="var(--green)"/>
+                <path d="M8 46c0-12 7-18 16-18s16 6 16 18" fill="var(--green)"/>
+                <path d="M20 34 l4-6 l4 6" stroke="var(--green-light)" stroke-width="2" fill="none"/>
+                <circle cx="21" cy="14" r="1.5" fill="var(--earth)"/>
+                <circle cx="27" cy="14" r="1.5" fill="var(--earth)"/>
+              </svg>
+              <div>
+                <div class="org-node-name">환이</div>
+                <div class="org-node-role">개선팀장</div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 2. AGENT CARDS ── -->
+  <section class="cards-section" aria-label="업무분장">
+    <h2 class="section-title">업무분장</h2>
+
+    <!-- 총괄 -->
+    <div class="team-group">
+      <div class="team-group-title">총괄</div>
+      <div class="cards-grid">
+        <article class="agent-card" id="card-jimmy">
+          <div class="card-header">
+            <svg class="agent-icon" viewBox="0 0 48 48" aria-hidden="true"><use href="#icon-jimmy"/></svg>
+            <div>
+              <h3>지미</h3>
+              <span class="card-role">AI경영지원실장</span>
+            </div>
+          </div>
+          <ul class="card-tasks">
+            <li>총괄 지휘, 방향 설정</li>
+            <li>업무 배분 및 우선순위 결정</li>
+            <li>후니님 의사결정 지원</li>
+            <li>에이전트 팀 코디네이션</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+
+    <!-- 실무팀 -->
+    <div class="team-group">
+      <div class="team-group-title">실무팀</div>
+      <div class="cards-grid">
+        <article class="agent-card" id="card-gunho">
+          <div class="card-header">
+            <svg class="agent-icon" viewBox="0 0 48 48" aria-hidden="true">
+              <circle cx="24" cy="15" r="9" fill="var(--green-light)"/>
+              <path d="M8 46c0-12 7-18 16-18s16 6 16 18" fill="var(--green-light)"/>
+              <rect x="19" y="30" width="10" height="6" rx="2" fill="var(--green)" opacity="0.6"/>
+              <circle cx="21" cy="14" r="1.5" fill="var(--earth)"/>
+              <circle cx="27" cy="14" r="1.5" fill="var(--earth)"/>
+            </svg>
+            <div>
+              <h3>건호</h3>
+              <span class="card-role">개발팀장</span>
+            </div>
+          </div>
+          <ul class="card-tasks">
+            <li>웹 페이지/기능 개발 (HTML, CSS, JS)</li>
+            <li>Python 스크립트, 봇 개발</li>
+            <li>버그 수정, 디버깅</li>
+            <li>인프라 코드 (배포 스크립트, 자동화)</li>
+          </ul>
+        </article>
+
+        <article class="agent-card" id="card-daon">
+          <div class="card-header">
+            <svg class="agent-icon" viewBox="0 0 48 48" aria-hidden="true">
+              <circle cx="24" cy="15" r="9" fill="var(--cream)"/>
+              <path d="M8 46c0-12 7-18 16-18s16 6 16 18" fill="var(--amber-light)"/>
+              <rect x="20" y="29" width="8" height="8" rx="1" fill="var(--cream)" opacity="0.5"/>
+              <circle cx="21" cy="14" r="1.5" fill="var(--earth)"/>
+              <circle cx="27" cy="14" r="1.5" fill="var(--earth)"/>
+            </svg>
+            <div>
+              <h3>다온</h3>
+              <span class="card-role">문서디자인팀장</span>
+            </div>
+          </div>
+          <ul class="card-tasks">
+            <li>지원사업 신청서, 경영보고서</li>
+            <li>PPT, 프레젠테이션 제작</li>
+            <li>가격태그, POP 디자인</li>
+            <li>마케팅 콘텐츠 제작</li>
+          </ul>
+        </article>
+
+        <article class="agent-card" id="card-eden">
+          <div class="card-header">
+            <svg class="agent-icon" viewBox="0 0 48 48" aria-hidden="true">
+              <circle cx="24" cy="15" r="9" fill="var(--dust)"/>
+              <path d="M8 46c0-12 7-18 16-18s16 6 16 18" fill="var(--dust)"/>
+              <path d="M18 32 l6-3 l6 3" stroke="var(--cream)" stroke-width="2" fill="none" opacity="0.5"/>
+              <circle cx="21" cy="14" r="1.5" fill="var(--earth)"/>
+              <circle cx="27" cy="14" r="1.5" fill="var(--earth)"/>
+            </svg>
+            <div>
+              <h3>이든</h3>
+              <span class="card-role">연결팀장</span>
+            </div>
+          </div>
+          <ul class="card-tasks">
+            <li>대외소통 추적 (이메일, 전화)</li>
+            <li>시스템 연동 관리</li>
+            <li>일정 관리, 마감 추적</li>
+            <li>텔레그램 채널 운영</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+
+    <!-- PDCA팀 -->
+    <div class="team-group">
+      <div class="team-group-title">PDCA팀</div>
+      <div class="cards-grid">
+        <article class="agent-card" id="card-gijun">
+          <div class="card-header">
+            <svg class="agent-icon" viewBox="0 0 48 48" aria-hidden="true">
+              <circle cx="24" cy="15" r="9" fill="var(--amber)"/>
+              <path d="M8 46c0-12 7-18 16-18s16 6 16 18" fill="var(--amber)"/>
+              <rect x="20" y="8" width="8" height="4" rx="1" fill="var(--amber-light)" opacity="0.6"/>
+              <circle cx="21" cy="14" r="1.5" fill="var(--earth)"/>
+              <circle cx="27" cy="14" r="1.5" fill="var(--earth)"/>
+            </svg>
+            <div>
+              <h3>기준</h3>
+              <span class="card-role">기획팀장</span>
+            </div>
+          </div>
+          <ul class="card-tasks">
+            <li>스펙 확장, 요구사항 구체화</li>
+            <li>완료 기준(DoD) 정의</li>
+            <li>작업 분해, 마일스톤 설정</li>
+          </ul>
+        </article>
+
+        <article class="agent-card" id="card-sihyun">
+          <div class="card-header">
+            <svg class="agent-icon" viewBox="0 0 48 48" aria-hidden="true">
+              <circle cx="24" cy="15" r="9" fill="var(--red)"/>
+              <path d="M8 46c0-12 7-18 16-18s16 6 16 18" fill="var(--red)"/>
+              <path d="M19 15 l4 4 l8-8" stroke="var(--white)" stroke-width="2.5" fill="none"/>
+              <circle cx="21" cy="14" r="1.5" fill="var(--earth)"/>
+              <circle cx="27" cy="14" r="1.5" fill="var(--earth)"/>
+            </svg>
+            <div>
+              <h3>시현</h3>
+              <span class="card-role">검증팀장</span>
+            </div>
+          </div>
+          <ul class="card-tasks">
+            <li>Playwright 자동 코드 검증</li>
+            <li>UI/UX 기능 테스트</li>
+            <li>크로스브라우저 호환성 확인</li>
+          </ul>
+        </article>
+
+        <article class="agent-card" id="card-sima">
+          <div class="card-header">
+            <svg class="agent-icon" viewBox="0 0 48 48" aria-hidden="true">
+              <circle cx="24" cy="15" r="9" fill="var(--dust)"/>
+              <path d="M8 46c0-12 7-18 16-18s16 6 16 18" fill="var(--cream)"/>
+              <rect x="20" y="30" width="8" height="6" rx="1" fill="var(--dust)" opacity="0.5"/>
+              <circle cx="21" cy="14" r="1.5" fill="var(--earth)"/>
+              <circle cx="27" cy="14" r="1.5" fill="var(--earth)"/>
+            </svg>
+            <div>
+              <h3>심아</h3>
+              <span class="card-role">문서검증팀장</span>
+            </div>
+          </div>
+          <ul class="card-tasks">
+            <li>문서 품질 4축 검증</li>
+            <li>정합성, 완결성 체크</li>
+            <li>오탈자, 수치 교차검증</li>
+          </ul>
+        </article>
+
+        <article class="agent-card" id="card-hwani">
+          <div class="card-header">
+            <svg class="agent-icon" viewBox="0 0 48 48" aria-hidden="true">
+              <circle cx="24" cy="15" r="9" fill="var(--green)"/>
+              <path d="M8 46c0-12 7-18 16-18s16 6 16 18" fill="var(--green)"/>
+              <path d="M20 34 l4-6 l4 6" stroke="var(--green-light)" stroke-width="2" fill="none"/>
+              <circle cx="21" cy="14" r="1.5" fill="var(--earth)"/>
+              <circle cx="27" cy="14" r="1.5" fill="var(--earth)"/>
+            </svg>
+            <div>
+              <h3>환이</h3>
+              <span class="card-role">개선팀장</span>
+            </div>
+          </div>
+          <ul class="card-tasks">
+            <li>레슨/스킬/메모리 환류</li>
+            <li>PDCA 사이클 분석</li>
+            <li>반복 실패 패턴 개선 제안</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 3. GANTT CHART ── -->
+  <section class="gantt-section" aria-label="업무현황">
+    <h2 class="section-title">업무현황</h2>
+
+    <div class="gantt-legend">
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--amber);"></div>
+        <span>진행중</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--green-light);"></div>
+        <span>완료</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--dust);"></div>
+        <span>기획중</span>
+      </div>
+    </div>
+
+    <div class="gantt-header">
+      <div class="gantt-header-label">에이전트 / 업무</div>
+      <div class="gantt-header-dates" id="gantt-dates"></div>
+    </div>
+
+    <div class="gantt-chart" id="gantt-chart">
+      <div class="loading-msg">데이터 로딩 중...</div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+(function() {
+  'use strict';
+
+  // ── Supabase Config ──
+  const SUPABASE_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRuaXZoY3BqcmhrbWVrY2ZxZ2RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NTc5MjMsImV4cCI6MjA4NzIzMzkyM30.yJ0_4Sg78p7oY89q7go3ab26PCPHnk1Q4ObZJIZEULA';
+
+  // ── Fallback Data ──
+  const INITIAL_TASKS = [
+    { agent_name: '건호', task_title: '에이전트 대시보드 개발', status: '진행중', start_date: '2026-03-29', end_date: null },
+    { agent_name: '건호', task_title: '바코드 봇 유지보수', status: '완료', start_date: '2026-03-15', end_date: '2026-03-20' },
+    { agent_name: '다온', task_title: '탄소중립 지원사업 신청서', status: '기획중', start_date: '2026-04-01', end_date: null },
+    { agent_name: '다온', task_title: '가격태그 시스템', status: '완료', start_date: '2026-03-10', end_date: '2026-03-18' },
+    { agent_name: '이든', task_title: '대외소통 추적 체계 구축', status: '기획중', start_date: '2026-04-01', end_date: null },
+    { agent_name: '이든', task_title: '텔레그램 채널 운영', status: '진행중', start_date: '2026-03-01', end_date: null },
+    { agent_name: '기준', task_title: '대시보드 기획', status: '완료', start_date: '2026-03-29', end_date: '2026-03-29' },
+    { agent_name: '시현', task_title: '홈페이지 QA 검증', status: '진행중', start_date: '2026-03-25', end_date: null },
+    { agent_name: '심아', task_title: '경영보고서 검증', status: '기획중', start_date: '2026-04-05', end_date: null },
+    { agent_name: '환이', task_title: 'PDCA v2 환류 분석', status: '완료', start_date: '2026-03-28', end_date: '2026-03-29' },
+  ];
+
+  // ── Gantt Helpers ──
+  function parseDate(str) {
+    if (!str) return null;
+    const parts = str.split('-');
+    return new Date(+parts[0], +parts[1] - 1, +parts[2]);
+  }
+
+  function daysBetween(a, b) {
+    return Math.round((b - a) / (1000 * 60 * 60 * 24));
+  }
+
+  function formatDate(d) {
+    const m = d.getMonth() + 1;
+    const day = d.getDate();
+    return m + '/' + day;
+  }
+
+  function getGanttRange(tasks) {
+    let min = new Date('2099-01-01');
+    let max = new Date('2000-01-01');
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    tasks.forEach(function(t) {
+      const s = parseDate(t.start_date);
+      const e = parseDate(t.end_date) || today;
+      if (s && s < min) min = s;
+      if (e > max) max = e;
+    });
+
+    // Add 2 days padding on each side
+    min = new Date(min.getTime() - 2 * 86400000);
+    max = new Date(max.getTime() + 5 * 86400000);
+
+    return { min: min, max: max, totalDays: daysBetween(min, max) };
+  }
+
+  function renderGantt(tasks) {
+    var chart = document.getElementById('gantt-chart');
+    var datesEl = document.getElementById('gantt-dates');
+    chart.innerHTML = '';
+
+    if (!tasks.length) {
+      chart.innerHTML = '<div class="loading-msg">등록된 업무가 없습니다.</div>';
+      return;
+    }
+
+    var range = getGanttRange(tasks);
+    var today = new Date();
+    today.setHours(0,0,0,0);
+
+    // Render date headers
+    datesEl.innerHTML = '';
+    var step = Math.max(1, Math.floor(range.totalDays / 6));
+    for (var i = 0; i <= range.totalDays; i += step) {
+      var d = new Date(range.min.getTime() + i * 86400000);
+      var span = document.createElement('span');
+      span.textContent = formatDate(d);
+      datesEl.appendChild(span);
+    }
+
+    // Render rows
+    tasks.forEach(function(task) {
+      var row = document.createElement('div');
+      row.className = 'gantt-row';
+
+      var label = document.createElement('div');
+      label.className = 'gantt-label';
+
+      var nameSpan = document.createElement('span');
+      nameSpan.className = 'task-name';
+      nameSpan.textContent = task.agent_name + ' - ' + task.task_title;
+      nameSpan.title = task.task_title;
+      label.appendChild(nameSpan);
+
+      var badge = document.createElement('span');
+      badge.className = 'status-badge ' + task.status;
+      badge.textContent = task.status;
+
+      var track = document.createElement('div');
+      track.className = 'gantt-track';
+
+      var startDate = parseDate(task.start_date);
+      var endDate = parseDate(task.end_date) || today;
+
+      if (startDate) {
+        var left = Math.max(0, daysBetween(range.min, startDate)) / range.totalDays * 100;
+        var width = Math.max(2, daysBetween(startDate, endDate) + 1) / range.totalDays * 100;
+
+        var bar = document.createElement('div');
+        bar.className = 'gantt-bar';
+        bar.setAttribute('data-status', task.status);
+        bar.style.left = left + '%';
+        bar.style.width = Math.min(width, 100 - left) + '%';
+        bar.textContent = task.task_title;
+        bar.title = task.task_title + ' (' + task.status + ')';
+        track.appendChild(bar);
+      }
+
+      row.appendChild(label);
+      row.appendChild(track);
+      row.appendChild(badge);
+      chart.appendChild(row);
+    });
+  }
+
+  // ── Load Data ──
+  async function loadTasks() {
+    try {
+      if (typeof supabase === 'undefined' || !supabase.createClient) {
+        throw new Error('Supabase SDK not loaded');
+      }
+      var client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      var result = await client.from('agent_tasks').select('*').order('start_date', { ascending: true });
+
+      if (result.error) throw result.error;
+      if (result.data && result.data.length > 0) {
+        renderGantt(result.data);
+        return;
+      }
+    } catch (err) {
+      console.info('Supabase agent_tasks 미연결, fallback 데이터 사용:', err.message || err);
+    }
+    renderGantt(INITIAL_TASKS);
+  }
+
+  // ── Init ──
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadTasks);
+  } else {
+    loadTasks();
+  }
+})();
+</script>
+
+</body>
+</html>
