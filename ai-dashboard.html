@@ -520,6 +520,69 @@
     .to-guide-grid { grid-template-columns: 1fr; }
   }
 
+  /* ── RATING ── */
+  .to-item-main {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+  }
+  .to-rating-display {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0 0;
+  }
+  .to-stars { font-size: 0.85rem; }
+  .to-stars.rated { color: var(--amber); }
+  .to-rating-comment {
+    font-size: 0.75rem;
+    color: var(--dust);
+    font-style: italic;
+  }
+  .to-rating-form {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0 0;
+    flex-wrap: wrap;
+  }
+  .to-stars-input {
+    display: flex;
+    gap: 0.15rem;
+  }
+  .to-star {
+    font-size: 1.1rem;
+    cursor: pointer;
+    color: var(--dust);
+    transition: color 0.15s;
+    user-select: none;
+  }
+  .to-star:hover, .to-star.active {
+    color: var(--amber);
+  }
+  .to-rating-input {
+    background: var(--bark);
+    border: 1px solid rgba(184,168,138,0.2);
+    border-radius: 6px;
+    color: var(--cream);
+    font-size: 0.78rem;
+    padding: 0.35rem 0.6rem;
+    width: 150px;
+  }
+  .to-rating-input::placeholder { color: var(--dust); opacity: 0.5; }
+  .to-rating-input:focus { outline: none; border-color: var(--amber); }
+  .to-rating-btn {
+    background: var(--green);
+    color: var(--cream);
+    border: none;
+    border-radius: 6px;
+    padding: 0.35rem 0.8rem;
+    font-size: 0.78rem;
+    cursor: pointer;
+  }
+  .to-rating-btn:hover { background: var(--green-light); }
+
   .to-login-box {
     background: var(--soil);
     border: 1px solid var(--bark);
@@ -1499,18 +1562,95 @@
         var urgClass = 'to-badge-urg-' + (order.urgency || '일반');
         var stClass = 'to-badge-st-' + (order.status || '접수');
 
+        var ratingHtml = '';
+        var isOwner = currentUser && order.requester_id === currentUser.id;
+        var canRate = isOwner && order.status === '완료' && !order.rating;
+        var hasRating = order.rating;
+
+        if (hasRating) {
+          var stars = '';
+          for (var s = 1; s <= 5; s++) { stars += s <= order.rating ? '★' : '☆'; }
+          ratingHtml = '<div class="to-rating-display">' +
+            '<span class="to-stars rated">' + stars + '</span>' +
+            (order.rating_comment ? '<span class="to-rating-comment">' + escapeHtml(order.rating_comment) + '</span>' : '') +
+            '</div>';
+        } else if (canRate) {
+          ratingHtml = '<div class="to-rating-form" data-order-id="' + order.id + '">' +
+            '<div class="to-stars-input">';
+          for (var s = 1; s <= 5; s++) {
+            ratingHtml += '<span class="to-star" data-val="' + s + '">☆</span>';
+          }
+          ratingHtml += '</div>' +
+            '<input type="text" class="to-rating-input" placeholder="한줄 평가 (선택)">' +
+            '<button class="to-rating-btn" type="button">평가</button>' +
+            '</div>';
+        }
+
         item.innerHTML =
+          '<div class="to-item-main">' +
           '<span class="to-requester">' + escapeHtml(order.requester_name || '') + '</span>' +
           '<span class="to-content" title="' + escapeHtml(order.content || '') + '">' + escapeHtml(order.content || '') + '</span>' +
           '<span class="to-badge ' + urgClass + '">' + escapeHtml(order.urgency || '일반') + '</span>' +
           '<span class="to-badge ' + stClass + '">' + escapeHtml(order.status || '접수') + '</span>' +
           '<span class="to-agent">' + escapeHtml(order.assigned_agent || '-') + '</span>' +
-          '<span class="to-date">' + formatOrderDate(order.created_at) + '</span>';
+          '<span class="to-date">' + formatOrderDate(order.created_at) + '</span>' +
+          '</div>' + ratingHtml;
+
+        // Bind star click events
+        if (canRate) {
+          var starsEl = item.querySelectorAll('.to-star');
+          starsEl.forEach(function(star) {
+            star.addEventListener('click', function() {
+              var val = parseInt(this.getAttribute('data-val'));
+              var parent = this.closest('.to-rating-form');
+              parent.setAttribute('data-selected', val);
+              parent.querySelectorAll('.to-star').forEach(function(s) {
+                s.textContent = parseInt(s.getAttribute('data-val')) <= val ? '★' : '☆';
+                s.classList.toggle('active', parseInt(s.getAttribute('data-val')) <= val);
+              });
+            });
+            star.addEventListener('mouseenter', function() {
+              var val = parseInt(this.getAttribute('data-val'));
+              this.closest('.to-stars-input').querySelectorAll('.to-star').forEach(function(s) {
+                s.textContent = parseInt(s.getAttribute('data-val')) <= val ? '★' : '☆';
+              });
+            });
+          });
+          var starsInput = item.querySelector('.to-stars-input');
+          starsInput.addEventListener('mouseleave', function() {
+            var parent = this.closest('.to-rating-form');
+            var selected = parseInt(parent.getAttribute('data-selected') || '0');
+            this.querySelectorAll('.to-star').forEach(function(s) {
+              s.textContent = parseInt(s.getAttribute('data-val')) <= selected ? '★' : '☆';
+            });
+          });
+          item.querySelector('.to-rating-btn').addEventListener('click', function() {
+            var form = this.closest('.to-rating-form');
+            var orderId = parseInt(form.getAttribute('data-order-id'));
+            var rating = parseInt(form.getAttribute('data-selected') || '0');
+            var comment = form.querySelector('.to-rating-input').value.trim();
+            if (!rating) { showToast('별점을 선택하세요'); return; }
+            submitRating(orderId, rating, comment);
+          });
+        }
 
         listEl.appendChild(item);
       });
     } catch (err) {
       listEl.innerHTML = '<div class="loading-msg">데이터 로드 실패: ' + escapeHtml(err.message || '') + '</div>';
+    }
+  }
+
+  async function submitRating(orderId, rating, comment) {
+    try {
+      var updateData = { rating: rating, updated_at: new Date().toISOString() };
+      if (comment) updateData.rating_comment = comment;
+      var result = await sb.from('task_orders').update(updateData).eq('id', orderId);
+      if (result.error) throw result.error;
+      showToast('평가가 등록되었습니다 (' + rating + '점)');
+      loadOrders();
+    } catch (err) {
+      showToast('평가 실패: ' + (err.message || err));
     }
   }
 
