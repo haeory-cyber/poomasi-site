@@ -801,20 +801,30 @@
       <button class="btn-sm" onclick="loadUnifiedOrders()">↻ 새로고침</button>
     </div>
 
-    <!-- 상태 필터 버튼 -->
-    <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center;">
-      <button id="ofilter-wait" class="btn-sm" style="border:1px solid var(--amber);color:var(--amber);font-weight:600;padding:0.45rem 1rem;font-size:0.82rem;" onclick="setOrderFilter('대기')">
-        요청대기 <span id="ofilter-wait-count" style="font-weight:700;margin-left:0.3rem;">0</span>
-      </button>
-      <button id="ofilter-done" class="btn-sm" style="padding:0.45rem 1rem;font-size:0.82rem;" onclick="setOrderFilter('발주완료')">
-        발주완료 <span id="ofilter-done-count" style="font-weight:700;margin-left:0.3rem;">0</span>
-      </button>
-      <button id="ofilter-all" class="btn-sm" style="padding:0.45rem 1rem;font-size:0.82rem;" onclick="setOrderFilter('전체')">
-        전체 <span id="ofilter-all-count" style="font-weight:700;margin-left:0.3rem;">0</span>
+    <!-- 요청대기 배지 -->
+    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.25rem;flex-wrap:wrap;">
+      <button id="pending-badge-btn" onclick="togglePendingList()" style="display:inline-flex;align-items:center;gap:0.4rem;background:rgba(196,128,58,0.12);border:1px solid var(--amber);color:var(--amber);font-weight:600;padding:0.45rem 1rem;font-size:0.82rem;border-radius:6px;cursor:pointer;">
+        요청대기 <span id="pending-badge-count" style="background:var(--amber);color:#0f0b07;border-radius:10px;padding:0.1rem 0.5rem;font-size:0.75rem;font-weight:700;min-width:1.4rem;text-align:center;">0</span>
       </button>
     </div>
 
-    <!-- 거래처별 카드 영역 -->
+    <!-- 대기 거래처 목록 (펼침) -->
+    <div id="pending-supplier-list" style="display:none;margin-bottom:1.25rem;background:rgba(196,128,58,0.06);border:1px solid rgba(196,128,58,0.2);border-radius:8px;padding:0.6rem 0.75rem;">
+      <div style="font-size:0.75rem;color:var(--dust);margin-bottom:0.5rem;letter-spacing:0.05em;">요청대기 거래처 — 클릭하면 카드 바로 보기</div>
+      <div id="pending-supplier-chips" style="display:flex;gap:0.4rem;flex-wrap:wrap;"></div>
+    </div>
+
+    <!-- 거래처 검색창 -->
+    <div style="position:relative;margin-bottom:1.25rem;">
+      <input id="order-supplier-search" type="text" placeholder="거래처 검색…" autocomplete="off"
+        oninput="onOrderSupplierSearch(this.value)"
+        onfocus="onOrderSupplierSearch(this.value)"
+        onblur="setTimeout(()=>document.getElementById('order-supplier-dropdown').style.display='none',200)"
+        style="width:100%;padding:0.6rem 0.9rem;background:var(--surface);border:1px solid rgba(196,128,58,0.25);border-radius:6px;color:var(--cream);font-size:0.88rem;outline:none;box-sizing:border-box;">
+      <div id="order-supplier-dropdown" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:50;background:rgba(30,26,20,0.97);border:1px solid rgba(196,128,58,0.25);border-radius:6px;max-height:200px;overflow-y:auto;"></div>
+    </div>
+
+    <!-- 선택된 거래처 카드 영역 -->
     <div id="unified-order-cards"><div class="loading-row">로딩 중…</div></div>
 
     <!-- ── 발주처 관리 (접힌 섹션) ── -->
@@ -1687,22 +1697,84 @@ function toggleSupplierSection() {
 
 // ══ 통합 발주 관리 ══
 let _unifiedOrderData = [];
-let _unifiedFilter = '대기';
 let _supplierCache = {};
+let _orderSupplierList = [];   // 거래처 전체 이름 목록 (검색용)
+let _orderSearchDebounce = null;
+let _selectedOrderSupplier = null;  // 현재 선택된 거래처
 
-function setOrderFilter(f) {
-  _unifiedFilter = f;
-  ['대기','발주완료','전체'].forEach(k => {
-    const key = k === '대기' ? 'wait' : k === '발주완료' ? 'done' : 'all';
-    const btn = document.getElementById('ofilter-' + key);
-    if (btn) {
-      const isActive = k === f;
-      btn.style.border = isActive ? '1px solid var(--amber)' : '1px solid rgba(196,128,58,0.3)';
-      btn.style.color = isActive ? 'var(--amber)' : 'var(--dust)';
-      btn.style.fontWeight = isActive ? '600' : '400';
-    }
+// ── 거래처 전체 목록 캐시 (suppliers + POS farmer_names 합산) ──
+async function loadOrderSupplierList() {
+  const [supRes, farmerRes] = await Promise.all([
+    sb.from('suppliers').select('name').eq('is_active', true),
+    sb.rpc('get_farmer_names')
+  ]);
+  const supNames = (supRes.data || []).map(r => r.name).filter(Boolean);
+  const farmerNames = (farmerRes.data || []).map(r => r.farmer_name).filter(Boolean);
+  const merged = Array.from(new Set([...supNames, ...farmerNames])).sort();
+  _orderSupplierList = merged;
+}
+
+// ── 검색 자동완성 ──
+function onOrderSupplierSearch(query) {
+  clearTimeout(_orderSearchDebounce);
+  _orderSearchDebounce = setTimeout(() => {
+    const dd = document.getElementById('order-supplier-dropdown');
+    if (!dd) return;
+    const q = query.trim();
+    const candidates = q
+      ? _orderSupplierList.filter(n => n.includes(q))
+      : _orderSupplierList.slice(0, 30);
+    if (candidates.length === 0) { dd.style.display = 'none'; return; }
+    dd.style.display = 'block';
+    dd.innerHTML = candidates.map(name => {
+      const waitItems = _unifiedOrderData.filter(r => r.farmer_name === name && r.status !== '발주완료');
+      const badge = waitItems.length > 0
+        ? `<span style="background:var(--amber);color:#0f0b07;border-radius:8px;padding:0.05rem 0.4rem;font-size:0.7rem;font-weight:700;margin-left:0.4rem;">${waitItems.length}</span>`
+        : '';
+      return `<div onclick="selectOrderSupplier('${name.replace(/'/g, "\\'")}')"
+        style="padding:0.55rem 0.85rem;font-size:0.85rem;color:var(--cream);cursor:pointer;display:flex;align-items:center;justify-content:space-between;"
+        onmouseover="this.style.background='rgba(196,128,58,0.12)'" onmouseout="this.style.background=''"
+      ><span>${name}</span>${badge}</div>`;
+    }).join('');
+  }, 150);
+}
+
+// ── 거래처 선택 → 카드 렌더링 ──
+async function selectOrderSupplier(name) {
+  _selectedOrderSupplier = name;
+  const dd = document.getElementById('order-supplier-dropdown');
+  if (dd) dd.style.display = 'none';
+  const inp = document.getElementById('order-supplier-search');
+  if (inp) inp.value = name;
+  await renderSupplierCard(name);
+}
+
+// ── 요청대기 배지 토글 ──
+function renderPendingBadge() {
+  const waitSuppliers = {};
+  _unifiedOrderData.filter(r => r.status !== '발주완료').forEach(r => {
+    const k = r.farmer_name || '(미지정)';
+    waitSuppliers[k] = (waitSuppliers[k] || 0) + 1;
   });
-  renderUnifiedOrders();
+  const count = Object.keys(waitSuppliers).length;
+  const badge = document.getElementById('pending-badge-count');
+  if (badge) badge.textContent = count;
+
+  const chips = document.getElementById('pending-supplier-chips');
+  if (chips) {
+    chips.innerHTML = Object.entries(waitSuppliers)
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, n]) => `<button onclick="selectOrderSupplier('${name.replace(/'/g, "\\'")}')"
+        style="font-size:0.78rem;color:var(--amber);background:rgba(196,128,58,0.1);border:1px solid rgba(196,128,58,0.3);padding:0.25rem 0.65rem;border-radius:14px;cursor:pointer;white-space:nowrap;">
+        ${name} <span style="font-weight:700;">${n}</span>
+      </button>`).join('');
+  }
+}
+
+function togglePendingList() {
+  const el = document.getElementById('pending-supplier-list');
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
 }
 
 async function loadUnifiedOrders() {
@@ -1724,150 +1796,290 @@ async function loadUnifiedOrders() {
   _supplierCache = {};
   (supplierRes.data || []).forEach(s => { _supplierCache[s.name] = s; });
 
-  // 카운트 업데이트
-  const waitCount = _unifiedOrderData.filter(r => r.status !== '발주완료').length;
-  const doneCount = _unifiedOrderData.filter(r => r.status === '발주완료').length;
-  const allCount = _unifiedOrderData.length;
-  const setCount = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = n; };
-  setCount('ofilter-wait-count', waitCount);
-  setCount('ofilter-done-count', doneCount);
-  setCount('ofilter-all-count', allCount);
+  await loadOrderSupplierList();
+  renderPendingBadge();
 
-  renderUnifiedOrders();
+  // 이전에 선택된 거래처가 있으면 다시 렌더링
+  if (_selectedOrderSupplier) {
+    await renderSupplierCard(_selectedOrderSupplier);
+  } else {
+    wrap.innerHTML = '<div class="card"><div class="empty-row" style="color:var(--dust);font-size:0.85rem;">위 검색창에서 거래처를 선택하세요.</div></div>';
+  }
 }
 
-function renderUnifiedOrders() {
+// ── 거래처 카드 렌더링 (현장요청 + POS 합산) ──
+async function renderSupplierCard(supplierName) {
   const wrap = document.getElementById('unified-order-cards');
   if (!wrap) return;
+  wrap.innerHTML = '<div class="loading-row">거래처 정보 로딩 중…</div>';
 
-  // 필터 적용
-  const filtered = _unifiedOrderData.filter(r => {
-    if (_unifiedFilter === '전체') return true;
-    if (_unifiedFilter === '발주완료') return r.status === '발주완료';
-    return r.status !== '발주완료';
+  // POS 30일 데이터 조회
+  const from30 = new Date(); from30.setDate(from30.getDate() - 30);
+  const { data: posData } = await sb.from('pos_transactions')
+    .select('item_name, unit, qty')
+    .eq('farmer_name', supplierName)
+    .gte('sold_at', from30.toISOString());
+
+  const sup = _supplierCache[supplierName];
+  const staffItems = _unifiedOrderData.filter(r => r.farmer_name === supplierName);
+  const waitItems = staffItems.filter(r => r.status !== '발주완료');
+  const urgencyColor = { '긴급': 'var(--red)', '보통': 'var(--amber)', '대비': 'var(--green-light)', '여유': 'var(--green-light)' };
+
+  // ── 거래처 정보 섹션 (인라인 수정) ──
+  const supId = supplierName.replace(/[^a-zA-Z0-9가-힣]/g, '_');
+  let infoSection;
+  if (sup) {
+    infoSection = `
+    <div id="sup-info-view-${supId}" style="margin-bottom:1rem;">
+      <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.4rem;">
+        <span style="font-size:0.78rem;color:var(--dust);">${sup.phone || '전화 없음'}</span>
+        ${sup.email ? `<span style="font-size:0.78rem;color:var(--dust);">· ${sup.email}</span>` : ''}
+        ${sup.kakao_id ? `<span style="font-size:0.78rem;color:var(--dust);">· 카카오: ${sup.kakao_id}</span>` : ''}
+        ${sup.note ? `<span style="font-size:0.78rem;color:var(--dust);">· ${sup.note}</span>` : ''}
+        <button onclick="toggleSupInfoEdit('${supId}')" style="font-size:0.7rem;color:var(--dust);background:none;border:1px solid rgba(184,168,138,0.2);padding:0.1rem 0.4rem;border-radius:3px;cursor:pointer;">수정</button>
+      </div>
+    </div>
+    <div id="sup-info-edit-${supId}" style="display:none;margin-bottom:1rem;background:rgba(196,128,58,0.05);border:1px solid rgba(196,128,58,0.15);border-radius:6px;padding:0.75rem;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin-bottom:0.6rem;">
+        <div><label style="font-size:0.72rem;color:var(--dust);display:block;margin-bottom:0.2rem;">전화번호</label>
+          <input id="sup-edit-phone-${supId}" class="form-input" value="${sup.phone || ''}" placeholder="010-0000-0000" style="padding:0.4rem 0.6rem;font-size:0.82rem;"></div>
+        <div><label style="font-size:0.72rem;color:var(--dust);display:block;margin-bottom:0.2rem;">이메일</label>
+          <input id="sup-edit-email-${supId}" class="form-input" value="${sup.email || ''}" placeholder="email@example.com" style="padding:0.4rem 0.6rem;font-size:0.82rem;"></div>
+        <div><label style="font-size:0.72rem;color:var(--dust);display:block;margin-bottom:0.2rem;">카카오 ID</label>
+          <input id="sup-edit-kakao-${supId}" class="form-input" value="${sup.kakao_id || ''}" style="padding:0.4rem 0.6rem;font-size:0.82rem;"></div>
+        <div><label style="font-size:0.72rem;color:var(--dust);display:block;margin-bottom:0.2rem;">메모</label>
+          <input id="sup-edit-note-${supId}" class="form-input" value="${sup.note || ''}" style="padding:0.4rem 0.6rem;font-size:0.82rem;"></div>
+      </div>
+      <div style="display:flex;gap:0.4rem;">
+        <button onclick="saveSupInfo('${sup.id}','${supId}')" class="btn-primary" style="font-size:0.78rem;">저장</button>
+        <button onclick="toggleSupInfoEdit('${supId}')" class="btn-sm" style="font-size:0.78rem;">취소</button>
+      </div>
+    </div>`;
+  } else {
+    infoSection = `
+    <div style="margin-bottom:1rem;">
+      <span style="font-size:0.78rem;color:var(--dust);">발주처로 미등록</span>
+      <button onclick="registerAsSupplier('${supplierName.replace(/'/g, "\\'")}')" style="margin-left:0.5rem;font-size:0.72rem;color:var(--amber);background:rgba(196,128,58,0.1);border:1px solid rgba(196,128,58,0.3);padding:0.15rem 0.5rem;border-radius:4px;cursor:pointer;">발주처로 등록</button>
+    </div>`;
+  }
+
+  // ── 품목 테이블 합산 ──
+  // staff_data 대기건
+  const staffItemMap = {};
+  waitItems.forEach(r => {
+    const key = r.item_name || '(품목 미지정)';
+    if (!staffItemMap[key]) staffItemMap[key] = { staffRows: [], posQty: 0, id: r.id };
+    staffItemMap[key].staffRows.push(r);
   });
 
-  if (filtered.length === 0) {
-    wrap.innerHTML = '<div class="card"><div class="empty-row">' +
-      (_unifiedFilter === '대기' ? '대기 중인 발주가 없습니다.' : _unifiedFilter === '발주완료' ? '발주완료 건이 없습니다.' : '발주 내역이 없습니다.') +
-      '</div></div>';
+  // POS 데이터 합산
+  const posItemMap = {};
+  (posData || []).forEach(r => {
+    const key = r.item_name + (r.unit ? ' (' + r.unit + ')' : '');
+    posItemMap[key] = (posItemMap[key] || 0) + (r.qty || 0);
+  });
+
+  // 합산 목록 구성: 현장요청 우선, POS only 추가
+  const mergedItems = [];
+  Object.entries(staffItemMap).forEach(([name, data]) => {
+    const totalReqQty = data.staffRows.reduce((s, r) => s + (r.qty || 0), 0);
+    const posQty = posItemMap[name] || 0;
+    mergedItems.push({ name, reqQty: totalReqQty, posQty, isStaff: true, rows: data.staffRows });
+  });
+  Object.keys(posItemMap).forEach(name => {
+    if (!staffItemMap[name]) {
+      mergedItems.push({ name, reqQty: 0, posQty: posItemMap[name], isStaff: false, rows: [] });
+    }
+  });
+
+  const itemTableRows = mergedItems.map((item, idx) => {
+    const urgTag = item.isStaff && item.rows[0]?.urgency
+      ? `<span style="font-size:0.68rem;color:${urgencyColor[item.rows[0].urgency] || 'var(--dust)'};border:1px solid ${urgencyColor[item.rows[0].urgency] || 'var(--dust)'};padding:0.05rem 0.28rem;border-radius:3px;margin-left:0.3rem;">${item.rows[0].urgency}</span>`
+      : '';
+    const posRef = item.posQty > 0
+      ? `<span style="font-size:0.7rem;color:var(--dust);margin-left:0.4rem;">(POS ${item.posQty}개)</span>`
+      : '';
+    const defaultQty = item.reqQty || '';
+    return `<tr>
+      <td style="padding:0.4rem 0.5rem;font-size:0.82rem;color:var(--cream);">${item.name}${urgTag}</td>
+      <td style="padding:0.4rem 0.5rem;text-align:center;">
+        <input type="number" min="0" id="order-qty-${supId}-${idx}" value="${defaultQty}" placeholder="수량"
+          style="width:5rem;padding:0.25rem 0.4rem;text-align:center;background:var(--surface);border:1px solid rgba(196,128,58,0.25);border-radius:4px;color:var(--cream);font-size:0.82rem;outline:none;">
+      </td>
+      <td style="padding:0.4rem 0.5rem;font-size:0.75rem;color:var(--dust);">${posRef}${item.isStaff ? '' : '<span style="color:var(--dust);font-size:0.7rem;">POS참고</span>'}</td>
+    </tr>`;
+  }).join('');
+
+  const itemTable = mergedItems.length > 0 ? `
+    <table style="width:100%;border-collapse:collapse;margin-bottom:0.75rem;">
+      <thead><tr style="border-bottom:1px solid rgba(196,128,58,0.15);">
+        <th style="padding:0.35rem 0.5rem;font-size:0.72rem;color:var(--dust);text-align:left;font-weight:500;">품목</th>
+        <th style="padding:0.35rem 0.5rem;font-size:0.72rem;color:var(--dust);text-align:center;font-weight:500;">발주수량</th>
+        <th style="padding:0.35rem 0.5rem;font-size:0.72rem;color:var(--dust);font-weight:500;">참고</th>
+      </tr></thead>
+      <tbody>${itemTableRows}</tbody>
+    </table>` : `<div style="font-size:0.82rem;color:var(--dust);padding:0.5rem 0;margin-bottom:0.75rem;">품목 없음</div>`;
+
+  // ── 발주 메시지 영역 ──
+  const msgId = 'order-msg-' + supId;
+  const resultId = 'order-result-' + supId;
+  const hasWaiting = waitItems.length > 0;
+
+  const actionSection = `
+    <div style="display:flex;gap:0.5rem;margin-top:0.8rem;flex-wrap:wrap;align-items:flex-start;">
+      <button class="btn-sm" style="font-size:0.78rem;background:rgba(196,128,58,0.15);border-color:var(--amber);color:var(--amber);"
+        onclick="generateOrderMessageFromTable('${supplierName.replace(/'/g, "\\'")}','${supId}','${msgId}')">발주 메시지 생성</button>
+      ${hasWaiting ? `<button class="btn-sm" style="font-size:0.78rem;background:var(--green);color:#fff;border-color:var(--green);" onclick="markSupplierDone('${supplierName.replace(/'/g, "\\'")}')">발주완료 처리</button>` : ''}
+    </div>
+    <div id="${msgId}-area" style="display:none;margin-top:0.8rem;">
+      <textarea id="${msgId}" rows="6" style="width:100%;background:rgba(15,11,7,0.8);border:1px solid rgba(196,128,58,0.2);color:var(--cream);padding:0.6rem 0.8rem;font-family:'Noto Sans KR',sans-serif;font-size:0.85rem;resize:vertical;outline:none;margin-bottom:0.5rem;box-sizing:border-box;"></textarea>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+        <button class="btn-primary" style="font-size:0.78rem;" onclick="sendCardSms('${supplierName.replace(/'/g, "\\'")}','${msgId}')">📨 문자발송</button>
+        <button class="btn-sm" style="font-size:0.78rem;" onclick="sendCardKakao('${supplierName.replace(/'/g, "\\'")}','${msgId}')">💬 카톡발주</button>
+        <button class="btn-sm" style="font-size:0.78rem;" onclick="sendCardEmail('${supplierName.replace(/'/g, "\\'")}','${msgId}')">✉ 이메일</button>
+      </div>
+      <div id="${resultId}" style="margin-top:0.5rem;font-size:0.8rem;color:var(--dust);"></div>
+    </div>`;
+
+  // ── 현장요청 개별 건 (코멘트 포함) ──
+  const staffSection = staffItems.length > 0 ? `
+    <div style="margin-top:1rem;border-top:1px solid rgba(184,168,138,0.08);padding-top:0.75rem;">
+      <div style="font-size:0.72rem;color:var(--dust);margin-bottom:0.5rem;letter-spacing:0.05em;">현장요청 목록</div>
+      ${staffItems.map(i => {
+        const urg = i.urgency
+          ? `<span style="font-size:0.7rem;color:${urgencyColor[i.urgency] || 'var(--dust)'};border:1px solid ${urgencyColor[i.urgency] || 'var(--dust)'};padding:0.05rem 0.28rem;border-radius:3px;">${i.urgency}</span>`
+          : '';
+        const isDone = i.status === '발주완료';
+        const statusTag = isDone
+          ? `<span style="font-size:0.7rem;color:var(--green-light);border:1px solid var(--green-light);padding:0.05rem 0.28rem;border-radius:3px;">완료</span>`
+          : '';
+        const dt = i.created_at ? new Date(i.created_at).toLocaleString('ko-KR', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }) : '';
+        const hasComment = !!i.order_comment;
+        const commentDisplay = hasComment
+          ? `<div style="font-size:0.75rem;color:var(--amber);background:rgba(196,128,58,0.08);padding:0.2rem 0.45rem;border-radius:4px;margin-top:0.2rem;">💬 ${i.order_comment}</div>`
+          : '';
+        return `<div style="padding:0.35rem 0;border-bottom:1px solid rgba(184,168,138,0.06);font-size:0.82rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.25rem;">
+            <div style="display:flex;align-items:center;gap:0.35rem;flex-wrap:wrap;">
+              <span style="color:var(--cream);font-weight:500;">${i.item_name || '—'}</span>
+              ${i.qty ? `<span style="color:var(--dust);">${i.qty}개</span>` : ''}
+              ${urg}${statusTag}
+              <span style="font-size:0.72rem;color:var(--dust);">${i.content || ''}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.35rem;">
+              <span style="font-size:0.72rem;color:var(--dust);">${dt}</span>
+              <button onclick="toggleOrderComment(${i.id})" style="font-size:0.68rem;color:${hasComment ? 'var(--amber)' : 'var(--dust)'};background:none;border:1px solid ${hasComment ? 'rgba(196,128,58,0.4)' : 'rgba(184,168,138,0.2)'};padding:0.12rem 0.35rem;border-radius:3px;cursor:pointer;">${hasComment ? '✏️' : '💬'}</button>
+            </div>
+          </div>
+          ${commentDisplay}
+          <div id="order-comment-${i.id}" style="display:none;margin-top:0.3rem;">
+            <div style="display:flex;gap:0.3rem;flex-wrap:wrap;margin-bottom:0.3rem;">
+              <button onclick="setQuickComment(${i.id},'생산중단')" style="font-size:0.7rem;color:var(--red);background:rgba(184,58,42,0.1);border:1px solid rgba(184,58,42,0.3);padding:0.12rem 0.35rem;border-radius:3px;cursor:pointer;">생산중단</button>
+              <button onclick="setQuickComment(${i.id},'품절')" style="font-size:0.7rem;color:var(--red);background:rgba(184,58,42,0.1);border:1px solid rgba(184,58,42,0.3);padding:0.12rem 0.35rem;border-radius:3px;cursor:pointer;">품절</button>
+              <button onclick="setQuickComment(${i.id},'수량조정 필요')" style="font-size:0.7rem;color:var(--amber);background:rgba(196,128,58,0.1);border:1px solid rgba(196,128,58,0.3);padding:0.12rem 0.35rem;border-radius:3px;cursor:pointer;">수량조정</button>
+              <button onclick="setQuickComment(${i.id},'납기지연')" style="font-size:0.7rem;color:var(--amber);background:rgba(196,128,58,0.1);border:1px solid rgba(196,128,58,0.3);padding:0.12rem 0.35rem;border-radius:3px;cursor:pointer;">납기지연</button>
+              <button onclick="setQuickComment(${i.id},'대체상품 확인')" style="font-size:0.7rem;color:var(--dust);background:rgba(184,168,138,0.1);border:1px solid rgba(184,168,138,0.2);padding:0.12rem 0.35rem;border-radius:3px;cursor:pointer;">대체상품</button>
+            </div>
+            <div style="display:flex;gap:0.3rem;">
+              <input type="text" id="order-comment-input-${i.id}" placeholder="코멘트 입력…" value="${(i.order_comment || '').replace(/"/g, '&quot;')}" style="flex:1;font-size:0.78rem;padding:0.3rem 0.5rem;background:var(--surface);border:1px solid rgba(196,128,58,0.2);border-radius:4px;color:var(--cream);outline:none;" onkeydown="if(event.key==='Enter')saveOrderComment(${i.id})">
+              <button onclick="saveOrderComment(${i.id})" style="font-size:0.72rem;color:var(--amber);background:rgba(196,128,58,0.15);border:1px solid rgba(196,128,58,0.3);padding:0.2rem 0.45rem;border-radius:4px;cursor:pointer;white-space:nowrap;">저장</button>
+              ${hasComment ? `<button onclick="deleteOrderComment(${i.id})" style="font-size:0.72rem;color:var(--red);background:rgba(184,58,42,0.1);border:1px solid rgba(184,58,42,0.3);padding:0.2rem 0.45rem;border-radius:4px;cursor:pointer;">삭제</button>` : ''}
+            </div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>` : '';
+
+  const urgentCount = waitItems.filter(i => i.urgency === '긴급').length;
+
+  wrap.innerHTML = `<div class="card" style="border-left:${urgentCount > 0 ? '3px solid var(--red)' : '3px solid rgba(196,128,58,0.3)'};">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;flex-wrap:wrap;gap:0.3rem;">
+      <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+        <span style="font-size:1rem;">📦</span>
+        <span class="card-title" style="margin-bottom:0;font-size:0.95rem;">${supplierName}</span>
+        ${urgentCount > 0 ? `<span style="font-size:0.72rem;color:#fff;background:var(--red);padding:0.15rem 0.5rem;border-radius:10px;font-weight:600;">긴급 ${urgentCount}</span>` : ''}
+        <span style="font-size:0.78rem;color:var(--dust);">대기 ${waitItems.length}건</span>
+      </div>
+      <button onclick="_selectedOrderSupplier=null;document.getElementById('order-supplier-search').value='';loadUnifiedOrders();" style="font-size:0.72rem;color:var(--dust);background:none;border:1px solid rgba(184,168,138,0.2);padding:0.2rem 0.5rem;border-radius:4px;cursor:pointer;">✕ 닫기</button>
+    </div>
+    ${infoSection}
+    <div style="font-size:0.72rem;color:var(--dust);margin-bottom:0.4rem;letter-spacing:0.05em;">발주 품목 (수량 입력 후 메시지 생성)</div>
+    ${itemTable}
+    ${actionSection}
+    ${staffSection}
+  </div>`;
+}
+
+// ── 거래처 정보 인라인 수정 토글 ──
+function toggleSupInfoEdit(supId) {
+  const view = document.getElementById('sup-info-view-' + supId);
+  const edit = document.getElementById('sup-info-edit-' + supId);
+  if (!view || !edit) return;
+  const show = edit.style.display === 'none';
+  view.style.display = show ? 'none' : 'block';
+  edit.style.display = show ? 'block' : 'none';
+}
+
+async function saveSupInfo(supDbId, supId) {
+  const phone = document.getElementById('sup-edit-phone-' + supId)?.value.trim() || '';
+  const email = document.getElementById('sup-edit-email-' + supId)?.value.trim() || '';
+  const kakao = document.getElementById('sup-edit-kakao-' + supId)?.value.trim() || '';
+  const note  = document.getElementById('sup-edit-note-' + supId)?.value.trim() || '';
+  const { error } = await sb.from('suppliers').update({ phone, email, kakao_id: kakao, note }).eq('id', supDbId);
+  if (error) { toast('저장 실패: ' + error.message); return; }
+  toast('거래처 정보 저장됨 ✓');
+  loadUnifiedOrders();
+}
+
+async function registerAsSupplier(name) {
+  const { error } = await sb.from('suppliers').insert({ name, is_active: true });
+  if (error) { toast('등록 실패: ' + error.message); return; }
+  toast(`${name} 발주처 등록됨 ✓`);
+  loadUnifiedOrders();
+}
+
+// ── 품목 테이블 수량 기반 발주 메시지 생성 ──
+function generateOrderMessageFromTable(supplierName, supId, msgId) {
+  const areaEl = document.getElementById(msgId + '-area');
+  const msgEl = document.getElementById(msgId);
+  if (!areaEl || !msgEl) return;
+  areaEl.style.display = 'block';
+
+  // 테이블에서 수량 입력된 품목만 수집
+  const rows = document.querySelectorAll(`[id^="order-qty-${supId}-"]`);
+  const lines = [];
+  rows.forEach(input => {
+    const qty = parseInt(input.value, 10);
+    if (!isNaN(qty) && qty > 0) {
+      // td의 첫 번째 셀에서 품목명 추출
+      const tr = input.closest('tr');
+      if (tr) {
+        const nameTd = tr.querySelector('td:first-child');
+        const rawName = nameTd ? nameTd.textContent.trim().replace(/긴급|보통|대비|여유/g, '').trim() : '';
+        if (rawName) lines.push(`  - ${rawName}: ${qty}개`);
+      }
+    }
+  });
+
+  if (lines.length === 0) {
+    toast('수량을 입력한 품목이 없습니다.');
     return;
   }
 
-  // 거래처별 그룹화
-  const grouped = {};
-  filtered.forEach(r => {
-    const key = r.farmer_name || '(미지정)';
-    if (!grouped[key]) grouped[key] = [];
-    grouped[key].push(r);
-  });
-
-  // 긴급 건 있는 거래처 우선 정렬
-  const sortedEntries = Object.entries(grouped).sort((a, b) => {
-    const aUrgent = a[1].filter(i => i.urgency === '긴급').length;
-    const bUrgent = b[1].filter(i => i.urgency === '긴급').length;
-    if (bUrgent !== aUrgent) return bUrgent - aUrgent;
-    return b[1].length - a[1].length;
-  });
-
-  const urgencyColor = { '긴급': 'var(--red)', '보통': 'var(--amber)', '대비': 'var(--green-light)', '여유': 'var(--green-light)' };
-
-  wrap.innerHTML = sortedEntries.map(([supplier, items]) => {
-    const urgentCount = items.filter(i => i.urgency === '긴급').length;
-    const totalQty = items.reduce((sum, i) => sum + (i.qty || 0), 0);
-    const sup = _supplierCache[supplier];
-    const hasWaiting = items.some(i => i.status !== '발주완료');
-
-    const urgentBadge = urgentCount > 0
-      ? `<span style="font-size:0.72rem;color:#fff;background:var(--red);padding:0.15rem 0.5rem;border-radius:10px;font-weight:600;">긴급 ${urgentCount}</span>`
-      : '';
-    const contactInfo = sup
-      ? `<span style="font-size:0.72rem;color:var(--dust);margin-left:0.5rem;">${sup.phone || ''}</span>`
-      : '';
-
-    const itemRows = items.map(i => {
-      const urg = i.urgency
-        ? `<span style="font-size:0.7rem;color:${urgencyColor[i.urgency] || 'var(--dust)'};border:1px solid ${urgencyColor[i.urgency] || 'var(--dust)'};padding:0.08rem 0.35rem;border-radius:3px;">${i.urgency}</span>`
-        : '';
-      const dt = i.created_at ? new Date(i.created_at).toLocaleString('ko-KR', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }) : '';
-      const isDone = i.status === '발주완료';
-      const statusTag = isDone
-        ? `<span style="font-size:0.7rem;color:var(--green-light);border:1px solid var(--green-light);padding:0.08rem 0.35rem;border-radius:3px;">완료</span>`
-        : '';
-      const hasComment = i.order_comment ? true : false;
-      const commentDisplay = hasComment
-        ? `<div style="font-size:0.75rem;color:var(--amber);background:rgba(196,128,58,0.08);padding:0.25rem 0.5rem;border-radius:4px;margin-top:0.2rem;">💬 ${i.order_comment}</div>`
-        : '';
-
-      return `<div style="padding:0.4rem 0;border-bottom:1px solid rgba(184,168,138,0.06);font-size:0.82rem;">
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.3rem;">
-          <div style="display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;">
-            <span style="color:var(--cream);font-weight:500;">${i.item_name || '—'}</span>
-            ${i.qty ? `<span style="color:var(--dust);">${i.qty}개</span>` : ''}
-            ${urg}
-            ${statusTag}
-            <span style="font-size:0.72rem;color:var(--dust);">${i.content || ''}</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:0.4rem;">
-            <span style="font-size:0.72rem;color:var(--dust);">${dt}</span>
-            <button onclick="toggleOrderComment(${i.id})" style="font-size:0.68rem;color:${hasComment ? 'var(--amber)' : 'var(--dust)'};background:none;border:1px solid ${hasComment ? 'rgba(196,128,58,0.4)' : 'rgba(184,168,138,0.2)'};padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;" title="코멘트">${hasComment ? '✏️' : '💬'}</button>
-          </div>
-        </div>
-        ${commentDisplay}
-        <div id="order-comment-${i.id}" style="display:none;margin-top:0.3rem;">
-          <div style="display:flex;gap:0.3rem;flex-wrap:wrap;margin-bottom:0.3rem;">
-            <button onclick="setQuickComment(${i.id},'생산중단')" style="font-size:0.7rem;color:var(--red);background:rgba(184,58,42,0.1);border:1px solid rgba(184,58,42,0.3);padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;">생산중단</button>
-            <button onclick="setQuickComment(${i.id},'품절')" style="font-size:0.7rem;color:var(--red);background:rgba(184,58,42,0.1);border:1px solid rgba(184,58,42,0.3);padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;">품절</button>
-            <button onclick="setQuickComment(${i.id},'수량조정 필요')" style="font-size:0.7rem;color:var(--amber);background:rgba(196,128,58,0.1);border:1px solid rgba(196,128,58,0.3);padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;">수량조정</button>
-            <button onclick="setQuickComment(${i.id},'납기지연')" style="font-size:0.7rem;color:var(--amber);background:rgba(196,128,58,0.1);border:1px solid rgba(196,128,58,0.3);padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;">납기지연</button>
-            <button onclick="setQuickComment(${i.id},'대체상품 확인')" style="font-size:0.7rem;color:var(--dust);background:rgba(184,168,138,0.1);border:1px solid rgba(184,168,138,0.2);padding:0.15rem 0.4rem;border-radius:3px;cursor:pointer;">대체상품</button>
-          </div>
-          <div style="display:flex;gap:0.3rem;">
-            <input type="text" id="order-comment-input-${i.id}" placeholder="코멘트 입력…" value="${(i.order_comment || '').replace(/"/g, '&quot;')}" style="flex:1;font-size:0.78rem;padding:0.3rem 0.5rem;background:var(--surface);border:1px solid rgba(196,128,58,0.2);border-radius:4px;color:var(--cream);outline:none;" onkeydown="if(event.key==='Enter')saveOrderComment(${i.id})">
-            <button onclick="saveOrderComment(${i.id})" style="font-size:0.72rem;color:var(--amber);background:rgba(196,128,58,0.15);border:1px solid rgba(196,128,58,0.3);padding:0.2rem 0.5rem;border-radius:4px;cursor:pointer;white-space:nowrap;">저장</button>
-            ${hasComment ? `<button onclick="deleteOrderComment(${i.id})" style="font-size:0.72rem;color:var(--red);background:rgba(184,58,42,0.1);border:1px solid rgba(184,58,42,0.3);padding:0.2rem 0.5rem;border-radius:4px;cursor:pointer;">삭제</button>` : ''}
-          </div>
-        </div>
-      </div>`;
-    }).join('');
-
-    // 발주 메시지 영역 ID
-    const msgId = 'order-msg-' + supplier.replace(/[^a-zA-Z0-9가-힣]/g, '_');
-    const resultId = 'order-result-' + supplier.replace(/[^a-zA-Z0-9가-힣]/g, '_');
-
-    // 카드 하단 버튼들
-    const actionButtons = hasWaiting ? `
-      <div style="display:flex;gap:0.5rem;margin-top:0.8rem;flex-wrap:wrap;align-items:flex-start;">
-        <button class="btn-sm" style="font-size:0.78rem;background:rgba(196,128,58,0.15);border-color:var(--amber);color:var(--amber);" onclick="generateOrderMessage('${supplier.replace(/'/g, "\\'")}', '${msgId}')">발주 메시지 생성</button>
-        <button class="btn-sm" style="font-size:0.78rem;background:var(--green);color:#fff;border-color:var(--green);" onclick="markSupplierDone('${supplier.replace(/'/g, "\\'")}')">발주완료 처리</button>
-      </div>
-      <div id="${msgId}-area" style="display:none;margin-top:0.8rem;">
-        <textarea id="${msgId}" rows="6" style="width:100%;background:rgba(15,11,7,0.8);border:1px solid rgba(196,128,58,0.2);color:var(--cream);padding:0.6rem 0.8rem;font-family:'Noto Sans KR',sans-serif;font-size:0.85rem;resize:vertical;outline:none;margin-bottom:0.5rem;"></textarea>
-        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-          <button class="btn-primary" style="font-size:0.78rem;" onclick="sendCardSms('${supplier.replace(/'/g, "\\'")}', '${msgId}')">📨 문자발송</button>
-          <button class="btn-sm" style="font-size:0.78rem;" onclick="sendCardKakao('${supplier.replace(/'/g, "\\'")}', '${msgId}')">💬 카톡발주</button>
-          <button class="btn-sm" style="font-size:0.78rem;" onclick="sendCardEmail('${supplier.replace(/'/g, "\\'")}', '${msgId}')">✉ 이메일</button>
-        </div>
-        <div id="${resultId}" style="margin-top:0.5rem;font-size:0.8rem;color:var(--dust);"></div>
-      </div>` : '';
-
-    return `<div class="card" style="margin-bottom:1rem;border-left:${urgentCount > 0 ? '3px solid var(--red)' : '3px solid transparent'};">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem;flex-wrap:wrap;gap:0.3rem;">
-        <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
-          <span style="font-size:1rem;">📦</span>
-          <span class="card-title" style="margin-bottom:0;font-size:0.95rem;">${supplier}</span>
-          ${urgentBadge}
-          <span style="font-size:0.78rem;color:var(--dust);">${items.length}건 · ${totalQty}개</span>
-          ${contactInfo}
-        </div>
-      </div>
-      ${itemRows}
-      ${actionButtons}
-    </div>`;
-  }).join('');
+  msgEl.value = `[품앗이소비자생활협동조합 발주 요청]\n안녕하세요. 품앗이생협 지족점입니다.\n아래와 같이 발주 요청드립니다.\n\n${lines.join('\n')}\n\n감사합니다.`;
+  msgEl.focus();
 }
 
-// ══ 카드 인라인 발주 메시지 생성 ══
+function renderUnifiedOrders() {
+  // 하위 호환 유지 (goToOrder 등에서 호출 가능)
+  if (_selectedOrderSupplier) {
+    renderSupplierCard(_selectedOrderSupplier);
+  }
+}
+
+function setOrderFilter() { /* 구버전 호환 — 미사용 */ }
+
+// ══ 카드 인라인 발주 메시지 생성 (하위 호환) ══
 async function generateOrderMessage(supplierName, msgId) {
   const areaEl = document.getElementById(msgId + '-area');
   const msgEl = document.getElementById(msgId);
@@ -2015,9 +2227,7 @@ async function deleteOrderComment(id) {
 }
 
 function goToOrder(supplierName) {
-  // 통합 구조에서는 해당 거래처 메시지 생성 바로 실행
-  const msgId = 'order-msg-' + supplierName.replace(/[^a-zA-Z0-9가-힣]/g, '_');
-  generateOrderMessage(supplierName, msgId);
+  selectOrderSupplier(supplierName);
 }
 
 // ── 출퇴근부 ──────────────────────────────────────────────

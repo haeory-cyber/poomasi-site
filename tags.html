@@ -499,7 +499,11 @@
       <button type="button" class="fo-urgency-btn" data-urg="대비" onclick="selectUrgency(this)">대비</button>
     </div>
     <span class="fo-label">수량</span>
-    <div class="fo-qty-row">
+    <div style="display:flex;gap:0.5rem;margin-bottom:0.8rem;">
+      <button type="button" class="fo-urgency-btn" id="fo-mode-min" onclick="selectOrderMode('min')" style="flex:1;padding:0.6rem;">최소발주</button>
+      <button type="button" class="fo-urgency-btn" id="fo-mode-qty" onclick="selectOrderMode('qty')" style="flex:1;padding:0.6rem;">갯수입력</button>
+    </div>
+    <div class="fo-qty-row" id="fo-qty-row" style="display:none;">
       <input type="number" class="fo-qty-input" id="fo-qty" min="1" value="1" inputmode="numeric">
       <span style="color:var(--dust);font-size:0.85rem;">개</span>
     </div>
@@ -529,10 +533,17 @@ const SITE_BASE = 'https://poomasi.org';
 
 // ── 현장발주 인라인 폼 ──
 let _selectedUrgency = null;
+let _orderMode = null; // 'min' or 'qty'
 function selectUrgency(btn) {
   document.querySelectorAll('.fo-urgency-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
   _selectedUrgency = btn.dataset.urg;
+}
+function selectOrderMode(mode) {
+  _orderMode = mode;
+  document.getElementById('fo-mode-min').classList.toggle('selected', mode === 'min');
+  document.getElementById('fo-mode-qty').classList.toggle('selected', mode === 'qty');
+  document.getElementById('fo-qty-row').style.display = mode === 'qty' ? 'flex' : 'none';
 }
 // 발주자 이름 localStorage 복원
 (function() {
@@ -544,8 +555,14 @@ async function submitFieldOrder() {
   const orderer = (document.getElementById('fo-orderer').value || '').trim();
   if (!orderer) { alert('발주자 이름을 입력하세요'); return; }
   if (!_selectedUrgency) { alert('긴급도를 선택하세요'); return; }
-  const qty = parseInt(document.getElementById('fo-qty').value) || 0;
-  if (qty < 1) { alert('수량을 입력하세요'); return; }
+  if (!_orderMode) { alert('최소발주 또는 갯수입력을 선택하세요'); return; }
+  let qty;
+  if (_orderMode === 'min') {
+    qty = 0; // 0 = 최소발주 (발주담당자가 수량 결정)
+  } else {
+    qty = parseInt(document.getElementById('fo-qty').value) || 0;
+    if (qty < 1) { alert('수량을 입력하세요'); return; }
+  }
   const data = window._fieldOrderData || {};
   if (!data.item_name) { alert('상품 정보가 없습니다'); return; }
 
@@ -568,7 +585,8 @@ async function submitFieldOrder() {
     });
     if (!r.ok) throw new Error(r.status);
     document.getElementById('fo-done').style.display = 'block';
-    document.getElementById('fo-done').innerHTML = `${_selectedUrgency} · ${data.item_name} ${qty}개<br><span style="font-size:0.8rem;color:var(--dust);">${orderer} 발주 등록 완료</span><br><a href="tags.html?orders=1" style="color:var(--amber);font-size:0.85rem;margin-top:0.5rem;display:inline-block;">발주현황 보기 →</a>`;
+    const qtyText = _orderMode === 'min' ? '최소발주' : `${qty}개`;
+    document.getElementById('fo-done').innerHTML = `${_selectedUrgency} · ${data.item_name} ${qtyText}<br><span style="font-size:0.8rem;color:var(--dust);">${orderer} 발주 등록 완료</span><br><a href="tags.html?orders=1" style="color:var(--amber);font-size:0.85rem;margin-top:0.5rem;display:inline-block;">발주현황 보기 →</a>`;
     btn.style.display = 'none';
   } catch (e) {
     alert('등록 실패: ' + e.message);
