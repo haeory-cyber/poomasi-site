@@ -434,6 +434,212 @@
     .container { padding: 1.5rem 1rem 3rem; }
   }
 
+  /* ── TOAST ── */
+  .toast-container {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .toast {
+    background: var(--soil);
+    border: 1px solid var(--amber);
+    color: var(--cream);
+    padding: 0.8rem 1.2rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+    pointer-events: none;
+  }
+  @keyframes toastIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes toastOut { from { opacity:1; } to { opacity:0; } }
+
+  /* ── TASK ORDER SECTION ── */
+  .task-order-section { margin-bottom: 3rem; }
+
+  .to-login-box {
+    background: var(--soil);
+    border: 1px solid var(--bark);
+    border-radius: 12px;
+    padding: 1.2rem;
+    margin-bottom: 1.5rem;
+  }
+  .to-login-row {
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+  }
+  .to-login-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    flex: 1;
+    min-width: 160px;
+  }
+  .to-login-field label {
+    font-size: 0.75rem;
+    color: var(--dust);
+    letter-spacing: 0.06em;
+  }
+  .to-login-field input {
+    padding: 0.6rem 0.8rem;
+    background: var(--earth);
+    border: 1px solid var(--bark);
+    border-radius: 6px;
+    color: var(--cream);
+    font-family: inherit;
+    font-size: 0.9rem;
+  }
+  .to-login-field input:focus {
+    outline: none;
+    border-color: var(--amber);
+  }
+  .to-btn {
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    border: 1.5px solid var(--amber);
+    background: var(--amber);
+    color: var(--earth);
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .to-btn:hover { background: var(--amber-light); border-color: var(--amber-light); }
+  .to-btn-secondary {
+    background: transparent;
+    color: var(--dust);
+    border-color: var(--bark);
+  }
+  .to-btn-secondary:hover {
+    color: var(--cream);
+    border-color: var(--dust);
+    background: transparent;
+  }
+  .to-user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.9rem;
+    color: var(--cream);
+  }
+  .to-user-info span { color: var(--amber); font-weight: 500; }
+  .to-login-msg {
+    color: var(--dust);
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 1rem;
+  }
+
+  .to-form-box {
+    background: var(--soil);
+    border: 1px solid var(--bark);
+    border-radius: 12px;
+    padding: 1.2rem;
+    margin-bottom: 1.5rem;
+  }
+  .to-form-box textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 0.8rem;
+    background: var(--earth);
+    border: 1px solid var(--bark);
+    border-radius: 6px;
+    color: var(--cream);
+    font-family: inherit;
+    font-size: 0.9rem;
+    resize: vertical;
+    margin-bottom: 1rem;
+  }
+  .to-form-box textarea:focus {
+    outline: none;
+    border-color: var(--amber);
+  }
+  .to-urgency-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .to-urgency-btn {
+    flex: 1;
+    padding: 0.6rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    border: 1.5px solid rgba(184,168,138,0.2);
+    background: transparent;
+    color: var(--dust);
+    transition: all 0.15s;
+  }
+  .to-urgency-btn.selected { color: var(--cream); }
+  .to-urgency-btn[data-urg="일반"].selected { background: var(--dust); border-color: var(--dust); color: var(--earth); }
+  .to-urgency-btn[data-urg="긴급"].selected { background: var(--amber); border-color: var(--amber); color: var(--earth); }
+  .to-urgency-btn[data-urg="최우선"].selected { background: var(--red); border-color: var(--red); }
+
+  .to-form-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  /* ── TASK ORDER LIST ── */
+  .to-list { display: flex; flex-direction: column; gap: 0.5rem; }
+  .to-list-item {
+    display: grid;
+    grid-template-columns: 70px 1fr auto auto auto auto;
+    gap: 0.6rem;
+    align-items: center;
+    background: var(--soil);
+    border: 1px solid var(--bark);
+    border-radius: 8px;
+    padding: 0.7rem 1rem;
+    font-size: 0.82rem;
+  }
+  .to-list-item .to-requester { color: var(--cream); font-weight: 500; }
+  .to-list-item .to-content {
+    color: var(--dust);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .to-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 10px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .to-badge-urg-일반 { background: var(--dust); color: var(--earth); }
+  .to-badge-urg-긴급 { background: var(--amber); color: var(--earth); }
+  .to-badge-urg-최우선 { background: var(--red); color: var(--cream); }
+  .to-badge-st-접수 { background: var(--dust); color: var(--earth); }
+  .to-badge-st-배분완료 { background: var(--amber); color: var(--earth); }
+  .to-badge-st-진행중 { background: var(--amber-light); color: var(--earth); }
+  .to-badge-st-완료 { background: var(--green-light); color: var(--earth); }
+  .to-agent { color: var(--dust); font-size: 0.75rem; }
+  .to-date { color: var(--dust); font-size: 0.72rem; white-space: nowrap; }
+
+  @media (max-width: 768px) {
+    .to-list-item {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto auto;
+      gap: 0.3rem 0.6rem;
+    }
+    .to-list-item .to-content {
+      grid-column: 1 / -1;
+      white-space: normal;
+    }
+    .to-login-row { flex-direction: column; align-items: stretch; }
+  }
+
   /* ── FOCUS VISIBLE ── */
   a:focus-visible, .org-node:focus-visible {
     outline: 2px solid var(--amber);
@@ -797,6 +1003,57 @@
     </div>
   </section>
 
+  <!-- ── 2.5. TASK ORDERS ── -->
+  <section class="task-order-section" aria-label="업무지시">
+    <h2 class="section-title">업무지시</h2>
+
+    <!-- Login Box -->
+    <div class="to-login-box" id="to-login-box">
+      <div id="to-login-form">
+        <div class="to-login-row">
+          <div class="to-login-field">
+            <label for="to-email">이메일</label>
+            <input type="email" id="to-email" placeholder="email@example.com" autocomplete="email">
+          </div>
+          <div class="to-login-field">
+            <label for="to-password">비밀번호</label>
+            <input type="password" id="to-password" placeholder="비밀번호" autocomplete="current-password">
+          </div>
+          <button class="to-btn" id="to-login-btn" type="button">로그인</button>
+        </div>
+      </div>
+      <div id="to-user-area" style="display:none;">
+        <div class="to-user-info">
+          <span id="to-user-name"></span>
+          <span style="color:var(--dust);font-size:0.8rem;">님 로그인</span>
+          <button class="to-btn to-btn-secondary" id="to-logout-btn" type="button">로그아웃</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Form (shown after login) -->
+    <div class="to-form-box" id="to-form-box" style="display:none;">
+      <textarea id="to-content" placeholder="업무 지시 내용을 입력하세요"></textarea>
+      <span style="font-size:0.75rem;color:var(--dust);letter-spacing:0.06em;display:block;margin-bottom:0.4rem;">긴급도</span>
+      <div class="to-urgency-group">
+        <button type="button" class="to-urgency-btn" data-urg="일반">일반</button>
+        <button type="button" class="to-urgency-btn" data-urg="긴급">긴급</button>
+        <button type="button" class="to-urgency-btn" data-urg="최우선">최우선</button>
+      </div>
+      <div class="to-form-actions">
+        <button class="to-btn" id="to-submit-btn" type="button">등록</button>
+      </div>
+    </div>
+
+    <!-- Not logged in message -->
+    <div id="to-no-login-msg" class="to-login-msg">로그인이 필요합니다</div>
+
+    <!-- Orders List -->
+    <div class="to-list" id="to-list">
+      <div class="loading-msg">데이터 로딩 중...</div>
+    </div>
+  </section>
+
   <!-- ── 3. GANTT CHART ── -->
   <section class="gantt-section" aria-label="업무현황">
     <h2 class="section-title">업무현황</h2>
@@ -981,6 +1238,227 @@
     document.addEventListener('DOMContentLoaded', loadTasks);
   } else {
     loadTasks();
+  }
+})();
+</script>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- Task Order Script (separate from IIFE) -->
+<script>
+(function() {
+  'use strict';
+
+  var SUPABASE_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRuaXZoY3BqcmhrbWVrY2ZxZ2RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NTc5MjMsImV4cCI6MjA4NzIzMzkyM30.yJ0_4Sg78p7oY89q7go3ab26PCPHnk1Q4ObZJIZEULA';
+  var sb = null;
+  var currentUser = null;
+  var selectedUrgency = '일반';
+
+  function initSupabase() {
+    if (typeof supabase !== 'undefined' && supabase.createClient) {
+      sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      return true;
+    }
+    return false;
+  }
+
+  function showToast(msg) {
+    var container = document.getElementById('toast-container');
+    var el = document.createElement('div');
+    el.className = 'toast';
+    el.textContent = msg;
+    container.appendChild(el);
+    setTimeout(function() { el.remove(); }, 3000);
+  }
+
+  function updateLoginUI() {
+    var loginForm = document.getElementById('to-login-form');
+    var userArea = document.getElementById('to-user-area');
+    var formBox = document.getElementById('to-form-box');
+    var noLoginMsg = document.getElementById('to-no-login-msg');
+
+    if (currentUser) {
+      loginForm.style.display = 'none';
+      userArea.style.display = 'block';
+      formBox.style.display = 'block';
+      noLoginMsg.style.display = 'none';
+      var name = (currentUser.user_metadata && currentUser.user_metadata.name) || currentUser.email;
+      document.getElementById('to-user-name').textContent = name;
+    } else {
+      loginForm.style.display = 'block';
+      userArea.style.display = 'none';
+      formBox.style.display = 'none';
+      noLoginMsg.style.display = 'block';
+    }
+  }
+
+  async function handleLogin() {
+    if (!sb) return;
+    var email = document.getElementById('to-email').value.trim();
+    var password = document.getElementById('to-password').value;
+    if (!email || !password) { showToast('이메일과 비밀번호를 입력하세요'); return; }
+
+    var btn = document.getElementById('to-login-btn');
+    btn.disabled = true;
+    btn.textContent = '로그인 중...';
+
+    try {
+      var result = await sb.auth.signInWithPassword({ email: email, password: password });
+      if (result.error) throw result.error;
+      currentUser = result.data.user;
+      updateLoginUI();
+      showToast('로그인 성공');
+    } catch (err) {
+      showToast('로그인 실패: ' + (err.message || err));
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '로그인';
+    }
+  }
+
+  async function handleLogout() {
+    if (!sb) return;
+    await sb.auth.signOut();
+    currentUser = null;
+    updateLoginUI();
+    showToast('로그아웃 되었습니다');
+  }
+
+  function selectUrgencyBtn(btn) {
+    var btns = document.querySelectorAll('.to-urgency-btn');
+    btns.forEach(function(b) { b.classList.remove('selected'); });
+    btn.classList.add('selected');
+    selectedUrgency = btn.getAttribute('data-urg');
+  }
+
+  async function handleSubmit() {
+    if (!sb || !currentUser) return;
+    var content = document.getElementById('to-content').value.trim();
+    if (!content) { showToast('업무 지시 내용을 입력하세요'); return; }
+
+    var submitBtn = document.getElementById('to-submit-btn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = '등록 중...';
+
+    var userName = (currentUser.user_metadata && currentUser.user_metadata.name) || currentUser.email;
+
+    try {
+      var result = await sb.from('task_orders').insert({
+        requester_id: currentUser.id,
+        requester_name: userName,
+        content: content,
+        urgency: selectedUrgency,
+        status: '접수'
+      });
+      if (result.error) throw result.error;
+
+      showToast('업무지시가 접수되었습니다');
+      document.getElementById('to-content').value = '';
+      var btns = document.querySelectorAll('.to-urgency-btn');
+      btns.forEach(function(b) { b.classList.remove('selected'); });
+      selectedUrgency = '일반';
+      loadOrders();
+    } catch (err) {
+      showToast('등록 실패: ' + (err.message || err));
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = '등록';
+    }
+  }
+
+  function formatOrderDate(isoStr) {
+    if (!isoStr) return '';
+    var d = new Date(isoStr);
+    var m = d.getMonth() + 1;
+    var day = d.getDate();
+    var h = d.getHours();
+    var min = String(d.getMinutes()).padStart(2, '0');
+    return m + '/' + day + ' ' + h + ':' + min;
+  }
+
+  async function loadOrders() {
+    var listEl = document.getElementById('to-list');
+    if (!sb) {
+      listEl.innerHTML = '<div class="loading-msg">Supabase 연결 대기 중...</div>';
+      return;
+    }
+
+    try {
+      var result = await sb.from('task_orders').select('*').order('created_at', { ascending: false }).limit(20);
+      if (result.error) throw result.error;
+
+      if (!result.data || result.data.length === 0) {
+        listEl.innerHTML = '<div class="loading-msg">등록된 업무지시가 없습니다.</div>';
+        return;
+      }
+
+      listEl.innerHTML = '';
+      result.data.forEach(function(order) {
+        var item = document.createElement('div');
+        item.className = 'to-list-item';
+
+        var urgClass = 'to-badge-urg-' + (order.urgency || '일반');
+        var stClass = 'to-badge-st-' + (order.status || '접수');
+
+        item.innerHTML =
+          '<span class="to-requester">' + escapeHtml(order.requester_name || '') + '</span>' +
+          '<span class="to-content" title="' + escapeHtml(order.content || '') + '">' + escapeHtml(order.content || '') + '</span>' +
+          '<span class="to-badge ' + urgClass + '">' + escapeHtml(order.urgency || '일반') + '</span>' +
+          '<span class="to-badge ' + stClass + '">' + escapeHtml(order.status || '접수') + '</span>' +
+          '<span class="to-agent">' + escapeHtml(order.assigned_agent || '-') + '</span>' +
+          '<span class="to-date">' + formatOrderDate(order.created_at) + '</span>';
+
+        listEl.appendChild(item);
+      });
+    } catch (err) {
+      listEl.innerHTML = '<div class="loading-msg">데이터 로드 실패: ' + escapeHtml(err.message || '') + '</div>';
+    }
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+
+  // ── Event Binding ──
+  function init() {
+    if (!initSupabase()) {
+      console.warn('Task Orders: Supabase SDK not loaded');
+      return;
+    }
+
+    // Check existing session
+    sb.auth.getSession().then(function(res) {
+      if (res.data && res.data.session) {
+        currentUser = res.data.session.user;
+      }
+      updateLoginUI();
+    });
+
+    document.getElementById('to-login-btn').addEventListener('click', handleLogin);
+    document.getElementById('to-logout-btn').addEventListener('click', handleLogout);
+    document.getElementById('to-submit-btn').addEventListener('click', handleSubmit);
+
+    // Enter key on password field
+    document.getElementById('to-password').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') handleLogin();
+    });
+
+    // Urgency buttons
+    document.querySelectorAll('.to-urgency-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() { selectUrgencyBtn(btn); });
+    });
+
+    loadOrders();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
   }
 })();
 </script>
