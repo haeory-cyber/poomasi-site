@@ -1170,7 +1170,67 @@
         <div class="sec-label">GROUP BUY</div>
         <div class="sec-title">공동구매 관리</div>
       </div>
-      <button class="btn-sm" onclick="loadGroupBuys()">↻ 새로고침</button>
+      <div style="display:flex;gap:0.5rem;">
+        <button class="btn-sm" onclick="loadGroupBuys()">↻ 새로고침</button>
+        <button class="btn-sm" onclick="showNewGroupBuy()" id="btn-new-groupbuy" style="border-color:rgba(196,128,58,0.5);color:var(--amber);">+ 신규 만들기</button>
+      </div>
+    </div>
+
+    <!-- 신규 공동구매 폼 (기본 숨김) -->
+    <div id="new-groupbuy-form" style="display:none;margin-bottom:1.5rem;">
+      <div class="card" style="border-color:rgba(196,128,58,0.3);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;">
+          <span style="font-size:0.9rem;font-weight:700;color:var(--amber);">신규 공동구매 만들기</span>
+          <button class="btn-del" onclick="hideNewGroupBuy()" style="font-size:1rem;">✕</button>
+        </div>
+
+        <!-- 업체명 + 차수 -->
+        <div style="display:grid;grid-template-columns:1fr auto;gap:0.8rem;margin-bottom:0.8rem;">
+          <div>
+            <label style="font-size:0.75rem;color:var(--dust);display:block;margin-bottom:0.3rem;">업체명</label>
+            <input id="gb-supplier" type="text" placeholder="예: 흙살림, 대저토마토" onblur="autoFillRound(this.value)"
+              style="width:100%;box-sizing:border-box;background:rgba(15,11,7,0.8);border:1px solid rgba(196,128,58,0.2);color:var(--cream);padding:0.5rem 0.7rem;font-family:'Noto Sans KR',sans-serif;font-size:0.85rem;outline:none;border-radius:3px;">
+          </div>
+          <div style="min-width:80px;">
+            <label style="font-size:0.75rem;color:var(--dust);display:block;margin-bottom:0.3rem;">차수</label>
+            <input id="gb-round" type="number" min="1" value="1"
+              style="width:100%;box-sizing:border-box;background:rgba(15,11,7,0.8);border:1px solid rgba(196,128,58,0.2);color:var(--cream);padding:0.5rem 0.7rem;font-family:'Noto Sans KR',sans-serif;font-size:0.85rem;outline:none;border-radius:3px;text-align:center;">
+          </div>
+        </div>
+
+        <!-- 상품 목록 -->
+        <div style="margin-bottom:0.8rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+            <label style="font-size:0.75rem;color:var(--dust);">상품 목록</label>
+            <button class="btn-sm" onclick="addGbItem()" style="font-size:0.72rem;padding:0.2rem 0.6rem;">+ 상품 추가</button>
+          </div>
+          <!-- 헤더 -->
+          <div style="display:grid;grid-template-columns:2fr 1.2fr 1fr 1fr auto;gap:0.4rem;margin-bottom:0.3rem;padding:0 0.2rem;">
+            <span style="font-size:0.7rem;color:var(--dust);">상품명</span>
+            <span style="font-size:0.7rem;color:var(--dust);">규격</span>
+            <span style="font-size:0.7rem;color:var(--dust);">매입가</span>
+            <span style="font-size:0.7rem;color:var(--dust);">판매가</span>
+            <span></span>
+          </div>
+          <div id="gb-items-list"></div>
+        </div>
+
+        <!-- 마감일 + 수령일 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-bottom:1rem;">
+          <div>
+            <label style="font-size:0.75rem;color:var(--dust);display:block;margin-bottom:0.3rem;">마감일시</label>
+            <input id="gb-deadline" type="datetime-local"
+              style="width:100%;box-sizing:border-box;background:rgba(15,11,7,0.8);border:1px solid rgba(196,128,58,0.2);color:var(--cream);padding:0.5rem 0.7rem;font-family:'Noto Sans KR',sans-serif;font-size:0.82rem;outline:none;border-radius:3px;">
+          </div>
+          <div>
+            <label style="font-size:0.75rem;color:var(--dust);display:block;margin-bottom:0.3rem;">수령일</label>
+            <input id="gb-pickup" type="date"
+              style="width:100%;box-sizing:border-box;background:rgba(15,11,7,0.8);border:1px solid rgba(196,128,58,0.2);color:var(--cream);padding:0.5rem 0.7rem;font-family:'Noto Sans KR',sans-serif;font-size:0.82rem;outline:none;border-radius:3px;">
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="submitNewGroupBuy()" style="width:100%;border-radius:3px;">폼 생성</button>
+      </div>
     </div>
 
     <!-- 진행중 목록 -->
@@ -1354,6 +1414,185 @@ function togglePastGroupBuys() {
   const open  = body.style.display === 'none';
   body.style.display  = open ? 'block' : 'none';
   arrow.style.transform = open ? 'rotate(180deg)' : '';
+}
+
+// ── 신규 공동구매 만들기 ──────────────────────────────────
+let _gbItemCount = 0;
+
+function showNewGroupBuy() {
+  document.getElementById('new-groupbuy-form').style.display = 'block';
+  document.getElementById('btn-new-groupbuy').style.display = 'none';
+  autoFillDates();
+  if (document.getElementById('gb-items-list').children.length === 0) addGbItem();
+}
+
+function hideNewGroupBuy() {
+  document.getElementById('new-groupbuy-form').style.display = 'none';
+  document.getElementById('btn-new-groupbuy').style.display = '';
+}
+
+function addGbItem() {
+  const idx = _gbItemCount++;
+  const row = document.createElement('div');
+  row.id = 'gb-item-' + idx;
+  row.style.cssText = 'display:grid;grid-template-columns:2fr 1.2fr 1fr 1fr auto;gap:0.4rem;margin-bottom:0.4rem;align-items:center;';
+  const inputStyle = 'background:rgba(15,11,7,0.8);border:1px solid rgba(196,128,58,0.15);color:var(--cream);padding:0.4rem 0.5rem;font-family:\'Noto Sans KR\',sans-serif;font-size:0.82rem;outline:none;border-radius:3px;width:100%;box-sizing:border-box;';
+  row.innerHTML = [
+    '<input type="text" placeholder="상품명" style="' + inputStyle + '">',
+    '<input type="text" placeholder="규격" style="' + inputStyle + '">',
+    '<input type="number" placeholder="매입가" min="0" oninput="calcSellPrice(' + idx + ')" style="' + inputStyle + '">',
+    '<input type="number" id="gb-sell-' + idx + '" placeholder="판매가" min="0" style="' + inputStyle + '">',
+    '<button class="btn-del" onclick="removeGbItem(' + idx + ')">✕</button>'
+  ].join('');
+  document.getElementById('gb-items-list').appendChild(row);
+}
+
+function removeGbItem(idx) {
+  const row = document.getElementById('gb-item-' + idx);
+  if (row) row.remove();
+}
+
+function calcSellPrice(idx) {
+  const row = document.getElementById('gb-item-' + idx);
+  if (!row) return;
+  const costInput = row.querySelectorAll('input')[2];
+  const sellInput = document.getElementById('gb-sell-' + idx);
+  const cost = parseFloat(costInput.value);
+  if (!cost || cost <= 0) { sellInput.value = ''; return; }
+  const raw = cost * 1.27;
+  const rounded = Math.round(raw / 500) * 500;
+  sellInput.value = rounded;
+}
+
+function autoFillDates() {
+  const now = new Date();
+  const day = now.getDay();
+  const daysToNextTue = ((2 - day + 7) % 7) || 7;
+  const deadline = new Date(now);
+  deadline.setDate(now.getDate() + daysToNextTue);
+  deadline.setHours(18, 0, 0, 0);
+
+  const pickup = new Date(deadline);
+  pickup.setDate(deadline.getDate() + 3);
+
+  // datetime-local format: YYYY-MM-DDTHH:MM
+  const pad = n => String(n).padStart(2, '0');
+  const dlStr = deadline.getFullYear() + '-' + pad(deadline.getMonth()+1) + '-' + pad(deadline.getDate()) + 'T' + pad(deadline.getHours()) + ':00';
+  const pkStr = pickup.getFullYear() + '-' + pad(pickup.getMonth()+1) + '-' + pad(pickup.getDate());
+
+  document.getElementById('gb-deadline').value = dlStr;
+  document.getElementById('gb-pickup').value = pkStr;
+}
+
+async function autoFillRound(supplier) {
+  if (!supplier.trim()) return;
+  const { data } = await sb
+    .from('group_buys')
+    .select('round')
+    .eq('supplier', supplier.trim())
+    .order('round', { ascending: false })
+    .limit(1);
+  const maxRound = (data && data.length > 0 && data[0].round) ? data[0].round : 0;
+  document.getElementById('gb-round').value = maxRound + 1;
+}
+
+async function submitNewGroupBuy() {
+  const supplier = document.getElementById('gb-supplier').value.trim();
+  const round    = parseInt(document.getElementById('gb-round').value) || 1;
+  const deadline = document.getElementById('gb-deadline').value;
+  const pickup   = document.getElementById('gb-pickup').value;
+
+  if (!supplier) { toast('업체명을 입력하세요.'); return; }
+  if (!deadline) { toast('마감일시를 입력하세요.'); return; }
+
+  // 상품 목록 수집
+  const items = [];
+  document.querySelectorAll('#gb-items-list > div').forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    const name = inputs[0].value.trim();
+    if (!name) return;
+    items.push({
+      item_name: name,
+      spec: inputs[1].value.trim(),
+      cost_price: parseFloat(inputs[2].value) || 0,
+      sell_price: parseFloat(inputs[3].value) || 0
+    });
+  });
+
+  if (items.length === 0) { toast('상품을 최소 1개 추가하세요.'); return; }
+
+  const btn = document.querySelector('#new-groupbuy-form .btn-primary');
+  btn.disabled = true;
+  btn.textContent = '생성 중…';
+
+  // group_buys INSERT
+  const { data: gbData, error: gbErr } = await sb
+    .from('group_buys')
+    .insert({ supplier, round, deadline, pickup_date: pickup || null, status: '생성중', is_active: true })
+    .select()
+    .single();
+
+  if (gbErr) {
+    toast('저장 실패: ' + gbErr.message);
+    btn.disabled = false;
+    btn.textContent = '폼 생성';
+    return;
+  }
+
+  const gbId = gbData.id;
+
+  // group_buy_items INSERT
+  const itemsToInsert = items.map(it => ({ ...it, group_buy_id: gbId }));
+  const { error: itemErr } = await sb.from('group_buy_items').insert(itemsToInsert);
+
+  if (itemErr) {
+    toast('상품 저장 실패: ' + itemErr.message);
+    btn.disabled = false;
+    btn.textContent = '폼 생성';
+    return;
+  }
+
+  toast('폼 생성 요청됨 — 잠시 후 자동으로 생성됩니다', 4000);
+  hideNewGroupBuy();
+  btn.disabled = false;
+  btn.textContent = '폼 생성';
+
+  // 폼 생성 polling
+  pollFormUrl(gbId);
+  loadGroupBuys();
+}
+
+let _pollTimers = {};
+
+function pollFormUrl(gbId) {
+  let elapsed = 0;
+  const interval = 5000;
+  const maxWait = 60000;
+
+  if (_pollTimers[gbId]) clearInterval(_pollTimers[gbId]);
+
+  _pollTimers[gbId] = setInterval(async () => {
+    elapsed += interval;
+    const { data } = await sb
+      .from('group_buys')
+      .select('form_url, status')
+      .eq('id', gbId)
+      .single();
+
+    if (data && data.form_url) {
+      clearInterval(_pollTimers[gbId]);
+      delete _pollTimers[gbId];
+      toast('폼 생성 완료!');
+      loadGroupBuys();
+      return;
+    }
+
+    if (elapsed >= maxWait) {
+      clearInterval(_pollTimers[gbId]);
+      delete _pollTimers[gbId];
+      toast('폼 생성 시간 초과. 워커 상태를 확인하세요.');
+    }
+  }, interval);
 }
 
 // ── 공통 유틸 ─────────────────────────────────────────────
