@@ -866,6 +866,159 @@
     }
     .to-login-row { flex-direction: column; align-items: stretch; }
   }
+
+  /* ── 에이전트 상세 패널 ── */
+  .agent-panel-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .agent-panel-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .agent-panel {
+    position: fixed;
+    top: 0;
+    right: -420px;
+    width: 400px;
+    height: 100%;
+    background: var(--soil);
+    border-left: 1px solid var(--border);
+    z-index: 201;
+    transition: right 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .agent-panel.open {
+    right: 0;
+  }
+  .agent-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.2rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bark);
+  }
+  .agent-panel-header h3 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.05rem;
+    color: var(--amber);
+    margin: 0;
+  }
+  .agent-panel-header .ap-role {
+    font-size: 0.78rem;
+    color: var(--dust);
+    margin-top: 0.15rem;
+  }
+  .agent-panel-close {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--dust);
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s, color 0.2s;
+    flex-shrink: 0;
+  }
+  .agent-panel-close:hover {
+    border-color: var(--amber);
+    color: var(--cream);
+  }
+  .agent-panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.2rem;
+  }
+  .agent-panel-body::-webkit-scrollbar { width: 4px; }
+  .agent-panel-body::-webkit-scrollbar-thumb { background: var(--bark); border-radius: 2px; }
+  .ap-desc {
+    font-size: 0.82rem;
+    color: var(--dust);
+    line-height: 1.5;
+    margin-bottom: 1.2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .ap-section-title {
+    font-size: 0.78rem;
+    color: var(--amber-light);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.6rem;
+    font-weight: 500;
+  }
+  .ap-task-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.4rem;
+  }
+  .ap-task-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .ap-task-title {
+    font-size: 0.85rem;
+    color: var(--cream);
+  }
+  .ap-task-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.72rem;
+    color: var(--dust);
+  }
+  .ap-badge {
+    font-size: 0.68rem;
+    padding: 0.12rem 0.5rem;
+    border-radius: 10px;
+    font-weight: 500;
+  }
+  .ap-badge-진행중 { background: var(--amber); color: var(--earth); }
+  .ap-badge-완료 { background: var(--green-light); color: var(--earth); }
+  .ap-badge-기획중 { background: var(--dust); color: var(--earth); }
+  .ap-badge-대기 { background: var(--bark); color: var(--cream); }
+  .ap-badge-긴급 { background: var(--red); color: var(--white); }
+  .ap-badge-일반 { background: var(--bark); color: var(--cream); }
+  .ap-empty {
+    font-size: 0.8rem;
+    color: var(--dust);
+    text-align: center;
+    padding: 1.5rem 0;
+  }
+  .ap-loading {
+    text-align: center;
+    padding: 1rem 0;
+    color: var(--dust);
+    font-size: 0.8rem;
+  }
+  .org-node.active {
+    border-color: var(--amber);
+    box-shadow: 0 0 0 2px rgba(196,128,58,0.3);
+  }
+  @media (max-width: 600px) {
+    .agent-panel { width: 100%; right: -100%; }
+    .agent-panel.open { right: 0; }
+    .agent-panel-body { padding: 1rem; }
+  }
 </style>
 </head>
 <body>
@@ -1027,7 +1180,7 @@
 
       <div class="org-chart">
         <!-- 후니님 -->
-        <div class="org-node" aria-label="후니님 - 대표">
+        <div class="org-node" data-agent="후니님" aria-label="후니님 - 대표">
           <svg class="agent-icon-sm" viewBox="0 0 48 48" aria-hidden="true">
             <circle cx="24" cy="14" r="8" fill="var(--white)"/>
             <path d="M10 42c0-10 6-16 14-16s14 6 14 16" fill="var(--white)"/>
@@ -1046,7 +1199,7 @@
         <div class="org-connector"></div>
 
         <!-- 지미 -->
-        <div class="org-node" style="border-color:var(--amber);" aria-label="지미 - AI경영지원실장">
+        <div class="org-node" data-agent="지미" style="border-color:var(--amber);" aria-label="지미 - AI경영지원실장">
           <svg class="agent-icon" viewBox="0 0 48 48" id="icon-jimmy" aria-hidden="true">
             <circle cx="24" cy="15" r="9" fill="var(--amber)"/>
             <path d="M8 46c0-12 7-18 16-18s16 6 16 18" fill="var(--amber)"/>
@@ -1068,7 +1221,7 @@
           <div class="org-team">
             <div class="org-team-label">실무팀</div>
             <div class="org-h-group">
-              <div class="org-node" aria-label="건호 - 개발팀장">
+              <div class="org-node" data-agent="건호" aria-label="건호 - 개발팀장">
                 <svg class="agent-icon-sm" viewBox="0 0 48 48" aria-hidden="true">
                   <circle cx="24" cy="15" r="9" fill="var(--green-light)"/>
                   <path d="M8 46c0-12 7-18 16-18s16 6 16 18" fill="var(--green-light)"/>
@@ -1081,7 +1234,7 @@
                   <div class="org-node-role">개발팀장</div>
                 </div>
               </div>
-              <div class="org-node" aria-label="다온 - 문서디자인팀장">
+              <div class="org-node" data-agent="다온" aria-label="다온 - 문서디자인팀장">
                 <svg class="agent-icon-sm" viewBox="0 0 48 48" aria-hidden="true">
                   <circle cx="24" cy="15" r="9" fill="var(--cream)"/>
                   <path d="M8 46c0-12 7-18 16-18s16 6 16 18" fill="var(--amber-light)"/>
@@ -1094,7 +1247,7 @@
                   <div class="org-node-role">문서디자인팀장</div>
                 </div>
               </div>
-              <div class="org-node" aria-label="이든 - 연결팀장">
+              <div class="org-node" data-agent="이든" aria-label="이든 - 연결팀장">
                 <svg class="agent-icon-sm" viewBox="0 0 48 48" aria-hidden="true">
                   <circle cx="24" cy="15" r="9" fill="var(--dust)"/>
                   <path d="M8 46c0-12 7-18 16-18s16 6 16 18" fill="var(--dust)"/>
@@ -1114,7 +1267,7 @@
           <div class="org-team">
             <div class="org-team-label">PDCA팀</div>
             <div class="org-h-group">
-              <div class="org-node" aria-label="기준 - 기획팀장">
+              <div class="org-node" data-agent="기준" aria-label="기준 - 기획팀장">
                 <svg class="agent-icon-sm" viewBox="0 0 48 48" aria-hidden="true">
                   <circle cx="24" cy="15" r="9" fill="var(--amber)"/>
                   <path d="M8 46c0-12 7-18 16-18s16 6 16 18" fill="var(--amber)"/>
@@ -1127,7 +1280,7 @@
                   <div class="org-node-role">기획팀장</div>
                 </div>
               </div>
-              <div class="org-node" aria-label="시현 - 코드검증팀장">
+              <div class="org-node" data-agent="시현" aria-label="시현 - 코드검증팀장">
                 <svg class="agent-icon-sm" viewBox="0 0 48 48" aria-hidden="true">
                   <circle cx="24" cy="15" r="9" fill="var(--red)"/>
                   <path d="M8 46c0-12 7-18 16-18s16 6 16 18" fill="var(--red)"/>
@@ -1140,7 +1293,7 @@
                   <div class="org-node-role">코드검증팀장</div>
                 </div>
               </div>
-              <div class="org-node" aria-label="심아 - 문서검증팀장">
+              <div class="org-node" data-agent="심아" aria-label="심아 - 문서검증팀장">
                 <svg class="agent-icon-sm" viewBox="0 0 48 48" aria-hidden="true">
                   <circle cx="24" cy="15" r="9" fill="var(--dust)"/>
                   <path d="M8 46c0-12 7-18 16-18s16 6 16 18" fill="var(--cream)"/>
@@ -1153,7 +1306,7 @@
                   <div class="org-node-role">문서검증팀장</div>
                 </div>
               </div>
-              <div class="org-node" aria-label="환이 - 개선팀장">
+              <div class="org-node" data-agent="환이" aria-label="환이 - 개선팀장">
                 <svg class="agent-icon-sm" viewBox="0 0 48 48" aria-hidden="true">
                   <circle cx="24" cy="15" r="9" fill="var(--green)"/>
                   <path d="M8 46c0-12 7-18 16-18s16 6 16 18" fill="var(--green)"/>
@@ -1171,6 +1324,29 @@
         </div>
       </div>
     </section>
+
+    <!-- ═══ 에이전트 상세 패널 ═══ -->
+    <div class="agent-panel-overlay" id="agent-panel-overlay"></div>
+    <div class="agent-panel" id="agent-panel">
+      <div class="agent-panel-header">
+        <div>
+          <h3 id="ap-name"></h3>
+          <div class="ap-role" id="ap-role"></div>
+        </div>
+        <button class="agent-panel-close" id="ap-close" aria-label="닫기">&times;</button>
+      </div>
+      <div class="agent-panel-body" id="ap-body">
+        <div class="ap-desc" id="ap-desc"></div>
+        <div id="ap-tasks-section">
+          <div class="ap-section-title">작업 이력</div>
+          <ul class="ap-task-list" id="ap-tasks"></ul>
+        </div>
+        <div id="ap-orders-section">
+          <div class="ap-section-title">업무지시</div>
+          <ul class="ap-task-list" id="ap-orders"></ul>
+        </div>
+      </div>
+    </div>
 
     <!-- ═══ 4. 업무현황 (간트) ═══ -->
     <section class="gantt-section" aria-label="업무현황">
@@ -1822,6 +1998,179 @@ sb.auth.getSession().then(({ data: { session } }) => {
   } else {
     init();
   }
+})();
+</script>
+
+<!-- ── 에이전트 상세 패널 스크립트 ── -->
+<script>
+(function() {
+  'use strict';
+
+  var AGENT_INFO = {
+    '후니님': { role: '대표', desc: '품앗이생활협동조합 대표. AI경영지원실 총괄 지휘.' },
+    '지미':   { role: 'AI경영지원실장', desc: '총괄 업무배분, 의사결정 지원, 배포 최종 게이트.' },
+    '건호':   { role: '개발팀장', desc: '웹개발, 봇개발, 버그수정, 인프라 코드.' },
+    '다온':   { role: '문서디자인팀장', desc: '신청서, PPT, 가격태그, 마케팅 자료.' },
+    '이든':   { role: '연결팀장', desc: '대외소통, 시스템연동, 일정관리.' },
+    '기준':   { role: '기획팀장', desc: '스펙확장, 완료기준 설정, 마일스톤 관리.' },
+    '시현':   { role: '코드검증팀장', desc: 'Playwright QA, UI 테스트, 코드 검증.' },
+    '심아':   { role: '문서검증팀장', desc: '문서 4축 검증, 오탈자, 수치검증.' },
+    '환이':   { role: '개선팀장', desc: '레슨환류, PDCA분석, 패턴개선.' }
+  };
+
+  var FALLBACK_TASKS = [
+    { agent_name: '건호', task_title: '에이전트 대시보드 개발', status: '진행중', start_date: '2026-03-29', end_date: null },
+    { agent_name: '건호', task_title: '바코드 봇 유지보수', status: '완료', start_date: '2026-03-15', end_date: '2026-03-20' },
+    { agent_name: '다온', task_title: '탄소중립 지원사업 신청서', status: '기획중', start_date: '2026-04-01', end_date: null },
+    { agent_name: '다온', task_title: '가격태그 시스템', status: '완료', start_date: '2026-03-10', end_date: '2026-03-18' },
+    { agent_name: '이든', task_title: '대외소통 추적 체계 구축', status: '기획중', start_date: '2026-04-01', end_date: null },
+    { agent_name: '이든', task_title: '텔레그램 채널 운영', status: '진행중', start_date: '2026-03-01', end_date: null },
+    { agent_name: '기준', task_title: '대시보드 기획', status: '완료', start_date: '2026-03-29', end_date: '2026-03-29' },
+    { agent_name: '시현', task_title: '홈페이지 QA 검증', status: '진행중', start_date: '2026-03-25', end_date: null },
+    { agent_name: '심아', task_title: '경영보고서 검증', status: '기획중', start_date: '2026-04-05', end_date: null },
+    { agent_name: '환이', task_title: 'PDCA v2 환류 분석', status: '완료', start_date: '2026-03-28', end_date: '2026-03-29' }
+  ];
+
+  var panel = document.getElementById('agent-panel');
+  var overlay = document.getElementById('agent-panel-overlay');
+  var activeNode = null;
+
+  function openPanel(agentName) {
+    var info = AGENT_INFO[agentName] || { role: '', desc: '' };
+    document.getElementById('ap-name').textContent = agentName;
+    document.getElementById('ap-role').textContent = info.role;
+    document.getElementById('ap-desc').textContent = info.desc;
+    document.getElementById('ap-tasks').innerHTML = '<li class="ap-loading">불러오는 중...</li>';
+    document.getElementById('ap-orders').innerHTML = '<li class="ap-loading">불러오는 중...</li>';
+
+    panel.classList.add('open');
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+
+    loadAgentTasks(agentName);
+    loadAgentOrders(agentName);
+  }
+
+  function closePanel() {
+    panel.classList.remove('open');
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+    if (activeNode) {
+      activeNode.classList.remove('active');
+      activeNode = null;
+    }
+  }
+
+  function renderTaskList(tasks, container) {
+    if (!tasks || tasks.length === 0) {
+      container.innerHTML = '<li class="ap-empty">등록된 항목이 없습니다.</li>';
+      return;
+    }
+    container.innerHTML = tasks.map(function(t) {
+      var status = t.status || '대기';
+      var badgeClass = 'ap-badge ap-badge-' + status;
+      var dateStr = t.start_date || '';
+      if (t.end_date) dateStr += ' ~ ' + t.end_date;
+      var title = t.task_title || t.content || '';
+      return '<li class="ap-task-item">' +
+        '<div class="ap-task-title">' + escapeHtml(title) + '</div>' +
+        '<div class="ap-task-meta">' +
+          '<span class="' + badgeClass + '">' + escapeHtml(status) + '</span>' +
+          (dateStr ? '<span>' + escapeHtml(dateStr) + '</span>' : '') +
+        '</div>' +
+      '</li>';
+    }).join('');
+  }
+
+  function renderOrderList(orders, container) {
+    if (!orders || orders.length === 0) {
+      container.innerHTML = '<li class="ap-empty">배분된 업무지시가 없습니다.</li>';
+      return;
+    }
+    container.innerHTML = orders.map(function(o) {
+      var status = o.status || '대기';
+      var urgency = o.urgency || '일반';
+      var date = o.created_at ? o.created_at.slice(0, 10) : '';
+      return '<li class="ap-task-item">' +
+        '<div class="ap-task-title">' + escapeHtml(o.content || '') + '</div>' +
+        '<div class="ap-task-meta">' +
+          '<span class="ap-badge ap-badge-' + status + '">' + escapeHtml(status) + '</span>' +
+          '<span class="ap-badge ap-badge-' + urgency + '">' + escapeHtml(urgency) + '</span>' +
+          (date ? '<span>' + escapeHtml(date) + '</span>' : '') +
+        '</div>' +
+      '</li>';
+    }).join('');
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  async function loadAgentTasks(agentName) {
+    var container = document.getElementById('ap-tasks');
+    try {
+      if (typeof supabase !== 'undefined' && supabase.createClient) {
+        var SB_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
+        var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRuaXZoY3BqcmhrbWVrY2ZxZ2RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NTc5MjMsImV4cCI6MjA4NzIzMzkyM30.yJ0_4Sg78p7oY89q7go3ab26PCPHnk1Q4ObZJIZEULA';
+        var client = supabase.createClient(SB_URL, SB_KEY);
+        var result = await client.from('agent_tasks').select('*').eq('agent_name', agentName).order('start_date', { ascending: false });
+        if (result.data && result.data.length > 0) {
+          renderTaskList(result.data, container);
+          return;
+        }
+      }
+    } catch (err) {
+      console.info('agent_tasks 조회 실패, fallback 사용:', err.message || err);
+    }
+    var fallback = FALLBACK_TASKS.filter(function(t) { return t.agent_name === agentName; });
+    renderTaskList(fallback, container);
+  }
+
+  async function loadAgentOrders(agentName) {
+    var container = document.getElementById('ap-orders');
+    try {
+      if (typeof supabase !== 'undefined' && supabase.createClient) {
+        var SB_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
+        var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRuaXZoY3BqcmhrbWVrY2ZxZ2RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NTc5MjMsImV4cCI6MjA4NzIzMzkyM30.yJ0_4Sg78p7oY89q7go3ab26PCPHnk1Q4ObZJIZEULA';
+        var client = supabase.createClient(SB_URL, SB_KEY);
+        var result = await client.from('task_orders').select('*').eq('assigned_agent', agentName).order('created_at', { ascending: false }).limit(10);
+        if (result.data && result.data.length > 0) {
+          renderOrderList(result.data, container);
+          return;
+        }
+      }
+    } catch (err) {
+      console.info('task_orders 조회 실패:', err.message || err);
+    }
+    renderOrderList([], container);
+  }
+
+  // 이벤트 바인딩
+  document.querySelectorAll('.org-node[data-agent]').forEach(function(node) {
+    node.addEventListener('click', function(e) {
+      e.preventDefault();
+      if (activeNode) activeNode.classList.remove('active');
+      activeNode = node;
+      node.classList.add('active');
+      openPanel(node.getAttribute('data-agent'));
+    });
+    node.setAttribute('tabindex', '0');
+    node.setAttribute('role', 'button');
+    node.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        node.click();
+      }
+    });
+  });
+
+  document.getElementById('ap-close').addEventListener('click', closePanel);
+  overlay.addEventListener('click', closePanel);
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && panel.classList.contains('open')) closePanel();
+  });
 })();
 </script>
 
