@@ -1019,6 +1019,206 @@
     .agent-panel.open { right: 0; }
     .agent-panel-body { padding: 1rem; }
   }
+
+  /* ── 비용 추적 / 토큰 이력 ── */
+  .budget-controls {
+    display: flex;
+    gap: 0.8rem;
+    margin-bottom: 1.2rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .budget-controls select {
+    background: var(--soil);
+    color: var(--cream);
+    border: 1px solid var(--border);
+    padding: 0.4rem 0.8rem;
+    font-size: 0.82rem;
+    font-family: inherit;
+    border-radius: 6px;
+  }
+  .budget-controls select:focus {
+    outline: none;
+    border-color: var(--amber);
+  }
+
+  .budget-summary {
+    font-size: 0.82rem;
+    color: var(--dust);
+    margin-bottom: 1rem;
+  }
+  .budget-summary strong {
+    color: var(--amber);
+  }
+
+  .budget-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
+  }
+  .budget-row {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+  .budget-agent-name {
+    width: 50px;
+    flex-shrink: 0;
+    font-size: 0.82rem;
+    color: var(--cream);
+    text-align: right;
+  }
+  .budget-bar-track {
+    flex: 1;
+    height: 24px;
+    background: var(--soil);
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--bark);
+  }
+  .budget-bar-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.4s ease;
+    display: flex;
+    align-items: center;
+    padding: 0 0.5rem;
+    font-size: 0.7rem;
+    color: var(--earth);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .budget-bar-fill.level-green { background: var(--green-light); }
+  .budget-bar-fill.level-amber { background: var(--amber); }
+  .budget-bar-fill.level-red   { background: var(--red); }
+  .budget-amount {
+    width: 90px;
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    color: var(--dust);
+    text-align: left;
+  }
+
+  .budget-gauge-section {
+    margin-top: 1.5rem;
+  }
+  .budget-gauge-title {
+    font-size: 0.85rem;
+    color: var(--dust);
+    margin-bottom: 0.8rem;
+  }
+  .budget-gauge-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.6rem;
+  }
+  .budget-gauge-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem 0.8rem;
+    text-align: center;
+  }
+  .budget-gauge-item .gauge-name {
+    font-size: 0.78rem;
+    color: var(--cream);
+    margin-bottom: 0.4rem;
+  }
+  .budget-gauge-item .gauge-track {
+    height: 6px;
+    background: var(--soil);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 0.3rem;
+  }
+  .budget-gauge-item .gauge-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+  .budget-gauge-item .gauge-fill.level-green { background: var(--green-light); }
+  .budget-gauge-item .gauge-fill.level-amber { background: var(--amber); }
+  .budget-gauge-item .gauge-fill.level-red   { background: var(--red); }
+  .budget-gauge-item .gauge-text {
+    font-size: 0.7rem;
+    color: var(--dust);
+  }
+
+  .daily-trend {
+    margin-top: 1.5rem;
+  }
+  .daily-trend-title {
+    font-size: 0.85rem;
+    color: var(--dust);
+    margin-bottom: 0.6rem;
+  }
+  .daily-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 80px;
+    padding: 0 0;
+  }
+  .daily-bar-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    justify-content: flex-end;
+  }
+  .daily-bar-col .bar {
+    width: 100%;
+    max-width: 24px;
+    background: var(--amber);
+    border-radius: 3px 3px 0 0;
+    transition: height 0.3s ease;
+  }
+  .daily-bar-col .day-label {
+    font-size: 0.6rem;
+    color: var(--dust);
+    margin-top: 2px;
+  }
+
+  .token-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+  }
+  .token-table th {
+    background: var(--bark);
+    color: var(--amber);
+    padding: 0.5rem 0.8rem;
+    text-align: left;
+    font-weight: 500;
+    font-size: 0.75rem;
+    letter-spacing: 0.03em;
+  }
+  .token-table td {
+    padding: 0.5rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--cream);
+  }
+  .token-table tr:hover {
+    background: rgba(196,128,58,0.05);
+  }
+  .token-empty {
+    text-align: center;
+    padding: 2rem;
+    color: var(--dust);
+    font-size: 0.85rem;
+  }
+
+  @media (max-width: 600px) {
+    .budget-gauge-grid { grid-template-columns: repeat(2, 1fr); }
+    .budget-agent-name { width: 40px; font-size: 0.75rem; }
+    .budget-amount { width: 70px; font-size: 0.68rem; }
+    .token-table { font-size: 0.72rem; }
+    .token-table th, .token-table td { padding: 0.4rem 0.5rem; }
+    .daily-bars { height: 60px; }
+  }
 </style>
 </head>
 <body>
@@ -1376,6 +1576,59 @@
         <div class="loading-msg">데이터 로딩 중...</div>
       </div>
     </section>
+
+    <!-- ═══ 4.5 비용 추적 ═══ -->
+    <div class="section" id="budget-section">
+      <h2 class="section-title">비용 추적</h2>
+      <div class="budget-controls">
+        <select id="budget-year"></select>
+        <select id="budget-month"></select>
+      </div>
+      <div class="budget-summary" id="budget-summary">로딩 중...</div>
+      <div class="budget-chart" id="budget-chart"></div>
+      <div class="budget-gauge-section">
+        <div class="budget-gauge-title">예산 대비 사용률</div>
+        <div class="budget-gauge-grid" id="budget-gauges"></div>
+      </div>
+      <div class="daily-trend">
+        <div class="daily-trend-title">일별 비용 추이</div>
+        <div class="daily-bars" id="daily-bars"></div>
+      </div>
+    </div>
+
+    <!-- ═══ 4.6 토큰 사용 이력 ═══ -->
+    <div class="section" id="token-log-section">
+      <h2 class="section-title">토큰 사용 이력</h2>
+      <div class="budget-controls">
+        <select id="token-agent-filter">
+          <option value="">전체 에이전트</option>
+          <option value="지미">지미</option>
+          <option value="건호">건호</option>
+          <option value="다온">다온</option>
+          <option value="이든">이든</option>
+          <option value="기준">기준</option>
+          <option value="시현">시현</option>
+          <option value="심아">심아</option>
+          <option value="환이">환이</option>
+        </select>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="token-table">
+          <thead>
+            <tr>
+              <th>시각</th>
+              <th>에이전트</th>
+              <th>작업요약</th>
+              <th>토큰</th>
+              <th>비용</th>
+            </tr>
+          </thead>
+          <tbody id="token-log-body">
+            <tr><td colspan="5" class="token-empty">로딩 중...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
     <!-- ═══ 5. 스킬 목록 ═══ -->
     <div class="section">
@@ -1991,6 +2244,233 @@ sb.auth.getSession().then(({ data: { session } }) => {
     });
 
     loadOrders();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+
+<!-- ── 비용 추적 / 토큰 이력 스크립트 ── -->
+<script>
+(function() {
+  'use strict';
+
+  var AGENT_BUDGETS = {
+    default_monthly_usd: 10.00,
+    warn_percent: 80,
+    agents: {
+      '지미': { monthly_usd: 15.00 },
+      '건호': { monthly_usd: 10.00 },
+      '다온': { monthly_usd: 8.00 },
+      '이든': { monthly_usd: 5.00 },
+      '기준': { monthly_usd: 5.00 },
+      '시현': { monthly_usd: 8.00 },
+      '심아': { monthly_usd: 5.00 },
+      '환이': { monthly_usd: 3.00 }
+    }
+  };
+
+  var AGENT_ORDER = ['지미','건호','다온','이든','기준','시현','심아','환이'];
+
+  // ── 연/월 드롭다운 초기화 ──
+  var now = new Date();
+  var yearSel = document.getElementById('budget-year');
+  var monthSel = document.getElementById('budget-month');
+
+  for (var y = now.getFullYear(); y >= now.getFullYear() - 1; y--) {
+    var opt = document.createElement('option');
+    opt.value = y; opt.textContent = y + '년';
+    yearSel.appendChild(opt);
+  }
+  for (var m = 1; m <= 12; m++) {
+    var opt2 = document.createElement('option');
+    opt2.value = m; opt2.textContent = m + '월';
+    if (m === now.getMonth() + 1) opt2.selected = true;
+    monthSel.appendChild(opt2);
+  }
+
+  yearSel.addEventListener('change', loadBudgetData);
+  monthSel.addEventListener('change', loadBudgetData);
+
+  // ── 토큰 이력 필터 ──
+  var tokenFilter = document.getElementById('token-agent-filter');
+  tokenFilter.addEventListener('change', loadTokenLog);
+
+  // ── 데이터 로드: 비용 추적 ──
+  async function loadBudgetData() {
+    var year = parseInt(yearSel.value);
+    var month = parseInt(monthSel.value);
+    var startDate = year + '-' + String(month).padStart(2, '0') + '-01';
+    var endMonth = month === 12 ? 1 : month + 1;
+    var endYear = month === 12 ? year + 1 : year;
+    var endDate = endYear + '-' + String(endMonth).padStart(2, '0') + '-01';
+
+    var summaryEl = document.getElementById('budget-summary');
+    var chartEl = document.getElementById('budget-chart');
+    var gaugesEl = document.getElementById('budget-gauges');
+    var dailyEl = document.getElementById('daily-bars');
+
+    summaryEl.textContent = '데이터 로딩 중...';
+
+    try {
+      var result = await sb.from('agent_token_log')
+        .select('agent_name, cost_usd, created_at')
+        .gte('created_at', startDate)
+        .lt('created_at', endDate)
+        .order('created_at', { ascending: true });
+
+      var rows = (result.data || []);
+
+      // 에이전트별 집계
+      var agentTotals = {};
+      var dailyTotals = {};
+      var grandTotal = 0;
+      AGENT_ORDER.forEach(function(a) { agentTotals[a] = 0; });
+
+      rows.forEach(function(r) {
+        var cost = parseFloat(r.cost_usd) || 0;
+        var agent = r.agent_name || 'unknown';
+        if (!(agent in agentTotals)) agentTotals[agent] = 0;
+        agentTotals[agent] += cost;
+        grandTotal += cost;
+
+        var day = r.created_at ? r.created_at.substring(8, 10) : '??';
+        if (!dailyTotals[day]) dailyTotals[day] = 0;
+        dailyTotals[day] += cost;
+      });
+
+      // 총 예산
+      var totalBudget = 0;
+      AGENT_ORDER.forEach(function(a) {
+        var cfg = AGENT_BUDGETS.agents[a] || {};
+        totalBudget += cfg.monthly_usd || AGENT_BUDGETS.default_monthly_usd;
+      });
+
+      summaryEl.innerHTML = '월간 사용: <strong>$' + grandTotal.toFixed(2) + '</strong> / $' + totalBudget.toFixed(2) + ' (' + (totalBudget > 0 ? ((grandTotal / totalBudget) * 100).toFixed(1) : 0) + '%)';
+
+      // 바차트
+      var maxCost = 0;
+      AGENT_ORDER.forEach(function(a) { if (agentTotals[a] > maxCost) maxCost = agentTotals[a]; });
+      if (maxCost === 0) maxCost = 1;
+
+      chartEl.innerHTML = '';
+      AGENT_ORDER.forEach(function(a) {
+        var cost = agentTotals[a] || 0;
+        var cfg = AGENT_BUDGETS.agents[a] || {};
+        var budget = cfg.monthly_usd || AGENT_BUDGETS.default_monthly_usd;
+        var pct = budget > 0 ? (cost / budget) * 100 : 0;
+        var level = pct < 50 ? 'level-green' : pct < 80 ? 'level-amber' : 'level-red';
+        var widthPct = maxCost > 0 ? Math.max((cost / maxCost) * 100, 2) : 2;
+
+        var row = document.createElement('div');
+        row.className = 'budget-row';
+        row.innerHTML = '<div class="budget-agent-name">' + a + '</div>' +
+          '<div class="budget-bar-track"><div class="budget-bar-fill ' + level + '" style="width:' + widthPct + '%">' + (widthPct > 15 ? '$' + cost.toFixed(2) : '') + '</div></div>' +
+          '<div class="budget-amount">$' + cost.toFixed(2) + ' / $' + budget.toFixed(0) + '</div>';
+        chartEl.appendChild(row);
+      });
+
+      // 게이지
+      gaugesEl.innerHTML = '';
+      AGENT_ORDER.forEach(function(a) {
+        var cost = agentTotals[a] || 0;
+        var cfg = AGENT_BUDGETS.agents[a] || {};
+        var budget = cfg.monthly_usd || AGENT_BUDGETS.default_monthly_usd;
+        var pct = budget > 0 ? Math.min((cost / budget) * 100, 100) : 0;
+        var level = pct < 50 ? 'level-green' : pct < 80 ? 'level-amber' : 'level-red';
+
+        var item = document.createElement('div');
+        item.className = 'budget-gauge-item';
+        item.innerHTML = '<div class="gauge-name">' + a + '</div>' +
+          '<div class="gauge-track"><div class="gauge-fill ' + level + '" style="width:' + pct + '%"></div></div>' +
+          '<div class="gauge-text">' + pct.toFixed(0) + '% ($' + cost.toFixed(2) + ')</div>';
+        gaugesEl.appendChild(item);
+      });
+
+      // 일별 추이
+      var daysInMonth = new Date(year, month, 0).getDate();
+      var maxDaily = 0;
+      for (var d = 1; d <= daysInMonth; d++) {
+        var dk = String(d).padStart(2, '0');
+        if ((dailyTotals[dk] || 0) > maxDaily) maxDaily = dailyTotals[dk];
+      }
+      if (maxDaily === 0) maxDaily = 1;
+
+      dailyEl.innerHTML = '';
+      for (var d2 = 1; d2 <= daysInMonth; d2++) {
+        var dk2 = String(d2).padStart(2, '0');
+        var val = dailyTotals[dk2] || 0;
+        var hPct = (val / maxDaily) * 100;
+        var col = document.createElement('div');
+        col.className = 'daily-bar-col';
+        col.title = d2 + '일: $' + val.toFixed(2);
+        col.innerHTML = '<div class="bar" style="height:' + Math.max(hPct, 1) + '%"></div>' +
+          (d2 % 5 === 1 || d2 === daysInMonth ? '<span class="day-label">' + d2 + '</span>' : '<span class="day-label"></span>');
+        dailyEl.appendChild(col);
+      }
+
+    } catch (err) {
+      summaryEl.textContent = '데이터 로드 실패: ' + (err.message || err);
+      console.error('budget load error:', err);
+    }
+  }
+
+  // ── 데이터 로드: 토큰 이력 ──
+  async function loadTokenLog() {
+    var tbody = document.getElementById('token-log-body');
+    tbody.innerHTML = '<tr><td colspan="5" class="token-empty">로딩 중...</td></tr>';
+
+    try {
+      var query = sb.from('agent_token_log')
+        .select('agent_name, task_summary, tokens_input, tokens_output, cost_usd, created_at')
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      var filterVal = tokenFilter.value;
+      if (filterVal) {
+        query = query.eq('agent_name', filterVal);
+      }
+
+      var result = await query;
+      var rows = result.data || [];
+
+      if (rows.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="token-empty">기록이 없습니다</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = '';
+      rows.forEach(function(r) {
+        var tr = document.createElement('tr');
+        var dt = r.created_at ? new Date(r.created_at) : null;
+        var timeStr = dt ? (String(dt.getMonth()+1).padStart(2,'0') + '/' + String(dt.getDate()).padStart(2,'0') + ' ' + String(dt.getHours()).padStart(2,'0') + ':' + String(dt.getMinutes()).padStart(2,'0')) : '-';
+        var tokens = ((r.tokens_input || 0) + (r.tokens_output || 0)).toLocaleString();
+        var cost = '$' + (parseFloat(r.cost_usd) || 0).toFixed(4);
+        var summary = r.task_summary || '-';
+        if (summary.length > 40) summary = summary.substring(0, 40) + '...';
+
+        tr.innerHTML = '<td>' + timeStr + '</td>' +
+          '<td>' + (r.agent_name || '-') + '</td>' +
+          '<td>' + summary + '</td>' +
+          '<td style="text-align:right">' + tokens + '</td>' +
+          '<td style="text-align:right">' + cost + '</td>';
+        tbody.appendChild(tr);
+      });
+
+    } catch (err) {
+      tbody.innerHTML = '<tr><td colspan="5" class="token-empty">로드 실패: ' + (err.message || '') + '</td></tr>';
+      console.error('token log error:', err);
+    }
+  }
+
+  // ── 초기 로드 ──
+  function init() {
+    loadBudgetData();
+    loadTokenLog();
   }
 
   if (document.readyState === 'loading') {
