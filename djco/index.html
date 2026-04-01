@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>대전주민운동교육원협동조합</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23a0846b'/><text x='16' y='22' text-anchor='middle' font-size='14' fill='%231a1410'>民</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+  /* ── CSS CUSTOM PROPERTIES ── */
+  :root {
+    --bg-deep: #f7f3ee;
+    --bg-main: #ffffff;
+    --bg-card: #faf8f5;
+    --bg-accent: #f0ebe3;
+    --text-primary: #2c2418;
+    --text-secondary: #5c4f3c;
+    --text-muted: #8a7d6a;
+    --accent-warm: #7a5c3e;
+    --accent-gold: #a07840;
+    --accent-rust: #8b5e3c;
+    --accent-sage: #4a6741;
+    --border-subtle: rgba(90, 70, 40, 0.1);
+    --border-medium: rgba(90, 70, 40, 0.2);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.1);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 16px;
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+    --space-3xl: 64px;
+    --space-4xl: 96px;
+    --max-width: 1200px;
+    --font-serif: 'Noto Serif KR', Georgia, serif;
+    --font-body: 'Pretendard Variable', 'Pretendard', -apple-system, sans-serif;
+  }
+
+  /* ── RESET ── */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ── NOISE TEXTURE ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.35;
+  }
+
+  /* ── SKIP LINK ── */
+  .skip-link {
+    position: absolute;
+    top: -100%;
+    left: var(--space-md);
+    background: var(--accent-warm);
+    color: var(--bg-deep);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    z-index: 2000;
+    text-decoration: none;
+  }
+  .skip-link:focus {
+    top: var(--space-md);
+    outline: 3px solid var(--accent-gold);
+    outline-offset: 2px;
+  }
+
+  /* ── TYPOGRAPHY ── */
+  h1, h2, h3, h4 {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+  }
+
+  /* ── LAYOUT ── */
+  .container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
+  }
+
+  section {
+    padding: var(--space-4xl) 0;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(247, 243, 238, 0.9);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-subtle);
+    transition: transform 0.3s ease-out;
+  }
+  nav.nav-hidden {
+    transform: translateY(-100%);
+  }
+  .nav-inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--space-md) var(--space-lg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .nav-logo {
+    font-family: var(--font-serif);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-decoration: none;
+    letter-spacing: -0.02em;
+  }
+  .nav-logo:focus-visible {
+    outline: 3px solid var(--accent-gold);
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+  .nav-links {
+    display: flex;
+    gap: var(--space-lg);
+    list-style: none;
+  }
+  .nav-links a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    padding: var(--space-sm) var(--space-xs);
+    transition: color 0.2s ease;
+    position: relative;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 1.5px;
+    background: var(--accent-warm);
+    transition: width 0.25s ease, left 0.25s ease;
+  }
+  .nav-links a:hover,
+  .nav-links a:focus-visible {
+    color: var(--text-primary);
+  }
+  .nav-links a:hover::after,
+  .nav-links a:focus-visible::after {
+    width: 100%;
+    left: 0;
+  }
+  .nav-links a:focus-visible {
+    outline: 2px solid var(--accent-gold);
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+
+  /* Mobile nav toggle */
+  .nav-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--space-sm);
+    min-width: 44px;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+  }
+  .nav-toggle svg {
+    width: 24px;
+    height: 24px;
+    stroke: var(--text-primary);
+    stroke-width: 2;
+    fill: none;
+  }
+  .nav-toggle:focus-visible {
+    outline: 3px solid var(--accent-gold);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    right: -10%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(ellipse, rgba(160, 132, 107, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-content {
+    position: relative;
+  }
+  .hero-label {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent-warm);
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--accent-warm);
+  }
+  .hero h1 {
+    font-size: clamp(32px, 6vw, 56px);
+    font-weight: 900;
+    color: var(--text-primary);
+    margin-bottom: var(--space-xl);
+    max-width: 700px;
+  }
+  .hero-slogan {
+    font-family: var(--font-serif);
+    font-size: clamp(20px, 3vw, 28px);
+    font-weight: 400;
+    color: var(--accent-gold);
+    font-style: italic;
+    margin-bottom: var(--space-3xl);
+    max-width: 600px;
+    line-height: 1.5;
+  }
+  .hero-rule {
+    width: 60px;
+    height: 2px;
+    background: var(--accent-warm);
+    border: none;
+    margin-bottom: var(--space-xl);
+  }
+  .hero-desc {
+    font-size: 16px;
+    color: var(--text-secondary);
+    max-width: 520px;
+    line-height: 1.8;
+  }
+  .hero-scroll {
+    position: absolute;
+    bottom: var(--space-2xl);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    color: var(--text-muted);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-decoration: none;
+    min-width: 44px;
+    min-height: 44px;
+    padding: var(--space-sm);
+  }
+  .hero-scroll:focus-visible {
+    outline: 2px solid var(--accent-gold);
+    outline-offset: 4px;
+    border-radius: var(--radius-sm);
+  }
+  .hero-scroll svg {
+    width: 20px;
+    height: 20px;
+    stroke: var(--text-muted);
+    animation: scrollBounce 2s ease-in-out infinite;
+  }
+  @keyframes scrollBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(6px); }
+  }
+
+  /* ── SECTION HEADERS ── */
+  .section-label {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent-warm);
+    margin-bottom: var(--space-md);
+  }
+  .section-title {
+    font-size: clamp(24px, 4vw, 40px);
+    margin-bottom: var(--space-2xl);
+    color: var(--text-primary);
+  }
+  .section-divider {
+    width: 40px;
+    height: 2px;
+    background: var(--border-medium);
+    border: none;
+    margin-bottom: var(--space-2xl);
+  }
+
+  /* ── ABOUT ── */
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3xl);
+    align-items: start;
+  }
+  .about-text {
+    font-size: 17px;
+    color: var(--text-secondary);
+    line-height: 1.9;
+  }
+  .about-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-lg);
+    padding-top: var(--space-lg);
+  }
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+  }
+  .stat-number {
+    font-family: var(--font-serif);
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--accent-gold);
+    line-height: 1.2;
+  }
+  .stat-label {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: var(--space-xs);
+  }
+
+  /* ── PURPOSE (설립취지) ── */
+  .purpose {
+    background: var(--bg-main);
+    border-top: 1px solid var(--border-subtle);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .purpose-content {
+    max-width: 760px;
+  }
+  .purpose-text {
+    font-size: 17px;
+    color: var(--text-secondary);
+    line-height: 2;
+    margin-bottom: var(--space-xl);
+  }
+  .purpose-text + .purpose-text {
+    margin-top: var(--space-lg);
+  }
+  blockquote {
+    position: relative;
+    padding: var(--space-xl) var(--space-2xl);
+    margin: var(--space-2xl) 0;
+    border-left: 3px solid var(--accent-warm);
+    background: rgba(160, 132, 107, 0.06);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  }
+  blockquote p {
+    font-family: var(--font-serif);
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--text-primary);
+    line-height: 1.9;
+    font-style: italic;
+  }
+  .purpose-closing {
+    font-size: 16px;
+    color: var(--text-secondary);
+    line-height: 1.9;
+  }
+
+  /* ── HISTORY (연혁) ── */
+  .timeline {
+    position: relative;
+    padding-left: var(--space-3xl);
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--border-medium);
+  }
+  .timeline-item {
+    position: relative;
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-xl);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .timeline-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: calc(-1 * var(--space-3xl));
+    top: 6px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--bg-deep);
+    border: 2px solid var(--accent-warm);
+  }
+  .timeline-item.highlight::before {
+    background: var(--accent-warm);
+    box-shadow: 0 0 0 4px rgba(160, 132, 107, 0.2);
+  }
+  .timeline-year {
+    font-family: var(--font-serif);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent-warm);
+    margin-bottom: var(--space-xs);
+    letter-spacing: 0.05em;
+  }
+  .timeline-desc {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+  .timeline-desc strong {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  /* ── COURSES (교육과정) ── */
+  .courses-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-lg);
+  }
+  .course-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--space-xl);
+    transition: border-color 0.25s ease, transform 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .course-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--accent-warm);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+  .course-card:hover::before {
+    transform: scaleX(1);
+  }
+  .course-card:hover {
+    border-color: var(--border-medium);
+    transform: translateY(-2px);
+  }
+  .course-type {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-warm);
+    background: rgba(160, 132, 107, 0.1);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--space-md);
+  }
+  .course-title {
+    font-family: var(--font-serif);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--space-md);
+    line-height: 1.4;
+  }
+  .course-meta {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+  .course-meta li {
+    font-size: 14px;
+    color: var(--text-secondary);
+    display: flex;
+    gap: var(--space-sm);
+    line-height: 1.6;
+  }
+  .course-meta li .meta-label {
+    color: var(--text-muted);
+    min-width: 36px;
+    flex-shrink: 0;
+  }
+
+  /* ── TRAINERS (트레이너) ── */
+  .trainers {
+    background: var(--bg-main);
+    border-top: 1px solid var(--border-subtle);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .trainers-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-lg);
+  }
+  .trainer-card {
+    padding: var(--space-xl);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+  }
+  .trainer-card.featured {
+    grid-column: span 2;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xl);
+    background: var(--bg-accent);
+    border-color: var(--border-medium);
+  }
+  .trainer-name {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--space-xs);
+  }
+  .trainer-role {
+    font-size: 14px;
+    color: var(--accent-warm);
+    margin-bottom: var(--space-md);
+    font-weight: 500;
+  }
+  .trainer-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+  }
+  .trainer-desc li {
+    margin-bottom: var(--space-xs);
+    list-style: none;
+    position: relative;
+    padding-left: var(--space-md);
+  }
+  .trainer-desc li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 9px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent-warm);
+  }
+
+  /* Small trainer cards */
+  .trainer-card:not(.featured) .trainer-name {
+    font-size: 18px;
+  }
+
+  /* ── JOIN (가입안내) ── */
+  .join-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3xl);
+  }
+  .join-conditions h3 {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--space-lg);
+  }
+  .join-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+  .join-list li {
+    font-size: 15px;
+    color: var(--text-secondary);
+    padding-left: var(--space-lg);
+    position: relative;
+    line-height: 1.7;
+  }
+  .join-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 10px;
+    width: 6px;
+    height: 6px;
+    border: 1.5px solid var(--accent-warm);
+    border-radius: 50%;
+  }
+  .join-steps h3 {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--space-lg);
+  }
+  .steps-list {
+    list-style: none;
+    counter-reset: steps;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+  .steps-list li {
+    counter-increment: steps;
+    display: flex;
+    gap: var(--space-md);
+    align-items: flex-start;
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+  .steps-list li::before {
+    content: counter(steps);
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1.5px solid var(--accent-warm);
+    color: var(--accent-warm);
+    font-family: var(--font-serif);
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .join-note {
+    margin-top: var(--space-2xl);
+    padding: var(--space-lg);
+    background: rgba(160, 132, 107, 0.06);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+  }
+  .join-note p {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+  .join-note strong {
+    color: var(--text-secondary);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: var(--space-2xl) 0;
+    border-top: 1px solid var(--border-subtle);
+    background: var(--bg-deep);
+  }
+  .footer-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer-name {
+    font-family: var(--font-serif);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--space-xs);
+  }
+  .footer-location {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .footer-copy {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+    .hero-scroll svg {
+      animation: none;
+    }
+    html { scroll-behavior: auto; }
+    .course-card, .course-card::before {
+      transition: none;
+    }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1024px) {
+    .about-grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-2xl);
+    }
+    .trainers-grid {
+      grid-template-columns: 1fr;
+    }
+    .trainer-card.featured {
+      grid-column: span 1;
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .nav-links {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: rgba(247, 243, 238, 0.97);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      flex-direction: column;
+      padding: var(--space-lg);
+      gap: var(--space-md);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .nav-links.open {
+      display: flex;
+    }
+    .nav-links a {
+      font-size: 16px;
+      padding: var(--space-sm) 0;
+    }
+    .nav-toggle {
+      display: flex;
+    }
+
+    .courses-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .join-grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-2xl);
+    }
+
+    .footer-inner {
+      flex-direction: column;
+      text-align: center;
+      gap: var(--space-md);
+    }
+
+    section {
+      padding: var(--space-3xl) 0;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .container {
+      padding: 0 var(--space-md);
+    }
+    .about-stats {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-sm);
+    }
+    .stat-card {
+      padding: var(--space-md);
+    }
+    .stat-number {
+      font-size: 24px;
+    }
+    blockquote {
+      padding: var(--space-md) var(--space-lg);
+    }
+  }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">본문으로 건너뛰기</a>
+
+<!-- NAV -->
+<nav aria-label="주요 내비게이션">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo" aria-label="대전주민운동교육원협동조합 홈">주민운동교육원</a>
+    <button class="nav-toggle" aria-label="메뉴 열기/닫기" aria-expanded="false" aria-controls="nav-menu">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <ul class="nav-links" id="nav-menu" role="list">
+      <li><a href="#about">소개</a></li>
+      <li><a href="#purpose">설립취지</a></li>
+      <li><a href="#history">연혁</a></li>
+      <li><a href="#courses">교육과정</a></li>
+      <li><a href="#trainers">트레이너</a></li>
+      <li><a href="#join">가입안내</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<main id="main">
+<section class="hero">
+  <div class="container hero-content">
+    <span class="hero-label reveal">DJCO — 대전주민운동교육원협동조합</span>
+    <h1 class="reveal reveal-delay-1">대전주민운동<br>교육원협동조합</h1>
+    <p class="hero-slogan reveal reveal-delay-2">당신을 구할 사람은 오직 당신 뿐</p>
+    <hr class="hero-rule reveal reveal-delay-2">
+    <p class="hero-desc reveal reveal-delay-3">주민과 주민지도자, 주민조직가의 교육훈련과 현장조직화를 통해 주민자치, 상생, 협동사회의 실현을 목적으로 설립된 협동조합입니다.</p>
+  </div>
+  <a href="#about" class="hero-scroll" aria-label="아래로 스크롤">
+    <span>SCROLL</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
+  </a>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div>
+        <span class="section-label reveal">About</span>
+        <h2 class="section-title reveal">조합 소개</h2>
+        <hr class="section-divider reveal">
+        <p class="about-text reveal">대전주민운동교육원협동조합은 주민과 주민지도자, 주민조직가의 교육훈련과 현장조직화를 통해 주민자치, 상생, 협동사회의 실현을 목적으로 설립된 협동조합입니다.</p>
+        <br>
+        <p class="about-text reveal">2003년부터 이어온 대전 주민운동의 교육훈련 역사를 계승하여 2022년 협동조합으로 새롭게 출발했습니다. 주민조직가 양성을 위한 정규 교육과정을 운영하고, 마을공동체 · 사회적경제 · 자활 등 다양한 주민운동 현장의 활동가와 리더를 교육훈련합니다.</p>
+        <br>
+        <p class="about-text reveal">서울, 부산에 이어 전국에서 세 번째로 설립된 지역 주민운동교육원입니다.</p>
+      </div>
+      <div class="about-stats reveal">
+        <div class="stat-card">
+          <div class="stat-number">2003</div>
+          <div class="stat-label">교육훈련 시작</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">20+</div>
+          <div class="stat-label">년 역사</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">전국 3번째</div>
+          <div class="stat-label">지역 주민운동교육원</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">2022</div>
+          <div class="stat-label">협동조합 설립</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PURPOSE (설립취지) -->
+<section id="purpose" class="purpose">
+  <div class="container">
+    <div class="purpose-content">
+      <span class="section-label reveal">Purpose</span>
+      <h2 class="section-title reveal">설립취지</h2>
+      <hr class="section-divider reveal">
+
+      <p class="purpose-text reveal">2003년 대전 주민조직가 교육훈련과정이 시작된 이래, 대전의 주민운동은 20년 넘는 역사를 이어오고 있습니다.</p>
+
+      <p class="purpose-text reveal">1971년 도시빈민의 아픔과 고난의 현장에서 출발한 한국의 주민운동, 그리고 1997년 외환위기 시대에 갑자기 일터에서 쫓겨나 가난으로 내몰린 사람들을 다시 일으켜 세우고자 했던 대전의 주민운동이 만났습니다.</p>
+
+      <p class="purpose-text reveal">누군가는 실무자라 불리고, 사회복지사라 불리고, 때로 활동가라 불리기도 했습니다. 우리의 활동은 빈민운동, 노동운동, 시민운동, 마을공동체운동, 사회적경제운동 등 다양하게 이름했지만, 2003년 이후 우리는 이 모두를 주민운동 현장이라 부르고, 그 현장에서 일하는 우리를 <strong>주민조직가</strong>라고 자처했습니다.</p>
+
+      <blockquote class="reveal">
+        <p>돈이 지배하는 신자유주의 지구질서에서 우리는 지역으로부터 사회변화의 단초를 열고자 합니다. 마을이 세계를 구한다고 믿기 때문입니다. 주민의 자립과 자치역량을 키우는 것이야말로 민주주의이며 사회혁신이고 공공선이라 선언합니다.</p>
+      </blockquote>
+
+      <p class="purpose-closing reveal">이를 위해 우리는 멤버십으로 조직된 결사체를 본질로, 사업체를 운영하며 자립과 자치, 연대를 통해 지역사회에 기여하는 <strong>협동방식의 운영원리</strong>를 채택했습니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HISTORY (연혁) -->
+<section id="history">
+  <div class="container">
+    <span class="section-label reveal">History</span>
+    <h2 class="section-title reveal">연혁</h2>
+    <hr class="section-divider reveal">
+
+    <div class="timeline">
+      <div class="timeline-item reveal">
+        <div class="timeline-year">1967</div>
+        <div class="timeline-desc">오재식, 한국학생사회개발단 조직 — 알린스키 방법론에 따른 교육훈련 시작</div>
+      </div>
+      <div class="timeline-item reveal">
+        <div class="timeline-year">1969</div>
+        <div class="timeline-desc">도시문제연구소 산하 도시선교위원회, 한국 최초 주민조직 교육훈련(ACTION TRAINING PROGRAM) 시작</div>
+      </div>
+      <div class="timeline-item reveal">
+        <div class="timeline-year">1971</div>
+        <div class="timeline-desc"><strong>수도권도시선교위원회 결성</strong> — 한국 주민운동의 본격적 출발</div>
+      </div>
+      <div class="timeline-item reveal">
+        <div class="timeline-year">2002</div>
+        <div class="timeline-desc">안영섭, 한국주민운동교육원 정규과정 시작 (대전 최초의 주민조직가)</div>
+      </div>
+      <div class="timeline-item reveal">
+        <div class="timeline-year">2003</div>
+        <div class="timeline-desc"><strong>대전 제1기 주민조직가 교육훈련과정 개설</strong> (실업극복시민연대 일어서는 사람들 + 한국주민운동교육원 공동 주최)</div>
+      </div>
+      <div class="timeline-item reveal">
+        <div class="timeline-year">2003~2008</div>
+        <div class="timeline-desc">기초과정 23명, 조직가과정 22명 수료</div>
+      </div>
+      <div class="timeline-item reveal">
+        <div class="timeline-year">2007</div>
+        <div class="timeline-desc">마을어린이도서관 활동가 50명 교육훈련 — 17개 마을어린이도서관 설립 지원</div>
+      </div>
+      <div class="timeline-item reveal">
+        <div class="timeline-year">2010~</div>
+        <div class="timeline-desc">충북 기초 주민조직가 교육훈련과정 6기수 배출 (안영섭, 김성훈 트레이너)</div>
+      </div>
+      <div class="timeline-item reveal">
+        <div class="timeline-year">2022</div>
+        <div class="timeline-desc">중단되었던 조직가 과정 재개 — 5명의 조직가 배출</div>
+      </div>
+      <div class="timeline-item highlight reveal">
+        <div class="timeline-year">2022. 11</div>
+        <div class="timeline-desc"><strong>대전주민운동교육원협동조합 설립</strong> (서울, 부산에 이어 전국 세 번째)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COURSES (교육과정) -->
+<section id="courses">
+  <div class="container">
+    <span class="section-label reveal">Courses 2026</span>
+    <h2 class="section-title reveal">2026년 교육과정 안내</h2>
+    <hr class="section-divider reveal">
+
+    <div class="courses-grid">
+      <!-- 정규과정 -->
+      <article class="course-card reveal">
+        <span class="course-type">정규과정</span>
+        <h3 class="course-title">주민조직가 기초과정</h3>
+        <ul class="course-meta">
+          <li><span class="meta-label">일정</span> 3월 중순 ~ 5월 (8회기)</li>
+          <li><span class="meta-label">대상</span> 주민운동 현장 활동가, 사회복지사, 지역 조직가 등</li>
+          <li><span class="meta-label">내용</span> 주민운동의 철학과 방법론, 주민조직화의 기초 이론과 실습</li>
+          <li><span class="meta-label">연계</span> 대전서구지역자활센터와 연계 개설</li>
+        </ul>
+      </article>
+
+      <!-- 기획과정 -->
+      <article class="course-card reveal reveal-delay-1">
+        <span class="course-type">기획과정</span>
+        <h3 class="course-title">워크숍 촉진자 과정</h3>
+        <ul class="course-meta">
+          <li><span class="meta-label">일정</span> 8월 ~ 10월 중 (4~5회기)</li>
+          <li><span class="meta-label">대상</span> 교육훈련 현장의 촉진자 역할을 맡고자 하는 활동가</li>
+          <li><span class="meta-label">내용</span> 워크숍 설계와 촉진 기법</li>
+          <li><span class="meta-label">연계</span> 한국주민운동교육원에 개설 요청</li>
+        </ul>
+      </article>
+
+      <!-- 특별과정 -->
+      <article class="course-card reveal reveal-delay-2">
+        <span class="course-type">특별과정</span>
+        <h3 class="course-title">주민조직화 입문과정</h3>
+        <ul class="course-meta">
+          <li><span class="meta-label">상반기</span> 5월 ~ 6월 (5회기)</li>
+          <li><span class="meta-label">하반기</span> 9월 ~ 10월 (5회기)</li>
+          <li><span class="meta-label">대상</span> 주민운동에 관심 있는 시민, 입문자</li>
+          <li><span class="meta-label">내용</span> 주민조직화의 기초 개념과 사례</li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- TRAINERS (트레이너) -->
+<section id="trainers" class="trainers">
+  <div class="container">
+    <span class="section-label reveal">Trainers</span>
+    <h2 class="section-title reveal">트레이너 소개</h2>
+    <hr class="section-divider reveal">
+
+    <div class="trainers-grid">
+      <!-- 안영섭 + 김성훈 (featured) -->
+      <div class="trainer-card featured reveal">
+        <div>
+          <h3 class="trainer-name">안영섭</h3>
+          <div class="trainer-role">이사장</div>
+          <ul class="trainer-desc">
+            <li>대전주민운동교육원협동조합 이사장</li>
+            <li>대전 최초의 주민조직가 — 2002년 한국주민운동교육원 정규과정 시작, 2003년 10기 수료</li>
+            <li>대전 제1기 주민조직가 교육훈련과정 수료</li>
+            <li>충북 기초 주민조직가 교육훈련과정 트레이너 (6기수 배출)</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="trainer-name">김성훈</h3>
+          <div class="trainer-role">트레이너</div>
+          <ul class="trainer-desc">
+            <li>마을공동체, 사회적경제 조직의 활동가 · 리더 양성과정에 주민운동 철학과 방법론 적용</li>
+            <li>2007년 마을어린이도서관 활동가 교육훈련 담당 (50명, 5개월)</li>
+            <li>충북 기초 주민조직가 교육훈련과정 트레이너</li>
+            <li>한국의료복지사회적협동조합연합회에서 건강조직가 교육훈련과정 개설 담당</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 박봉희 -->
+      <div class="trainer-card reveal">
+        <h3 class="trainer-name">박봉희</h3>
+        <div class="trainer-role">트레이너</div>
+        <ul class="trainer-desc">
+          <li>YMCA 활동 경력</li>
+          <li>인천 부평구 평화의료생협 현장 활동</li>
+          <li>한국의료복지사회적협동조합연합회 활동</li>
+          <li>현재 마음의숲사회적협동조합 센터장, 대전 주민운동 현장과 결합</li>
+        </ul>
+      </div>
+
+      <!-- 신만수 -->
+      <div class="trainer-card reveal">
+        <h3 class="trainer-name">신만수</h3>
+        <div class="trainer-role">트레이너</div>
+        <ul class="trainer-desc">
+          <li>서울 금호 · 하왕십리 지역 현장 조직가</li>
+          <li>지역자활센터, 사회적경제센터 활동</li>
+          <li>대덕구 도시재생부센터장 역임 후 대전에 결합</li>
+        </ul>
+      </div>
+
+      <!-- 최순례 -->
+      <div class="trainer-card reveal">
+        <h3 class="trainer-name">최순례</h3>
+        <div class="trainer-role">조합원</div>
+        <ul class="trainer-desc">
+          <li>모두의밥상협동조합 이사장</li>
+        </ul>
+      </div>
+
+      <!-- 백정훈 -->
+      <div class="trainer-card reveal">
+        <h3 class="trainer-name">백정훈</h3>
+        <div class="trainer-role">조합원</div>
+        <ul class="trainer-desc">
+          <li>관저마을신문사 편집장</li>
+        </ul>
+      </div>
+
+      <!-- 박선례 -->
+      <div class="trainer-card reveal">
+        <h3 class="trainer-name">박선례</h3>
+        <div class="trainer-role">조합원</div>
+        <ul class="trainer-desc">
+          <li>학마을사회적협동조합 이사</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- JOIN (가입안내) -->
+<section id="join">
+  <div class="container">
+    <span class="section-label reveal">Membership</span>
+    <h2 class="section-title reveal">가입안내</h2>
+    <hr class="section-divider reveal">
+
+    <div class="join-grid">
+      <div class="join-conditions reveal">
+        <h3>조합원 가입 조건</h3>
+        <ul class="join-list">
+          <li>조합의 설립목적에 동의하고, <strong>주민운동교육원의 정규교육과정을 이수</strong>한 자</li>
+          <li>출자금: <strong>5좌 이상</strong> (1좌 = 100,000원, 최소 500,000원)</li>
+          <li>법인도 조합원 가입 가능</li>
+        </ul>
+        <div class="join-note">
+          <p><strong>소재지:</strong> 대전광역시</p>
+        </div>
+      </div>
+
+      <div class="join-steps reveal reveal-delay-1">
+        <h3>가입 절차</h3>
+        <ol class="steps-list">
+          <li>정규교육과정 이수</li>
+          <li>가입신청서 제출</li>
+          <li>자격 확인 후 2주 이내 가입 여부 통지</li>
+          <li>통지 후 2주 이내 출자금 납입</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-name">대전주민운동교육원협동조합</div>
+        <div class="footer-location">대전광역시</div>
+      </div>
+      <div class="footer-copy">&copy; 2022 대전주민운동교육원협동조합</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function() {
+  'use strict';
+
+  // ── Scroll reveal ──
+  var reveals = document.querySelectorAll('.reveal');
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+  reveals.forEach(function(el) { observer.observe(el); });
+
+  // ── Nav hide on scroll ──
+  var nav = document.querySelector('nav');
+  var lastScroll = 0;
+  var ticking = false;
+
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        var currentScroll = window.pageYOffset;
+        if (currentScroll > 80 && currentScroll > lastScroll) {
+          nav.classList.add('nav-hidden');
+        } else {
+          nav.classList.remove('nav-hidden');
+        }
+        lastScroll = currentScroll;
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  // ── Mobile nav toggle ──
+  var toggle = document.querySelector('.nav-toggle');
+  var navMenu = document.getElementById('nav-menu');
+
+  toggle.addEventListener('click', function() {
+    var isOpen = navMenu.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  });
+
+  // Close mobile nav on link click
+  navMenu.querySelectorAll('a').forEach(function(link) {
+    link.addEventListener('click', function() {
+      navMenu.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
