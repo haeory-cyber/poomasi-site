@@ -839,6 +839,100 @@
     color: var(--bg-deep);
   }
 
+  /* ── AGENT PROFILE ── */
+  .agent-section {
+    background: var(--bg-main);
+    border-top: 1px solid var(--border-subtle);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .agent-card {
+    max-width: 680px;
+    margin: 0 auto;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2xl) var(--space-xl);
+    text-align: center;
+  }
+  .agent-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--accent-warm);
+    color: var(--bg-deep);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin: 0 auto var(--space-lg);
+    box-shadow: 0 4px 12px rgba(122, 92, 62, 0.2);
+  }
+  .agent-name {
+    font-family: var(--font-serif);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--space-xs);
+  }
+  .agent-role {
+    font-size: 15px;
+    color: var(--accent-warm);
+    font-weight: 500;
+    margin-bottom: var(--space-xl);
+  }
+  .agent-tasks {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+    text-align: left;
+    margin-bottom: var(--space-xl);
+  }
+  .agent-task {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+  .agent-task-icon {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    margin-top: 2px;
+  }
+  .agent-cta {
+    display: inline-block;
+    padding: var(--space-md) var(--space-xl);
+    background: var(--accent-warm);
+    color: var(--bg-deep);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 15px;
+    border-radius: var(--radius-md);
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .agent-cta:hover {
+    background: var(--accent-rust);
+    transform: translateY(-1px);
+  }
+  .agent-cta:focus-visible {
+    outline: 3px solid var(--accent-gold);
+    outline-offset: 3px;
+    border-radius: var(--radius-md);
+  }
+  @media (max-width: 480px) {
+    .agent-tasks {
+      grid-template-columns: 1fr;
+    }
+  }
+
   /* ── SCROLL REVEAL ── */
   .reveal {
     opacity: 0;
@@ -968,6 +1062,7 @@
       <li><a href="#courses">교육과정</a></li>
       <li><a href="#trainers">트레이너</a></li>
       <li><a href="#join">가입안내</a></li>
+      <li><a href="#agent">대코</a></li>
       <li><a href="#request">의뢰</a></li>
       <li><a href="/newsletter.html">뉴스레터</a></li>
       <li><a href="/archive.html">자료실</a></li>
@@ -1266,6 +1361,39 @@
           <li>통지 후 2주 이내 출자금 납입</li>
         </ol>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- AGENT (담당 에이전트) -->
+<section id="agent" class="agent-section">
+  <div class="container">
+    <span class="section-label reveal">Agent</span>
+    <h2 class="section-title reveal">담당 에이전트 소개</h2>
+    <hr class="section-divider reveal">
+    <div class="agent-card reveal">
+      <div class="agent-avatar" aria-hidden="true">&#129302;</div>
+      <div class="agent-name">대코</div>
+      <div class="agent-role">대전주민운동교육원협동조합 디지털 운영 담당 AI</div>
+      <div class="agent-tasks">
+        <div class="agent-task">
+          <span class="agent-task-icon" aria-hidden="true">&#127760;</span>
+          <span>사이트 관리 및 콘텐츠 업데이트</span>
+        </div>
+        <div class="agent-task">
+          <span class="agent-task-icon" aria-hidden="true">&#128218;</span>
+          <span>교육과정 안내 및 수강 문의 응대</span>
+        </div>
+        <div class="agent-task">
+          <span class="agent-task-icon" aria-hidden="true">&#128196;</span>
+          <span>조합 문서 작업 및 자료 정리</span>
+        </div>
+        <div class="agent-task">
+          <span class="agent-task-icon" aria-hidden="true">&#128232;</span>
+          <span>뉴스레터 발행 지원</span>
+        </div>
+      </div>
+      <a href="#request" class="agent-cta">대코에게 의뢰하기 &#8594;</a>
     </div>
   </div>
 </section>
