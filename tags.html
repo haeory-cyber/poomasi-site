@@ -6,6 +6,7 @@
 <title>가격표 인쇄 — 품앗이소비자생활협동조합</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;400;500;700&family=Noto+Serif+KR:wght@200&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
     --earth: #0f0b07;
@@ -371,9 +372,156 @@
   .urg-긴급 { color: var(--red); border-color: var(--red); }
   .urg-보통 { color: var(--amber); border-color: var(--amber); }
   .urg-대비 { color: var(--green); border-color: var(--green); }
+
+  /* ── LOGIN SCREEN ── */
+  #login-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+  }
+
+  .login-box {
+    width: 100%;
+    max-width: 420px;
+    background: var(--soil);
+    border: 1px solid rgba(196,128,58,0.2);
+    padding: 3rem 2.5rem;
+    position: relative;
+  }
+
+  .login-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(to right, var(--amber), var(--green-light));
+  }
+
+  .login-brand {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    color: var(--amber);
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  .login-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--white);
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .login-sub {
+    font-size: 0.78rem;
+    color: var(--dust);
+    text-align: center;
+    letter-spacing: 0.05em;
+    margin-bottom: 2.5rem;
+  }
+
+  .form-group { margin-bottom: 1.2rem; }
+
+  .form-label {
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--dust);
+    margin-bottom: 0.5rem;
+  }
+
+  .form-input {
+    width: 100%;
+    background: rgba(15,11,7,0.8);
+    border: 1px solid rgba(196,128,58,0.2);
+    color: var(--cream);
+    padding: 0.85rem 1rem;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+
+  .form-input:focus { border-color: var(--amber); }
+
+  .btn-login {
+    width: 100%;
+    background: var(--amber);
+    color: var(--earth);
+    border: none;
+    padding: 1rem;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    margin-top: 0.5rem;
+    transition: background 0.3s;
+  }
+
+  .btn-login:hover { background: var(--amber-light); }
+  .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .login-error {
+    margin-top: 1rem;
+    padding: 0.8rem 1rem;
+    background: rgba(184,58,42,0.15);
+    border: 1px solid rgba(184,58,42,0.3);
+    color: #e07070;
+    font-size: 0.8rem;
+    display: none;
+  }
+
+  .nav-user {
+    display: flex; align-items: center; gap: 1rem; position: relative;
+  }
+  .nav-user-email {
+    font-size: 0.7rem; color: var(--dust); letter-spacing: 0.05em;
+  }
+  .btn-logout {
+    background: none; border: 1px solid rgba(196,128,58,0.3);
+    color: var(--dust); font-size: 0.7rem; padding: 0.3rem 0.8rem;
+    cursor: pointer; font-family: inherit; letter-spacing: 0.05em;
+    transition: all 0.3s; position: relative;
+  }
+  .btn-logout:hover { color: var(--cream); border-color: var(--amber); }
+
+  @media print {
+    #login-screen { display: none !important; }
+  }
 </style>
 </head>
 <body>
+
+<!-- ── LOGIN ─────────────────────────────────────────────── -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-brand">품앗이소비자생활협동조합</div>
+    <div class="login-title">가격표 인쇄</div>
+    <div class="login-sub">운영자 전용 · 로그인이 필요합니다</div>
+
+    <div class="form-group">
+      <label class="form-label" for="email">이메일</label>
+      <input class="form-input" type="email" id="email" placeholder="admin@poomasi.org" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="password">비밀번호</label>
+      <input class="form-input" type="password" id="password" placeholder="••••••••" autocomplete="current-password"
+             onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+
+    <button class="btn-login" id="login-btn" onclick="doLogin()">로그인</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- ── APP ───────────────────────────────────────────────── -->
+<div id="app" style="display:none">
 
 <nav>
   <a href="index.html" class="nav-logo">품앗이생협</a>
@@ -382,6 +530,10 @@
     <li><a href="market.html">직매장</a></li>
     <li><a href="work.html">사무국</a></li>
   </ul>
+  <div class="nav-user">
+    <span class="nav-user-email" id="user-email"></span>
+    <button class="btn-logout" onclick="doLogout()">로그아웃</button>
+  </div>
 </nav>
 
 <div class="ui-wrap">
@@ -522,12 +674,60 @@
   <div id="orders-list"></div>
 </div>
 
+</div><!-- /app -->
+
 <!-- Print target (hidden on screen) -->
 <div class="print-sheet" id="print-sheet"></div>
 
 <script>
+// ── Supabase Auth ────────────────────────────────────────
 const SB_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
 const SB_KEY = ['sb_publi','shable_SKtfO63ApOP3DyJKu_2ypw_JK4dsdUG'].join('');
+const sb = supabase.createClient(SB_URL, SB_KEY);
+
+async function doLogin() {
+  const email = document.getElementById('email').value.trim();
+  const pw    = document.getElementById('password').value;
+  const btn   = document.getElementById('login-btn');
+  const err   = document.getElementById('login-error');
+
+  err.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = '로그인 중…';
+
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
+
+  if (error) {
+    err.textContent = '로그인 실패: ' + (error.message || '이메일/비밀번호를 확인하세요.');
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '로그인';
+    return;
+  }
+
+  showApp(data.user);
+}
+
+function showApp(user) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('user-email').textContent = user.email;
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('password').value = '';
+}
+
+// 세션 복원
+sb.auth.getSession().then(({ data: { session } }) => {
+  if (session) showApp(session.user);
+});
+</script>
+
+<script>
 const HEADERS = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
 const SITE_BASE = 'https://poomasi.org';
 
