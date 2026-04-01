@@ -130,6 +130,7 @@ def create_newsletter():
 def send_newsletter():
     data = request.get_json()
     newsletter_id = data.get("newsletter_id")
+    from_email = data.get("from_email", "")
     if not newsletter_id:
         return jsonify({"error": "newsletter_id required"}), 400
 
@@ -152,7 +153,7 @@ def send_newsletter():
     errors = []
     for sub in subs:
         try:
-            send_email(sub["email"], nl["title"], email_html)
+            send_email(sub["email"], nl["title"], email_html, from_email)
             success_count += 1
         except Exception as e:
             errors.append({"email": sub["email"], "error": str(e)})
@@ -218,22 +219,24 @@ def build_email_html(title, category, content):
 </html>"""
 
 
-def send_email(to_email, subject, html_body):
+def send_email(to_email, subject, html_body, from_email=""):
     """Send email using gws gmail +send CLI."""
-    # Write HTML to temp file to avoid shell escaping issues
     with tempfile.NamedTemporaryFile(mode="w", suffix=".html", delete=False, encoding="utf-8") as f:
         f.write(html_body)
         tmp_path = f.name
 
     try:
+        cmd = [
+            "gws", "gmail", "+send",
+            "--to", to_email,
+            "--subject", subject,
+            "--body", html_body,
+            "--html",
+        ]
+        if from_email:
+            cmd.extend(["--reply-to", from_email])
         result = subprocess.run(
-            [
-                "gws", "gmail", "+send",
-                "--to", to_email,
-                "--subject", subject,
-                "--body", html_body,
-                "--html",
-            ],
+            cmd,
             capture_output=True,
             text=True,
             timeout=30,

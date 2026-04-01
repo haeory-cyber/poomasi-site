@@ -395,6 +395,10 @@
           <label for="nl-content">본문 (HTML)</label>
           <textarea id="nl-content" class="form-textarea" placeholder="<p>뉴스레터 본문을 HTML로 작성하세요.</p>"></textarea>
         </div>
+        <div class="form-group">
+          <label for="nl-from">발송자 이메일</label>
+          <input type="email" id="nl-from" class="form-input" placeholder="발송자 이메일을 입력하세요" value="movementer@gmail.com">
+        </div>
         <div class="btn-group">
           <button type="button" class="btn btn-secondary" onclick="previewNewsletter()">미리보기</button>
           <button type="button" class="btn btn-primary" onclick="saveNewsletter()">저장</button>
@@ -566,7 +570,8 @@
     if (!confirm('저장 후 모든 구독자에게 발송합니다. 계속하시겠습니까?')) return;
     saveNewsletter(function(id) {
       showToast('발송 중...');
-      api('POST', '/api/send-newsletter', { newsletter_id: id })
+      var fromEmail = document.getElementById('nl-from').value || 'movementer@gmail.com';
+      api('POST', '/api/send-newsletter', { newsletter_id: id, from_email: fromEmail })
         .then(function(res) {
           showToast(res.sent + '/' + res.total + '명에게 발송 완료');
           document.getElementById('compose-form').reset();
