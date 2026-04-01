@@ -719,6 +719,126 @@
     color: var(--text-muted);
   }
 
+  /* ── REQUEST FORM (의뢰하기) ── */
+  .request-section {
+    background: var(--bg-main);
+    border-top: 1px solid var(--border-subtle);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .request-form {
+    max-width: 560px;
+  }
+  .request-form label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-sm);
+  }
+  .request-form .field-optional {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+  .request-form input[type="text"],
+  .request-form select,
+  .request-form textarea {
+    width: 100%;
+    background: var(--bg-card);
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 15px;
+    font-family: var(--font-body);
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.2s ease;
+    margin-bottom: var(--space-lg);
+  }
+  .request-form input[type="text"]:focus,
+  .request-form select:focus,
+  .request-form textarea:focus {
+    border-color: var(--accent-warm);
+  }
+  .request-form textarea {
+    resize: vertical;
+    min-height: 140px;
+    line-height: 1.7;
+  }
+  .request-form select {
+    cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a7d6a' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+  }
+  .request-submit {
+    display: inline-block;
+    background: var(--accent-warm);
+    color: var(--bg-deep);
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 12px 32px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .request-submit:hover {
+    background: var(--accent-gold);
+  }
+  .request-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .request-msg {
+    margin-top: var(--space-md);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .request-msg.ok {
+    color: var(--accent-sage);
+  }
+  .request-msg.err {
+    color: #b83a2a;
+  }
+  .request-done {
+    display: none;
+    text-align: center;
+    padding: var(--space-2xl) 0;
+  }
+  .request-done h3 {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    color: var(--accent-sage);
+    margin-bottom: var(--space-md);
+  }
+  .request-done p {
+    font-size: 15px;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-xl);
+  }
+  .request-again {
+    background: transparent;
+    border: 1.5px solid var(--accent-warm);
+    color: var(--accent-warm);
+    border-radius: var(--radius-sm);
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .request-again:hover {
+    background: var(--accent-warm);
+    color: var(--bg-deep);
+  }
+
   /* ── SCROLL REVEAL ── */
   .reveal {
     opacity: 0;
@@ -848,6 +968,7 @@
       <li><a href="#courses">교육과정</a></li>
       <li><a href="#trainers">트레이너</a></li>
       <li><a href="#join">가입안내</a></li>
+      <li><a href="#request">의뢰</a></li>
     </ul>
   </div>
 </nav>
@@ -1145,6 +1266,42 @@
     </div>
   </div>
 </section>
+
+<!-- REQUEST (의뢰하기) -->
+<section id="request" class="request-section">
+  <div class="container">
+    <span class="section-label reveal">Request</span>
+    <h2 class="section-title reveal">대코에게 의뢰하기</h2>
+    <hr class="section-divider reveal">
+
+    <div class="request-form reveal" id="request-form">
+      <label for="req-name">이름 <span class="field-optional">(선택)</span></label>
+      <input type="text" id="req-name" placeholder="이름을 입력해주세요">
+
+      <label for="req-category">의뢰 유형</label>
+      <select id="req-category">
+        <option value="">선택해주세요</option>
+        <option value="제안">제안</option>
+        <option value="교육문의">교육문의</option>
+        <option value="자료요청">자료요청</option>
+        <option value="기타">기타</option>
+      </select>
+
+      <label for="req-content">내용 <span class="field-optional" style="color:#b83a2a;">*필수</span></label>
+      <textarea id="req-content" placeholder="의뢰하실 내용을 자유롭게 적어주세요"></textarea>
+
+      <button class="request-submit" id="req-submit" type="button">의뢰 보내기</button>
+      <div class="request-msg" id="req-msg"></div>
+    </div>
+
+    <div class="request-done" id="request-done">
+      <h3>의뢰가 접수되었습니다</h3>
+      <p>검토 후 처리하겠습니다. 감사합니다.</p>
+      <button class="request-again" id="req-again" type="button">다른 의뢰 남기기</button>
+    </div>
+  </div>
+</section>
+
 </main>
 
 <!-- FOOTER -->
@@ -1213,6 +1370,81 @@
       navMenu.classList.remove('open');
       toggle.setAttribute('aria-expanded', 'false');
     });
+  });
+})();
+</script>
+
+<script>
+(function() {
+  'use strict';
+
+  var SUPABASE_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
+  var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRuaXZoY3BqcmhrbWVrY2ZxZ2RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NTc5MjMsImV4cCI6MjA4NzIzMzkyM30.yJ0_4Sg78p7oY89q7go3ab26PCPHnk1Q4ObZJIZEULA';
+
+  var submitBtn = document.getElementById('req-submit');
+  var msgEl = document.getElementById('req-msg');
+  var formEl = document.getElementById('request-form');
+  var doneEl = document.getElementById('request-done');
+  var againBtn = document.getElementById('req-again');
+
+  submitBtn.addEventListener('click', function() {
+    var name = document.getElementById('req-name').value.trim();
+    var category = document.getElementById('req-category').value;
+    var content = document.getElementById('req-content').value.trim();
+
+    msgEl.textContent = '';
+    msgEl.className = 'request-msg';
+
+    if (!content) {
+      msgEl.className = 'request-msg err';
+      msgEl.textContent = '내용을 입력해주세요.';
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = '보내는 중...';
+
+    var body = {
+      content: content,
+      category: category || '기타',
+      status: 'pending'
+    };
+    if (name) { body.name = name; }
+
+    fetch(SUPABASE_URL + '/rest/v1/djco_requests', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(body)
+    })
+    .then(function(res) {
+      if (!res.ok) {
+        throw new Error('HTTP ' + res.status);
+      }
+      formEl.style.display = 'none';
+      doneEl.style.display = 'block';
+    })
+    .catch(function() {
+      msgEl.className = 'request-msg err';
+      msgEl.textContent = '전송에 실패했습니다. 잠시 후 다시 시도해주세요.';
+    })
+    .finally(function() {
+      submitBtn.disabled = false;
+      submitBtn.textContent = '의뢰 보내기';
+    });
+  });
+
+  againBtn.addEventListener('click', function() {
+    document.getElementById('req-name').value = '';
+    document.getElementById('req-category').value = '';
+    document.getElementById('req-content').value = '';
+    msgEl.textContent = '';
+    doneEl.style.display = 'none';
+    formEl.style.display = 'block';
   });
 })();
 </script>
