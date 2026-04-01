@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>자료실 - 대전주민운동교육원협동조합</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23a0846b'/><text x='16' y='22' text-anchor='middle' font-size='14' fill='%231a1410'>民</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #f7f3ee;
+    --bg-main: #ffffff;
+    --bg-card: #faf8f5;
+    --bg-accent: #f0ebe3;
+    --text-primary: #2c2418;
+    --text-secondary: #5c4f3c;
+    --text-muted: #8a7d6a;
+    --accent-warm: #7a5c3e;
+    --accent-gold: #a07840;
+    --accent-rust: #8b5e3c;
+    --accent-sage: #4a6741;
+    --border-subtle: rgba(90, 70, 40, 0.1);
+    --border-medium: rgba(90, 70, 40, 0.2);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.1);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 16px;
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+    --space-3xl: 64px;
+    --max-width: 1200px;
+    --font-serif: 'Noto Serif KR', Georgia, serif;
+    --font-body: 'Pretendard Variable', 'Pretendard', -apple-system, sans-serif;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.35;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .nav-inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--space-md) var(--space-xl);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .nav-logo {
+    font-family: var(--font-serif);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-decoration: none;
+    letter-spacing: -0.03em;
+  }
+  .nav-links {
+    display: flex;
+    gap: var(--space-lg);
+    list-style: none;
+  }
+  .nav-links a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover,
+  .nav-links a.active {
+    color: var(--text-primary);
+  }
+
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+  }
+
+  /* ── MAIN ── */
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: calc(80px + var(--space-2xl)) var(--space-xl) var(--space-3xl);
+  }
+
+  .page-header {
+    text-align: center;
+    margin-bottom: var(--space-2xl);
+  }
+  .page-header h1 {
+    font-size: clamp(28px, 4vw, 40px);
+    color: var(--text-primary);
+    margin-bottom: var(--space-sm);
+  }
+  .page-header p {
+    color: var(--text-muted);
+    font-size: 15px;
+  }
+
+  /* ── UPLOAD SECTION ── */
+  .upload-section {
+    background: var(--bg-main);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    margin-bottom: var(--space-xl);
+    box-shadow: var(--shadow-sm);
+  }
+  .upload-section h2 {
+    font-size: 18px;
+    margin-bottom: var(--space-md);
+    color: var(--text-primary);
+  }
+
+  .upload-form {
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .file-input-wrapper {
+    flex: 1;
+    min-width: 200px;
+  }
+  .file-input-wrapper input[type="file"] {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    border: 1px dashed var(--border-medium);
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--text-secondary);
+    cursor: pointer;
+  }
+  .file-input-wrapper input[type="file"]:hover {
+    border-color: var(--accent-warm);
+    background: var(--bg-accent);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: 10px 24px;
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .btn-primary {
+    background: var(--accent-warm);
+    color: #fff;
+  }
+  .btn-primary:hover {
+    background: var(--accent-gold);
+  }
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .btn-sm {
+    padding: 6px 14px;
+    font-size: 13px;
+  }
+  .btn-outline {
+    background: transparent;
+    color: var(--accent-warm);
+    border: 1px solid var(--accent-warm);
+  }
+  .btn-outline:hover {
+    background: var(--bg-accent);
+  }
+
+  .upload-status {
+    width: 100%;
+    margin-top: var(--space-sm);
+    font-size: 13px;
+    color: var(--text-muted);
+    min-height: 20px;
+  }
+  .upload-status.error { color: #b44; }
+  .upload-status.success { color: var(--accent-sage); }
+
+  /* ── FILE TABLE ── */
+  .files-section {
+    background: var(--bg-main);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    box-shadow: var(--shadow-sm);
+  }
+  .files-section h2 {
+    font-size: 18px;
+    margin-bottom: var(--space-md);
+    color: var(--text-primary);
+  }
+
+  .files-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .files-table th {
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 2px solid var(--border-medium);
+  }
+  .files-table td {
+    padding: var(--space-md);
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: 14px;
+    color: var(--text-secondary);
+    vertical-align: middle;
+  }
+  .files-table tr:hover td {
+    background: var(--bg-card);
+  }
+  .files-table .file-name {
+    font-weight: 500;
+    color: var(--text-primary);
+    word-break: break-all;
+  }
+  .files-table .file-meta {
+    font-size: 13px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: var(--space-2xl);
+    color: var(--text-muted);
+    font-size: 15px;
+  }
+
+  .loading {
+    text-align: center;
+    padding: var(--space-2xl);
+    color: var(--text-muted);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: var(--space-xl);
+    color: var(--text-muted);
+    font-size: 13px;
+    border-top: 1px solid var(--border-subtle);
+    margin-top: var(--space-3xl);
+  }
+  footer a {
+    color: var(--accent-warm);
+    text-decoration: none;
+  }
+  footer a:hover {
+    text-decoration: underline;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    .files-table .col-size,
+    .files-table .col-date {
+      display: none;
+    }
+    .upload-form {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav aria-label="주요 내비게이션">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">주민운동교육원</a>
+    <ul class="nav-links" role="list">
+      <li><a href="/">홈</a></li>
+      <li><a href="/newsletter.html">뉴스레터</a></li>
+      <li><a href="/archive.html" class="active">자료실</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main>
+  <div class="page-header">
+    <h1>자료실</h1>
+    <p>대전주민운동교육원협동조합 공유 자료</p>
+  </div>
+
+  <!-- Upload -->
+  <section class="upload-section">
+    <h2>파일 업로드</h2>
+    <form class="upload-form" id="uploadForm">
+      <div class="file-input-wrapper">
+        <input type="file" id="fileInput" name="file">
+      </div>
+      <button type="submit" class="btn btn-primary" id="uploadBtn" disabled>업로드</button>
+    </form>
+    <div class="upload-status" id="uploadStatus"></div>
+  </section>
+
+  <!-- File list -->
+  <section class="files-section">
+    <h2>파일 목록</h2>
+    <div id="fileList">
+      <div class="loading">불러오는 중...</div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <a href="/">대전주민운동교육원협동조합</a> &middot; 자료실
+</footer>
+
+<script>
+(function() {
+  var fileInput = document.getElementById('fileInput');
+  var uploadBtn = document.getElementById('uploadBtn');
+  var uploadStatus = document.getElementById('uploadStatus');
+  var uploadForm = document.getElementById('uploadForm');
+  var fileListEl = document.getElementById('fileList');
+
+  // Enable upload button when file selected
+  fileInput.addEventListener('change', function() {
+    uploadBtn.disabled = !fileInput.files.length;
+    uploadStatus.textContent = '';
+    uploadStatus.className = 'upload-status';
+  });
+
+  // Upload handler
+  uploadForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (!fileInput.files.length) return;
+
+    var file = fileInput.files[0];
+    var maxSize = 50 * 1024 * 1024;
+    if (file.size > maxSize) {
+      uploadStatus.textContent = '파일 크기가 50MB를 초과합니다.';
+      uploadStatus.className = 'upload-status error';
+      return;
+    }
+
+    uploadBtn.disabled = true;
+    uploadStatus.textContent = '업로드 중...';
+    uploadStatus.className = 'upload-status';
+
+    var formData = new FormData();
+    formData.append('file', file);
+
+    fetch('/api/drive/upload', {
+      method: 'POST',
+      body: formData
+    })
+    .then(function(res) {
+      if (!res.ok) return res.json().then(function(d) { throw new Error(d.error || '업로드 실패'); });
+      return res.json();
+    })
+    .then(function(data) {
+      uploadStatus.textContent = '"' + data.name + '" 업로드 완료';
+      uploadStatus.className = 'upload-status success';
+      fileInput.value = '';
+      uploadBtn.disabled = true;
+      loadFiles();
+    })
+    .catch(function(err) {
+      uploadStatus.textContent = '오류: ' + err.message;
+      uploadStatus.className = 'upload-status error';
+      uploadBtn.disabled = !fileInput.files.length;
+    });
+  });
+
+  // Load file list
+  function loadFiles() {
+    fileListEl.innerHTML = '<div class="loading">불러오는 중...</div>';
+
+    fetch('/api/drive/files')
+    .then(function(res) {
+      if (!res.ok) throw new Error('파일 목록을 불러올 수 없습니다.');
+      return res.json();
+    })
+    .then(function(files) {
+      if (!files.length) {
+        fileListEl.innerHTML = '<div class="empty-state">등록된 자료가 없습니다.</div>';
+        return;
+      }
+
+      var html = '<table class="files-table">';
+      html += '<thead><tr>';
+      html += '<th>파일명</th>';
+      html += '<th class="col-size">크기</th>';
+      html += '<th class="col-date">수정일</th>';
+      html += '<th></th>';
+      html += '</tr></thead><tbody>';
+
+      files.forEach(function(f) {
+        var size = formatSize(parseInt(f.size) || 0);
+        var date = formatDate(f.modifiedTime);
+        html += '<tr>';
+        html += '<td class="file-name">' + escapeHtml(f.name) + '</td>';
+        html += '<td class="file-meta col-size">' + size + '</td>';
+        html += '<td class="file-meta col-date">' + date + '</td>';
+        html += '<td><a href="/api/drive/download/' + encodeURIComponent(f.id) + '" class="btn btn-sm btn-outline">다운로드</a></td>';
+        html += '</tr>';
+      });
+
+      html += '</tbody></table>';
+      fileListEl.innerHTML = html;
+    })
+    .catch(function(err) {
+      fileListEl.innerHTML = '<div class="empty-state" style="color:#b44;">오류: ' + escapeHtml(err.message) + '</div>';
+    });
+  }
+
+  function formatSize(bytes) {
+    if (bytes === 0) return '-';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  function formatDate(iso) {
+    if (!iso) return '-';
+    var d = new Date(iso);
+    var y = d.getFullYear();
+    var m = String(d.getMonth() + 1).padStart(2, '0');
+    var day = String(d.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + day;
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+
+  // Initial load
+  loadFiles();
+})();
+</script>
+</body>
+</html>

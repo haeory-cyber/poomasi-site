@@ -247,6 +247,124 @@ def send_email(to_email, subject, html_body, from_email=""):
         os.unlink(tmp_path)
 
 
+# ── DRIVE ARCHIVE API ──
+
+DRIVE_FOLDER_ID = "1NaRQrcKe8N200ukWJQ27OhlewRyoiBcD"
+MAX_UPLOAD_SIZE = 50 * 1024 * 1024  # 50 MB
+
+
+@app.route("/api/drive/files", methods=["GET"])
+def drive_list_files():
+    """List files in the DJCO Drive archive folder."""
+    try:
+        query = f"'{DRIVE_FOLDER_ID}' in parents and trashed = false"
+        params = json.dumps({
+            "q": query,
+            "fields": "files(id,name,mimeType,size,createdTime,modifiedTime)",
+            "orderBy": "modifiedTime desc",
+        })
+        result = subprocess.run(
+            ["gws", "drive", "files", "list", "--params", params],
+            capture_output=True, text=True, timeout=30,
+        )
+        if result.returncode != 0:
+            return jsonify({"error": result.stderr.strip()}), 500
+        data = json.loads(result.stdout)
+        return jsonify(data.get("files", []))
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/drive/upload", methods=["POST"])
+def drive_upload_file():
+    """Upload a file to the DJCO Drive archive folder."""
+    if "file" not in request.files:
+        return jsonify({"error": "file required"}), 400
+
+    uploaded = request.files["file"]
+    if not uploaded.filename:
+        return jsonify({"error": "empty filename"}), 400
+
+    # Check size via content-length header
+    content_length = request.content_length or 0
+    if content_length > MAX_UPLOAD_SIZE:
+        return jsonify({"error": f"file too large (max {MAX_UPLOAD_SIZE // (1024*1024)}MB)"}), 413
+
+    # Save to temp file
+    tmp_dir = tempfile.mkdtemp()
+    tmp_path = os.path.join(tmp_dir, uploaded.filename)
+    try:
+        uploaded.save(tmp_path)
+
+        # Check actual file size
+        if os.path.getsize(tmp_path) > MAX_UPLOAD_SIZE:
+            return jsonify({"error": f"file too large (max {MAX_UPLOAD_SIZE // (1024*1024)}MB)"}), 413
+
+        # Upload to Drive via gws CLI
+        metadata = json.dumps({"name": uploaded.filename, "parents": [DRIVE_FOLDER_ID]})
+        result = subprocess.run(
+            [
+                "gws", "drive", "files", "create",
+                "--json", metadata,
+                "--upload", tmp_path,
+            ],
+            capture_output=True, text=True, timeout=120,
+        )
+        if result.returncode != 0:
+            return jsonify({"error": result.stderr.strip()}), 500
+
+        data = json.loads(result.stdout)
+        return jsonify({"id": data.get("id"), "name": data.get("name")}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if os.path.exists(tmp_path):
+            os.unlink(tmp_path)
+        os.rmdir(tmp_dir)
+
+
+@app.route("/api/drive/download/<file_id>", methods=["GET"])
+def drive_download_file(file_id):
+    """Download a file from Drive by file ID."""
+    try:
+        # First get file metadata for the filename
+        meta_result = subprocess.run(
+            ["gws", "drive", "files", "get", "--params", json.dumps({"fileId": file_id, "fields": "name,mimeType"})],
+            capture_output=True, text=True, timeout=30,
+        )
+        if meta_result.returncode != 0:
+            return jsonify({"error": meta_result.stderr.strip()}), 500
+
+        meta = json.loads(meta_result.stdout)
+        filename = meta.get("name", "download")
+        mime_type = meta.get("mimeType", "application/octet-stream")
+
+        # Download file content
+        tmp_dir = tempfile.mkdtemp()
+        tmp_path = os.path.join(tmp_dir, filename)
+
+        dl_result = subprocess.run(
+            [
+                "gws", "drive", "files", "get",
+                "--params", json.dumps({"fileId": file_id, "alt": "media"}),
+                "-o", tmp_path,
+            ],
+            capture_output=True, text=True, timeout=120,
+        )
+        if dl_result.returncode != 0:
+            return jsonify({"error": dl_result.stderr.strip()}), 500
+
+        from flask import send_file
+        return send_file(
+            tmp_path,
+            mimetype=mime_type,
+            as_attachment=True,
+            download_name=filename,
+        )
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 # ── MAIN ──
 
 if __name__ == "__main__":
