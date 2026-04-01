@@ -1,6 +1,7 @@
 # Python 스크립트 (민감/내부용) — scripts/ 폴더는 예외
 *.py
 !scripts/*.py
+!djco/server.py
 __pycache__/
 *.pyc
 
