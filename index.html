@@ -1104,9 +1104,201 @@
   /* doors 4개 대응 */
   .doors-grid { grid-template-columns: repeat(2, 1fr); }
 
+  /* ── INVESTORS HALL ── */
+  #investors {
+    background: var(--earth);
+    padding: 6rem 8vw;
+    border-top: 1px solid rgba(196,128,58,0.15);
+    position: relative;
+    overflow: hidden;
+  }
+
+  #investors::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 50% 60% at 50% 40%, rgba(196,128,58,0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .inv-header {
+    position: relative;
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+
+  .inv-header .section-label {
+    justify-content: center;
+  }
+
+  .inv-header .section-label::before { display: none; }
+
+  .inv-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 900;
+    color: var(--white);
+    line-height: 1.3;
+    margin-bottom: 1rem;
+  }
+
+  .inv-title span { color: var(--amber); }
+
+  .inv-subtitle {
+    font-size: 0.9rem;
+    color: var(--dust);
+    font-weight: 300;
+    line-height: 1.8;
+    max-width: 540px;
+    margin: 0 auto;
+  }
+
+  /* Tier legend */
+  .inv-tiers {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    margin-bottom: 3rem;
+    position: relative;
+  }
+
+  .inv-tier {
+    background: rgba(30,21,16,0.7);
+    border: 1px solid rgba(196,128,58,0.1);
+    padding: 2rem 1.2rem;
+    text-align: center;
+    transition: all 0.3s;
+    cursor: default;
+  }
+
+  .inv-tier:hover {
+    border-color: rgba(196,128,58,0.3);
+    background: rgba(44,31,20,0.6);
+  }
+
+  .inv-tier-icon {
+    font-size: 2.2rem;
+    line-height: 1;
+    margin-bottom: 0.8rem;
+  }
+
+  .inv-tier-name {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--cream);
+    margin-bottom: 0.3rem;
+  }
+
+  .inv-tier-en {
+    font-family: 'DM Serif Display', serif;
+    font-size: 0.7rem;
+    font-style: italic;
+    color: var(--dust);
+    letter-spacing: 0.1em;
+  }
+
+  /* Investor cards grid */
+  .inv-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 3rem;
+    min-height: 0;
+  }
+
+  .inv-card {
+    background: rgba(30,21,16,0.5);
+    border: 1px solid rgba(196,128,58,0.12);
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s;
+  }
+
+  .inv-card:hover {
+    border-color: rgba(196,128,58,0.35);
+    transform: translateY(-2px);
+  }
+
+  .inv-card-badge {
+    font-size: 1.6rem;
+    flex-shrink: 0;
+  }
+
+  .inv-card-name {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--cream);
+  }
+
+  .inv-card-tier {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--dust);
+    margin-top: 0.2rem;
+  }
+
+  /* CTA empty state */
+  .inv-empty {
+    position: relative;
+    text-align: center;
+    padding: 4rem 2rem;
+    border: 2px dashed rgba(196,128,58,0.2);
+    background: rgba(196,128,58,0.03);
+  }
+
+  .inv-empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.6;
+  }
+
+  .inv-empty-text {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    font-weight: 700;
+    color: var(--cream);
+    margin-bottom: 0.8rem;
+  }
+
+  .inv-empty-sub {
+    font-size: 0.85rem;
+    color: var(--dust);
+    line-height: 1.8;
+    margin-bottom: 2rem;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .btn-invest {
+    display: inline-block;
+    background: transparent;
+    border: 1px solid var(--amber);
+    color: var(--amber);
+    padding: 0.9rem 2.5rem;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+
+  .btn-invest:hover {
+    background: var(--amber);
+    color: var(--earth);
+    transform: translateY(-2px);
+  }
+
   @media (max-width: 768px) {
     .fm-layout { grid-template-columns: 1fr; gap: 3rem; }
     .doors-grid { grid-template-columns: 1fr !important; }
+    .inv-tiers { grid-template-columns: repeat(2, 1fr); }
   }
 </style>
 </head>
@@ -1126,6 +1318,7 @@
     <li><a href="zerowaste.html" style="color:#52B788;">제로웨이스트존</a></li>
     <li><a href="feedback.html">조합원말씀</a></li>
     <li><a href="ai-tools.html" style="color:#c4803a;">AI경영지원실</a></li>
+    <li><a href="#investors" style="color:#e8a55a;">씨앗 투자</a></li>
     <li><a href="join.html">조합원 가입</a></li>
   </ul>
 </nav>
@@ -1495,6 +1688,66 @@
       <a href="market.html" class="btn-act3">매장 찾아오기</a>
       <a href="join.html" class="btn-act3-ghost">조합원 가입 →</a>
     </div>
+  </div>
+</section>
+
+<!-- INVESTORS HALL — 투자자 명예의 전당 -->
+<section id="investors">
+  <div class="inv-header reveal">
+    <div class="section-label">SEED INVESTORS</div>
+    <h2 class="inv-title">로컬의 반격에<br><span>씨앗</span>을 심은 사람들</h2>
+    <p class="inv-subtitle">
+      이 반격은 혼자 시작할 수 없었습니다.<br>
+      처음 용기를 낸 사람들이 여기 있습니다.
+    </p>
+  </div>
+
+  <!-- 등급 안내 -->
+  <div class="inv-tiers reveal reveal-delay-1">
+    <div class="inv-tier">
+      <div class="inv-tier-icon">🌱</div>
+      <div class="inv-tier-name">씨앗</div>
+      <div class="inv-tier-en">Seed</div>
+    </div>
+    <div class="inv-tier">
+      <div class="inv-tier-icon">🌿</div>
+      <div class="inv-tier-name">새싹</div>
+      <div class="inv-tier-en">Sprout</div>
+    </div>
+    <div class="inv-tier">
+      <div class="inv-tier-icon">🍎</div>
+      <div class="inv-tier-name">열매</div>
+      <div class="inv-tier-en">Fruit</div>
+    </div>
+    <div class="inv-tier">
+      <div class="inv-tier-icon">🌳</div>
+      <div class="inv-tier-name">뿌리</div>
+      <div class="inv-tier-en">Root</div>
+    </div>
+  </div>
+
+  <!-- 투자자 카드 영역 (투자자 생기면 아래 주석 해제 후 추가) -->
+  <!--
+  <div class="inv-cards reveal reveal-delay-2">
+    <div class="inv-card">
+      <div class="inv-card-badge">🌱</div>
+      <div>
+        <div class="inv-card-name">홍길동</div>
+        <div class="inv-card-tier">SEED</div>
+      </div>
+    </div>
+  </div>
+  -->
+
+  <!-- 빈 상태 CTA -->
+  <div class="inv-empty reveal reveal-delay-2">
+    <div class="inv-empty-icon">🌱</div>
+    <div class="inv-empty-text">첫 번째 씨앗이 되어주세요</div>
+    <p class="inv-empty-sub">
+      로컬의 반격은 작은 용기에서 시작됩니다.<br>
+      당신의 씨앗이 마을을 바꿉니다.
+    </p>
+    <a href="join.html" class="btn-invest">씨앗 심기</a>
   </div>
 </section>
 
