@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>품앗이AI — AI와 로컬리스트의 협동</title>
+<meta name="description" content="품앗이AI는 AI와 로컬리스트가 협동하여 데이터주권을 실현하는 프로젝트입니다. 사회적경제, 로컬푸드, 지역화폐 27년 현장 경험과 AI기술의 만남.">
+<meta property="og:title" content="품앗이AI — AI와 로컬리스트의 협동">
+<meta property="og:description" content="AI는 자본의 전유물이 아니다. 인류가 수천 년간 축적한 지식의 결정체다. 로컬의 반격이 시작됩니다.">
+<meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23c4803a'/><text x='16' y='22' text-anchor='middle' font-size='18' fill='%230f0b07'>品</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;700;900&family=Noto+Sans+KR:wght@300;400;500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
@@ -54,6 +58,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    transition: background 0.4s, box-shadow 0.4s;
   }
 
   nav::before {
@@ -62,6 +67,16 @@
     inset: 0;
     background: linear-gradient(to bottom, rgba(15,11,7,0.95), transparent);
     pointer-events: none;
+    transition: opacity 0.4s;
+  }
+
+  nav.scrolled {
+    background: rgba(15,11,7,0.97);
+    box-shadow: 0 2px 20px rgba(0,0,0,0.4);
+  }
+
+  nav.scrolled::before {
+    opacity: 0;
   }
 
   .nav-logo {
@@ -106,6 +121,58 @@
     color: var(--earth);
   }
 
+  /* Nav 더보기 드롭다운 */
+  .nav-more {
+    position: relative;
+  }
+
+  .nav-more-btn {
+    color: var(--dust);
+    background: none;
+    border: 1px solid rgba(184,168,138,0.25);
+    padding: 0.3rem 0.7rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: all 0.3s;
+  }
+
+  .nav-more-btn:hover {
+    color: var(--cream);
+    border-color: rgba(184,168,138,0.5);
+  }
+
+  .nav-more-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    background: rgba(15,11,7,0.97);
+    border: 1px solid rgba(196,128,58,0.15);
+    min-width: 160px;
+    padding: 0.5rem 0;
+    z-index: 200;
+  }
+
+  .nav-more-dropdown.open {
+    display: block;
+  }
+
+  .nav-more-dropdown a {
+    display: block;
+    padding: 0.5rem 1.2rem;
+    color: var(--dust);
+    text-decoration: none;
+    font-size: 0.78rem;
+    transition: all 0.2s;
+  }
+
+  .nav-more-dropdown a:hover {
+    color: var(--cream);
+    background: rgba(196,128,58,0.08);
+  }
+
   /* Mobile hamburger */
   .nav-toggle {
     display: none;
@@ -131,6 +198,21 @@
   .nav-toggle span:nth-child(1) { top: 0; }
   .nav-toggle span:nth-child(2) { top: 9px; }
   .nav-toggle span:nth-child(3) { top: 18px; }
+
+  /* Hamburger → X transform */
+  .nav-toggle.active span:nth-child(1) {
+    top: 9px;
+    transform: rotate(45deg);
+  }
+
+  .nav-toggle.active span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .nav-toggle.active span:nth-child(3) {
+    top: 9px;
+    transform: rotate(-45deg);
+  }
 
   /* ── HERO ── */
   #hero {
@@ -204,24 +286,41 @@
     letter-spacing: -0.02em;
   }
 
-  .hero-subtitle {
+  /* Hero CTA wrapper */
+  .hero-cta-wrapper {
     position: relative;
-    margin-top: 1.5rem;
+    margin-top: 2rem;
     opacity: 0;
     animation: fadeUp 1s 2.8s forwards;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.2rem;
   }
 
-  .hero-subtitle p {
-    font-family: 'Noto Serif KR', serif;
-    font-size: clamp(0.95rem, 2vw, 1.3rem);
-    font-weight: 300;
-    color: var(--dust);
-    line-height: 1.8;
-  }
-
-  .hero-subtitle .hero-channel {
+  .btn-primary {
     display: inline-block;
-    margin-top: 1.2rem;
+    background: var(--amber);
+    color: var(--earth);
+    padding: 1rem 2.5rem;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    transition: all 0.3s;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-primary:hover {
+    background: var(--amber-light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(196,128,58,0.3);
+  }
+
+  .hero-channel {
+    display: inline-block;
     font-family: 'DM Serif Display', serif;
     font-size: clamp(0.8rem, 1.5vw, 1rem);
     font-style: italic;
@@ -233,7 +332,7 @@
     transition: all 0.3s;
   }
 
-  .hero-subtitle .hero-channel:hover {
+  .hero-channel:hover {
     color: var(--amber-light);
     border-color: var(--amber-light);
   }
@@ -465,6 +564,7 @@
     padding: 3rem;
     position: relative;
     overflow: hidden;
+    margin-bottom: 3rem;
   }
 
   .act2-sovereignty::after {
@@ -491,6 +591,25 @@
   .act2-sovereignty-text em {
     font-style: normal;
     color: var(--amber);
+  }
+
+  /* 2막 텍스트 링크 CTA */
+  .btn-text-link {
+    display: inline-block;
+    color: var(--amber);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 400;
+    text-decoration: none;
+    letter-spacing: 0.03em;
+    transition: color 0.3s;
+    border-bottom: 1px solid rgba(196,128,58,0.3);
+    padding-bottom: 2px;
+  }
+
+  .btn-text-link:hover {
+    color: var(--amber-light);
+    border-color: var(--amber-light);
   }
 
   /* ── ACT 3: 실천 ── */
@@ -526,34 +645,55 @@
     max-width: 600px;
   }
 
-  /* Coming soon demo */
-  .act3-demo {
-    border: 2px dashed rgba(242,234,216,0.2);
-    padding: 3rem 2rem;
-    text-align: center;
-    margin-bottom: 4rem;
-    background: rgba(42,68,37,0.3);
+  /* Q&A 아코디언 */
+  .qna-accordion {
+    border: 1px solid rgba(242,234,216,0.15);
+    background: rgba(42,68,37,0.4);
+    margin-bottom: 0.5rem;
     max-width: 600px;
   }
 
-  .act3-demo-icon {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-    opacity: 0.6;
-  }
-
-  .act3-demo-title {
+  .qna-accordion summary {
+    padding: 1.2rem 1.5rem;
     font-family: 'Noto Serif KR', serif;
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     font-weight: 700;
     color: var(--cream);
-    margin-bottom: 0.5rem;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.3s;
   }
 
-  .act3-demo-sub {
-    font-size: 0.8rem;
-    color: rgba(242,234,216,0.5);
-    line-height: 1.7;
+  .qna-accordion summary::-webkit-details-marker { display: none; }
+
+  .qna-accordion summary::after {
+    content: '+';
+    font-size: 1.2rem;
+    color: var(--amber);
+    transition: transform 0.3s;
+  }
+
+  .qna-accordion[open] summary::after {
+    transform: rotate(45deg);
+  }
+
+  .qna-accordion summary:hover {
+    background: rgba(42,68,37,0.6);
+  }
+
+  .qna-accordion .qna-answer {
+    padding: 0 1.5rem 1.2rem;
+    font-size: 0.85rem;
+    color: rgba(242,234,216,0.65);
+    line-height: 1.9;
+    font-weight: 300;
+  }
+
+  .qna-section {
+    margin-bottom: 4rem;
   }
 
   /* AI 진화 타임라인 */
@@ -774,34 +914,6 @@
     letter-spacing: 0.1em;
   }
 
-  /* 투자자 카드 */
-  .inv-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-bottom: 3rem;
-    min-height: 0;
-  }
-
-  .inv-card {
-    background: rgba(30,21,16,0.5);
-    border: 1px solid rgba(196,128,58,0.12);
-    padding: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    transition: all 0.3s;
-  }
-
-  .inv-card:hover {
-    border-color: rgba(196,128,58,0.35);
-    transform: translateY(-2px);
-  }
-
-  .inv-card-badge { font-size: 1.6rem; flex-shrink: 0; }
-  .inv-card-name { font-family: 'Noto Serif KR', serif; font-size: 0.95rem; font-weight: 700; color: var(--cream); }
-  .inv-card-tier { font-size: 0.65rem; letter-spacing: 0.15em; color: var(--dust); margin-top: 0.2rem; }
-
   .inv-empty {
     position: relative;
     text-align: center;
@@ -917,6 +1029,20 @@
     letter-spacing: 0.05em;
   }
 
+  .footer-legal {
+    font-size: 0.72rem;
+    display: flex;
+    gap: 1.2rem;
+  }
+
+  .footer-legal a {
+    color: var(--dust);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+
+  .footer-legal a:hover { color: var(--cream); }
+
   .footer-philosophy {
     font-family: 'Noto Serif KR', serif;
     font-size: 0.75rem;
@@ -933,11 +1059,6 @@
   @keyframes scrollPulse {
     0%, 100% { opacity: 0.3; transform: scaleY(0.8); }
     50% { opacity: 1; transform: scaleY(1); }
-  }
-
-  @keyframes typing {
-    from { width: 0; }
-    to { width: 100%; }
   }
 
   /* Scroll reveal */
@@ -979,6 +1100,24 @@
       letter-spacing: 0.1em;
     }
 
+    .nav-more-btn {
+      font-size: 0.9rem;
+      padding: 0.4rem 1rem;
+    }
+
+    .nav-more-dropdown {
+      position: static;
+      border: none;
+      background: transparent;
+      min-width: auto;
+      text-align: center;
+    }
+
+    .nav-more-dropdown a {
+      font-size: 0.9rem;
+      padding: 0.4rem 0;
+    }
+
     .nav-toggle { display: block; }
 
     section { padding: 5rem 6vw; }
@@ -1015,7 +1154,7 @@
 <!-- NAV -->
 <nav>
   <a href="/" class="nav-logo">품앗이AI</a>
-  <button class="nav-toggle" aria-label="메뉴 열기">
+  <button class="nav-toggle" aria-label="메뉴 열기" aria-expanded="false">
     <span></span><span></span><span></span>
   </button>
   <ul class="nav-links">
@@ -1024,10 +1163,19 @@
     <li><a href="#act3">실천</a></li>
     <li><a href="#investors">씨앗투자</a></li>
     <li><a href="https://seed.poomasi.org" target="_blank">생협</a></li>
-    <li><a href="work.html">경영</a></li>
-    <li><a href="annual_report.html">리포트</a></li>
-    <li><a href="market.html">매장</a></li>
-    <li><a href="ai-tools.html">AI경영지원실</a></li>
+    <li class="nav-more">
+      <button class="nav-more-btn" aria-expanded="false" aria-haspopup="true">더보기</button>
+      <div class="nav-more-dropdown" role="menu">
+        <a href="work.html" role="menuitem">경영</a>
+        <a href="annual_report.html" role="menuitem">연차보고서</a>
+        <a href="market.html" role="menuitem">매장</a>
+        <a href="ai-tools.html" role="menuitem">AI경영지원실</a>
+        <a href="display.html" role="menuitem">디스플레이</a>
+        <a href="feedback.html" role="menuitem">조합원말씀</a>
+        <a href="join.html" role="menuitem">가입</a>
+        <a href="poomasi_philosophy.html" role="menuitem">철학</a>
+      </div>
+    </li>
     <li><a href="https://www.youtube.com/@local_counterattack" target="_blank" class="nav-yt">유튜브</a></li>
   </ul>
 </nav>
@@ -1051,8 +1199,8 @@
     <h1>품앗이AI</h1>
   </div>
 
-  <div class="hero-subtitle">
-    <p>AI와 로컬리스트의 협동</p>
+  <div class="hero-cta-wrapper">
+    <a href="#investors" class="btn-primary">로컬의 반격 동참하기</a>
     <a href="https://www.youtube.com/@local_counterattack" target="_blank" class="hero-channel">
       로컬의 반격 (feat. AI)
     </a>
@@ -1148,6 +1296,8 @@
       <em>자체 모델을 만들어야 비로소 데이터주권이 달성된다.</em>
     </div>
   </div>
+
+  <a href="https://www.youtube.com/@local_counterattack" target="_blank" class="btn-text-link reveal">자체 파인튜닝 과정 살펴보기 &#8594;</a>
 </section>
 
 <!-- ACT 3: 실천 -->
@@ -1160,14 +1310,22 @@
       지금 여기서
     </h2>
 
-    <!-- Coming Soon 데모 -->
-    <div class="act3-demo reveal reveal-delay-1">
-      <div class="act3-demo-icon">&#9671;</div>
-      <div class="act3-demo-title">AI 챗봇 Coming Soon</div>
-      <div class="act3-demo-sub">
-        로컬푸드, 생협 운영, 데이터 분석 &#8212;<br>
-        품앗이AI가 직접 답합니다.
-      </div>
+    <!-- Q&A 아코디언 데모 -->
+    <div class="qna-section reveal reveal-delay-1">
+      <details class="qna-accordion">
+        <summary>품앗이AI는 무엇인가요?</summary>
+        <div class="qna-answer">
+          품앗이AI는 사회적경제 현장에서 27년 경험을 가진 팀이 만드는 로컬 AI 프로젝트입니다.
+          대자본의 AI 독점에 맞서, 로컬 데이터의 주권을 지키고, 협동조합 현장에서 실제로 쓸 수 있는 AI를 만듭니다.
+        </div>
+      </details>
+      <details class="qna-accordion">
+        <summary>로컬딥테크가 뭔가요?</summary>
+        <div class="qna-answer">
+          로컬딥테크는 지역(로컬)의 데이터와 현장 경험을 기반으로 한 심층기술(딥테크)입니다.
+          기본기술로서의 AI, 공유지능, 로컬데이터주권 &#8212; 이 세 축이 로컬딥테크의 핵심입니다.
+        </div>
+      </details>
     </div>
 
     <!-- AI 진화 타임라인 -->
@@ -1267,19 +1425,6 @@
     </div>
   </div>
 
-  <!-- 투자자 카드 (투자자 생기면 주석 해제) -->
-  <!--
-  <div class="inv-cards reveal reveal-delay-2">
-    <div class="inv-card">
-      <div class="inv-card-badge">&#x1F331;</div>
-      <div>
-        <div class="inv-card-name">홍길동</div>
-        <div class="inv-card-tier">SEED</div>
-      </div>
-    </div>
-  </div>
-  -->
-
   <div class="inv-empty reveal reveal-delay-2">
     <div class="inv-empty-icon">&#x1F331;</div>
     <div class="inv-empty-text">첫 번째 씨앗이 되어주세요</div>
@@ -1287,7 +1432,7 @@
       품앗이AI의 반격은 작은 용기에서 시작됩니다.<br>
       당신의 씨앗이 마을을 바꿉니다.
     </p>
-    <a href="mailto:haeory@gmail.com?subject=씨앗투자 문의" class="btn-invest">씨앗 심기</a>
+    <a href="https://forms.google.com/" target="_blank" class="btn-invest">씨앗 투자 문의 폼 작성하기</a>
   </div>
 </section>
 
@@ -1307,9 +1452,10 @@
       <div class="footer-col-title">탐색</div>
       <ul class="footer-links">
         <li><a href="market.html">매장 안내</a></li>
-        <li><a href="annual_report.html">연차 리포트</a></li>
+        <li><a href="annual_report.html">연차보고서</a></li>
         <li><a href="display.html">데이터 현황판</a></li>
         <li><a href="ai-tools.html">AI경영지원실</a></li>
+        <li><a href="poomasi_philosophy.html">철학</a></li>
       </ul>
     </div>
     <div>
@@ -1317,8 +1463,8 @@
       <ul class="footer-links">
         <li><a href="join.html">조합원 가입</a></li>
         <li><a href="feedback.html">조합원말씀</a></li>
-        <li><a href="mailto:haeory@gmail.com?subject=투자 문의">투자 문의</a></li>
-        <li><a href="work.html">사무국</a></li>
+        <li><a href="work.html">경영(사무국)</a></li>
+        <li><a href="https://forms.google.com/" target="_blank">투자 문의</a></li>
       </ul>
     </div>
     <div>
@@ -1326,16 +1472,15 @@
       <ul class="footer-links">
         <li><a href="https://www.youtube.com/@local_counterattack" target="_blank">유튜브 채널</a></li>
         <li><a href="https://pf.kakao.com/_ZxoVxfj" target="_blank">카카오채널</a></li>
-        <li><a href="poomasi_philosophy.html">철학실</a></li>
         <li><a href="https://seed.poomasi.org" target="_blank">생협 사이트</a></li>
       </ul>
     </div>
   </div>
   <div class="footer-bottom">
     <div class="footer-copy">&copy; 2026 품앗이소비자생활협동조합</div>
-    <div style="font-size:0.72rem;display:flex;gap:1.2rem;">
-      <a href="privacy.html" style="color:var(--dust);text-decoration:none;">개인정보처리방침</a>
-      <a href="sitemap.html" style="color:var(--dust);text-decoration:none;">사이트맵</a>
+    <div class="footer-legal">
+      <a href="privacy.html">개인정보처리방침</a>
+      <a href="sitemap.html">사이트맵</a>
     </div>
     <div class="footer-philosophy">AI와 로컬리스트의 협동</div>
   </div>
@@ -1354,22 +1499,61 @@
 
   reveals.forEach(function(el) { observer.observe(el); });
 
-  // ── Mobile nav toggle ──
+  // ── Mobile nav toggle (hamburger ↔ X) ──
   var navToggle = document.querySelector('.nav-toggle');
   var navLinks = document.querySelector('.nav-links');
 
   if (navToggle) {
     navToggle.addEventListener('click', function() {
-      navLinks.classList.toggle('open');
+      var isOpen = navLinks.classList.toggle('open');
+      navToggle.classList.toggle('active', isOpen);
+      navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      navToggle.setAttribute('aria-label', isOpen ? '메뉴 닫기' : '메뉴 열기');
     });
 
     // 메뉴 항목 클릭 시 닫기
     navLinks.querySelectorAll('a').forEach(function(link) {
       link.addEventListener('click', function() {
         navLinks.classList.remove('open');
+        navToggle.classList.remove('active');
+        navToggle.setAttribute('aria-expanded', 'false');
+        navToggle.setAttribute('aria-label', '메뉴 열기');
       });
     });
   }
+
+  // ── Nav 더보기 드롭다운 ──
+  var moreBtn = document.querySelector('.nav-more-btn');
+  var moreDropdown = document.querySelector('.nav-more-dropdown');
+
+  if (moreBtn && moreDropdown) {
+    moreBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var isOpen = moreDropdown.classList.toggle('open');
+      moreBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    // 외부 클릭 시 드롭다운 닫기
+    document.addEventListener('click', function() {
+      moreDropdown.classList.remove('open');
+      moreBtn.setAttribute('aria-expanded', 'false');
+    });
+
+    // 드롭다운 내부 클릭 시 전파 방지
+    moreDropdown.addEventListener('click', function(e) {
+      e.stopPropagation();
+    });
+  }
+
+  // ── 스크롤 시 nav 배경 전환 ──
+  var navEl = document.querySelector('nav');
+  window.addEventListener('scroll', function() {
+    if (window.scrollY > 60) {
+      navEl.classList.add('scrolled');
+    } else {
+      navEl.classList.remove('scrolled');
+    }
+  });
 </script>
 </body>
 </html>
