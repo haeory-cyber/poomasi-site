@@ -25,17 +25,39 @@ BIZINFO_KEYWORDS = [
 ]
 
 EXCLUDE_REGIONS = [
-    '경기', '충청', '충남', '충북', '전라', '전북', '전남',
-    '경상', '경북', '경남', '강원', '제주', '인천', '부산',
-    '대구', '광주', '울산', '세종', '서울',
+    '경기', '경기도',
+    '충청', '충남', '충청남도', '충북', '충청북도',
+    '전라', '전북', '전라북도', '전남', '전라남도',
+    '경상', '경북', '경상북도', '경남', '경상남도',
+    '강원', '강원도', '강원특별자치도',
+    '제주', '제주도', '제주특별자치도',
+    '인천', '인천광역시',
+    '부산', '부산광역시',
+    '대구', '대구광역시',
+    '광주', '광주광역시',
+    '울산', '울산광역시',
+    '세종', '세종특별자치시',
+    '서울', '서울특별시',
 ]
 
 
 def is_relevant_region(author: str) -> bool:
-    """중앙부처 또는 대전만 허용."""
+    """중앙부처 또는 대전만 허용. title의 [지역] 태그도 확인."""
     if '대전' in author:
         return True
     return not any(k in author for k in EXCLUDE_REGIONS)
+
+
+def is_relevant_title(title: str) -> bool:
+    """title의 [지역] 태그 기준으로 타지역 공고 제외."""
+    import re
+    m = re.match(r'^\[(.+?)\]', title)
+    if not m:
+        return True  # 태그 없으면 중앙부처 공고
+    tag = m.group(1)
+    if '대전' in tag:
+        return True
+    return not any(k in tag for k in EXCLUDE_REGIONS)
 
 
 def fix_link(url: str) -> str:
@@ -69,10 +91,11 @@ def fetch_announcements(num: int = 30) -> list:
             return el.text.strip() if el is not None and el.text else ''
 
         author = txt('author')
-        if not is_relevant_region(author):
+        title = txt('title')
+
+        if not is_relevant_region(author) or not is_relevant_title(title):
             continue
 
-        title = txt('title')
         if not any(kw in title for kw in BIZINFO_KEYWORDS):
             continue
 
