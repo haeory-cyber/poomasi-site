@@ -1,0 +1,1878 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>로컬의 반격 — 품앗이소비자생활협동조합</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23c4803a'/><text x='16' y='22' text-anchor='middle' font-size='18' fill='%230f0b07'>品</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;700;900&family=Noto+Sans+KR:wght@300;400;500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --earth: #0f0b07;
+    --soil: #1e1510;
+    --bark: #2d1f14;
+    --amber: #c4803a;
+    --amber-light: #e8a55a;
+    --green: #3d5c35;
+    --green-light: #5a8a4e;
+    --cream: #f2ead8;
+    --dust: #b8a88a;
+    --red: #b83a2a;
+    --white: #faf7f0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--earth);
+    color: var(--cream);
+    font-family: 'Noto Sans KR', sans-serif;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1.5rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    mix-blend-mode: normal;
+  }
+
+  nav::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(15,11,7,0.9), transparent);
+    pointer-events: none;
+  }
+
+  .nav-logo {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: var(--amber);
+    position: relative;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+    position: relative;
+  }
+
+  .nav-links a {
+    color: var(--dust);
+    text-decoration: none;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    transition: color 0.3s;
+  }
+
+  .nav-links a:hover { color: var(--cream); }
+
+  /* ── HERO ── */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 8rem 8vw 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 80% 60% at 70% 50%, rgba(44,31,20,0.8) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 80%, rgba(61,92,53,0.15) 0%, transparent 60%),
+      linear-gradient(135deg, var(--earth) 0%, var(--soil) 50%, var(--bark) 100%);
+  }
+
+  /* Organic lines */
+  .hero-lines {
+    position: absolute;
+    right: 0; top: 0;
+    width: 55%;
+    height: 100%;
+    opacity: 0.12;
+  }
+
+  .hero-year {
+    position: relative;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: var(--amber);
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 1s 0.3s forwards;
+  }
+
+  .hero-year::before {
+    content: '';
+    display: inline-block;
+    width: 2rem;
+    height: 1px;
+    background: var(--amber);
+    margin-right: 1rem;
+    vertical-align: middle;
+  }
+
+  .hero-main {
+    position: relative;
+    opacity: 0;
+    animation: fadeUp 1s 0.6s forwards;
+  }
+
+  .hero-ko {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(4rem, 10vw, 9rem);
+    font-weight: 900;
+    line-height: 0.95;
+    color: var(--white);
+    letter-spacing: -0.02em;
+  }
+
+  .hero-ko span {
+    color: var(--amber);
+    display: block;
+  }
+
+  .hero-en {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(0.9rem, 2vw, 1.2rem);
+    font-style: italic;
+    color: var(--dust);
+    margin-top: 1.5rem;
+    letter-spacing: 0.05em;
+  }
+
+  .hero-sub {
+    position: relative;
+    margin-top: 3rem;
+    opacity: 0;
+    animation: fadeUp 1s 0.9s forwards;
+  }
+
+  .hero-sub p {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(1rem, 2.5vw, 1.6rem);
+    font-weight: 300;
+    color: var(--dust);
+    line-height: 1.8;
+  }
+
+  .hero-sub p strong {
+    color: var(--cream);
+    font-weight: 700;
+  }
+
+  .hero-cta {
+    position: relative;
+    margin-top: 3.5rem;
+    opacity: 0;
+    animation: fadeUp 1s 1.2s forwards;
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+  }
+
+  .btn-primary {
+    background: var(--amber);
+    color: var(--earth);
+    border: none;
+    padding: 1rem 2.5rem;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .btn-primary:hover {
+    background: var(--amber-light);
+    transform: translateY(-2px);
+  }
+
+  .btn-ghost {
+    color: var(--dust);
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(184,168,138,0.3);
+    padding-bottom: 2px;
+    transition: all 0.3s;
+  }
+
+  .btn-ghost:hover {
+    color: var(--cream);
+    border-color: var(--cream);
+  }
+
+  /* Scroll indicator */
+  .scroll-hint {
+    position: absolute;
+    bottom: 3rem;
+    left: 8vw;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    opacity: 0;
+    animation: fadeUp 1s 1.8s forwards;
+  }
+
+  .scroll-line {
+    width: 1px;
+    height: 4rem;
+    background: linear-gradient(to bottom, transparent, var(--amber));
+    animation: scrollPulse 2s infinite;
+  }
+
+  .scroll-text {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--dust);
+    writing-mode: vertical-rl;
+  }
+
+  /* ── SECTION COMMON ── */
+  section {
+    padding: 8rem 8vw;
+    position: relative;
+  }
+
+  .section-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    color: var(--amber);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .section-label::before {
+    content: '';
+    width: 2rem;
+    height: 1px;
+    background: var(--amber);
+  }
+
+  .section-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(2rem, 5vw, 4rem);
+    font-weight: 900;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  /* ── ACT 1: 저항 ── */
+  #act1 {
+    background: var(--soil);
+    overflow: hidden;
+  }
+
+  .act1-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    margin-top: 4rem;
+    align-items: center;
+  }
+
+  .act1-left .section-title {
+    color: var(--white);
+  }
+
+  .act1-left .section-title em {
+    color: var(--red);
+    font-style: normal;
+    display: block;
+  }
+
+  .act1-text {
+    margin-top: 2rem;
+    color: var(--dust);
+    font-size: 1rem;
+    line-height: 2;
+    font-weight: 300;
+  }
+
+  .act1-text strong {
+    color: var(--cream);
+  }
+
+  /* Platform vs Us comparison */
+  .contrast-block {
+    border: 1px solid rgba(196,128,58,0.2);
+    padding: 2.5rem;
+    position: relative;
+    background: rgba(15,11,7,0.5);
+    backdrop-filter: blur(8px);
+  }
+
+  .contrast-block::before {
+    content: '대비';
+    position: absolute;
+    top: -0.6rem;
+    left: 2rem;
+    background: var(--soil);
+    padding: 0 0.8rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--amber);
+  }
+
+  .contrast-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 1rem;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(184,168,138,0.08);
+  }
+
+  .contrast-row:last-child { border-bottom: none; }
+
+  .contrast-them {
+    font-size: 0.85rem;
+    color: rgba(184,168,138,0.5);
+    text-align: right;
+    text-decoration: line-through;
+    text-decoration-color: var(--red);
+  }
+
+  .contrast-vs {
+    font-size: 0.6rem;
+    color: var(--amber);
+    letter-spacing: 0.1em;
+    text-align: center;
+  }
+
+  .contrast-us {
+    font-size: 0.9rem;
+    color: var(--cream);
+    font-weight: 500;
+  }
+
+  /* ── ACT 2: 건설 ── */
+  #act2 {
+    background: var(--bark);
+    position: relative;
+  }
+
+  #act2::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--green), var(--amber));
+  }
+
+  .act2-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: end;
+    margin-bottom: 5rem;
+  }
+
+  .act2-header .section-title {
+    color: var(--white);
+  }
+
+  .act2-header .section-title span {
+    color: var(--green-light);
+    font-style: italic;
+  }
+
+  .act2-quote {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.8rem;
+    font-weight: 300;
+    color: var(--dust);
+    line-height: 1.6;
+    border-left: 2px solid var(--amber);
+    padding-left: 1.5rem;
+  }
+
+  .act2-quote strong {
+    color: var(--cream);
+    font-weight: 700;
+    display: block;
+  }
+
+  /* Data sovereignty visualization */
+  .data-sovereign {
+    background: rgba(10,8,5,0.6);
+    border: 1px solid rgba(196,128,58,0.15);
+    padding: 3rem;
+    margin-top: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .data-sovereign::after {
+    content: 'DATA SOVEREIGNTY';
+    position: absolute;
+    right: -3rem;
+    top: 50%;
+    transform: translateY(-50%) rotate(90deg);
+    font-size: 0.55rem;
+    letter-spacing: 0.5em;
+    color: rgba(196,128,58,0.2);
+    white-space: nowrap;
+  }
+
+  .data-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--amber);
+    margin-bottom: 2rem;
+    letter-spacing: 0.05em;
+  }
+
+  .data-flow {
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .data-box {
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  .data-box.them {
+    background: rgba(184,58,42,0.1);
+    border: 1px solid rgba(184,58,42,0.3);
+  }
+
+  .data-box.us {
+    background: rgba(61,92,53,0.15);
+    border: 1px solid rgba(90,138,78,0.3);
+  }
+
+  .data-box-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    margin-bottom: 0.8rem;
+    opacity: 0.6;
+  }
+
+  .data-box.them .data-box-label { color: var(--red); }
+  .data-box.us .data-box-label { color: var(--green-light); }
+
+  .data-box-main {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.6;
+  }
+
+  .data-box.them .data-box-main { color: rgba(242,234,216,0.4); }
+  .data-box.us .data-box-main { color: var(--cream); }
+
+  .data-arrow {
+    text-align: center;
+    font-size: 1.5rem;
+    color: var(--amber);
+    opacity: 0.6;
+  }
+
+  /* Stats row */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    margin-top: 4rem;
+    padding: 4rem 8vw;
+    background: rgba(255,255,255,0.03);
+    border-top: 1px solid rgba(196,128,58,0.2);
+    border-bottom: 1px solid rgba(196,128,58,0.2);
+  }
+
+  .stats-row .stat-item {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .stat-item {
+    background: rgba(15,11,7,0.5);
+    padding: 2rem 1.5rem;
+    border-top: 2px solid transparent;
+    transition: border-color 0.3s;
+    cursor: default;
+  }
+
+  .stat-item:hover { border-color: var(--amber); }
+
+  .stat-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 3.6rem;
+    color: var(--amber);
+    line-height: 1;
+  }
+
+  .stat-unit {
+    font-size: 0.9rem;
+    color: var(--dust);
+    margin-left: 0.3rem;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    color: var(--dust);
+    margin-top: 0.5rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* Doors section */
+  .doors-section {
+    margin-top: 5rem;
+  }
+
+  .doors-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.3em;
+    color: var(--amber);
+    margin-bottom: 2rem;
+  }
+
+  .doors-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+
+  .door {
+    background: rgba(15,11,7,0.7);
+    padding: 3rem 2rem;
+    border: 1px solid rgba(196,128,58,0.08);
+    transition: all 0.4s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    display: block;
+    color: inherit;
+  }
+
+  .door::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--amber);
+    transform: scaleX(0);
+    transition: transform 0.4s;
+    transform-origin: left;
+  }
+
+  .door:hover::before { transform: scaleX(1); }
+
+  .door:hover {
+    background: rgba(44,31,20,0.9);
+    transform: translateY(-6px);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+  }
+
+  .door-number {
+    font-family: 'DM Serif Display', serif;
+    font-size: 3rem;
+    color: rgba(196,128,58,0.2);
+    line-height: 1;
+    margin-bottom: 1.5rem;
+    transition: color 0.4s;
+  }
+
+  .door:hover .door-number { color: rgba(196,128,58,0.5); }
+
+  .door-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    color: var(--amber);
+    margin-bottom: 0.8rem;
+  }
+
+  .door-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 1rem;
+    line-height: 1.4;
+  }
+
+  .door-desc {
+    font-size: 0.8rem;
+    color: var(--dust);
+    line-height: 1.8;
+    font-weight: 300;
+  }
+
+  .door-arrow {
+    position: absolute;
+    bottom: 2rem;
+    right: 2rem;
+    font-size: 1.2rem;
+    color: var(--amber);
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    transform: translateX(-8px);
+  }
+
+  .door:hover .door-arrow {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* ── ACT 3: 기동 ── */
+  #act3 {
+    background: var(--green);
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #act3::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 60% 80% at 80% 50%, rgba(61,92,53,0.3) 0%, transparent 70%),
+      linear-gradient(135deg, #2a4425 0%, var(--green) 100%);
+  }
+
+  .act3-inner {
+    position: relative;
+    max-width: 800px;
+  }
+
+  .act3-inner .section-label { color: rgba(242,234,216,0.5); }
+  .act3-inner .section-label::before { background: rgba(242,234,216,0.5); }
+
+  .act3-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(2.5rem, 6vw, 5.5rem);
+    font-weight: 900;
+    line-height: 1.1;
+    color: var(--white);
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+  }
+
+  .act3-title .highlight {
+    color: var(--amber-light);
+    font-style: italic;
+  }
+
+  .act3-sub {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.1rem;
+    font-weight: 300;
+    color: rgba(242,234,216,0.7);
+    line-height: 1.9;
+    margin-bottom: 3rem;
+    max-width: 500px;
+  }
+
+  .act3-actions {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-act3 {
+    background: var(--amber);
+    color: var(--earth);
+    padding: 1.2rem 3rem;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-act3:hover {
+    background: var(--amber-light);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+  }
+
+  .btn-act3-ghost {
+    border: 1px solid rgba(242,234,216,0.3);
+    color: rgba(242,234,216,0.7);
+    padding: 1.2rem 2rem;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.85rem;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s;
+    letter-spacing: 0.1em;
+  }
+
+  .btn-act3-ghost:hover {
+    border-color: var(--cream);
+    color: var(--cream);
+  }
+
+  /* Right side organic shape */
+  .act3-deco {
+    position: absolute;
+    right: 5vw;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.06;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 20vw;
+    font-weight: 900;
+    color: var(--cream);
+    line-height: 1;
+    user-select: none;
+  }
+
+  /* ── MANIFESTO STRIP ── */
+  #manifesto {
+    background: var(--amber);
+    padding: 4rem 8vw;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .manifesto-inner {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 4rem;
+    align-items: center;
+  }
+
+  .manifesto-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.4em;
+    color: var(--bark);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .manifesto-year {
+    font-family: 'DM Serif Display', serif;
+    font-size: 6rem;
+    color: rgba(45,31,20,0.2);
+    line-height: 1;
+    font-style: italic;
+  }
+
+  .manifesto-text {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(1.2rem, 3vw, 2rem);
+    font-weight: 700;
+    color: var(--bark);
+    line-height: 1.7;
+  }
+
+  .manifesto-text em {
+    font-style: normal;
+    background: var(--bark);
+    color: var(--amber);
+    padding: 0.1em 0.3em;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--earth);
+    padding: 4rem 8vw;
+    border-top: 1px solid rgba(196,128,58,0.1);
+  }
+
+  .footer-inner {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 4rem;
+  }
+
+  .footer-brand {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--amber);
+    margin-bottom: 1rem;
+  }
+
+  .footer-desc {
+    font-size: 0.8rem;
+    color: var(--dust);
+    line-height: 1.9;
+    font-weight: 300;
+  }
+
+  .footer-col-title {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--amber);
+    margin-bottom: 1.2rem;
+  }
+
+  .footer-links {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .footer-links a {
+    color: var(--dust);
+    text-decoration: none;
+    font-size: 0.8rem;
+    transition: color 0.3s;
+  }
+
+  .footer-links a:hover { color: var(--cream); }
+
+  .footer-bottom {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(184,168,138,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-copy {
+    font-size: 0.7rem;
+    color: rgba(184,168,138,0.4);
+    letter-spacing: 0.05em;
+  }
+
+  .footer-philosophy {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.75rem;
+    color: rgba(184,168,138,0.4);
+    font-style: italic;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.3; transform: scaleY(0.8); }
+    50% { opacity: 1; transform: scaleY(1); }
+  }
+
+  /* Scroll reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .reveal-delay-1 { transition-delay: 0.15s; }
+  .reveal-delay-2 { transition-delay: 0.3s; }
+  .reveal-delay-3 { transition-delay: 0.45s; }
+
+  /* ── 이벤트 티커 ──────────────────────────────────── */
+  .ticker-wrap {
+    background: #1B4332;
+    border-bottom: 1px solid rgba(64,145,108,0.25);
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 0.55rem 0;
+  }
+  .ticker-inner {
+    display: inline-flex;
+    animation: ticker-scroll 28s linear infinite;
+  }
+  .ticker-inner:hover { animation-play-state: paused; }
+  .ticker-item {
+    display: inline-block;
+    padding: 0 3rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    color: rgba(212,239,223,0.82);
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .ticker-item .ticker-type {
+    color: #74C69D;
+    font-weight: 700;
+    margin-right: 0.5rem;
+  }
+  @keyframes ticker-scroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+
+  /* ── 의제가 이제가 되었다 ── */
+  .ago-section {
+    padding: 6rem 8vw;
+    background: var(--earth);
+    text-align: center;
+    border-top: 1px solid rgba(196,128,58,0.15);
+    border-bottom: 1px solid rgba(196,128,58,0.15);
+  }
+
+  .ago-text {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(1.5rem, 4vw, 3rem);
+    font-weight: 300;
+    color: var(--dust);
+    letter-spacing: 0.05em;
+    line-height: 2;
+  }
+
+  .ago-text strong {
+    color: var(--amber);
+    font-weight: 900;
+  }
+
+  .ago-text em {
+    font-style: normal;
+    color: var(--cream);
+    font-weight: 700;
+  }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    nav { padding: 1.5rem 2rem; }
+    .nav-links { display: none; }
+    section { padding: 5rem 6vw; }
+    .act1-grid { grid-template-columns: 1fr; gap: 3rem; }
+    .act2-header { grid-template-columns: 1fr; gap: 2rem; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .doors-grid { grid-template-columns: 1fr; }
+    .manifesto-inner { grid-template-columns: 1fr; gap: 1rem; }
+    .manifesto-year { font-size: 4rem; }
+    .footer-inner { grid-template-columns: 1fr; gap: 2rem; }
+    .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
+    .data-flow { grid-template-columns: 1fr; }
+    .data-arrow { transform: rotate(90deg); text-align: center; }
+  }
+  .lab-strip{background:rgba(61,92,53,0.12);border-top:1px solid rgba(90,138,78,0.2);border-bottom:1px solid rgba(90,138,78,0.2);padding:2rem 8vw;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1.5rem}.lab-cell{text-align:center}.lab-num{font-family:'DM Serif Display',serif;font-size:2rem;color:var(--amber);line-height:1}.lab-unit{font-size:.85rem;color:var(--dust);margin-left:.2rem}.lab-key{font-size:.65rem;letter-spacing:.15em;color:rgba(184,168,138,.5);margin-top:.4rem}.lab-roadmap{padding:1.2rem 8vw;background:rgba(196,128,58,0.06);border-bottom:1px solid rgba(196,128,58,0.1);font-size:.8rem;color:var(--dust);letter-spacing:.05em;text-align:center}.lab-roadmap strong{color:var(--amber-light)}
+
+  /* ── FOOD MILEAGE ── */
+  #foodmileage {
+    background: var(--soil);
+    overflow: hidden;
+  }
+  .fm-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    margin-top: 4rem;
+    align-items: center;
+  }
+  .fm-map-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .fm-map-wrap svg {
+    width: 100%;
+    max-width: 380px;
+    height: auto;
+    overflow: visible;
+  }
+  .fm-headline {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(1.6rem, 3vw, 2.6rem);
+    font-weight: 900;
+    line-height: 1.3;
+    color: var(--white);
+    margin-bottom: 1.8rem;
+  }
+  .fm-headline em {
+    color: var(--green-light);
+    font-style: normal;
+    display: block;
+    font-size: 1.3em;
+    line-height: 1;
+    margin-top: 0.4rem;
+  }
+  .fm-compare {
+    display: grid;
+    grid-template-columns: 1fr 36px 1fr;
+    gap: 1rem;
+    align-items: center;
+    background: rgba(10,8,5,0.5);
+    border: 1px solid rgba(196,128,58,0.15);
+    padding: 1.8rem;
+    margin-bottom: 2rem;
+    position: relative;
+  }
+  .fm-compare::before {
+    content: '이동거리 비교';
+    position: absolute;
+    top: -0.6rem;
+    left: 1.5rem;
+    background: var(--soil);
+    padding: 0 0.8rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--amber);
+  }
+  .fm-side { text-align: center; }
+  .fm-big {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2.8rem;
+    line-height: 1;
+  }
+  .fm-side.ours .fm-big { color: var(--green-light); }
+  .fm-side.theirs .fm-big {
+    color: rgba(184,168,138,0.25);
+    text-decoration: line-through;
+    text-decoration-color: rgba(184,58,42,0.5);
+  }
+  .fm-unit { font-size: 0.85rem; color: var(--dust); margin-left: 0.2rem; }
+  .fm-tag { font-size: 0.62rem; letter-spacing: 0.12em; margin-top: 0.5rem; }
+  .fm-side.ours .fm-tag { color: var(--green-light); }
+  .fm-side.theirs .fm-tag { color: rgba(184,168,138,0.3); }
+  .fm-vs { text-align: center; font-size: 0.58rem; letter-spacing: 0.08em; color: var(--amber); }
+  .fm-stats { list-style: none; }
+  .fm-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid rgba(184,168,138,0.07);
+  }
+  .fm-stat:last-child { border-bottom: none; }
+  .fm-stat-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.8rem;
+    color: var(--amber);
+    white-space: nowrap;
+    min-width: 80px;
+  }
+  .fm-stat-desc {
+    font-size: 0.77rem;
+    color: var(--dust);
+    text-align: right;
+    line-height: 1.7;
+  }
+  .fm-source {
+    margin-top: 1.5rem;
+    font-size: 0.62rem;
+    color: rgba(184,168,138,0.3);
+    letter-spacing: 0.08em;
+  }
+
+  /* doors 4개 대응 */
+  .doors-grid { grid-template-columns: repeat(2, 1fr); }
+
+  /* ── INVESTORS HALL ── */
+  #investors {
+    background: var(--earth);
+    padding: 6rem 8vw;
+    border-top: 1px solid rgba(196,128,58,0.15);
+    position: relative;
+    overflow: hidden;
+  }
+
+  #investors::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 50% 60% at 50% 40%, rgba(196,128,58,0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .inv-header {
+    position: relative;
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+
+  .inv-header .section-label {
+    justify-content: center;
+  }
+
+  .inv-header .section-label::before { display: none; }
+
+  .inv-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 900;
+    color: var(--white);
+    line-height: 1.3;
+    margin-bottom: 1rem;
+  }
+
+  .inv-title span { color: var(--amber); }
+
+  .inv-subtitle {
+    font-size: 0.9rem;
+    color: var(--dust);
+    font-weight: 300;
+    line-height: 1.8;
+    max-width: 540px;
+    margin: 0 auto;
+  }
+
+  /* Tier legend */
+  .inv-tiers {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    margin-bottom: 3rem;
+    position: relative;
+  }
+
+  .inv-tier {
+    background: rgba(30,21,16,0.7);
+    border: 1px solid rgba(196,128,58,0.1);
+    padding: 2rem 1.2rem;
+    text-align: center;
+    transition: all 0.3s;
+    cursor: default;
+  }
+
+  .inv-tier:hover {
+    border-color: rgba(196,128,58,0.3);
+    background: rgba(44,31,20,0.6);
+  }
+
+  .inv-tier-icon {
+    font-size: 2.2rem;
+    line-height: 1;
+    margin-bottom: 0.8rem;
+  }
+
+  .inv-tier-name {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--cream);
+    margin-bottom: 0.3rem;
+  }
+
+  .inv-tier-en {
+    font-family: 'DM Serif Display', serif;
+    font-size: 0.7rem;
+    font-style: italic;
+    color: var(--dust);
+    letter-spacing: 0.1em;
+  }
+
+  /* Investor cards grid */
+  .inv-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 3rem;
+    min-height: 0;
+  }
+
+  .inv-card {
+    background: rgba(30,21,16,0.5);
+    border: 1px solid rgba(196,128,58,0.12);
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s;
+  }
+
+  .inv-card:hover {
+    border-color: rgba(196,128,58,0.35);
+    transform: translateY(-2px);
+  }
+
+  .inv-card-badge {
+    font-size: 1.6rem;
+    flex-shrink: 0;
+  }
+
+  .inv-card-name {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--cream);
+  }
+
+  .inv-card-tier {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--dust);
+    margin-top: 0.2rem;
+  }
+
+  /* CTA empty state */
+  .inv-empty {
+    position: relative;
+    text-align: center;
+    padding: 4rem 2rem;
+    border: 2px dashed rgba(196,128,58,0.2);
+    background: rgba(196,128,58,0.03);
+  }
+
+  .inv-empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.6;
+  }
+
+  .inv-empty-text {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    font-weight: 700;
+    color: var(--cream);
+    margin-bottom: 0.8rem;
+  }
+
+  .inv-empty-sub {
+    font-size: 0.85rem;
+    color: var(--dust);
+    line-height: 1.8;
+    margin-bottom: 2rem;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .btn-invest {
+    display: inline-block;
+    background: transparent;
+    border: 1px solid var(--amber);
+    color: var(--amber);
+    padding: 0.9rem 2.5rem;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+
+  .btn-invest:hover {
+    background: var(--amber);
+    color: var(--earth);
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 768px) {
+    .fm-layout { grid-template-columns: 1fr; gap: 3rem; }
+    .doors-grid { grid-template-columns: 1fr !important; }
+    .inv-tiers { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">품앗이생협</div>
+  <ul class="nav-links">
+    <li><a href="#act1">현실</a></li>
+    <li><a href="#act2">미션</a></li>
+    <li><a href="work.html">경영</a></li>
+    <li><a href="#foodmileage">푸드마일리지</a></li>
+    <li><a href="annual_report.html">리포트</a></li>
+    <li><a href="market.html">매장 안내</a></li>
+    <li><a href="babsang.html" style="color:#D4763C;">모두의밥상</a></li>
+    <li><a href="zerowaste.html" style="color:#52B788;">제로웨이스트존</a></li>
+    <li><a href="feedback.html">조합원말씀</a></li>
+    <li><a href="ai-tools.html" style="color:#c4803a;">AI경영지원실</a></li>
+    <li><a href="#investors" style="color:#e8a55a;">씨앗 투자</a></li>
+    <li><a href="join.html">조합원 가입</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <svg class="hero-lines" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid slice">
+    <path d="M100,0 Q300,200 200,400 Q100,600 300,800" stroke="#c4803a" stroke-width="1" fill="none"/>
+    <path d="M250,0 Q450,150 350,350 Q250,550 450,800" stroke="#c4803a" stroke-width="0.5" fill="none"/>
+    <path d="M400,0 Q200,200 400,400 Q600,600 400,800" stroke="#c4803a" stroke-width="0.3" fill="none"/>
+    <circle cx="300" cy="200" r="150" stroke="#c4803a" stroke-width="0.3" fill="none"/>
+    <circle cx="400" cy="500" r="200" stroke="#c4803a" stroke-width="0.2" fill="none"/>
+  </svg>
+
+  <div class="hero-year">1999 → 2026 · 대전 지족동</div>
+
+  <div class="hero-main">
+    <h1 class="hero-ko">
+      로컬의
+      <span>반격</span>
+    </h1>
+    <p class="hero-en">The Local Strikes Back — An Ancient Future</p>
+  </div>
+
+  <div class="hero-sub">
+    <p><strong>우리는 포장하지 않습니다.</strong><br>
+    비닐도, 과장도, 데이터도.<br><br>
+    그러나 여전히 포장이 더 많습니다.<br>
+    당신이 오셔야 합니다.</p>
+  </div>
+
+  <div class="hero-cta">
+    <a href="#act3" class="btn-primary">용기 들고 오세요</a>
+    <a href="#act1" class="btn-ghost">우리가 하는 일 ↓</a>
+  </div>
+
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    <span class="scroll-text">스크롤</span>
+  </div>
+</section>
+
+
+<!-- ACT 1: 저항 -->
+<section id="act1">
+  <div class="section-label reveal">1막 — 저항</div>
+  <div class="act1-grid">
+    <div class="act1-left">
+      <h2 class="section-title reveal">
+        플랫폼이<br>모든 것을<br><em>독점한다</em>
+      </h2>
+      <div class="act1-text reveal reveal-delay-1">
+        농산물 유통을 장악하고, <strong>데이터를 가져가고,</strong><br>
+        수수료를 떼고, 농가를 종속시킨다.<br><br>
+        초국적 플랫폼이 로컬을 삼키는 시대.<br>
+        <strong>우리는 그 흐름에 저항한다.</strong><br><br>
+        이것은 오래된 반격이다.<br>
+        1844년 로치데일에서, 1992년 리우에서,<br>
+        1999년 대전에서 — 같은 문을 다른 시대에 열었다.
+      </div>
+    </div>
+    <div class="reveal reveal-delay-2">
+      <div class="contrast-block">
+        <div class="contrast-row">
+          <div class="contrast-them">데이터 독점</div>
+          <div class="contrast-vs">VS</div>
+          <div class="contrast-us">데이터 소유</div>
+        </div>
+        <div class="contrast-row">
+          <div class="contrast-them">수수료 착취</div>
+          <div class="contrast-vs">VS</div>
+          <div class="contrast-us">직거래 연결</div>
+        </div>
+        <div class="contrast-row">
+          <div class="contrast-them">알고리즘 지배</div>
+          <div class="contrast-vs">VS</div>
+          <div class="contrast-us">사람이 결정</div>
+        </div>
+        <div class="contrast-row">
+          <div class="contrast-them">포장된 정보</div>
+          <div class="contrast-vs">VS</div>
+          <div class="contrast-us">포장하지 않는 말</div>
+        </div>
+        <div class="contrast-row">
+          <div class="contrast-them">특허로 닫기</div>
+          <div class="contrast-vs">VS</div>
+          <div class="contrast-us">공유로 열기</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ACT 2: 건설 -->
+<section id="act2">
+  <div class="section-label reveal">2막 — 건설</div>
+  <div class="act2-header">
+    <h2 class="section-title reveal">
+      우리가<br><span>직접</span><br>만든다
+    </h2>
+    <blockquote class="act2-quote reveal reveal-delay-1">
+      <strong>우리는 포장하지 않습니다.</strong>
+      비닐도 없고, 과장도 없다.<br>
+      있는 그대로, 데이터도 함께.
+    </blockquote>
+  </div>
+
+  <!-- Data Sovereignty -->
+  <div class="data-sovereign reveal">
+    <div class="data-title">데이터 주권 — 우리가 만들고, 우리가 소유하고, 함께 나눈다</div>
+    <div class="data-flow">
+      <div class="data-box them">
+        <div class="data-box-label">PLATFORM</div>
+        <div class="data-box-main">
+          당신의 구매 데이터를<br>가져간다<br>알고리즘으로 지배한다<br>다시 팔아 돈을 번다
+        </div>
+      </div>
+      <div class="data-arrow">→</div>
+      <div class="data-box us">
+        <div class="data-box-label">POOMASI</div>
+        <div class="data-box-main">
+          우리가 직접 분석한다<br>농가에게 돌려준다<br>조합원과 공유한다<br>인류의 자산으로 열어둔다
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 이벤트 티커 -->
+  <div class="ticker-wrap" id="ticker-wrap" style="display:none">
+    <div class="ticker-inner" id="ticker-inner"></div>
+  </div>
+
+  <!-- Stats — 정직한 데이터만. 확인된 것부터 하나씩. -->
+  <div class="stats-row">
+    <div class="stat-item reveal">
+      <div class="stat-num">1999<span class="stat-unit">년</span></div>
+      <div class="stat-label">로컬 운동 시작 — 한밭레츠</div>
+    </div>
+    <div class="stat-item reveal reveal-delay-1">
+      <div class="stat-num">0<span class="stat-unit">개</span></div>
+      <div class="stat-label">중간 플랫폼</div>
+    </div>
+    <div class="stat-item reveal reveal-delay-2">
+      <div class="stat-num">519<span class="stat-unit">곳</span></div>
+      <div class="stat-label">거래 농가 (2023–2025 누적)</div>
+    </div>
+    <div class="stat-item reveal reveal-delay-3">
+      <div class="stat-num">9.51<span class="stat-unit">억</span></div>
+      <div class="stat-label">생산자회 84명 매출 (2025)</div>
+    </div>
+  </div>
+
+  <!-- 실험실 데이터 — 자동 생성 -->
+  <div class="lab-strip">
+    <div class="lab-cell"><div class="lab-num">15<span class="lab-unit">종</span></div><div class="lab-key">무비닐(벌크)</div></div>
+    <div class="lab-cell"><div class="lab-num">12<span class="lab-unit">종</span></div><div class="lab-key">무라벨(nl)</div></div>
+    <div class="lab-cell"><div class="lab-num">38<span class="lab-unit">종</span></div><div class="lab-key">친환경</div></div>
+    <div class="lab-cell"><div class="lab-num">55,575<span class="lab-unit">kg</span></div><div class="lab-key">탄소저감 (누적추정)</div></div>
+  </div>
+  <div class="lab-roadmap"><strong>재사용 용기 가져오면</strong> → 무포장 완성 + 탄소중립포인트 적립&nbsp;&nbsp;|&nbsp;&nbsp;어제(2026.03.07) 지족점 POS 자동 산출  </div>
+
+  <!-- Doors -->
+  <div class="doors-section">
+    <div class="doors-title reveal">— 어느 문으로 들어오시겠어요</div>
+    <div class="doors-grid">
+      <a href="market.html" class="door reveal">
+        <div class="door-number">01</div>
+        <div class="door-label">MARKET · 광장</div>
+        <div class="door-title">직매장으로<br>오는 문</div>
+        <div class="door-desc">오늘 들어온 농산물,<br>용기 들고 오세요.</div>
+        <div class="door-arrow">→</div>
+      </a>
+      <a href="display.html" class="door reveal reveal-delay-1">
+        <div class="door-number">02</div>
+        <div class="door-label">WORKSHOP · 작업실</div>
+        <div class="door-title">데이터로<br>들어오는 문</div>
+        <div class="door-desc">우리가 직접 만든 파이프라인.<br>살아있는 숫자들.</div>
+        <div class="door-arrow">→</div>
+      </a>
+      <a href="poomasi_philosophy.html" class="door reveal reveal-delay-2">
+        <div class="door-number">03</div>
+        <div class="door-label">PHILOSOPHY · 철학실</div>
+        <div class="door-title">함께 성찰하러<br>오는 문</div>
+        <div class="door-desc">마을이 세계를 구한다.<br>Data Sovereignty 선언.</div>
+        <div class="door-arrow">→</div>
+      </a>
+      <a href="annual_report.html" class="door reveal reveal-delay-3">
+        <div class="door-number">04</div>
+        <div class="door-label">ANNUAL REPORT · 기록실</div>
+        <div class="door-title">로컬의 반격<br>2023–2025</div>
+        <div class="door-desc">3년을 버텼다. 흑자로 돌아섰다.<br>숫자로, 포장 없이.</div>
+        <div class="door-arrow">→</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- 의제가 이제가 되었다 -->
+<div class="ago-section">
+  <div class="ago-text reveal">
+    논밭에서 식탁까지 <strong>가장 빠른 시스템</strong>,<br>
+    그리고 <em>가장 적은 탄소발자국</em>
+  </div>
+</div>
+
+<!-- 푸드마일리지 섹션 -->
+<section id="foodmileage">
+  <div class="section-label reveal">FOOD MILEAGE · 푸드마일리지</div>
+  <div class="fm-layout">
+
+    <!-- B안: 동심원 지도 -->
+    <div class="fm-map-wrap reveal">
+      <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <clipPath id="fm-canvas">
+            <rect x="0" y="0" width="400" height="400"/>
+          </clipPath>
+          <radialGradient id="fm-inner" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="rgba(61,92,53,0.5)"/>
+            <stop offset="100%" stop-color="rgba(61,92,53,0)"/>
+          </radialGradient>
+        </defs>
+
+        <!-- 200km 대형마트 점선 (클립) -->
+        <circle cx="200" cy="200" r="560"
+          stroke="rgba(184,58,42,0.22)" stroke-width="1.5"
+          stroke-dasharray="8 5" fill="none"
+          clip-path="url(#fm-canvas)"/>
+
+        <!-- 40km 로컬 기준 경계 -->
+        <circle cx="200" cy="200" r="130"
+          fill="rgba(61,92,53,0.06)"
+          stroke="rgba(196,128,58,0.35)" stroke-width="1"
+          stroke-dasharray="5 3"/>
+
+        <!-- 27.1km 품앗이 평균 (강조) -->
+        <circle cx="200" cy="200" r="88"
+          fill="rgba(61,92,53,0.14)"
+          stroke="#5a8a4e" stroke-width="2"/>
+
+        <!-- 5km 조합원 생활권 -->
+        <circle cx="200" cy="200" r="16"
+          fill="url(#fm-inner)"
+          stroke="rgba(90,138,78,0.65)" stroke-width="1.2"/>
+
+        <!-- 중심점 매장 -->
+        <circle cx="200" cy="200" r="4.5" fill="#c4803a"/>
+        <text x="200" y="222" text-anchor="middle"
+          font-size="8.5" fill="#c4803a" letter-spacing="0.08em"
+          font-family="sans-serif">지족점</text>
+
+        <!-- 5km 라벨 -->
+        <line x1="213" y1="187" x2="230" y2="170"
+          stroke="rgba(90,138,78,0.45)" stroke-width="0.8"/>
+        <text x="233" y="168" text-anchor="start"
+          font-size="9" fill="rgba(90,138,78,0.85)"
+          font-family="sans-serif">5km</text>
+        <text x="233" y="180" text-anchor="start"
+          font-size="7" fill="rgba(90,138,78,0.55)"
+          font-family="sans-serif">조합원 54% 거주</text>
+
+        <!-- 27.1km 라벨 -->
+        <line x1="288" y1="200" x2="304" y2="200"
+          stroke="#5a8a4e" stroke-width="0.8"/>
+        <text x="307" y="196" text-anchor="start"
+          font-size="11" font-weight="bold" fill="#5a8a4e"
+          font-family="sans-serif">27.1km</text>
+        <text x="307" y="210" text-anchor="start"
+          font-size="7.5" fill="rgba(90,138,78,0.65)"
+          font-family="sans-serif">품앗이 평균</text>
+
+        <!-- 40km 라벨 (우상단) -->
+        <line x1="292" y1="108" x2="302" y2="92"
+          stroke="rgba(196,128,58,0.55)" stroke-width="0.8"/>
+        <text x="305" y="90" text-anchor="start"
+          font-size="9" fill="rgba(196,128,58,0.8)"
+          font-family="sans-serif">40km</text>
+        <text x="305" y="102" text-anchor="start"
+          font-size="7" fill="rgba(196,128,58,0.5)"
+          font-family="sans-serif">로컬 기준</text>
+
+        <!-- 200km 라벨 (좌상단) -->
+        <text x="8" y="20" text-anchor="start"
+          font-size="9" fill="rgba(184,58,42,0.5)"
+          font-family="sans-serif">↗ 200km</text>
+        <text x="8" y="33" text-anchor="start"
+          font-size="7.5" fill="rgba(184,58,42,0.38)"
+          font-family="sans-serif">대형마트 유통 기준</text>
+      </svg>
+    </div>
+
+    <!-- A안: 숫자 대비 + 통계 -->
+    <div class="reveal reveal-delay-1">
+      <h2 class="fm-headline">
+        논밭에서 식탁까지
+        <em>평균 27.1km</em>
+      </h2>
+
+      <div class="fm-compare">
+        <div class="fm-side ours">
+          <div class="fm-big">27<span class="fm-unit">km</span></div>
+          <div class="fm-tag">POOMASI · 품앗이</div>
+        </div>
+        <div class="fm-vs">VS</div>
+        <div class="fm-side theirs">
+          <div class="fm-big">200<span class="fm-unit">km</span></div>
+          <div class="fm-tag">대형마트 유통망</div>
+        </div>
+      </div>
+
+      <ul class="fm-stats">
+        <li class="fm-stat">
+          <span class="fm-stat-num">81%</span>
+          <span class="fm-stat-desc">거래의 81%가<br>반경 40km 이내 로컬 농가</span>
+        </li>
+        <li class="fm-stat">
+          <span class="fm-stat-num">75.7%</span>
+          <span class="fm-stat-desc">완전 로컬 거래<br>농가 40km + 소비자 5km 이내</span>
+        </li>
+        <li class="fm-stat">
+          <span class="fm-stat-num">54%</span>
+          <span class="fm-stat-desc">조합원의 54%가<br>매장 5km 이내 거주</span>
+        </li>
+        <li class="fm-stat">
+          <span class="fm-stat-num">-40.6%</span>
+          <span class="fm-stat-desc">비로컬 → 로컬 전환 시<br>탄소 절감 가능량</span>
+        </li>
+      </ul>
+      <div class="fm-source">출처 · 품앗이생협 푸드마일리지 분석보고서 2025 | 분석 거래 13,794건 기준</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- MANIFESTO STRIP -->
+<div id="manifesto">
+  <div class="manifesto-inner">
+    <div>
+      <div class="manifesto-label">MANIFESTO</div>
+      <div class="manifesto-year">1999</div>
+    </div>
+    <div class="manifesto-text reveal">
+      마을이 세계를 구한다.<br>
+      로컬의 반격은 <em>오래된 미래</em>다.<br>
+      로치데일에서, 리우에서, 지족동에서 —<br>
+      같은 문을 다른 시대에 열었다.
+    </div>
+  </div>
+</div>
+
+<!-- ACT 3: 기동 -->
+<section id="act3">
+  <div class="act3-deco">용기</div>
+  <div class="act3-inner">
+    <div class="section-label">3막 — 기동</div>
+    <h2 class="act3-title reveal">
+      용기내서<br>
+      <span class="highlight">용기</span> 가져오세요
+    </h2>
+    <p class="act3-sub reveal reveal-delay-1">
+      勇氣를 내어 容器를 들고 오세요.<br>
+      그 작은 행동이 이미 반격의 시작입니다.<br>
+      대전 지족동에서, 우리 함께.
+    </p>
+    <div class="act3-actions reveal reveal-delay-2">
+      <a href="market.html" class="btn-act3">매장 찾아오기</a>
+      <a href="join.html" class="btn-act3-ghost">조합원 가입 →</a>
+    </div>
+  </div>
+</section>
+
+<!-- INVESTORS HALL — 투자자 명예의 전당 -->
+<section id="investors">
+  <div class="inv-header reveal">
+    <div class="section-label">SEED INVESTORS</div>
+    <h2 class="inv-title">로컬의 반격에<br><span>씨앗</span>을 심은 사람들</h2>
+    <p class="inv-subtitle">
+      이 반격은 혼자 시작할 수 없었습니다.<br>
+      처음 용기를 낸 사람들이 여기 있습니다.
+    </p>
+  </div>
+
+  <!-- 등급 안내 -->
+  <div class="inv-tiers reveal reveal-delay-1">
+    <div class="inv-tier">
+      <div class="inv-tier-icon">🌱</div>
+      <div class="inv-tier-name">씨앗</div>
+      <div class="inv-tier-en">Seed</div>
+    </div>
+    <div class="inv-tier">
+      <div class="inv-tier-icon">🌿</div>
+      <div class="inv-tier-name">새싹</div>
+      <div class="inv-tier-en">Sprout</div>
+    </div>
+    <div class="inv-tier">
+      <div class="inv-tier-icon">🍎</div>
+      <div class="inv-tier-name">열매</div>
+      <div class="inv-tier-en">Fruit</div>
+    </div>
+    <div class="inv-tier">
+      <div class="inv-tier-icon">🌳</div>
+      <div class="inv-tier-name">뿌리</div>
+      <div class="inv-tier-en">Root</div>
+    </div>
+  </div>
+
+  <!-- 투자자 카드 영역 (투자자 생기면 아래 주석 해제 후 추가) -->
+  <!--
+  <div class="inv-cards reveal reveal-delay-2">
+    <div class="inv-card">
+      <div class="inv-card-badge">🌱</div>
+      <div>
+        <div class="inv-card-name">홍길동</div>
+        <div class="inv-card-tier">SEED</div>
+      </div>
+    </div>
+  </div>
+  -->
+
+  <!-- 빈 상태 CTA -->
+  <div class="inv-empty reveal reveal-delay-2">
+    <div class="inv-empty-icon">🌱</div>
+    <div class="inv-empty-text">첫 번째 씨앗이 되어주세요</div>
+    <p class="inv-empty-sub">
+      로컬의 반격은 작은 용기에서 시작됩니다.<br>
+      당신의 씨앗이 마을을 바꿉니다.
+    </p>
+    <a href="join.html" class="btn-invest">씨앗 심기</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">품앗이소비자생활협동조합</div>
+      <div class="footer-desc">
+        대전광역시 유성구 지족로 364번길 40, 품앗이마을 지족점<br>
+        Tel. 042-716-0019 · haeory@gmail.com<br>
+        로컬푸드 직매장 · 데이터 주권 · 협동의 힘<br><br>
+        1999년 지역품앗이 한밭레츠로부터 '품앗이'는 나아가고 있습니다.
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">직매장</div>
+      <ul class="footer-links">
+        <li><a href="market.html">오늘의 농산물</a></li>
+        <li><a href="market.html">농가 소개</a></li>
+        <li><a href="market.html#nopack">무포장 안내</a></li>
+        <li><a href="annual_report.html">탄소 리포트</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">협동</div>
+      <ul class="footer-links">
+        <li><a href="join.html">조합원 가입</a></li>
+        <li><a href="feedback.html">조합원말씀</a></li>
+        <li><a href="poomasi_philosophy.html">로컬 네트워크</a></li>
+        <li><a href="poomasi_philosophy.html">Data 공유</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">철학실</div>
+      <ul class="footer-links">
+        <li><a href="poomasi_philosophy.html">Data Sovereignty</a></li>
+        <li><a href="poomasi_philosophy.html">협동조합 원칙</a></li>
+        <li><a href="poomasi_philosophy.html">로컬의 반격</a></li>
+        <li><a href="https://www.youtube.com/@local_counterattack" target="_blank">유튜브 채널</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2026 품앗이소비자생활협동조합. 데이터는 우리 것입니다.</div>
+    <div style="font-size:0.72rem;display:flex;gap:1.2rem;"><a href="privacy.html" style="color:var(--dust);text-decoration:none;">개인정보처리방침</a><a href="sitemap.html" style="color:var(--dust);text-decoration:none;">사이트맵</a></div>
+    <div class="footer-philosophy">의제가 이제가 되었다</div>
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+  reveals.forEach(el => observer.observe(el));
+
+  // Stats count-up animation
+  const countObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target;
+      if (el.dataset.counted) return;
+      el.dataset.counted = '1';
+      const raw = el.textContent.trim();
+      const match = raw.match(/^([0-9,.]+)/);
+      if (!match) return;
+      const numStr = match[1];
+      const hasComma = numStr.includes(',');
+      const hasDot = numStr.includes('.') && !hasComma;
+      const target = parseFloat(numStr.replace(/,/g, ''));
+      const decimals = hasDot ? (numStr.split('.')[1] || '').length : 0;
+      const suffix = raw.replace(numStr, '');
+      const duration = 1200;
+      const start = performance.now();
+      function tick(now) {
+        const p = Math.min((now - start) / duration, 1);
+        const ease = 1 - Math.pow(1 - p, 3);
+        let val = target * ease;
+        let display = decimals > 0 ? val.toFixed(decimals) : Math.round(val).toString();
+        if (hasComma) display = Number(display).toLocaleString();
+        el.textContent = display + suffix;
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    });
+  }, { threshold: 0.3 });
+  document.querySelectorAll('.stat-num, .lab-num, .fm-stat-num, .fm-big').forEach(el => countObserver.observe(el));
+
+  // ── 이벤트 티커 ────────────────────────────────────
+  (async function loadTicker() {
+    const SB_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
+    const SB_KEY = ['sb_publi', 'shable_SKtfO63Ap', 'OP3DyJKu_2ypw_JK4dsdUG'].join('');
+    const today  = new Date().toISOString().slice(0, 10);
+    const DEFAULT = '<span class="ticker-item"><span class="ticker-type">품앗이</span>포장하지 않습니다 · 비닐도, 과장도</span>';
+    const wrap  = document.getElementById('ticker-wrap');
+    const inner = document.getElementById('ticker-inner');
+    try {
+      const qs = 'select=type,content&is_active=eq.true&or=(expires_at.is.null,expires_at.gte.' + today + ')&order=created_at.desc';
+      const r = await fetch(SB_URL + '/rest/v1/events?' + qs, {
+        headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+      });
+      const items = await r.json();
+      let html;
+      if (Array.isArray(items) && items.length > 0) {
+        html = items.map(ev =>
+          '<span class="ticker-item"><span class="ticker-type">' + ev.type + '</span>' + ev.content + '</span>'
+        ).join('');
+      } else {
+        html = DEFAULT;
+      }
+      inner.innerHTML = html + html;
+      wrap.style.display = '';
+    } catch(e) {
+      inner.innerHTML = DEFAULT + DEFAULT;
+      wrap.style.display = '';
+    }
+  })();
+
+</script>
+</body>
+</html>
