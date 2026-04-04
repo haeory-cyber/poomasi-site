@@ -13,6 +13,7 @@ key_box/
 # 데이터 파일
 *.json
 !notices.json
+!poomai_growth.json
 *.xlsx
 *.xls
 *.csv
