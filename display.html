@@ -79,4 +79,5 @@ backdrop-filter:blur(8px);transition:all .3s ease}
 <script>const pages=document.querySelectorAll(".page");let cur=0;
 function next(){pages[cur].classList.remove("active");cur=(cur+1)%pages.length;pages[cur].classList.add("active");setTimeout(next,parseInt(pages[cur].dataset.time))}
 window.onload=function(){setTimeout(next,parseInt(pages[0].dataset.time))};
-</script></body></html>
+</script><script src="https://seed.poomasi.org/poomai-widget.js"></script>
+</body></html>
