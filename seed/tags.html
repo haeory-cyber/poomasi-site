@@ -881,7 +881,7 @@ sb.auth.getSession().then(({ data: { session } }) => {
 
 <script>
 const HEADERS = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
-const SITE_BASE = 'https://seed.poomasi.org';
+const SITE_BASE = 'https://poomasi.org';
 
 // ── 현장발주 인라인 폼 ──
 let _selectedUrgency = null;
@@ -1369,6 +1369,6 @@ function printTags(products) {
 // ── INIT ──
 // Products are searched on-demand via Supabase API
 </script>
-<script src="/poomai-widget.js"></script>
+<script src="https://seed.poomasi.org/poomai-widget.js"></script>
 </body>
 </html>

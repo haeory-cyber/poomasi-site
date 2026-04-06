@@ -84,18 +84,23 @@ fi
 
 echo "[deploy] copying ${SRC} → ${NEW_DIR}"
 mkdir -p "$NEW_DIR"
-cp -a "${SRC}/." "$NEW_DIR/"
+# -L: dereference symlinks (seed/scripts → ../scripts 등 상대 링크가 release dir에서
+# 깨지지 않도록 실제 파일/디렉터리로 복사). -a 는 -dR --preserve=all 인데
+# -d(=preserve links)와 -L가 충돌하므로 -L가 후행되어 dereference 우선.
+cp -aL "${SRC}/." "$NEW_DIR/"
 
-# ── 5. 정합성 검증 ────────────────────────────────────
-SRC_COUNT=$(find "$SRC" -type f | wc -l)
+# ── 5b. 비공개 파일 sanitize (서버측 스크립트, bak, 스냅샷) ──
+# scripts/ 는 server-side admin 스크립트라 publish 금지.
+# *.bak* 은 작업 백업이라 publish 금지.
+# .snapshots/ 는 내부 백업 디렉터리.
+rm -rf "${NEW_DIR}/scripts" "${NEW_DIR}/.snapshots" 2>/dev/null || true
+find "$NEW_DIR" -name "*.bak" -delete 2>/dev/null || true
+find "$NEW_DIR" -name "*.bak_*" -delete 2>/dev/null || true
+find "$NEW_DIR" -name "*.bak2_*" -delete 2>/dev/null || true
+
+# ── 6. 정합성 검증 ────────────────────────────────────
+# 핵심 파일 md5 cross-check (sanitize 후, 핵심 파일은 sanitize 대상이 아니므로 src와 일치해야 함)
 DST_COUNT=$(find "$NEW_DIR" -type f | wc -l)
-if [ "$SRC_COUNT" -ne "$DST_COUNT" ]; then
-    echo "ERROR: file count mismatch (src=$SRC_COUNT, dst=$DST_COUNT). aborting, live untouched." >&2
-    rm -rf "$NEW_DIR"
-    exit 1
-fi
-
-# 핵심 파일 md5 cross-check
 for f in store.html work.html index.html; do
     if [ -f "${SRC}/${f}" ]; then
         SRC_MD5=$(md5sum "${SRC}/${f}" | awk '{print $1}')
@@ -107,7 +112,7 @@ for f in store.html work.html index.html; do
         fi
     fi
 done
-echo "[deploy] verified ${DST_COUNT} files, core md5 OK"
+echo "[deploy] verified ${DST_COUNT} files (post-sanitize), core md5 OK"
 
 # ── 6. Atomic 심볼릭 링크 스왑 ───────────────────────
 PREV="$(readlink "$LIVE_LINK" 2>/dev/null || echo "(none)")"

@@ -549,6 +549,34 @@
   .grant-completed { background:rgba(61,92,53,0.3); color:#8fba7a; }
   .grant-failed { background:rgba(180,60,60,0.2); color:#e07070; }
 
+  /* ── 결재판 ─────────────────────────────────────────── */
+  .approval-filter-bar { display:flex; gap:0.4rem; margin-bottom:1.2rem; }
+  .approval-filter-btn { padding:0.45rem 1rem; border:1px solid var(--border); background:transparent; color:var(--dust); cursor:pointer; font-size:0.82rem; font-family:'Noto Sans KR',sans-serif; transition:all 0.2s; }
+  .approval-filter-btn:hover { border-color:var(--amber); color:var(--cream); }
+  .approval-filter-btn.active { background:rgba(196,128,58,0.15); border-color:var(--amber); color:var(--amber); font-weight:500; }
+
+  .appr-card { background:var(--surface); border-left:3px solid var(--dust); padding:1rem 1.2rem; margin-bottom:0.6rem; display:flex; flex-direction:column; gap:0.4rem; transition:border-color 0.2s; }
+  .appr-card:hover { border-left-color:var(--amber); }
+  .appr-card-header { display:flex; justify-content:space-between; align-items:flex-start; gap:0.5rem; }
+  .appr-card-title { font-weight:600; color:var(--cream); font-size:0.95rem; flex:1; }
+  .appr-card-content { color:var(--dust); font-size:0.82rem; line-height:1.5; }
+  .appr-card-meta { font-size:0.75rem; color:rgba(184,168,138,0.5); display:flex; gap:1rem; flex-wrap:wrap; }
+  .appr-card-actions { display:flex; gap:0.5rem; margin-top:0.5rem; }
+
+  .appr-status { padding:0.15rem 0.6rem; border-radius:20px; font-size:0.72rem; font-weight:600; white-space:nowrap; }
+  .appr-status-pending  { background:rgba(232,165,90,0.2); color:var(--amber-light); }
+  .appr-status-approved { background:rgba(61,92,53,0.3); color:#8fba7a; }
+  .appr-status-rejected { background:rgba(180,60,60,0.2); color:#e07070; }
+
+  .appr-btn { padding:0.35rem 0.8rem; border:1px solid var(--border); background:transparent; color:var(--dust); cursor:pointer; font-size:0.78rem; font-family:'Noto Sans KR',sans-serif; transition:all 0.2s; }
+  .appr-btn:hover { border-color:var(--amber); color:var(--cream); }
+  .appr-btn-approve { border-color:rgba(61,92,53,0.5); color:#8fba7a; }
+  .appr-btn-approve:hover { background:rgba(61,92,53,0.2); border-color:#8fba7a; }
+  .appr-btn-reject { border-color:rgba(180,60,60,0.3); color:#e07070; }
+  .appr-btn-reject:hover { background:rgba(180,60,60,0.15); border-color:#e07070; }
+
+  .appr-reject-reason { font-size:0.78rem; color:#e07070; background:rgba(180,60,60,0.08); padding:0.4rem 0.6rem; margin-top:0.3rem; border-left:2px solid rgba(180,60,60,0.3); }
+
   /* ── bizinfo AI 공고 카드 ───────────────────────────── */
   .bizinfo-section { margin-top:1.2rem; }
   .bizinfo-section-header { font-size:0.78rem; color:var(--dust); font-weight:600; letter-spacing:0.05em; text-transform:uppercase; margin-bottom:0.6rem; display:flex; align-items:center; gap:0.5rem; }
@@ -1486,6 +1514,82 @@
       </div>
     </div>
   </section>
+
+  <!-- ══ TAB: 결재판 ══════════════════════════════════════ -->
+  <section class="tab-content" id="tab-approval">
+    <div class="sec-header">
+      <div>
+        <div class="sec-label">APPROVAL</div>
+        <div class="sec-title">결재판</div>
+      </div>
+      <button class="btn-primary" onclick="openApprovalModal()">+ 결재 요청</button>
+    </div>
+
+    <!-- 필터 탭 -->
+    <div class="approval-filter-bar">
+      <button class="approval-filter-btn active" onclick="filterApprovals('all', this)">전체</button>
+      <button class="approval-filter-btn" onclick="filterApprovals('pending', this)">대기</button>
+      <button class="approval-filter-btn" onclick="filterApprovals('approved', this)">승인</button>
+      <button class="approval-filter-btn" onclick="filterApprovals('rejected', this)">반려</button>
+    </div>
+
+    <div id="approval-list"></div>
+  </section>
+
+  <!-- 결재 요청 모달 -->
+  <div id="approval-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem;">
+    <div style="background:var(--soil);border:1px solid rgba(196,128,58,0.2);padding:2rem;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;position:relative;">
+      <div style="font-family:'Noto Serif KR',serif;font-size:1.1rem;font-weight:700;color:var(--white);margin-bottom:1.5rem;">결재 요청서</div>
+      <div style="display:flex;flex-direction:column;gap:1rem;">
+        <div>
+          <label style="font-size:0.78rem;color:var(--dust);display:block;margin-bottom:0.3rem;">제목 *</label>
+          <input id="appr-title" type="text" placeholder="결재 제목" style="width:100%;padding:0.6rem 0.8rem;background:var(--surface);border:1px solid var(--border);color:var(--cream);font-size:0.88rem;font-family:'Noto Sans KR',sans-serif;">
+        </div>
+        <div>
+          <label style="font-size:0.78rem;color:var(--dust);display:block;margin-bottom:0.3rem;">분류</label>
+          <select id="appr-category" style="width:100%;padding:0.6rem 0.8rem;background:var(--surface);border:1px solid var(--border);color:var(--cream);font-size:0.88rem;font-family:'Noto Sans KR',sans-serif;">
+            <option value="일반">일반</option>
+            <option value="발주">발주</option>
+            <option value="물품구매">물품구매</option>
+            <option value="행사">행사</option>
+            <option value="인사">인사</option>
+            <option value="기타">기타</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:0.78rem;color:var(--dust);display:block;margin-bottom:0.3rem;">내용</label>
+          <textarea id="appr-content" rows="3" placeholder="결재 내용 상세" style="width:100%;padding:0.6rem 0.8rem;background:var(--surface);border:1px solid var(--border);color:var(--cream);font-size:0.88rem;font-family:'Noto Sans KR',sans-serif;resize:vertical;"></textarea>
+        </div>
+        <div style="display:flex;gap:1rem;">
+          <div style="flex:1;">
+            <label style="font-size:0.78rem;color:var(--dust);display:block;margin-bottom:0.3rem;">요청자 *</label>
+            <input id="appr-requester" type="text" placeholder="요청자" style="width:100%;padding:0.6rem 0.8rem;background:var(--surface);border:1px solid var(--border);color:var(--cream);font-size:0.88rem;font-family:'Noto Sans KR',sans-serif;">
+          </div>
+          <div style="flex:1;">
+            <label style="font-size:0.78rem;color:var(--dust);display:block;margin-bottom:0.3rem;">금액 (원)</label>
+            <input id="appr-amount" type="number" placeholder="0" style="width:100%;padding:0.6rem 0.8rem;background:var(--surface);border:1px solid var(--border);color:var(--cream);font-size:0.88rem;font-family:'Noto Sans KR',sans-serif;">
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:0.8rem;margin-top:1.5rem;justify-content:flex-end;">
+        <button onclick="closeApprovalModal()" style="padding:0.6rem 1.2rem;background:transparent;border:1px solid var(--border);color:var(--dust);cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-size:0.85rem;">취소</button>
+        <button onclick="submitApproval()" class="btn-primary">등록</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 반려 사유 모달 -->
+  <div id="reject-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1001;display:none;align-items:center;justify-content:center;padding:1rem;">
+    <div style="background:var(--soil);border:1px solid rgba(196,128,58,0.2);padding:2rem;width:100%;max-width:400px;position:relative;">
+      <div style="font-family:'Noto Serif KR',serif;font-size:1rem;font-weight:700;color:var(--white);margin-bottom:1rem;">반려 사유</div>
+      <input type="hidden" id="reject-target-id">
+      <textarea id="reject-reason" rows="3" placeholder="반려 사유를 입력하세요" style="width:100%;padding:0.6rem 0.8rem;background:var(--surface);border:1px solid var(--border);color:var(--cream);font-size:0.88rem;font-family:'Noto Sans KR',sans-serif;resize:vertical;"></textarea>
+      <div style="display:flex;gap:0.8rem;margin-top:1rem;justify-content:flex-end;">
+        <button onclick="closeRejectModal()" style="padding:0.6rem 1.2rem;background:transparent;border:1px solid var(--border);color:var(--dust);cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-size:0.85rem;">취소</button>
+        <button onclick="confirmReject()" style="padding:0.6rem 1.2rem;background:var(--red);border:none;color:var(--white);cursor:pointer;font-family:'Noto Serif KR',serif;font-size:0.82rem;font-weight:700;">반려 확정</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div id="toast"></div>
@@ -1540,13 +1644,14 @@ sb.auth.getSession().then(({ data: { session } }) => {
 });
 
 // ── 탭 전환 ──────────────────────────────────────────────
-const TAB_IDS = { today: 'tab-today', action: 'tab-action', feedback: 'tab-feedback', notice: 'tab-notice', project: 'tab-project', grant: 'tab-grant', ai: 'tab-ai', archive: 'tab-archive' };
+const TAB_IDS = { today: 'tab-today', action: 'tab-action', feedback: 'tab-feedback', notice: 'tab-notice', project: 'tab-project', grant: 'tab-grant', ai: 'tab-ai', archive: 'tab-archive', approval: 'tab-approval' };
 
 const SUB_TABS = {
   mgmt: [
     { key: 'project', label: '프로젝트관리' },
     { key: 'grant', label: '지원사업' },
-    { key: 'ai', label: 'AI경영지원실' }
+    { key: 'ai', label: 'AI경영지원실' },
+    { key: 'approval', label: '결재판' }
   ],
   comm: [
     { key: 'feedback', label: '조합원말씀' },
@@ -1604,6 +1709,7 @@ function onTabLoad(key) {
   if (key === 'grant') { if (typeof loadGrants === 'function') loadGrants(); }
   if (key === 'notice') { if (typeof loadNotices === 'function') loadNotices(); }
   if (key === 'ai') { if (typeof loadProjects === 'function') loadProjects('ai'); if (typeof initAiRealtime === 'function' && !aiRealtimeChannel) initAiRealtime(); }
+  if (key === 'approval') { if (typeof loadApprovals === 'function') loadApprovals('all'); }
 }
 
 // ── 공통 유틸 ─────────────────────────────────────────────
@@ -2544,7 +2650,139 @@ async function fbToOrder(id, btn) {
   } catch(e) {}
 })();
 
+// ══ 결재판 ═══════════════════════════════════════════════
+let currentApprovalFilter = 'all';
+
+async function loadApprovals(filter) {
+  currentApprovalFilter = filter || 'all';
+  const listEl = document.getElementById('approval-list');
+  if (!listEl) return;
+  listEl.innerHTML = '<div style="text-align:center;color:var(--dust);padding:2rem;">불러오는 중...</div>';
+
+  let query = sb.from('approvals').select('*').order('created_at', { ascending: false });
+  if (filter && filter !== 'all') {
+    query = query.eq('status', filter);
+  }
+
+  const { data, error } = await query;
+  if (error) {
+    listEl.innerHTML = '<div style="text-align:center;color:var(--red);padding:2rem;">데이터 조회 실패</div>';
+    return;
+  }
+  if (!data || data.length === 0) {
+    listEl.innerHTML = '<div style="text-align:center;color:var(--dust);padding:2rem;">결재 내역이 없습니다.</div>';
+    return;
+  }
+
+  listEl.innerHTML = data.map(function(item) {
+    var statusLabel = item.status === 'pending' ? '대기' : item.status === 'approved' ? '승인' : '반려';
+    var statusIcon = item.status === 'pending' ? '&#x1F7E1;' : item.status === 'approved' ? '&#x2705;' : '&#x274C;';
+    var statusClass = 'appr-status-' + item.status;
+    var amountStr = item.amount ? fmtKrw(item.amount) + '원' : '';
+    var dateStr = item.created_at ? new Date(item.created_at).toLocaleDateString('ko-KR') : '';
+
+    var actions = '';
+    if (item.status === 'pending') {
+      actions = '<div class="appr-card-actions">' +
+        '<button class="appr-btn appr-btn-approve" onclick="approveItem(\'' + item.id + '\')">승인</button>' +
+        '<button class="appr-btn appr-btn-reject" onclick="openRejectModal(\'' + item.id + '\')">반려</button>' +
+        '</div>';
+    }
+
+    var rejectBox = '';
+    if (item.status === 'rejected' && item.reject_reason) {
+      rejectBox = '<div class="appr-reject-reason">반려 사유: ' + item.reject_reason + '</div>';
+    }
+
+    return '<div class="appr-card">' +
+      '<div class="appr-card-header">' +
+        '<div class="appr-card-title">' + item.title + '</div>' +
+        '<span class="appr-status ' + statusClass + '">' + statusIcon + ' ' + statusLabel + '</span>' +
+      '</div>' +
+      (item.content ? '<div class="appr-card-content">' + item.content + '</div>' : '') +
+      '<div class="appr-card-meta">' +
+        '<span>' + item.category + '</span>' +
+        '<span>요청: ' + item.requester + '</span>' +
+        (amountStr ? '<span>' + amountStr + '</span>' : '') +
+        '<span>' + dateStr + '</span>' +
+      '</div>' +
+      rejectBox +
+      actions +
+    '</div>';
+  }).join('');
+}
+
+function filterApprovals(filter, btn) {
+  document.querySelectorAll('.approval-filter-btn').forEach(function(el) { el.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  loadApprovals(filter);
+}
+
+async function approveItem(id) {
+  var { error } = await sb.from('approvals').update({ status: 'approved', updated_at: new Date().toISOString() }).eq('id', id);
+  if (error) { toast('승인 처리 실패'); return; }
+  toast('승인 완료');
+  loadApprovals(currentApprovalFilter);
+}
+
+function openRejectModal(id) {
+  document.getElementById('reject-target-id').value = id;
+  document.getElementById('reject-reason').value = '';
+  var modal = document.getElementById('reject-modal');
+  modal.style.display = 'flex';
+}
+
+function closeRejectModal() {
+  document.getElementById('reject-modal').style.display = 'none';
+}
+
+async function confirmReject() {
+  var id = document.getElementById('reject-target-id').value;
+  var reason = document.getElementById('reject-reason').value.trim();
+  if (!reason) { toast('반려 사유를 입력하세요'); return; }
+
+  var { error } = await sb.from('approvals').update({ status: 'rejected', reject_reason: reason, updated_at: new Date().toISOString() }).eq('id', id);
+  if (error) { toast('반려 처리 실패'); return; }
+  closeRejectModal();
+  toast('반려 처리됨');
+  loadApprovals(currentApprovalFilter);
+}
+
+function openApprovalModal() {
+  document.getElementById('appr-title').value = '';
+  document.getElementById('appr-category').value = '일반';
+  document.getElementById('appr-content').value = '';
+  document.getElementById('appr-requester').value = '';
+  document.getElementById('appr-amount').value = '';
+  var modal = document.getElementById('approval-modal');
+  modal.style.display = 'flex';
+}
+
+function closeApprovalModal() {
+  document.getElementById('approval-modal').style.display = 'none';
+}
+
+async function submitApproval() {
+  var title = document.getElementById('appr-title').value.trim();
+  var requester = document.getElementById('appr-requester').value.trim();
+  if (!title || !requester) { toast('제목과 요청자는 필수입니다'); return; }
+
+  var payload = {
+    title: title,
+    content: document.getElementById('appr-content').value.trim() || null,
+    category: document.getElementById('appr-category').value,
+    requester: requester,
+    amount: parseInt(document.getElementById('appr-amount').value) || 0
+  };
+
+  var { error } = await sb.from('approvals').insert([payload]);
+  if (error) { toast('등록 실패: ' + error.message); return; }
+  closeApprovalModal();
+  toast('결재 요청 등록됨');
+  loadApprovals(currentApprovalFilter);
+}
+
 </script>
-<script src="/poomai-widget.js"></script>
+<script src="https://seed.poomasi.org/poomai-widget.js"></script>
 </body>
 </html>
