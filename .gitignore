@@ -2,6 +2,7 @@
 *.py
 !scripts/*.py
 !djco/server.py
+!infra/*.py
 __pycache__/
 *.pyc
 
@@ -22,6 +23,7 @@ key_box/
 # 백업
 *.bak_*
 seed/.snapshots/
+infra/.snapshots/
 
 # 기타
 *.txt

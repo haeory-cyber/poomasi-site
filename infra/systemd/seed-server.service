@@ -1,0 +1,13 @@
+[Unit]
+Description=seed.poomasi.org static file server
+After=network.target
+
+[Service]
+EnvironmentFile=/home/haeory/poomasi/.env
+User=haeory
+ExecStart=/home/haeory/poomasi/rag/venv/bin/python /home/haeory/poomasi/seed_server.py
+Restart=always
+WorkingDirectory=/home/haeory/poomasi/poomasi-site-git/seed
+
+[Install]
+WantedBy=multi-user.target
