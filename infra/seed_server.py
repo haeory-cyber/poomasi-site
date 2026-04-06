@@ -15,7 +15,9 @@ from fastapi.staticfiles import StaticFiles
 
 # ── 설정 ──────────────────────────────────────────────
 PORT = 8030
-STATIC_DIR = "/home/haeory/poomasi/poomasi-site-git/seed"
+# Phase 2: live serving dir is a symlink (seed-live → seed-releases/v_*),
+# 작업 트리(poomasi-site-git/seed)와 분리. 배포는 infra/deploy-seed.sh.
+STATIC_DIR = "/home/haeory/poomasi/seed-live"
 RAG_DIR = "/home/haeory/poomasi/rag"
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
@@ -75,6 +77,8 @@ engine = None
 async def lifespan(app: FastAPI):
     global engine
     try:
+        # rag 패키지 절대 임포트 (from rag.fuzzy_utils import ...) 지원을 위해 부모 dir도 추가
+        sys.path.insert(0, os.path.dirname(RAG_DIR))
         sys.path.insert(0, RAG_DIR)
         from engine import RAGEngine
         engine = RAGEngine()

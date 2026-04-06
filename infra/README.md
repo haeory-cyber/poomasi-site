@@ -3,7 +3,9 @@
 > seed.poomasi.org를 띄우는 데 필요한 인프라 코드와 설정을 git으로 관리하는 폴더.
 > 사고가 나도 여기서 복구할 수 있도록 만든 안전금고.
 >
-> 봉인 이력: 2026-04-06 — 1단계, 그동안 git 밖이던 seed_server.py 등을 정식 편입.
+> 봉인 이력:
+> - 2026-04-06 1단계: 그동안 git 밖이던 seed_server.py 등을 정식 편입.
+> - 2026-04-06 2단계: working tree와 라이브 서빙 디렉터리 분리. 심볼릭 링크 릴리즈 방식 도입 (`seed-live` → `seed-releases/v_*`). 무재시작 atomic 배포.
 
 ---
 
@@ -13,6 +15,7 @@
 infra/
 ├── README.md                  # 이 파일
 ├── seed_server.py             # FastAPI 정적 서버 본체 (라이브 코드)
+├── deploy-seed.sh             # atomic 배포 스크립트 (Phase 2)
 ├── systemd/
 │   └── seed-server.service    # systemd 서비스 정의 사본
 ├── .env.example               # 환경변수 키 이름만 (값 X)
@@ -28,16 +31,30 @@ infra/
 1. **systemd**가 부팅 시 `seed-server.service`를 띄움
 2. 서비스가 `/home/haeory/poomasi/seed_server.py`를 실행 → **이건 심볼릭 링크**
 3. 실제 파일은 `poomasi-site-git/infra/seed_server.py` (= 이 폴더 안)
-4. seed_server.py는 FastAPI로 포트 8030에 떠서, `poomasi-site-git/seed/` 디렉터리를 정적 파일로 서빙
-5. Cloudflare Tunnel(`/home/haeory/.cloudflared/config.yml`)이 `seed.poomasi.org` → `localhost:8030`으로 연결
+4. seed_server.py는 FastAPI로 포트 8030에 떠서, **`/home/haeory/poomasi/seed-live` 심볼릭 링크**가 가리키는 디렉터리를 정적 파일로 서빙
+5. `seed-live`는 `/home/haeory/poomasi/seed-releases/v_TIMESTAMP/` 중 하나를 가리킴 (배포 시 atomic 스왑)
+6. Cloudflare Tunnel(`/home/haeory/.cloudflared/config.yml`)이 `seed.poomasi.org` → `localhost:8030`으로 연결
 
 ```
-[조합원] → [Cloudflare] → [터널] → [localhost:8030 = seed_server.py] → [poomasi-site-git/seed/*.html]
+[조합원] → [Cloudflare] → [터널] → [localhost:8030 = seed_server.py]
+                                          ↓ STATIC_DIR
+                                  [seed-live → seed-releases/v_TIMESTAMP/*.html]
 ```
+
+**핵심: git working tree(`poomasi-site-git/seed/`)와 라이브 서빙 디렉터리(`seed-releases/v_*/`)는 완전히 분리됨.** working tree에서 자유롭게 편집해도 라이브에는 전혀 영향 없음. 배포는 `infra/deploy-seed.sh` 한 번으로 atomic 스왑.
 
 ---
 
 ## 수정 → 배포 절차
+
+### 정적 콘텐츠(seed/*.html, *.js 등) 수정 시
+
+1. `poomasi-site-git/seed/` 안의 파일을 자유롭게 편집 (작업 트리, 라이브 영향 0)
+2. `bash infra/deploy-seed.sh --dry-run` 으로 시뮬레이션 (선택)
+3. `bash infra/deploy-seed.sh` — 새 릴리즈 디렉터리 생성 → atomic 심볼릭 링크 스왑 → live health check
+4. 실패 시 자동 롤백
+5. 수동 롤백: `bash infra/deploy-seed.sh --rollback`
+6. 옛 릴리즈는 최근 5개만 자동 보관
 
 ### seed_server.py 수정 시
 
@@ -107,9 +124,11 @@ sudo systemctl restart seed-server
 
 ## 알려진 이슈 / 미해결 사항
 
-### 🔴 라이브 디렉터리 = git working tree
+### ✅ 라이브 디렉터리 = git working tree (Phase 2 해결)
 
-`seed_server.py`의 `STATIC_DIR`은 `/home/haeory/poomasi/poomasi-site-git/seed`. 즉 **git working tree가 곧 라이브**. 누군가 `git checkout`이나 `git reset`을 잘못 실행하면 라이브 사이트가 즉시 영향받음. **별도 deploy 디렉터리로 분리하는 작업(2단계)이 필요**.
+~~`seed_server.py`의 `STATIC_DIR`은 `/home/haeory/poomasi/poomasi-site-git/seed`...~~
+
+**해결 (2026-04-06 Phase 2)**: `STATIC_DIR`을 `/home/haeory/poomasi/seed-live` 심볼릭 링크로 변경. 작업 트리(`poomasi-site-git/seed/`)와 라이브 디렉터리(`seed-releases/v_*/`) 완전 분리. 배포는 `infra/deploy-seed.sh`로 atomic 스왑.
 
 ### 🟡 RAG 엔진 의존성 (`/home/haeory/poomasi/rag/`)
 
@@ -137,3 +156,4 @@ seed_server.py는 `from engine import RAGEngine`을 통해 9GB 규모의 RAG 디
 ## 변경 이력
 
 - **2026-04-06** — 1단계: seed_server.py를 git 밖에서 `infra/`로 이동, 심볼릭 링크로 호환성 유지. systemd unit 사본 + .env.example + 본 README 신설. PID 75696 무중단 유지, 라이브 md5 변화 없음.
+- **2026-04-06** — 2단계: working tree와 라이브 분리. `seed-releases/v_TIMESTAMP/` 릴리즈 디렉터리 + `seed-live` 심볼릭 링크 도입. `STATIC_DIR` 변경. `deploy-seed.sh` 신설 (atomic 심볼릭 링크 스왑, 자동 롤백, 옛 릴리즈 자동 정리). 배포는 무재시작. 부수 — 사전 지뢰 발견: `rag/engine.py`가 `from rag.fuzzy_utils import ...`를 추가했는데 `seed_server.py`의 `sys.path`에 부모 dir이 없었음. lifespan에 부모 dir 추가로 해결.
