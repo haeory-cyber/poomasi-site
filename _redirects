@@ -1,1 +1,11 @@
-https://seed.poomasi.org/* https://poomasi.org/seed/:splat 301
+# Cloudflare Pages 리디렉션 규칙
+# 형식: from to status (https://developers.cloudflare.com/pages/configuration/redirects/)
+
+# server-side admin 스크립트는 publish 금지
+/scripts/* /404.html 404
+/infra/* /404.html 404
+
+# 작업 백업 파일은 publish 금지
+/*.bak /404.html 404
+/*.bak_* /404.html 404
+/*.bak2_* /404.html 404
