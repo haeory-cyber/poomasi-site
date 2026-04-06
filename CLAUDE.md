@@ -7,6 +7,15 @@
 
 ## 필수 규칙
 
+### 🔴 사이트 정체성 — 절대 헷갈리지 말 것 (사고 2회)
+- **`index.html`** = poomasi.org = **품아이 페이지** (메인)
+- **`seed/index.html`** = seed.poomasi.org = **품앗이생협 본체** (옮겨짐, 1878줄, `<title>로컬의 반격 — 품앗이소비자생활협동조합`)
+- **⛔ `seed/index.html`은 root에서 sync 금지** — 사고 2회 (2026-04-02, 2026-04-06). 상세: `seed/INCIDENT_20260404.md`
+- 다른 `seed/*.html` (work, store 등 23개)은 root와 sync **OK** (같은 내용이어야 함)
+- 자동 차단: `seed/index.html`은 첫 10줄에 `@PROTECTED-IDENTITY` 마커 + `<title>`에 "품앗이소비자생활협동조합" + `root/index.html`과 다름. 셋 다 검사하는 pre-commit hook이 박혀있음.
+- "생협 페이지 수정해" 지시 받으면 → **`seed/index.html`** (root 아님!)
+- "메인/홈/품아이" 지시 받으면 → **`index.html`**
+
 ### 작업 전
 - **`git pull` 먼저** — 항상 최신 파일 기준으로 작업할 것. sida_work/ 파일로 작업 금지.
 - **수정 전 백업 필수** — `파일명.bak_YYYYMMDD`
