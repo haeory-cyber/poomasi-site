@@ -9,29 +9,3 @@
 /*.bak /404.html 404
 /*.bak_* /404.html 404
 /*.bak2_* /404.html 404
-
-# 2026-04-07: 생협/매장운영 페이지는 seed.poomasi.org로 이관 완료
-# poomasi.org에 남겨두면 sync 혼동 발생 (INCIDENT_20260404, 20260406 참조)
-# root는 품아이 홈(index.html)만 남기고, 나머지는 seed로 301 전환
-/ai-dashboard.html https://seed.poomasi.org/ai-dashboard.html 301
-/ai-tools.html https://seed.poomasi.org/ai-tools.html 301
-/annual_report.html https://seed.poomasi.org/annual_report.html 301
-/babsang.html https://seed.poomasi.org/babsang.html 301
-/delivery.html https://seed.poomasi.org/delivery.html 301
-/delivery_app.html https://seed.poomasi.org/delivery_app.html 301
-/display.html https://seed.poomasi.org/display.html 301
-/feedback.html https://seed.poomasi.org/feedback.html 301
-/join.html https://seed.poomasi.org/join.html 301
-/location.html https://seed.poomasi.org/location.html 301
-/market.html https://seed.poomasi.org/market.html 301
-/poomasi_philosophy.html https://seed.poomasi.org/poomasi_philosophy.html 301
-/print_paper_form.html https://seed.poomasi.org/print_paper_form.html 301
-/print_qr_notice.html https://seed.poomasi.org/print_qr_notice.html 301
-/print_tags_6m.html https://seed.poomasi.org/print_tags_6m.html 301
-/privacy.html https://seed.poomasi.org/privacy.html 301
-/sitemap.html https://seed.poomasi.org/sitemap.html 301
-/store.html https://seed.poomasi.org/store.html 301
-/tags.html https://seed.poomasi.org/tags.html 301
-/work.html https://seed.poomasi.org/work.html 301
-/workshop.html https://seed.poomasi.org/workshop.html 301
-/zerowaste.html https://seed.poomasi.org/zerowaste.html 301
