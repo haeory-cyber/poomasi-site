@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>모두의 밥상 — 매장 운영 도구</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23D4763C'/><text x='16' y='21' text-anchor='middle' font-size='14' fill='white'>🍚</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FFFBF5;
+    --surface: #FFFFFF;
+    --tangerine: #D4763C;
+    --tangerine-light: #E8935A;
+    --tangerine-pale: #FDEBD0;
+    --warm-cream: #FFF5E6;
+    --rust: #A0522D;
+    --rust-deep: #6B3410;
+    --rice: #F5F0E1;
+    --text: #3B2312;
+    --text-sub: #7A5C46;
+    --text-muted: #A8907A;
+    --border: rgba(164,82,45,0.1);
+    --shadow-sm: 0 1px 3px rgba(107,52,16,0.05);
+    --shadow-md: 0 4px 20px rgba(107,52,16,0.07);
+    --shadow-lg: 0 8px 40px rgba(107,52,16,0.09);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── GRAIN TEXTURE ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 0 2rem;
+    height: 56px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255,251,245,0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+    color: var(--tangerine);
+  }
+
+  .topbar-brand svg { width: 28px; height: 28px; }
+
+  .topbar-name {
+    font-family: 'Gaegu', cursive;
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: -0.01em;
+    color: var(--rust-deep);
+  }
+
+  .topbar-back {
+    color: var(--text-sub);
+    text-decoration: none;
+    font-size: 0.78rem;
+    letter-spacing: 0.03em;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .topbar-back:hover { color: var(--tangerine); }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 8rem 2rem 3rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(212,118,60,0.15) 0%, rgba(232,147,90,0.06) 40%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 1rem;
+    background: var(--tangerine-pale);
+    color: var(--rust);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    border-radius: 100px;
+    margin-bottom: 1.5rem;
+    position: relative;
+  }
+
+  .hero-title {
+    font-family: 'Gaegu', cursive;
+    font-size: clamp(2.4rem, 6vw, 3.6rem);
+    font-weight: 700;
+    color: var(--rust-deep);
+    line-height: 1.2;
+    margin-bottom: 0.8rem;
+    position: relative;
+  }
+
+  .hero-sub {
+    font-size: 1rem;
+    color: var(--text-sub);
+    font-weight: 300;
+    line-height: 1.6;
+    max-width: 480px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .hero-org {
+    margin-top: 1rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    position: relative;
+  }
+
+  /* ── TOOLS GRID ── */
+  .tools-section {
+    padding: 1rem 2rem 4rem;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .tools-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+    padding-left: 0.2rem;
+  }
+
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  /* ── TOOL CARD ── */
+  .tool-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.8rem;
+    text-decoration: none;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tool-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .tool-card:hover {
+    border-color: rgba(212,118,60,0.25);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+  }
+  .tool-card:hover::before { opacity: 1; }
+  .tool-card:active { transform: translateY(0); box-shadow: var(--shadow-sm); }
+
+  .tool-card[data-accent="tangerine"]::before { background: linear-gradient(90deg, var(--tangerine), var(--tangerine-light)); }
+  .tool-card[data-accent="rust"]::before { background: linear-gradient(90deg, var(--rust), #C0784A); }
+  .tool-card[data-accent="rice"]::before { background: linear-gradient(90deg, #C9B896, #D4C5A0); }
+  .tool-card[data-accent="green"]::before { background: linear-gradient(90deg, #6B8E5A, #8CB070); }
+  .tool-card[data-accent="warm"]::before { background: linear-gradient(90deg, #B8860B, #DAA520); }
+
+  .tool-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+
+  .tool-icon.tangerine { background: var(--tangerine-pale); }
+  .tool-icon.rust { background: rgba(160,82,45,0.1); }
+  .tool-icon.rice { background: var(--rice); }
+  .tool-icon.green { background: rgba(107,142,90,0.12); }
+  .tool-icon.warm { background: rgba(184,134,11,0.1); }
+
+  .tool-info { flex: 1; }
+  .tool-name { font-weight: 600; font-size: 1rem; margin-bottom: 0.3rem; }
+  .tool-desc { font-size: 0.82rem; color: var(--text-sub); line-height: 1.5; font-weight: 300; }
+
+  .tool-arrow {
+    align-self: flex-start;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    transition: transform 0.3s, color 0.3s;
+    margin-top: 0.2rem;
+  }
+  .tool-card:hover .tool-arrow { transform: translateX(3px); color: var(--tangerine); }
+
+  .tg-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.6rem;
+    background: rgba(0,136,204,0.08);
+    color: #0088cc;
+    font-size: 0.65rem;
+    font-weight: 500;
+    border-radius: 100px;
+    margin-top: 0.4rem;
+    width: fit-content;
+  }
+
+  /* ── INFO STRIP ── */
+  .info-strip {
+    max-width: 960px;
+    margin: 0 auto 3rem;
+    padding: 0 2rem;
+  }
+
+  .info-box {
+    background: var(--warm-cream);
+    border-radius: var(--radius);
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .info-icon { font-size: 1.4rem; flex-shrink: 0; line-height: 1.4; }
+  .info-text { font-size: 0.85rem; color: var(--rust); line-height: 1.7; font-weight: 400; }
+  .info-text strong { font-weight: 600; }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    letter-spacing: 0.03em;
+    border-top: 1px solid var(--border);
+  }
+  footer a { color: var(--tangerine); text-decoration: none; }
+
+  /* ── ANIMATION ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-badge { animation: fadeUp 0.6s ease both 0.1s; }
+  .hero-title { animation: fadeUp 0.6s ease both 0.2s; }
+  .hero-sub   { animation: fadeUp 0.6s ease both 0.35s; }
+  .hero-org   { animation: fadeUp 0.6s ease both 0.4s; }
+
+  .tool-card { animation: fadeUp 0.5s ease both; }
+  .tool-card:nth-child(1) { animation-delay: 0.15s; }
+  .tool-card:nth-child(2) { animation-delay: 0.25s; }
+  .tool-card:nth-child(3) { animation-delay: 0.35s; }
+  .tool-card:nth-child(4) { animation-delay: 0.45s; }
+  .tool-card:nth-child(5) { animation-delay: 0.55s; }
+
+  .info-box { animation: fadeUp 0.5s ease both 0.6s; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    .topbar { padding: 0 1.2rem; }
+    .hero { padding: 7rem 1.5rem 2rem; }
+    .tools-section { padding: 1rem 1.2rem 3rem; }
+    .tools-grid { grid-template-columns: 1fr; }
+    .info-strip { padding: 0 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a href="babsang.html" class="topbar-brand">
+    <svg viewBox="0 0 32 32" fill="none">
+      <circle cx="16" cy="16" r="15" fill="#D4763C"/>
+      <ellipse cx="16" cy="16" rx="10" ry="6" fill="#FFF5E6" opacity="0.8"/>
+      <ellipse cx="16" cy="15" rx="7" ry="4" fill="#FDEBD0"/>
+      <circle cx="14" cy="14" r="1.5" fill="#D4763C" opacity="0.3"/>
+      <circle cx="18" cy="13.5" r="1" fill="#D4763C" opacity="0.25"/>
+    </svg>
+    <span class="topbar-name">모두의 밥상</span>
+  </a>
+  <a href="index.html" class="topbar-back">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M5 12L12 19M5 12L12 5"/></svg>
+    품앗이생협
+  </a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">🍚 김밥 · 간식 · 반찬</div>
+  <h1 class="hero-title">모두의 밥상</h1>
+  <p class="hero-sub">매일 만드는 정직한 한 끼.<br>매장 운영을 위한 도구 모음입니다.</p>
+  <p class="hero-org">모두의밥상협동조합</p>
+</section>
+
+<!-- TOOLS -->
+<section class="tools-section">
+  <div class="tools-label">매장 운영 도구</div>
+  <div class="tools-grid">
+
+    <!-- 1. 가격태그 인쇄 -->
+    <a href="tags.html" class="tool-card" data-accent="tangerine">
+      <div style="display:flex; align-items:flex-start; gap:1rem;">
+        <div class="tool-icon tangerine">🏷</div>
+        <div class="tool-info">
+          <div class="tool-name">가격태그 인쇄</div>
+          <div class="tool-desc">65×38mm 라벨 생성 · A4 용지 18매 배치 · QR코드 자동 생성</div>
+        </div>
+        <span class="tool-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- 2. 바코드 폐기 -->
+    <a href="https://t.me/barcode_poom_bot" target="_blank" class="tool-card" data-accent="rust">
+      <div style="display:flex; align-items:flex-start; gap:1rem;">
+        <div class="tool-icon rust">📷</div>
+        <div class="tool-info">
+          <div class="tool-name">바코드 폐기</div>
+          <div class="tool-desc">바코드 사진을 보내면 자동으로 폐기 등록. 넷포스 POS 연동.</div>
+          <div class="tg-badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="#0088cc"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+            텔레그램 봇
+          </div>
+        </div>
+        <span class="tool-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- 3. 출퇴근 관리 -->
+    <a href="https://t.me/att_register_bot" target="_blank" class="tool-card" data-accent="green">
+      <div style="display:flex; align-items:flex-start; gap:1rem;">
+        <div class="tool-icon green">⏰</div>
+        <div class="tool-info">
+          <div class="tool-name">출퇴근 관리</div>
+          <div class="tool-desc">QR + GPS 이중검증. 출퇴근 기록을 자동으로 관리합니다.</div>
+          <div class="tg-badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="#0088cc"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+            텔레그램 봇
+          </div>
+        </div>
+        <span class="tool-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- 4. 고객의 소리 -->
+    <a href="feedback.html" class="tool-card" data-accent="rice">
+      <div style="display:flex; align-items:flex-start; gap:1rem;">
+        <div class="tool-icon rice">💬</div>
+        <div class="tool-info">
+          <div class="tool-name">고객의 소리</div>
+          <div class="tool-desc">조합원·고객 의견을 익명으로 접수합니다. 제안, 불편사항, 칭찬 모두.</div>
+        </div>
+        <span class="tool-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- 5. 경영 대시보드 -->
+    <a href="work.html" class="tool-card" data-accent="warm">
+      <div style="display:flex; align-items:flex-start; gap:1rem;">
+        <div class="tool-icon warm">📊</div>
+        <div class="tool-info">
+          <div class="tool-name">경영 대시보드</div>
+          <div class="tool-desc">발주, 이벤트, 프로젝트, 지원사업 현황을 한눈에. 로그인이 필요합니다.</div>
+        </div>
+        <span class="tool-arrow">→</span>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<!-- INFO -->
+<div class="info-strip">
+  <div class="info-box">
+    <span class="info-icon">🍙</span>
+    <div class="info-text">
+      <strong>모두의 밥상</strong>은 김밥, 간식, 반찬을 직접 만들어 판매합니다.
+      매일 아침 준비한 정직한 먹거리를 품앗이생협 매장에서 만나보세요.
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>모두의 밥상 · 모두의밥상협동조합</p>
+  <p style="margin-top:0.3rem;"><a href="index.html">품앗이생협</a> 안의 숍인숍</p>
+</footer>
+
+<script src="/poomai-widget.js"></script>
+</body>
+</html>

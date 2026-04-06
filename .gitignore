@@ -21,6 +21,7 @@ key_box/
 
 # 백업
 *.bak_*
+seed/.snapshots/
 
 # 기타
 *.txt

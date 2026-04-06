@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>직매장 — 품앗이소비자생활협동조합</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;700;900&family=Noto+Sans+KR:wght@300;400;500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --earth: #0f0b07;
+    --soil:  #1e1510;
+    --bark:  #2d1f14;
+    --amber: #c4803a;
+    --amber-light: #e8a55a;
+    --green: #3d5c35;
+    --green-light: #5a8a4e;
+    --cream: #f2ead8;
+    --dust:  #b8a88a;
+    --red:   #b83a2a;
+    --white: #faf7f0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--earth);
+    color: var(--cream);
+    font-family: 'Noto Sans KR', sans-serif;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1.5rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  nav::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(15,11,7,0.9), transparent);
+    pointer-events: none;
+  }
+
+  .nav-logo {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: var(--amber);
+    position: relative;
+    text-decoration: none;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+    position: relative;
+  }
+
+  .nav-links a {
+    color: var(--dust);
+    text-decoration: none;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    transition: color 0.3s;
+  }
+
+  .nav-links a:hover { color: var(--cream); }
+
+  /* ── HERO ── */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 8rem 8vw 6rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-photo {
+    position: absolute;
+    inset: 0;
+    background-image: url('images/fresh_01.webp');
+    background-size: cover;
+    background-position: center;
+  }
+
+  .hero-photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(to top, rgba(15,11,7,0.92) 0%, rgba(15,11,7,0.5) 50%, rgba(15,11,7,0.2) 100%);
+  }
+
+  .hero-inner {
+    position: relative;
+    max-width: 700px;
+  }
+
+  .hero-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    color: var(--amber);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    opacity: 0;
+    animation: fadeUp 1s 0.3s forwards;
+  }
+
+  .hero-label::before {
+    content: '';
+    width: 2rem;
+    height: 1px;
+    background: var(--amber);
+  }
+
+  .hero-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(3rem, 8vw, 7rem);
+    font-weight: 900;
+    line-height: 1;
+    color: var(--white);
+    letter-spacing: -0.02em;
+    opacity: 0;
+    animation: fadeUp 1s 0.6s forwards;
+  }
+
+  .hero-title span {
+    color: var(--amber);
+    display: block;
+  }
+
+  .hero-sub {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(1rem, 2.5vw, 1.4rem);
+    font-weight: 300;
+    color: var(--dust);
+    line-height: 1.8;
+    margin-top: 2rem;
+    opacity: 0;
+    animation: fadeUp 1s 0.9s forwards;
+  }
+
+  .hero-back {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 3rem;
+    color: var(--dust);
+    text-decoration: none;
+    font-size: 0.78rem;
+    letter-spacing: 0.15em;
+    border-bottom: 1px solid rgba(184,168,138,0.3);
+    padding-bottom: 2px;
+    transition: all 0.3s;
+    opacity: 0;
+    animation: fadeUp 1s 1.2s forwards;
+  }
+
+  .hero-back:hover { color: var(--cream); border-color: var(--cream); }
+
+  /* ── INFO BAR ── */
+  .info-bar {
+    background: var(--soil);
+    border-top: 1px solid rgba(196,128,58,0.2);
+    border-bottom: 1px solid rgba(196,128,58,0.1);
+    padding: 1.5rem 8vw;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  .info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .info-key {
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    color: var(--amber);
+  }
+
+  .info-val {
+    font-size: 0.9rem;
+    color: var(--cream);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+  }
+
+  .info-val a {
+    color: var(--cream);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+
+  .info-val a:hover { color: var(--amber); }
+
+  /* ── GALLERY ── */
+  #gallery {
+    padding: 6rem 8vw;
+    background: var(--bark);
+  }
+
+  .sec-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    color: var(--amber);
+    margin-bottom: 3rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .sec-label::before {
+    content: '';
+    width: 2rem;
+    height: 1px;
+    background: var(--amber);
+  }
+
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .gallery-item {
+    overflow: hidden;
+    position: relative;
+  }
+
+  .gallery-item img {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.6s ease;
+  }
+
+  /* 에디토리얼 피처: 1번, 6번, 11번 → 2열 wide */
+  .gallery-item:nth-child(1),
+  .gallery-item:nth-child(6),
+  .gallery-item:nth-child(11) {
+    grid-column: span 2;
+  }
+
+  .gallery-item:nth-child(1) img,
+  .gallery-item:nth-child(6) img,
+  .gallery-item:nth-child(11) img {
+    aspect-ratio: 16/9;
+  }
+
+  /* 마지막(16번째) → 풀 배너 */
+  .gallery-item:nth-child(16) {
+    grid-column: span 3;
+  }
+
+  .gallery-item:nth-child(16) img {
+    aspect-ratio: 21/9;
+  }
+
+  .gallery-item:hover img { transform: scale(1.03); }
+
+  .gallery-caption {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 1rem;
+    background: linear-gradient(to top, rgba(15,11,7,0.8), transparent);
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--dust);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .gallery-item:hover .gallery-caption { opacity: 1; }
+
+  /* ── 무포장 안내 ── */
+  #nopack {
+    padding: 6rem 8vw;
+    background: var(--earth);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: center;
+  }
+
+  .nopack-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 900;
+    line-height: 1.2;
+    color: var(--white);
+    letter-spacing: -0.02em;
+  }
+
+  .nopack-title em {
+    font-style: normal;
+    color: var(--amber);
+    display: block;
+  }
+
+  .nopack-text {
+    margin-top: 2rem;
+    font-size: 0.95rem;
+    color: var(--dust);
+    line-height: 2;
+    font-weight: 300;
+  }
+
+  .nopack-text strong { color: var(--cream); }
+
+  .nopack-photo {
+    overflow: hidden;
+  }
+
+  .nopack-photo img {
+    width: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* ── 찾아오는 길 ── */
+  #directions {
+    padding: 6rem 8vw;
+    background: var(--soil);
+  }
+
+  .directions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    margin-top: 1rem;
+  }
+
+  .map-area {
+    background: rgba(15,11,7,0.6);
+    border: 1px solid rgba(196,128,58,0.15);
+    overflow: hidden;
+    position: relative;
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+  }
+
+  .map-photo {
+    width: 100%;
+    height: 320px;
+    object-fit: cover;
+    display: block;
+    opacity: 0.7;
+  }
+
+  .map-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15,11,7,0.4);
+  }
+
+  .btn-map {
+    background: var(--amber);
+    color: var(--earth);
+    border: none;
+    padding: 0.9rem 2rem;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: background 0.3s;
+  }
+
+  .btn-map:hover { background: var(--amber-light); }
+
+  .addr-block { display: flex; flex-direction: column; gap: 2rem; }
+
+  .addr-row {
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(184,168,138,0.08);
+  }
+
+  .addr-row:last-child { border-bottom: none; }
+
+  .addr-key {
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    color: var(--amber);
+    margin-bottom: 0.6rem;
+  }
+
+  .addr-val {
+    font-size: 0.95rem;
+    color: var(--cream);
+    line-height: 1.8;
+  }
+
+  .addr-val a {
+    color: var(--amber-light);
+    text-decoration: none;
+  }
+
+  .hours-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.5rem;
+  }
+
+  .hours-table td {
+    padding: 0.4rem 0;
+    font-size: 0.85rem;
+    color: var(--dust);
+    border-bottom: 1px solid rgba(184,168,138,0.06);
+  }
+
+  .hours-table td:first-child {
+    color: var(--cream);
+    width: 5rem;
+  }
+
+  .hours-closed { color: rgba(184,168,138,0.4) !important; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--earth);
+    padding: 4rem 8vw;
+    border-top: 1px solid rgba(196,128,58,0.1);
+  }
+
+  .footer-inner {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 4rem;
+  }
+
+  .footer-brand {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--amber);
+    margin-bottom: 1rem;
+  }
+
+  .footer-desc {
+    font-size: 0.8rem;
+    color: var(--dust);
+    line-height: 1.9;
+    font-weight: 300;
+  }
+
+  .footer-col-title {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--amber);
+    margin-bottom: 1.2rem;
+  }
+
+  .footer-links {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .footer-links a {
+    color: var(--dust);
+    text-decoration: none;
+    font-size: 0.8rem;
+    transition: color 0.3s;
+  }
+
+  .footer-links a:hover { color: var(--cream); }
+
+  .footer-bottom {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(184,168,138,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-copy {
+    font-size: 0.7rem;
+    color: rgba(184,168,138,0.4);
+    letter-spacing: 0.05em;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-delay-1 { transition-delay: 0.15s; }
+  .reveal-delay-2 { transition-delay: 0.3s; }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    nav { padding: 1.5rem 2rem; }
+    .nav-links { display: none; }
+    .info-bar { grid-template-columns: 1fr; gap: 1.2rem; }
+    .gallery-grid { grid-template-columns: 1fr; }
+    #nopack { grid-template-columns: 1fr; gap: 2rem; }
+    .directions-grid { grid-template-columns: 1fr; }
+    .footer-inner { grid-template-columns: 1fr; gap: 2rem; }
+    .footer-bottom { flex-direction: column; gap: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="index.html">품앗이생협</a>
+  <ul class="nav-links">
+    <li><a href="index.html#act1">저항</a></li>
+    <li><a href="index.html#act2">건설</a></li>
+    <li><a href="work.html">기동</a></li>
+    <li><a href="market.html" style="color:var(--amber)">매장 안내</a></li>
+    <li><a href="join.html">조합원 가입</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-photo"></div>
+  <div class="hero-inner">
+    <div class="hero-label">01 · MARKET · 광장</div>
+    <h1 class="hero-title">
+      직매장으로<br>
+      <span>오는 문</span>
+    </h1>
+    <p class="hero-sub">
+      오늘 들어온 농산물, 용기 들고 오세요.<br>
+      논밭에서 식탁까지 가장 빠른 시스템.
+    </p>
+    <a href="index.html" class="hero-back">← 광장으로</a>
+  </div>
+</section>
+
+<!-- INFO BAR -->
+<div class="info-bar">
+  <div class="info-item">
+    <div class="info-key">ADDRESS</div>
+    <div class="info-val">대전 유성구 지족로 364번길 40</div>
+  </div>
+  <div class="info-item">
+    <div class="info-key">TEL</div>
+    <div class="info-val"><a href="tel:042-716-0019">042-716-0019</a></div>
+  </div>
+  <div class="info-item">
+    <div class="info-key">HOURS</div>
+    <div class="info-val">매일 09:00 – 21:00</div>
+  </div>
+</div>
+
+<!-- GALLERY -->
+<section id="gallery">
+  <div class="sec-label reveal">매장 공간</div>
+  <div class="gallery-grid">
+    <div class="gallery-item reveal">
+      <img src="images/fresh_01.webp" alt="신선 농산물 진열대">
+      <div class="gallery-caption">신선 농산물 · 매일 직송</div>
+    </div>
+    <div class="gallery-item reveal reveal-delay-1">
+      <img src="images/bulk_new_01.webp" alt="매장 전경">
+      <div class="gallery-caption">매장 전경 · 다양한 직거래 상품</div>
+    </div>
+    <div class="gallery-item reveal reveal-delay-2">
+      <img src="images/bulk_new_02.webp" alt="건식식품 · 양념류 코너">
+      <div class="gallery-caption">건식식품 · 양념류 · 건강식품</div>
+    </div>
+    <div class="gallery-item reveal reveal-delay-1">
+      <img src="images/bulk_new_03.webp" alt="무항생제 친환경 인증 정육 코너">
+      <div class="gallery-caption">무항생제 친환경 인증 정육</div>
+    </div>
+    <div class="gallery-item reveal reveal-delay-2">
+      <img src="images/bulk_new_04.webp" alt="유기농 쌀·잡곡 진열대">
+      <div class="gallery-caption">유기농 쌀·잡곡 직거래</div>
+    </div>
+  </div>
+</section>
+
+<!-- 무포장 안내 -->
+<section id="nopack">
+  <div class="reveal">
+    <div class="sec-label">무포장 원칙</div>
+    <h2 class="nopack-title">
+      용기 들고<br>
+      <em>오세요</em>
+    </h2>
+    <p class="nopack-text">
+      우리 매장은 <strong>포장하지 않습니다.</strong><br>
+      비닐봉투 없이, 개인 용기를 가져오시면<br>
+      농산물을 담아드립니다.<br><br>
+      재사용 용기 지참 시 탄소중립포인트 적립.<br>
+      작은 실천이 <strong>가장 빠른 탄소저감</strong>입니다.
+    </p>
+  </div>
+  <div class="nopack-photo reveal reveal-delay-1">
+    <img src="images/zerowaste_03.webp" alt="리필스테이션 코너">
+  </div>
+</section>
+
+<!-- 찾아오는 길 -->
+<section id="directions">
+  <div class="sec-label reveal">찾아오는 길</div>
+  <div class="directions-grid">
+    <div class="map-area reveal">
+      <img class="map-photo" src="images/exterior.webp" alt="품앗이마을 지족점 외관">
+      <div class="map-overlay">
+        <a class="btn-map" href="https://map.naver.com/p/entry/place/36655266" target="_blank" rel="noopener">
+          네이버 지도로 열기 →
+        </a>
+      </div>
+    </div>
+    <div class="addr-block reveal reveal-delay-1">
+      <div class="addr-row">
+        <div class="addr-key">주소</div>
+        <div class="addr-val">
+          대전광역시 유성구<br>
+          지족로 364번길 40<br>
+          품앗이마을 지족점
+        </div>
+      </div>
+      <div class="addr-row">
+        <div class="addr-key">전화</div>
+        <div class="addr-val">
+          <a href="tel:042-716-0019">042-716-0019</a>
+        </div>
+      </div>
+      <div class="addr-row">
+        <div class="addr-key">이메일</div>
+        <div class="addr-val">
+          <a href="mailto:haeory@gmail.com">haeory@gmail.com</a>
+        </div>
+      </div>
+      <div class="addr-row">
+        <div class="addr-key">채널</div>
+        <div class="addr-val">
+          <a href="https://pf.kakao.com/_VsYxkb" target="_blank" rel="noopener">카카오채널</a>
+          &nbsp;·&nbsp;
+          <a href="https://map.naver.com/p/entry/place/36655266" target="_blank" rel="noopener">네이버 플레이스</a>
+        </div>
+      </div>
+      <div class="addr-row">
+        <div class="addr-key">운영시간</div>
+        <div class="addr-val">
+          <table class="hours-table">
+            <tr><td>매일</td><td>09:00 – 21:00</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">품앗이소비자생활협동조합</div>
+      <div class="footer-desc">
+        대전광역시 유성구 지족로 364번길 40, 품앗이마을 지족점<br>
+        Tel. 042-716-0019 · haeory@gmail.com<br>
+        로컬푸드 직매장 · 데이터 주권 · 협동의 힘<br><br>
+        1999년 지역품앗이 한밭레츠로부터 '품앗이'는 나아가고 있습니다.
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">직매장</div>
+      <ul class="footer-links">
+        <li><a href="#">오늘의 농산물</a></li>
+        <li><a href="#">농가 소개</a></li>
+        <li><a href="#">무포장 안내</a></li>
+        <li><a href="#">탄소 리포트</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">협동</div>
+      <ul class="footer-links">
+        <li><a href="join.html">조합원 가입</a></li>
+        <li><a href="#">활동 소식</a></li>
+        <li><a href="#">로컬 네트워크</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">철학실</div>
+      <ul class="footer-links">
+        <li><a href="poomasi_philosophy.html">Data Sovereignty</a></li>
+        <li><a href="poomasi_philosophy.html">협동조합 원칙</a></li>
+        <li><a href="poomasi_philosophy.html">로컬의 반격</a></li>
+        <li><a href="https://www.youtube.com/@local_counterattack" target="_blank">유튜브 채널</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2026 품앗이소비자생활협동조합. 데이터는 우리 것입니다.</div>
+  </div>
+</footer>
+
+<script>
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+  reveals.forEach(el => observer.observe(el));
+</script>
+<script src="/poomai-widget.js"></script>
+</body>
+</html>

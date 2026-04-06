@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>품앗이 배달</title>
+  <style>
+    :root {
+      --green: #2e7d32;
+      --red:   #c62828;
+      --gray:  #757575;
+      --bg:    #f0f4f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); font-size: 18px; }
+
+    .screen { display: none; min-height: 100vh; padding: 16px 14px 40px; }
+    .screen.active { display: block; }
+
+    h1 { font-size: 22px; font-weight: 900; color: var(--green); margin-bottom: 14px; }
+
+    .btn {
+      display: block; width: 100%; padding: 18px 12px;
+      font-size: 20px; font-weight: bold; border: none;
+      border-radius: 14px; cursor: pointer; margin-bottom: 12px;
+    }
+    .btn-green { background: var(--green); color: #fff; }
+    .btn-red   { background: var(--red);   color: #fff; font-size: 24px; padding: 22px; }
+    .btn-tmap  { background: #1565c0; color: #fff; }
+    .btn-gmap  { background: #e53935; color: #fff; }
+    .btn-sms   { background: #f57f17; color: #fff; }
+    .btn-gray  { background: var(--gray);  color: #fff; }
+    .btn:active { filter: brightness(0.85); }
+
+    .search-box {
+      width: 100%; padding: 16px; font-size: 20px;
+      border: 2px solid #ccc; border-radius: 12px; margin-bottom: 6px; background: #fff;
+    }
+    .search-box:focus { outline: none; border-color: var(--green); }
+
+    .ac-list { background: #fff; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 10px; overflow: hidden; display: none; }
+    .ac-item { padding: 14px 16px; border-bottom: 1px solid #f0f0f0; cursor: pointer; line-height: 1.4; }
+    .ac-item:last-child { border-bottom: none; }
+    .ac-item:active { background: #e8f5e9; }
+    .ac-name { font-size: 20px; font-weight: bold; }
+    .ac-sub  { font-size: 15px; color: #777; }
+
+    .member-form {
+      background: #fff; border-radius: 12px; padding: 16px;
+      margin-bottom: 14px; border: 2px dashed #aaa; display: none;
+    }
+    .member-form p { font-weight: bold; margin-bottom: 10px; color: var(--green); }
+    .member-form label { display: block; font-size: 13px; color: #888; margin: 8px 0 2px; }
+    .member-form input {
+      width: 100%; padding: 12px; font-size: 17px;
+      border: 1px solid #ccc; border-radius: 8px;
+    }
+
+    .d-item {
+      background: #fff; border-radius: 12px; padding: 14px 12px;
+      margin-bottom: 10px; display: flex; align-items: center; gap: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08); touch-action: none;
+    }
+    .d-handle { font-size: 26px; color: #bbb; padding: 6px; cursor: grab; flex-shrink: 0; }
+    .d-info   { flex: 1; min-width: 0; }
+    .d-num    { font-size: 13px; color: #999; }
+    .d-name   { font-size: 20px; font-weight: bold; }
+    .d-addr   { font-size: 15px; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .d-edit   { background: none; border: none; font-size: 22px; color: #aaa; padding: 8px; cursor: pointer; flex-shrink: 0; }
+    .d-del    { background: none; border: none; font-size: 24px; color: #ccc; padding: 8px; cursor: pointer; flex-shrink: 0; }
+
+    .progress { font-size: 17px; color: #888; text-align: center; margin-bottom: 12px; }
+    .nav-card {
+      background: #fff; border-radius: 14px; padding: 20px 18px;
+      margin-bottom: 12px; box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    }
+    .nav-label    { font-size: 14px; color: #999; margin-bottom: 6px; }
+    .nav-address  { font-size: 30px; font-weight: 900; color: #1a237e; line-height: 1.3; }
+    .nav-unit     { font-size: 26px; font-weight: bold; color: #1a237e; margin-top: 4px; }
+    .nav-password { font-size: 44px; font-weight: 900; color: #b71c1c; letter-spacing: 5px; }
+    .nav-phone    { font-size: 26px; color: #222; }
+    .nav-memo     { font-size: 17px; color: #888; margin-top: 6px; font-style: italic; }
+
+    .overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+      align-items: center; justify-content: center; z-index: 200; padding: 20px;
+    }
+    .overlay.show { display: flex; }
+    .overlay-box {
+      background: #fff; border-radius: 20px; padding: 24px 20px;
+      width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto;
+    }
+    .overlay-box h2 { font-size: 22px; margin-bottom: 8px; }
+    .overlay-box p  { font-size: 17px; color: #555; margin-bottom: 18px; }
+    .overlay-box label { display: block; font-size: 13px; color: #888; margin: 8px 0 2px; }
+    .overlay-box input {
+      width: 100%; padding: 12px; font-size: 17px;
+      border: 1px solid #ccc; border-radius: 8px; margin-bottom: 4px;
+    }
+
+    .status { font-size: 14px; color: #888; text-align: center; padding: 8px; min-height: 28px; }
+    .status.err { color: var(--red); }
+    .badge { display: inline-block; background: var(--green); color: #fff; border-radius: 20px; padding: 2px 10px; font-size: 14px; vertical-align: middle; }
+    .empty-hint { text-align: center; color: #bbb; padding: 30px 0; font-size: 17px; }
+    .searching { text-align: center; color: #aaa; padding: 12px; font-size: 15px; }
+  </style>
+</head>
+<body>
+
+<!-- ════════ Screen: List ════════ -->
+<div id="screen-list" class="screen active">
+  <h1>품앗이 배달 <span id="list-badge" class="badge">0</span></h1>
+
+  <input class="search-box" id="search-input" type="search"
+    placeholder="이름 또는 전화번호 검색..."
+    oninput="onSearch(this.value)"
+    autocomplete="off" autocorrect="off">
+  <div id="ac-list" class="ac-list"></div>
+  <button id="new-btn" class="btn btn-green" onclick="showNewForm()" style="display:none;margin-bottom:10px">+ 신규 등록</button>
+
+  <div id="new-form" class="member-form">
+    <p>신규 조합원 추가</p>
+    <label>이름 *</label>
+    <input id="nm-name"  type="text" placeholder="홍길동">
+    <label>전화번호 *</label>
+    <input id="nm-phone" type="tel"  placeholder="010-0000-0000">
+    <label>주소</label>
+    <input id="nm-addr"  type="text" placeholder="○○아파트">
+    <label>동/호수</label>
+    <input id="nm-unit"  type="text" placeholder="101동 201호">
+    <label>공동현관 비번</label>
+    <input id="nm-pass"  type="text" placeholder="#1234*">
+    <label>메모</label>
+    <input id="nm-memo"  type="text" placeholder="">
+    <button class="btn btn-green" onclick="submitNewMember()" style="margin-top:12px">DB에 추가</button>
+    <button class="btn btn-gray"  onclick="hideNewForm()">취소</button>
+  </div>
+
+  <div id="d-list"></div>
+
+  <button class="btn btn-green" onclick="startDelivery()">배달 시작 →</button>
+  <div id="list-status" class="status">이름 또는 전화번호를 입력해 검색하세요</div>
+</div>
+
+<!-- ════════ Screen: Nav ════════ -->
+<div id="screen-nav" class="screen">
+  <div class="progress" id="nav-progress">1 / 1</div>
+
+  <div class="nav-card">
+    <div class="nav-label">목적지 주소</div>
+    <div class="nav-address" id="nav-address">-</div>
+    <div class="nav-unit"    id="nav-unit"></div>
+  </div>
+  <div class="nav-card">
+    <div class="nav-label">공동현관 비번</div>
+    <div class="nav-password" id="nav-password">-</div>
+  </div>
+  <div class="nav-card">
+    <div class="nav-label">전화번호</div>
+    <div class="nav-phone" id="nav-phone">-</div>
+    <div class="nav-memo"  id="nav-memo"></div>
+  </div>
+
+  <button class="btn btn-tmap" onclick="openTmap()">🗺 티맵으로 열기</button>
+  <button class="btn btn-gmap" onclick="openGmap()">📍 구글맵으로 열기</button>
+  <button class="btn btn-red"  onclick="showCompleteOverlay()">✅ 배달완료</button>
+  <button class="btn btn-gray" onclick="showScreen('list')" style="font-size:16px;padding:12px">← 목록으로</button>
+</div>
+
+<!-- ════════ Overlay: 배달완료 ════════ -->
+<div id="overlay-complete" class="overlay">
+  <div class="overlay-box" style="text-align:center">
+    <h2>✅ 배달완료</h2>
+    <p id="complete-name"></p>
+    <button class="btn btn-sms"   onclick="sendSMS()">📱 완료 문자 발송</button>
+    <button class="btn btn-green" onclick="nextDelivery()">다음 목적지 →</button>
+    <button class="btn btn-gray"  onclick="closeOverlay('overlay-complete')" style="font-size:16px;padding:12px">닫기</button>
+  </div>
+</div>
+
+<!-- ════════ Overlay: 조합원 수정 ════════ -->
+<div id="overlay-edit" class="overlay">
+  <div class="overlay-box">
+    <h2>✏️ 조합원 수정</h2>
+    <input type="hidden" id="edit-id">
+    <label>이름 *</label>
+    <input id="edit-name"  type="text">
+    <label>전화번호 *</label>
+    <input id="edit-phone" type="tel">
+    <label>주소</label>
+    <input id="edit-addr"  type="text">
+    <label>동/호수</label>
+    <input id="edit-unit"  type="text">
+    <label>공동현관 비번</label>
+    <input id="edit-pass"  type="text">
+    <label>메모</label>
+    <input id="edit-memo"  type="text">
+    <button class="btn btn-green" onclick="submitEdit()" style="margin-top:14px">저장</button>
+    <button class="btn btn-gray"  onclick="closeOverlay('overlay-edit')" style="font-size:16px;padding:12px">취소</button>
+    <div id="edit-status" class="status"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  Supabase 설정
+// ══════════════════════════════════════════════
+const SB_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
+const SB_KEY = 'sb_publishable_SKtfO63ApOP3DyJKu_2ypw_JK4dsdUG';
+const TABLE  = 'delivery_members';
+
+// 컬럼명 URL 인코딩 (한글)
+const SEL = 'id,%EC%9D%B4%EB%A6%84,%EC%A0%84%ED%99%94%EB%B2%88%ED%98%B8,%EC%A3%BC%EC%86%8C,%EB%8F%99%ED%98%B8%EC%88%98,%EB%B9%84%EB%B2%88,%EB%A9%94%EB%AA%A8';
+
+function sbHeaders(extra = {}) {
+  return {
+    'apikey':        SB_KEY,
+    'Authorization': 'Bearer ' + SB_KEY,
+    'Content-Type':  'application/json',
+    ...extra
+  };
+}
+
+// ── 서버사이드 검색 ──
+// 전화번호 입력 정규화: 01012345678 → 010-1234-5678
+function normPhone(q) {
+  const d = q.replace(/\D/g, '');
+  if (d.length >= 11 && d.startsWith('010'))
+    return d.slice(0,3) + '-' + d.slice(3,7) + '-' + d.slice(7,11);
+  if (d.length >= 8 && d.startsWith('010'))
+    return d.slice(0,3) + '-' + d.slice(3,7) + '-' + d.slice(7);
+  if (d.length >= 4 && d.startsWith('010'))
+    return d.slice(0,3) + '-' + d.slice(3);
+  return d.length >= 3 ? d : q;
+}
+
+async function sbSearch(q) {
+  // 이름 검색: q 그대로
+  // 전화번호 검색: q를 010-XXXX-XXXX 포맷으로 변환
+  const phoneQ = normPhone(q);
+
+  // or=(이름.ilike.*q*,전화번호.ilike.*phoneQ*)
+  // encodeURIComponent 후 %2A → * 복원 (PostgREST wildcard)
+  const orRaw     = `(이름.ilike.*${q}*,전화번호.ilike.*${phoneQ}*)`;
+  const orEncoded = encodeURIComponent(orRaw).replace(/%2A/gi, '*');
+
+  const url = `${SB_URL}/rest/v1/${TABLE}?select=${SEL}&or=${orEncoded}&limit=10`;
+  const res = await fetch(url, { headers: sbHeaders() });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+async function sbInsert(row) {
+  const res = await fetch(`${SB_URL}/rest/v1/${TABLE}`, {
+    method:  'POST',
+    headers: sbHeaders({ 'Prefer': 'return=representation' }),
+    body:    JSON.stringify(row)
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+async function sbUpdate(id, row) {
+  const res = await fetch(`${SB_URL}/rest/v1/${TABLE}?id=eq.${id}`, {
+    method:  'PATCH',
+    headers: sbHeaders({ 'Prefer': 'return=representation' }),
+    body:    JSON.stringify(row)
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+// ══════════════════════════════════════════════
+//  State
+// ══════════════════════════════════════════════
+let deliveryList  = [];   // 오늘 배달 목록
+let searchResults = {};   // id → member (최근 검색결과 캐시)
+let currentIdx    = 0;
+let wakeLock      = null;
+let searchTimer   = null;
+
+// ══════════════════════════════════════════════
+//  Screen
+// ══════════════════════════════════════════════
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+}
+
+function closeOverlay(id) {
+  document.getElementById(id).classList.remove('show');
+}
+
+// ══════════════════════════════════════════════
+//  Search (서버사이드, 300ms 디바운스)
+// ══════════════════════════════════════════════
+function onSearch(val) {
+  const q  = val.trim();
+  const ac = document.getElementById('ac-list');
+  const nb = document.getElementById('new-btn');
+  const nf = document.getElementById('new-form');
+
+  clearTimeout(searchTimer);
+  ac.style.display = 'none';
+  nb.style.display = 'none';
+  nf.style.display = 'none';
+
+  if (!q) { setStatus('list-status', '이름 또는 전화번호를 입력해 검색하세요'); return; }
+  if (q.length < 2) { setStatus('list-status', '2글자 이상 입력하세요'); return; }
+
+  // 로딩 표시
+  ac.innerHTML = '<div class="searching">검색 중...</div>';
+  ac.style.display = 'block';
+
+  searchTimer = setTimeout(async () => {
+    try {
+      const results = await sbSearch(q);
+
+      if (results.length === 0) {
+        ac.style.display = 'none';
+        // 신규 등록 버튼 표시 (폼은 버튼 클릭 시 열림)
+        nb.style.display = 'block';
+        // 숫자면 전화번호, 아니면 이름 필드에 미리 채움
+        const isNum = /^\d/.test(q);
+        document.getElementById('nm-name').value  = isNum ? '' : q;
+        document.getElementById('nm-phone').value = isNum ? q  : '';
+        document.getElementById('nm-addr').value  = '';
+        document.getElementById('nm-unit').value  = '';
+        document.getElementById('nm-pass').value  = '';
+        document.getElementById('nm-memo').value  = '';
+        setStatus('list-status', `"${q}" 검색결과 없음`);
+        return;
+      }
+
+      // 검색결과 캐시
+      searchResults = {};
+      results.forEach(m => { searchResults[m.id] = m; });
+
+      nb.style.display = 'block';
+      nf.style.display = 'none';
+      ac.innerHTML = results.map(m => `
+        <div class="ac-item" onclick="pickMember(${m.id})">
+          <div class="ac-name">${m['이름']} <span style="font-weight:normal;font-size:16px;color:#888">${m['전화번호']||''}</span></div>
+          <div class="ac-sub">${m['주소']||''} ${m['동호수']||''}</div>
+        </div>
+      `).join('');
+      ac.style.display = 'block';
+      setStatus('list-status', `${results.length}건 검색됨`);
+
+    } catch(e) {
+      ac.style.display = 'none';
+      setStatus('list-status', '검색 오류: ' + e.message, true);
+    }
+  }, 300);
+}
+
+function pickMember(id) {
+  const m = searchResults[id];
+  if (!m) return;
+  if (!deliveryList.find(d => String(d.id) === String(id))) {
+    deliveryList.push({ ...m });
+  }
+  document.getElementById('search-input').value = '';
+  document.getElementById('ac-list').style.display  = 'none';
+  document.getElementById('new-btn').style.display  = 'none';
+  document.getElementById('new-form').style.display = 'none';
+  setStatus('list-status', `${m['이름']} 추가됨`);
+  renderDList();
+}
+
+// ── New member ──
+function showNewForm() {
+  document.getElementById('new-btn').style.display  = 'none';
+  document.getElementById('new-form').style.display = 'block';
+}
+
+function hideNewForm() {
+  document.getElementById('new-btn').style.display  = 'none';
+  document.getElementById('new-form').style.display = 'none';
+  document.getElementById('search-input').value = '';
+  setStatus('list-status', '이름 또는 전화번호를 입력해 검색하세요');
+}
+
+async function submitNewMember() {
+  const row = {
+    '이름':    document.getElementById('nm-name').value.trim(),
+    '전화번호': document.getElementById('nm-phone').value.trim(),
+    '주소':    document.getElementById('nm-addr').value.trim(),
+    '동호수':  document.getElementById('nm-unit').value.trim(),
+    '비번':    document.getElementById('nm-pass').value.trim(),
+    '메모':    document.getElementById('nm-memo').value.trim()
+  };
+  if (!row['이름'] || !row['전화번호']) { alert('이름과 전화번호는 필수입니다.'); return; }
+  try {
+    const inserted  = await sbInsert(row);
+    const newMember = Array.isArray(inserted) ? inserted[0] : inserted;
+    deliveryList.push({ ...newMember });
+    hideNewForm();
+    renderDList();
+    setStatus('list-status', `${row['이름']}님 추가 완료 (DB 저장됨)`);
+  } catch(e) {
+    setStatus('list-status', 'DB 저장 실패: ' + e.message, true);
+  }
+}
+
+// ── Edit member ──
+function openEdit(id) {
+  // deliveryList에서 찾기
+  const m = deliveryList.find(d => String(d.id) === String(id));
+  if (!m) return;
+  document.getElementById('edit-id').value    = m.id;
+  document.getElementById('edit-name').value  = m['이름']    || '';
+  document.getElementById('edit-phone').value = m['전화번호'] || '';
+  document.getElementById('edit-addr').value  = m['주소']    || '';
+  document.getElementById('edit-unit').value  = m['동호수']  || '';
+  document.getElementById('edit-pass').value  = m['비번']    || '';
+  document.getElementById('edit-memo').value  = m['메모']    || '';
+  document.getElementById('edit-status').textContent = '';
+  document.getElementById('overlay-edit').classList.add('show');
+}
+
+async function submitEdit() {
+  const id  = document.getElementById('edit-id').value;
+  const row = {
+    '이름':    document.getElementById('edit-name').value.trim(),
+    '전화번호': document.getElementById('edit-phone').value.trim(),
+    '주소':    document.getElementById('edit-addr').value.trim(),
+    '동호수':  document.getElementById('edit-unit').value.trim(),
+    '비번':    document.getElementById('edit-pass').value.trim(),
+    '메모':    document.getElementById('edit-memo').value.trim()
+  };
+  if (!row['이름'] || !row['전화번호']) { alert('이름과 전화번호는 필수입니다.'); return; }
+  try {
+    await sbUpdate(id, row);
+    const di = deliveryList.findIndex(d => String(d.id) === String(id));
+    if (di >= 0) deliveryList[di] = { ...deliveryList[di], ...row };
+    closeOverlay('overlay-edit');
+    renderDList();
+    if (deliveryList[currentIdx] && String(deliveryList[currentIdx].id) === String(id)) renderNav();
+  } catch(e) {
+    setStatus('edit-status', '저장 실패: ' + e.message, true);
+  }
+}
+
+// ══════════════════════════════════════════════
+//  Delivery list + touch drag
+// ══════════════════════════════════════════════
+function renderDList() {
+  const el = document.getElementById('d-list');
+  document.getElementById('list-badge').textContent = deliveryList.length;
+
+  if (deliveryList.length === 0) {
+    el.innerHTML = '<div class="empty-hint">위 검색창에서 조합원을 추가하세요</div>';
+    return;
+  }
+
+  el.innerHTML = deliveryList.map((m, i) => `
+    <div class="d-item" id="di-${i}">
+      <div class="d-handle"
+        ontouchstart="tdStart(event,${i})"
+        ontouchmove="tdMove(event)"
+        ontouchend="tdEnd(event)">☰</div>
+      <div class="d-info">
+        <div class="d-num">${i+1}번째</div>
+        <div class="d-name">${m['이름']}</div>
+        <div class="d-addr">${m['주소']||''} ${m['동호수']||''}</div>
+      </div>
+      <button class="d-edit" onclick="openEdit('${m.id}')">✏️</button>
+      <button class="d-del"  onclick="removeDItem(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function removeDItem(i) { deliveryList.splice(i, 1); renderDList(); }
+
+// Touch drag
+let _tdIdx = null, _tdStartY = 0, _tdClone = null;
+
+function tdStart(e, i) {
+  e.stopPropagation();
+  _tdIdx    = i;
+  _tdStartY = e.touches[0].clientY;
+  const el  = document.getElementById('di-' + i);
+  const r   = el.getBoundingClientRect();
+  _tdClone  = el.cloneNode(true);
+  Object.assign(_tdClone.style, {
+    position: 'fixed', left: r.left + 'px', top: r.top + 'px',
+    width: r.width + 'px', opacity: '0.85', zIndex: '999',
+    pointerEvents: 'none', boxShadow: '0 8px 20px rgba(0,0,0,0.25)'
+  });
+  document.body.appendChild(_tdClone);
+  el.style.opacity = '0.2';
+}
+
+function tdMove(e) {
+  if (!_tdClone) return;
+  e.preventDefault();
+  const dy  = e.touches[0].clientY - _tdStartY;
+  const top = document.getElementById('di-' + _tdIdx).getBoundingClientRect().top + dy;
+  _tdClone.style.top = top + 'px';
+}
+
+function tdEnd(e) {
+  if (!_tdClone) return;
+  document.body.removeChild(_tdClone);
+  _tdClone = null;
+  const el = document.getElementById('di-' + _tdIdx);
+  el.style.opacity = '1';
+  const dy    = e.changedTouches[0].clientY - _tdStartY;
+  const itemH = (el.offsetHeight + 10) || 70;
+  const steps = Math.round(dy / itemH);
+  if (steps !== 0) {
+    const newIdx = Math.max(0, Math.min(deliveryList.length - 1, _tdIdx + steps));
+    const [item] = deliveryList.splice(_tdIdx, 1);
+    deliveryList.splice(newIdx, 0, item);
+    renderDList();
+  }
+  _tdIdx = null;
+}
+
+// ══════════════════════════════════════════════
+//  Navigation
+// ══════════════════════════════════════════════
+async function startDelivery() {
+  if (deliveryList.length === 0) { alert('배달 목록에 조합원을 추가하세요.'); return; }
+  currentIdx = 0;
+  await reqWakeLock();
+  renderNav();
+  showScreen('nav');
+}
+
+function renderNav() {
+  const m = deliveryList[currentIdx];
+  document.getElementById('nav-progress').textContent = `${currentIdx + 1} / ${deliveryList.length}`;
+  document.getElementById('nav-address').textContent  = m['주소']    || '(주소 없음)';
+  document.getElementById('nav-unit').textContent     = m['동호수']  || '';
+  document.getElementById('nav-password').textContent = m['비번']    || '-';
+  document.getElementById('nav-phone').textContent    = m['전화번호'] || '-';
+  document.getElementById('nav-memo').textContent     = m['메모']    || '';
+}
+
+function navDest(m) {
+  // 동호수 있으면 아파트 → 주소(단지명+동)만 전달, 동호수 제외
+  // 동호수 없으면 단독주택 → 주소 그대로 전달
+  return (m['주소'] || '').trim();
+}
+
+function openTmap() {
+  const m   = deliveryList[currentIdx];
+  const enc = encodeURIComponent(navDest(m));
+  // tmap://search 로 주소 검색 (좌표 불필요)
+  // 앱 미설치 시 1.5초 후 웹 티맵으로 fallback
+  window.location.href = `tmap://search?name=${enc}`;
+  setTimeout(() => { window.open(`https://tmap.life/${enc}`, '_blank'); }, 1500);
+}
+
+function openGmap() {
+  const m   = deliveryList[currentIdx];
+  const enc = encodeURIComponent(navDest(m));
+  window.open(`https://maps.google.com/maps?daddr=${enc}`, '_blank');
+}
+
+// ══════════════════════════════════════════════
+//  Complete overlay
+// ══════════════════════════════════════════════
+function showCompleteOverlay() {
+  const m = deliveryList[currentIdx];
+  document.getElementById('complete-name').textContent = `${m['이름']} (${m['전화번호']||''})`;
+  document.getElementById('overlay-complete').classList.add('show');
+}
+
+function sendSMS() {
+  const m   = deliveryList[currentIdx];
+  const num = (m['전화번호'] || '').replace(/[^0-9]/g, '');
+  const msg = encodeURIComponent('품앗이마을지족점입니다. 문앞에 배송을 완료하였습니다');
+  window.location.href = `sms:${num}?body=${msg}`;
+}
+
+function nextDelivery() {
+  closeOverlay('overlay-complete');
+  currentIdx++;
+  if (currentIdx >= deliveryList.length) {
+    relWakeLock();
+    alert('🎉 오늘 배달 모두 완료!');
+    deliveryList = [];
+    renderDList();
+    showScreen('list');
+  } else {
+    renderNav();
+  }
+}
+
+// ══════════════════════════════════════════════
+//  WakeLock
+// ══════════════════════════════════════════════
+async function reqWakeLock() {
+  try {
+    if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen');
+  } catch(e) {}
+}
+function relWakeLock() { if (wakeLock) { wakeLock.release(); wakeLock = null; } }
+document.addEventListener('visibilitychange', async () => {
+  if (document.visibilityState === 'visible' && !wakeLock &&
+      document.getElementById('screen-nav').classList.contains('active')) {
+    await reqWakeLock();
+  }
+});
+
+// ══════════════════════════════════════════════
+//  Util
+// ══════════════════════════════════════════════
+function setStatus(id, msg, isErr = false) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.className   = 'status' + (isErr ? ' err' : '');
+}
+
+// ── 초기화 ──
+renderDList();
+</script>
+<script src="/poomai-widget.js"></script>
+</body>
+</html>
