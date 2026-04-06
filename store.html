@@ -802,6 +802,21 @@
       <button class="btn-sm" onclick="loadUnifiedOrders()">↻ 새로고침</button>
     </div>
 
+    <!-- ── 서브탭: 발주 요청 / 발주됨 ── -->
+    <div class="order-subtabs" style="display:flex;gap:0.25rem;border-bottom:1px solid rgba(196,128,58,0.2);margin-bottom:1.25rem;">
+      <button class="order-subtab active" data-subtab="pending" onclick="switchOrderSubtab('pending')"
+        style="flex:1;padding:0.75rem 1rem;background:none;border:none;border-bottom:2px solid var(--amber);color:var(--amber);font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;">
+        발주 요청 <span id="subtab-pending-count" style="display:inline-block;background:var(--amber);color:#0f0b07;border-radius:10px;padding:0.08rem 0.5rem;font-size:0.72rem;font-weight:700;margin-left:0.3rem;min-width:1.2rem;text-align:center;">0</span>
+      </button>
+      <button class="order-subtab" data-subtab="ordered" onclick="switchOrderSubtab('ordered')"
+        style="flex:1;padding:0.75rem 1rem;background:none;border:none;border-bottom:2px solid transparent;color:var(--dust);font-size:0.9rem;font-weight:500;cursor:pointer;transition:all 0.2s;">
+        발주됨 <span id="subtab-ordered-count" style="display:inline-block;background:rgba(184,168,138,0.2);color:var(--dust);border-radius:10px;padding:0.08rem 0.5rem;font-size:0.72rem;font-weight:700;margin-left:0.3rem;min-width:1.2rem;text-align:center;">0</span>
+      </button>
+    </div>
+
+    <!-- ══ 서브탭 1: 발주 요청 ══ -->
+    <div id="order-subtab-pending">
+
     <!-- 요청대기 배지 -->
     <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.25rem;flex-wrap:wrap;">
       <button id="pending-badge-btn" onclick="togglePendingList()" style="display:inline-flex;align-items:center;gap:0.4rem;background:rgba(196,128,58,0.12);border:1px solid var(--amber);color:var(--amber);font-weight:600;padding:0.45rem 1rem;font-size:0.82rem;border-radius:6px;cursor:pointer;">
@@ -827,6 +842,18 @@
 
     <!-- 선택된 거래처 카드 영역 -->
     <div id="unified-order-cards"><div class="loading-row">로딩 중…</div></div>
+
+    </div>
+    <!-- ══ /서브탭 1 ══ -->
+
+    <!-- ══ 서브탭 2: 발주됨 (입고 대기) ══ -->
+    <div id="order-subtab-ordered" style="display:none;">
+      <div style="font-size:0.78rem;color:var(--dust);margin-bottom:0.75rem;line-height:1.5;">
+        발주 처리된 품목입니다. 입고되면 <strong style="color:var(--amber);">입고완료</strong> 버튼으로 목록에서 제거하세요.
+      </div>
+      <div id="ordered-cards-wrap"><div class="loading-row" style="color:var(--dust);font-size:0.85rem;padding:1rem;">로딩 중…</div></div>
+    </div>
+    <!-- ══ /서브탭 2 ══ -->
 
     <!-- ── 발주처 관리 (접힌 섹션) ── -->
     <div style="margin-top:2rem;border-top:1px solid rgba(196,128,58,0.15);padding-top:1rem;">
@@ -2245,6 +2272,7 @@ async function loadUnifiedOrders() {
 
   await loadOrderSupplierList();
   renderPendingBadge();
+  updateOrderSubtabCounts();
 
   // 이전에 선택된 거래처가 있으면 다시 렌더링
   if (_selectedOrderSupplier) {
@@ -2252,6 +2280,22 @@ async function loadUnifiedOrders() {
   } else {
     wrap.innerHTML = '<div class="card"><div class="empty-row" style="color:var(--dust);font-size:0.85rem;">위 검색창에서 거래처를 선택하세요.</div></div>';
   }
+
+  // 발주됨 서브탭이 현재 활성이면 리스트 재렌더링
+  const orderedTab = document.getElementById('order-subtab-ordered');
+  if (orderedTab && orderedTab.style.display !== 'none') {
+    renderOrderedTab();
+  }
+}
+
+// ── 서브탭 카운트 업데이트 (대기 / 발주됨) ──
+function updateOrderSubtabCounts() {
+  const pendingN = _unifiedOrderData.filter(r => r.status !== '발주완료').length;
+  const orderedN = _unifiedOrderData.filter(r => r.status === '발주완료').length;
+  const pEl = document.getElementById('subtab-pending-count');
+  const oEl = document.getElementById('subtab-ordered-count');
+  if (pEl) pEl.textContent = pendingN;
+  if (oEl) oEl.textContent = orderedN;
 }
 
 // ── 거래처 카드 렌더링 (현장요청 + POS 합산) ──
@@ -2347,7 +2391,14 @@ async function renderSupplierCard(supplierName) {
       ? `<span style="font-size:0.7rem;color:var(--dust);margin-left:0.4rem;">(POS ${item.posQty}개)</span>`
       : '';
     const defaultQty = item.reqQty || '';
+    // ── 체크박스: staff_data 항목(현장요청)만. POS-only는 체크박스 없음 ──
+    const rowIds = item.isStaff ? item.rows.map(r => r.id).join(',') : '';
+    const checkboxCell = item.isStaff
+      ? `<input type="checkbox" class="order-item-chk" data-supplier="${supplierName.replace(/"/g, '&quot;')}" data-ids="${rowIds}" checked
+          style="width:1rem;height:1rem;cursor:pointer;accent-color:var(--amber);">`
+      : `<span style="color:var(--dust);font-size:0.68rem;">-</span>`;
     return `<tr>
+      <td style="padding:0.4rem 0.35rem;text-align:center;width:2rem;">${checkboxCell}</td>
       <td style="padding:0.4rem 0.5rem;font-size:0.82rem;color:var(--cream);">${item.name}${urgTag}</td>
       <td style="padding:0.4rem 0.5rem;text-align:center;">
         <input type="number" min="0" id="order-qty-${supId}-${idx}" value="${defaultQty}" placeholder="수량"
@@ -2360,6 +2411,10 @@ async function renderSupplierCard(supplierName) {
   const itemTable = mergedItems.length > 0 ? `
     <table style="width:100%;border-collapse:collapse;margin-bottom:0.75rem;">
       <thead><tr style="border-bottom:1px solid rgba(196,128,58,0.15);">
+        <th style="padding:0.35rem 0.35rem;text-align:center;width:2rem;">
+          <input type="checkbox" id="order-chk-all-${supId}" checked onclick="toggleAllOrderItems('${supId}')"
+            style="width:1rem;height:1rem;cursor:pointer;accent-color:var(--amber);" title="전체 선택/해제">
+        </th>
         <th style="padding:0.35rem 0.5rem;font-size:0.72rem;color:var(--dust);text-align:left;font-weight:500;">품목</th>
         <th style="padding:0.35rem 0.5rem;font-size:0.72rem;color:var(--dust);text-align:center;font-weight:500;">발주수량</th>
         <th style="padding:0.35rem 0.5rem;font-size:0.72rem;color:var(--dust);font-weight:500;">참고</th>
@@ -2376,7 +2431,7 @@ async function renderSupplierCard(supplierName) {
     <div style="display:flex;gap:0.5rem;margin-top:0.8rem;flex-wrap:wrap;align-items:flex-start;">
       <button class="btn-sm" style="font-size:0.78rem;background:rgba(196,128,58,0.15);border-color:var(--amber);color:var(--amber);"
         onclick="generateOrderMessageFromTable('${supplierName.replace(/'/g, "\\'")}','${supId}','${msgId}')">발주 메시지 생성</button>
-      ${hasWaiting ? `<button class="btn-sm" style="font-size:0.78rem;background:var(--green);color:#fff;border-color:var(--green);" onclick="markSupplierDone('${supplierName.replace(/'/g, "\\'")}')">발주완료 처리</button>` : ''}
+      ${hasWaiting ? `<button class="btn-sm" style="font-size:0.78rem;background:var(--green);color:#fff;border-color:var(--green);" onclick="markSupplierDone('${supplierName.replace(/'/g, "\\'")}')">선택 발주처리 →</button>` : ''}
     </div>
     <div id="${msgId}-area" style="display:none;margin-top:0.8rem;">
       <textarea id="${msgId}" rows="6" style="width:100%;background:rgba(15,11,7,0.8);border:1px solid rgba(196,128,58,0.2);color:var(--cream);padding:0.6rem 0.8rem;font-family:'Noto Sans KR',sans-serif;font-size:0.85rem;resize:vertical;outline:none;margin-bottom:0.5rem;box-sizing:border-box;"></textarea>
@@ -2566,16 +2621,138 @@ async function generateOrderMessage(supplierName, msgId) {
   msgEl.focus();
 }
 
-// ══ 거래처 일괄 발주완료 처리 ══
+// ══ 선택 발주처리 — 체크된 품목만 status='발주완료'로 업데이트 → 발주됨 탭으로 이동 ══
+// 체크 안 된 품목은 발주 요청 탭에 그대로 남음 (부분 발주 케이스)
 async function markSupplierDone(supplierName) {
-  const waitItems = _unifiedOrderData.filter(r => r.farmer_name === supplierName && r.status !== '발주완료');
-  if (waitItems.length === 0) { toast('대기 건이 없습니다.'); return; }
-  if (!confirm(`${supplierName}의 대기 ${waitItems.length}건을 모두 발주완료 처리하시겠습니까?`)) return;
+  // 현재 카드에서 체크된 체크박스 수집
+  const checkboxes = document.querySelectorAll(`.order-item-chk[data-supplier="${supplierName.replace(/"/g, '&quot;')}"]:checked`);
+  if (checkboxes.length === 0) {
+    toast('발주처리할 품목을 체크하세요.');
+    return;
+  }
+  // data-ids 수집 (품목당 여러 staff_data row 가능)
+  const ids = [];
+  checkboxes.forEach(cb => {
+    (cb.dataset.ids || '').split(',').filter(x => x).forEach(id => ids.push(parseInt(id, 10)));
+  });
+  if (ids.length === 0) { toast('처리할 건이 없습니다.'); return; }
 
-  const ids = waitItems.map(i => i.id);
+  if (!confirm(`${supplierName}의 선택 ${ids.length}건을 발주처리하시겠습니까?\n(체크 안 된 품목은 발주 요청에 남습니다)`)) return;
+
   const { error } = await sb.from('staff_data').update({ status: '발주완료' }).in('id', ids);
   if (error) { toast('처리 실패: ' + error.message); return; }
-  toast(`${supplierName} ${waitItems.length}건 발주완료 ✓`);
+  toast(`${supplierName} ${ids.length}건 발주처리 ✓ (발주됨 탭으로 이동)`);
+  loadUnifiedOrders();
+}
+
+// ══ 전체 선택/해제 토글 ══
+function toggleAllOrderItems(supId) {
+  const all = document.getElementById('order-chk-all-' + supId);
+  if (!all) return;
+  document.querySelectorAll('.order-item-chk').forEach(cb => { cb.checked = all.checked; });
+}
+
+// ══ 서브탭 전환 (발주 요청 / 발주됨) ══
+function switchOrderSubtab(key) {
+  const pending = document.getElementById('order-subtab-pending');
+  const ordered = document.getElementById('order-subtab-ordered');
+  if (!pending || !ordered) return;
+  pending.style.display = (key === 'pending') ? '' : 'none';
+  ordered.style.display = (key === 'ordered') ? '' : 'none';
+  // 탭 버튼 활성화 상태 업데이트
+  document.querySelectorAll('.order-subtab').forEach(btn => {
+    const active = btn.dataset.subtab === key;
+    btn.classList.toggle('active', active);
+    btn.style.color = active ? 'var(--amber)' : 'var(--dust)';
+    btn.style.borderBottomColor = active ? 'var(--amber)' : 'transparent';
+    btn.style.fontWeight = active ? '600' : '500';
+  });
+  if (key === 'ordered') renderOrderedTab();
+}
+
+// ══ 발주됨 탭 렌더링 — status='발주완료' 항목을 거래처별 그룹 ══
+function renderOrderedTab() {
+  const wrap = document.getElementById('ordered-cards-wrap');
+  if (!wrap) return;
+  const orderedItems = _unifiedOrderData.filter(r => r.status === '발주완료');
+  if (orderedItems.length === 0) {
+    wrap.innerHTML = '<div class="card"><div class="empty-row" style="color:var(--dust);font-size:0.85rem;text-align:center;padding:1rem;">발주된 항목이 없습니다.</div></div>';
+    return;
+  }
+  // 거래처별 그룹
+  const byFarmer = {};
+  orderedItems.forEach(r => {
+    const key = r.farmer_name || '(거래처 미지정)';
+    (byFarmer[key] = byFarmer[key] || []).push(r);
+  });
+
+  const cards = Object.entries(byFarmer).map(([farmerName, items]) => {
+    const rows = items.map(i => {
+      const dt = i.created_at ? new Date(i.created_at).toLocaleString('ko-KR', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }) : '';
+      const urg = i.urgency
+        ? `<span style="font-size:0.68rem;color:var(--amber);border:1px solid var(--amber);padding:0.05rem 0.28rem;border-radius:3px;margin-left:0.3rem;">${i.urgency}</span>`
+        : '';
+      const comment = i.order_comment
+        ? `<div style="font-size:0.72rem;color:var(--amber);margin-top:0.15rem;">💬 ${i.order_comment}</div>`
+        : '';
+      return `<tr style="border-bottom:1px solid rgba(184,168,138,0.06);">
+        <td style="padding:0.5rem 0.5rem;font-size:0.85rem;color:var(--cream);">
+          ${i.item_name || '—'}${urg}
+          ${i.qty ? `<span style="color:var(--dust);font-size:0.78rem;margin-left:0.4rem;">${i.qty}개</span>` : ''}
+          ${comment}
+        </td>
+        <td style="padding:0.5rem 0.5rem;font-size:0.72rem;color:var(--dust);text-align:center;white-space:nowrap;">${dt}</td>
+        <td style="padding:0.5rem 0.5rem;text-align:center;">
+          <button onclick="markItemDelivered(${i.id})" class="btn-sm"
+            style="font-size:0.72rem;background:rgba(61,92,53,0.2);border-color:var(--green-light);color:var(--green-light);padding:0.25rem 0.6rem;">입고완료</button>
+        </td>
+      </tr>`;
+    }).join('');
+
+    return `<div class="card" style="margin-bottom:0.8rem;border-left:3px solid var(--green);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem;flex-wrap:wrap;gap:0.5rem;">
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <span style="font-size:1rem;">📦</span>
+          <span class="card-title" style="margin-bottom:0;font-size:0.95rem;">${farmerName}</span>
+          <span style="font-size:0.78rem;color:var(--dust);">발주됨 ${items.length}건</span>
+        </div>
+        <button onclick="markSupplierDelivered('${farmerName.replace(/'/g, "\\'")}')" class="btn-sm"
+          style="font-size:0.75rem;background:var(--green);color:#fff;border-color:var(--green);">전체 입고완료 ✓</button>
+      </div>
+      <table style="width:100%;border-collapse:collapse;">
+        <thead><tr style="border-bottom:1px solid rgba(196,128,58,0.15);">
+          <th style="padding:0.35rem 0.5rem;font-size:0.72rem;color:var(--dust);text-align:left;font-weight:500;">품목</th>
+          <th style="padding:0.35rem 0.5rem;font-size:0.72rem;color:var(--dust);text-align:center;font-weight:500;width:5rem;">요청일시</th>
+          <th style="padding:0.35rem 0.5rem;font-size:0.72rem;color:var(--dust);text-align:center;font-weight:500;width:5.5rem;">처리</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  }).join('');
+
+  wrap.innerHTML = cards;
+}
+
+// ══ 개별 입고완료 — soft delete: status='입고완료'로 업데이트 (원본 이력 보존) ══
+// 발주됨 탭 필터는 status==='발주완료'이므로 자동으로 목록에서 사라짐. DB에는 이력 남음.
+async function markItemDelivered(id) {
+  if (!confirm('이 품목을 입고완료 처리하시겠습니까?\n(목록에서 제거되고, 이력은 DB에 보존됩니다)')) return;
+  const { error } = await sb.from('staff_data').update({ status: '입고완료' }).eq('id', id);
+  if (error) { toast('처리 실패: ' + error.message); return; }
+  toast('입고완료 ✓');
+  loadUnifiedOrders();
+}
+
+// ══ 거래처 전체 입고완료 — soft delete: 해당 거래처의 발주됨 항목 일괄 status='입고완료' ══
+async function markSupplierDelivered(supplierName) {
+  const items = _unifiedOrderData.filter(r => r.farmer_name === supplierName && r.status === '발주완료');
+  if (items.length === 0) { toast('발주된 건이 없습니다.'); return; }
+  if (!confirm(`${supplierName}의 발주된 ${items.length}건을 모두 입고완료 처리하시겠습니까?\n(목록에서 제거되고, 이력은 DB에 보존됩니다)`)) return;
+
+  const ids = items.map(i => i.id);
+  const { error } = await sb.from('staff_data').update({ status: '입고완료' }).in('id', ids);
+  if (error) { toast('처리 실패: ' + error.message); return; }
+  toast(`${supplierName} ${items.length}건 입고완료 ✓`);
   loadUnifiedOrders();
 }
 
