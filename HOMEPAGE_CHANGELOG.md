@@ -38,6 +38,24 @@
 
 ## 수정 이력
 
+### 2026-04-02
+
+#### index.html — 대규모 업데이트 (4건 배포)
+**백업**: `index.html.bak_20260402`
+
+| 커밋 | 변경 내용 |
+|------|-----------|
+| `a0c9ab5` | "함께 키우기"(contribute) 섹션 추가 — 기여 3문 카드(데이터/에이전트/돈) + 진입장벽 스펙트럼 + 품포인트 안내 |
+| `d687b92` | 보안: `rel="noopener noreferrer"` 전체 추가, 접근성: contribute 아이콘 aria-label 추가 |
+| `6cd9674` | 브랜딩: "품앗이AI" → "품아이" 전체 변경 (title, meta, nav, hero, Q&A, 투자 섹션) + 구글폼 플레이스홀더 → 실제 투자 문의 폼 URL 연결 |
+| `a9ebff6` | 3막에 "품아이 체험하기 →" 데모 버튼 추가 (demo.poomasi.org 링크) |
+
+#### 구글폼 신규 생성
+- 씨앗 투자 문의 폼: 이름(필수), 연락처(필수), 소속(선택), 관심분야(체크박스), 자유텍스트
+- URL: `https://docs.google.com/forms/d/e/1FAIpQLScYgjn8GPTnQINj2KNLivOXLGwDxK0gYI3qoPOaasUfrfSUqQ/viewform`
+
+---
+
 ### 2026-03-18
 
 #### display.html — Supabase 이벤트 슬라이드 연동

@@ -1,28 +1,112 @@
 {
-  "last_updated": "2026-04-04",
-  "age_days": 12,
+  "last_updated": "2026-04-06",
+  "age_days": 14,
   "axes": {
-    "knowledge": { "label": "지식(知)", "desc": "RAG 지식 건수", "value": 84, "detail": "8,408건" },
-    "reasoning": { "label": "사고(思)", "desc": "논리·편향교정", "value": 72, "detail": "9장 + 편향5건 수정" },
-    "realworld": { "label": "현장(場)", "desc": "실시간 데이터 연결", "value": 68, "detail": "507,999건, 93% 매핑" },
-    "identity":  { "label": "정체성(品)", "desc": "헌법·캐릭터·말투", "value": 90, "detail": "헌법8조 확정" },
-    "tech":      { "label": "기술(技)", "desc": "엔진·API·파인튜닝", "value": 60, "detail": "278건 파인튜닝 중" },
-    "research":  { "label": "조사(探)", "desc": "검색·지식자기화", "value": 45, "detail": "Search Grounding ON" }
+    "knowledge": {
+      "label": "지식(知)",
+      "desc": "RAG 지식 건수",
+      "value": 56,
+      "detail": "8,405건"
+    },
+    "reasoning": {
+      "label": "사고(思)",
+      "desc": "논리·편향교정",
+      "value": 48,
+      "detail": "9장 + 편향4건 수정"
+    },
+    "realworld": {
+      "label": "현장(場)",
+      "desc": "매장·현장 암묵지",
+      "value": 10,
+      "detail": "현장 지식 축적 중"
+    },
+    "identity": {
+      "label": "정체성(品)",
+      "desc": "헌법·캐릭터·말투",
+      "value": 50,
+      "detail": "헌법8조 확정, 말투 형성 중"
+    },
+    "tech": {
+      "label": "기술(技)",
+      "desc": "엔진·API·파인튜닝",
+      "value": 52,
+      "detail": "314건 + 파인튜닝2회"
+    },
+    "research": {
+      "label": "조사(探)",
+      "desc": "검색·지식자기화",
+      "value": 1,
+      "detail": "자기화 6건"
+    }
   },
   "milestones": [
-    { "date": "2026-03-24", "day": 1,  "label": "씨앗 모으기", "desc": "RAG 소스 수집 시작" },
-    { "date": "2026-03-30", "day": 7,  "label": "첫 울음", "desc": "파인튜닝 첫 시도 18건" },
-    { "date": "2026-04-01", "day": 9,  "label": "뼈대 잡기", "desc": "RAG+파인튜닝 두 갈래 전략" },
-    { "date": "2026-04-02", "day": 10, "label": "네 가지 결정", "desc": "캐릭터·BM·RLHF 대안·데모 배포" },
-    { "date": "2026-04-03", "day": 11, "label": "헌법과 뿌리", "desc": "헌법8조, 지식 8,408건" },
-    { "date": "2026-04-04", "day": 12, "label": "사고하는 아이", "desc": "사고9장, Search Grounding, 편향교정, Vertex AI 파인튜닝" }
+    {
+      "date": "2026-03-24",
+      "day": 1,
+      "label": "씨앗 모으기",
+      "desc": "RAG 소스 수집 시작"
+    },
+    {
+      "date": "2026-03-30",
+      "day": 7,
+      "label": "첫 울음",
+      "desc": "파인튜닝 첫 시도 18건"
+    },
+    {
+      "date": "2026-04-01",
+      "day": 9,
+      "label": "뼈대 잡기",
+      "desc": "RAG+파인튜닝 두 갈래 전략"
+    },
+    {
+      "date": "2026-04-02",
+      "day": 10,
+      "label": "네 가지 결정",
+      "desc": "캐릭터·BM·RLHF 대안·데모 배포"
+    },
+    {
+      "date": "2026-04-03",
+      "day": 11,
+      "label": "헌법과 뿌리",
+      "desc": "헌법8조, 지식 8,408건"
+    },
+    {
+      "date": "2026-04-04",
+      "day": 12,
+      "label": "사고하는 아이",
+      "desc": "사고9장, Search Grounding, 편향교정, Vertex AI 파인튜닝"
+    }
   ],
   "key_numbers": [
-    { "value": "8,408", "unit": "건", "label": "지식나무" },
-    { "value": "278",   "unit": "건", "label": "학습 데이터" },
-    { "value": "50만+", "unit": "건", "label": "거래 데이터" },
-    { "value": "8",     "unit": "조",  "label": "헌법" },
-    { "value": "9",     "unit": "장",  "label": "사고 프로토콜" },
-    { "value": "12",    "unit": "일",  "label": "성장 기간" }
+    {
+      "value": "8,405",
+      "unit": "건",
+      "label": "지식나무"
+    },
+    {
+      "value": "314",
+      "unit": "건",
+      "label": "학습 데이터"
+    },
+    {
+      "value": "10",
+      "unit": "점",
+      "label": "현장 감각"
+    },
+    {
+      "value": "50",
+      "unit": "점",
+      "label": "정체성"
+    },
+    {
+      "value": "9",
+      "unit": "장",
+      "label": "사고 프로토콜"
+    },
+    {
+      "value": "14",
+      "unit": "일",
+      "label": "성장 기간"
+    }
   ]
 }
