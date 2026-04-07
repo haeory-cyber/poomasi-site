@@ -1,0 +1,82 @@
+<!DOCTYPE html><html lang="ko"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta http-equiv="refresh" content="1800"><title>로컬의 반격 — 지족점</title>
+<style>:root{--earth:#0f0b07;--soil:#1e1510;--amber:#c4803a;--amber-l:#e8a55a;--green:#3d5c35;--green-l:#5a8a4e;--cream:#f2ead8;--dust:#b8a88a}
+*{margin:0;padding:0;box-sizing:border-box}
+body,html{width:100%;height:100%;overflow:hidden;background:var(--earth);font-family:"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
+.slide-container{position:relative;width:100%;height:100%}
+.page{position:absolute;width:100%;height:100%;opacity:0;transition:opacity .8s ease;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6vh 8vw;text-align:center;box-sizing:border-box}
+.active{opacity:1;z-index:10}
+.open-page{background:var(--earth)}
+.open-date{font-size:2.4vh;color:var(--amber);letter-spacing:.6em;margin-bottom:6vh;font-weight:500}
+.open-date::before{content:"";display:inline-block;width:2.5rem;height:1px;background:var(--amber);margin-right:1.2rem;vertical-align:middle}
+.open-title{font-size:16vh;color:var(--cream);font-weight:900;line-height:1.05;letter-spacing:.02em}
+.open-title .em{color:var(--amber);display:block}
+.open-sub{font-size:3vh;color:var(--dust);margin-top:5vh;letter-spacing:.25em}
+.stat-page{background:var(--earth)}
+.stat-label{font-size:2.5vh;color:var(--amber);letter-spacing:.5em;font-weight:500;margin-bottom:4vh}
+.stat-label::before{content:"";display:inline-block;width:2rem;height:1px;background:var(--amber);margin-right:1rem;vertical-align:middle}
+.big-num{font-size:22vh;font-weight:900;color:var(--cream);line-height:1.1;letter-spacing:.02em;position:relative;z-index:1}
+.big-num .unit{font-size:6vh;color:var(--dust);margin-left:.5rem;font-weight:500;vertical-align:super}
+.stat-note{font-size:3.5vh;color:var(--green-l);margin-top:4vh;font-weight:600;letter-spacing:.1em}
+.stat-extra{font-size:2.2vh;color:var(--dust);margin-top:2vh;letter-spacing:.15em}
+.deco{position:absolute;font-size:55vh;font-weight:900;color:rgba(242,234,216,.025);z-index:0;line-height:1;pointer-events:none;user-select:none}
+.farmer-tags{display:flex;flex-wrap:wrap;justify-content:center;gap:2vh;margin-top:4vh;max-width:85%;position:relative;z-index:1}
+.farmer-tag{background:rgba(196,128,58,.1);border:1px solid rgba(196,128,58,.3);padding:1vh 2.5vh;border-radius:40px;font-size:2.5vh;color:var(--dust);letter-spacing:.1em}
+.list-page{background:var(--earth);justify-content:flex-start;padding-top:9vh;align-items:flex-start;text-align:left}
+.list-header{font-size:5.5vh;color:var(--cream);font-weight:900;margin-bottom:2vh;width:100%;letter-spacing:.05em}
+.list-header .cnt{color:var(--amber)}
+.list-sub{font-size:2vh;color:var(--dust);margin-bottom:4vh;letter-spacing:.25em}
+.item-container{display:flex;flex-wrap:wrap;gap:2vh;max-width:100%}
+.item-tag{background:rgba(61,92,53,.25);border:1px solid rgba(90,138,78,.4);padding:1.2vh 3vh;border-radius:40px;font-size:3vh;color:var(--cream);font-weight:600;letter-spacing:.05em}
+.nl-tag{background:rgba(196,128,58,.12);border:1px solid rgba(196,128,58,.35);color:var(--amber-l)}
+.eco-tag{background:rgba(61,92,53,.35);border:1px solid var(--green-l);color:#8fba7a}
+.footer{position:absolute;bottom:2vh;width:100%;text-align:center;font-size:1.5vh;color:rgba(184,168,138,.3);z-index:20;letter-spacing:.1em}
+.home-btn{position:fixed;top:2vh;left:2vw;z-index:100;display:flex;align-items:center;gap:.6rem;
+background:rgba(30,21,16,.7);border:1px solid rgba(196,128,58,.3);border-radius:40px;
+padding:.8vh 2vh;text-decoration:none;color:var(--amber);font-size:1.8vh;letter-spacing:.1em;
+backdrop-filter:blur(8px);transition:all .3s ease}
+.home-btn:hover{background:rgba(196,128,58,.15);border-color:var(--amber)}
+.home-btn .arrow{font-size:1.6vh;opacity:.7}
+</style></head><body>
+<a href="index.html" class="home-btn"><span class="arrow">←</span> 홈으로</a>
+<div class="slide-container">
+<div class="page open-page active" data-time="7000">
+  <div class="open-date">2026.04.06 · 지족점</div>
+  <div class="open-title">어제,<br>우리가<br><span class="em">함께</span></div>
+  <div class="open-sub">품앗이 로컬푸드 일일 현황</div>
+</div>
+<div class="page stat-page" data-time="6000">
+  <span class="deco">탄</span>
+  <div class="stat-label">탄소 저감량</div>
+  <div class="big-num">3<span class="unit">kg</span></div>
+  <div class="stat-note">소나무 0.7그루 심은 효과</div>
+  <div class="stat-extra">수송 2.97kg + 무포장 0.36kg (DEFRA·LCA)</div>
+</div>
+<div class="page stat-page" data-time="6000">
+  <span class="deco">농</span>
+  <div class="stat-label">함께한 농부</div>
+  <div class="big-num">98<span class="unit">명</span></div>
+  <div class="stat-note">직접 발걸음해주신 지역 생산자</div>
+  <div class="farmer-tags"><span class="farmer-tag">모두의밥상</span><span class="farmer-tag">하대목장</span><span class="farmer-tag">도토리보호작업장</span><span class="farmer-tag">(주)이담</span><span class="farmer-tag">농업회사법인 햇님원 주식회사</span><span class="farmer-tag">자연에찬</span><span class="farmer-tag">오춘균</span><span class="farmer-tag">콩세알</span></div>
+</div>
+<div class="page stat-page" data-time="6000">
+  <span class="deco">품</span>
+  <div class="stat-label">참여 품앗이님</div>
+  <div class="big-num">212<span class="unit">명</span></div>
+  <div class="stat-note">오늘도 함께해주셔서</div>
+  <div class="stat-extra">용기 들고, 생각 챙겨, 오셨습니다</div>
+</div>
+<div class="page list-page" data-time="8000">
+  <div class="list-header">무비닐 실천 품목 <span class="cnt">12종</span></div>
+  <div class="list-sub">포장재 없이 · 있는 그대로</div>
+  <div class="item-container"><span class="item-tag">당근</span><span class="item-tag">청경채</span><span class="item-tag">케일</span><span class="item-tag">무농약완숙토마토(흙)</span><span class="item-tag">완숙토마토</span><span class="item-tag">무</span><span class="item-tag">감자</span><span class="item-tag">통우엉</span><span class="item-tag">고구마</span><span class="item-tag">봄동</span><span class="item-tag">비트</span><span class="item-tag">못난이사과노</span></div>
+</div>
+<div class="page list-page" data-time="7000"><div class="list-header">무라벨 실천 품목 <span class="cnt">10종</span></div><div class="list-sub">라벨 없이 · 내용물 그대로</div><div class="item-container"><span class="nl-tag">*팽이버섯*</span><span class="nl-tag">*새송이버섯(무농약)</span><span class="nl-tag">*깻잎*</span><span class="nl-tag">*느타리버섯(무농약)</span><span class="nl-tag">*부추*</span><span class="nl-tag">깐마늘</span><span class="nl-tag">대추방울토마토(무농약)</span><span class="nl-tag">당근*</span><span class="nl-tag">팽이버섯*</span><span class="nl-tag">*달래*</span></div></div>
+<div class="page stat-page" data-time="7000"><span class="deco">친</span><div class="stat-label">친환경 취급 품목</div><div class="big-num">431<span class="unit">종</span></div><div class="stat-note">무농약 · 유기농 인증</div><div class="stat-extra">농산물 213종 + 가공품 218종 · 오늘 판매 38종</div></div><div class="page stat-page" data-time="6000"><span class="deco">제</span><div class="stat-label">제로웨이스트 취급 품목</div><div class="big-num">91<span class="unit">종</span></div><div class="stat-note">잇다 · 제로웨이스트존</div><div class="stat-extra">대나무칫솔 · 수세미 · 비누바 · 빨대 · 장바구니 외</div></div>
+</div>
+<div class="footer">* POS 판매 데이터 기반 AI 자동 산출 · 품앗이생협 지족점 로컬푸드2.0</div>
+<script>const pages=document.querySelectorAll(".page");let cur=0;
+function next(){pages[cur].classList.remove("active");cur=(cur+1)%pages.length;pages[cur].classList.add("active");setTimeout(next,parseInt(pages[cur].dataset.time))}
+window.onload=function(){setTimeout(next,parseInt(pages[0].dataset.time))};
+</script></body></html>
