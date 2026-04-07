@@ -389,6 +389,21 @@ async def personalize_sms(request: Request):
 SOLAPI_API_KEY    = os.environ.get("SOLAPI_API_KEY", "")
 SOLAPI_API_SECRET = os.environ.get("SOLAPI_API_SECRET", "")
 SOLAPI_FROM       = os.environ.get("SOLAPI_FROM", "")
+STORE_NAME        = os.environ.get("STORE_NAME", "품앗이마을 지족점")  # 발신 매장명
+
+
+def _format_sms_text(text: str, recipient_name: str | None) -> str:
+    """SMS 본문에 매장명 + 조합원 호명 prefix 자동 추가.
+
+    포맷: "{STORE_NAME}입니다.\n{이름} 조합원님, {본문}"
+    recipient_name이 없으면 매장명만 prefix.
+    """
+    text = (text or "").strip()
+    if not text:
+        return text
+    if recipient_name:
+        return f"{STORE_NAME}입니다.\n{recipient_name} 조합원님, {text}"
+    return f"{STORE_NAME}입니다.\n{text}"
 
 
 @app.post("/api/sms-send")
@@ -396,8 +411,10 @@ async def sms_send(request: Request):
     """Solapi SMS 발송 프록시.
 
     POST body 형태:
-      { "messages": [{ "to": "01012345678", "text": "..." }, ...] }
-      또는 단일: { "to": "01012345678", "text": "..." }
+      { "messages": [{ "to": "01012345678", "text": "...", "recipient_name": "김성훈" }, ...] }
+      또는 단일: { "to": "01012345678", "text": "...", "recipient_name": "김성훈" }
+
+    recipient_name이 있으면 본문에 매장명+조합원님 호명 자동 prefix.
 
     응답: { "ok": true, "count": N, "fail": M, "group_id": "..." }
        또는 { "ok": false, "error": "..." }
@@ -422,16 +439,18 @@ async def sms_send(request: Request):
         text = body.get("text") or ""
         if not to or not text:
             return JSONResponse(status_code=400, content={"ok": False, "error": "to, text 필수"})
-        raw_messages = [{"to": to, "text": text}]
+        raw_messages = [{"to": to, "text": text, "recipient_name": body.get("recipient_name")}]
 
     from_clean = SOLAPI_FROM.replace("-", "")
     messages_norm = []
     for m in raw_messages[:50]:  # 최대 50건/요청
         to_clean = (m.get("to") or "").replace("-", "")
-        text_clean = (m.get("text") or "").strip()
-        if not to_clean or not text_clean:
+        text_raw = (m.get("text") or "").strip()
+        recipient = (m.get("recipient_name") or "").strip() or None
+        if not to_clean or not text_raw:
             continue
-        messages_norm.append({"to": to_clean, "from": from_clean, "text": text_clean})
+        text_formatted = _format_sms_text(text_raw, recipient)
+        messages_norm.append({"to": to_clean, "from": from_clean, "text": text_formatted})
 
     if not messages_norm:
         return JSONResponse(status_code=400, content={"ok": False, "error": "유효한 메시지 없음"})

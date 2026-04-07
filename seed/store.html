@@ -2167,9 +2167,11 @@ async function sendSms() {
   resList.innerHTML = '<div class="loading-row">발송 중…</div>';
 
   // 백엔드 프록시 호출 (.env의 SOLAPI 키 사용 — localStorage 의존 제거)
+  // recipient_name을 같이 보내면 백엔드가 "{매장}입니다.\n{이름} 조합원님, {본문}" 자동 prefix
   const messages = recipients.map(c => ({
     to: c.phone.replace(/-/g, ''),
     text: message,
+    recipient_name: c.member_name || null,
   }));
 
   try {
