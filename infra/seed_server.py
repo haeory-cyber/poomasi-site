@@ -177,7 +177,17 @@ async def chat(request: Request):
         answer, refs = engine.generate(
             query, top_k=top_k, history=history, user_email=email
         )
-        return {"answer": answer, "refs": refs}
+        # 위젯 액션 객체 (engine이 self._last_action에 담아주면 응답에 통과)
+        action = getattr(engine, '_last_action', None)
+        if action is not None:
+            try:
+                engine._last_action = None  # 1회용
+            except Exception:
+                pass
+        resp = {"answer": answer, "refs": refs}
+        if action:
+            resp["action"] = action
+        return resp
     except Exception as e:
         return JSONResponse(
             status_code=500,

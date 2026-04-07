@@ -1896,22 +1896,32 @@ function updateCharCount() {
 }
 
 // ── 이음SMS 딥링크 자동 채움 ──────────────────────────
-// URL 파라미터: ?name=홍길동 (조합원 이름) / ?producer=김농부 (생산자) / ?item=사과 (품목, M2 연기)
+// URL 파라미터:
+//   ?name=홍길동           (조합원 이름)
+//   ?member_id=XXX         (특정 회원 직접 선택, 동명이인 우회)
+//   ?producer=김농부       (생산자)
+//   ?item=사과             (품목, M2 연기)
+//   ?sms_text=...          (textarea 자동 채움)
+//   ?auto_send=1           (자동 발송 모드 — 위젯 hidden iframe 호출용)
+//   ?session_id=XXX        (postMessage echo back, 위젯이 응답 매칭용)
 async function autoFillFromURL(params) {
-  const name     = params.get('name');
-  const producer = params.get('producer');
-  const item     = params.get('item');
-  const smsText  = params.get('sms_text');
+  const name      = params.get('name');
+  const memberId  = params.get('member_id');
+  const producer  = params.get('producer');
+  const item      = params.get('item');
+  const smsText   = params.get('sms_text');
+  const autoSend  = params.get('auto_send') === '1';
+  const sessionId = params.get('session_id') || '';
 
-  if (!name && !producer && !item && !smsText) return;
+  if (!name && !memberId && !producer && !item && !smsText) return;
 
-  // 이음SMS 탭으로 전환
+  // 이음SMS 탭으로 전환 (auto_send 모드면 사용자 시야에 안 보이지만 dom 활성화 필요)
   try {
     switchTab('sms', null);
     document.querySelectorAll('.tab-btn').forEach(b => { if (b.textContent.includes('SMS') || b.textContent.includes('이음')) b.classList.add('active'); });
   } catch(e) { console.warn('switchTab(sms) 실패:', e); }
 
-  // 메시지 자동 채움 (대상 선택과 무관하게 적용)
+  // 메시지 자동 채움
   if (smsText) {
     const ta = document.getElementById('sms-message');
     if (ta) {
@@ -1920,28 +1930,106 @@ async function autoFillFromURL(params) {
     }
   }
 
+  // postMessage 헬퍼 (auto_send 모드 전용, 위젯에 결과 보고)
+  function _postBack(payload) {
+    if (!autoSend || window.parent === window) return;
+    try {
+      window.parent.postMessage(Object.assign({ session_id: sessionId, source: 'poomai-store' }, payload), location.origin);
+    } catch(e) { console.error('postMessage 실패:', e); }
+  }
+
+  // 자동 발송 실행기
+  async function _autoFireSend(memberObj) {
+    try {
+      _applySingleMember(memberObj);
+      // textarea 검증
+      const msg = (document.getElementById('sms-message').value || '').trim();
+      if (!msg) {
+        _postBack({ type: 'poomai-sms-result', ok: false, error: 'empty_message' });
+        return;
+      }
+      // sendSms 호출 (기존 함수 그대로)
+      await sendSms();
+      // 발송 결과 영역에서 성공 여부 추출 (sendSms는 sms-result에 결과 그림)
+      const ok = (document.getElementById('sms-result').textContent || '').includes('성공') ||
+                 (document.getElementById('sms-result-list').textContent || '').includes('성공');
+      _postBack({
+        type: 'poomai-sms-result',
+        ok: true, // sendSms가 throw 안 했으면 일단 ok
+        recipient_name: memberObj.member_name || memberObj.member_id,
+        phone_masked: _maskPhone(memberObj.phone),
+        message: msg,
+      });
+    } catch(e) {
+      console.error('autoFire error:', e);
+      _postBack({ type: 'poomai-sms-result', ok: false, error: String(e && e.message || e) });
+    }
+  }
+
+  // member_id 직접 모드 — 동명이인 우회용 (위젯이 1번 선택 후 재호출)
+  if (memberId) {
+    try {
+      const { data, error } = await sb
+        .from('members')
+        .select('member_id,member_name,phone')
+        .eq('member_id', memberId)
+        .limit(1)
+        .single();
+      if (error || !data) {
+        _postBack({ type: 'poomai-sms-result', ok: false, error: 'member_not_found' });
+        toast('회원 없음'); return;
+      }
+      if (autoSend) await _autoFireSend(data);
+      else _applySingleMember(data);
+    } catch(e) {
+      _postBack({ type: 'poomai-sms-result', ok: false, error: String(e.message) });
+    }
+    return;
+  }
+
   // item 모드 — farmer_members에 품목 컬럼 없음. M2 연기
   if (item && !name && !producer) {
-    setTimeout(() => toast('품목 기반 발송은 준비 중입니다. name 또는 producer로 호출하세요.'), 300);
+    if (autoSend) _postBack({ type: 'poomai-sms-result', ok: false, error: 'item_mode_unsupported' });
+    else setTimeout(() => toast('품목 기반 발송은 준비 중입니다. name 또는 producer로 호출하세요.'), 300);
     return;
   }
 
   // producer 모드 — 기존 loadTopCustomers 파이프라인 재사용
   if (producer) {
     try {
-      // farmer-select 로딩 대기
       await loadFarmerList();
       const sel = document.getElementById('farmer-select');
       if (!sel) return;
-      // 후보 매칭
       const match = allFarmerNames.find(n => n === producer) || allFarmerNames.find(n => n && n.includes(producer));
-      if (!match) { toast(`생산자 "${producer}" 없음`); return; }
+      if (!match) {
+        if (autoSend) _postBack({ type: 'poomai-sms-result', ok: false, error: 'producer_not_found', producer });
+        else toast(`생산자 "${producer}" 없음`);
+        return;
+      }
       sel.value = match;
       await loadTopCustomers();
-      toast(`${match} 단골 불러옴`);
+      if (autoSend) {
+        // producer 모드 자동 발송 — 단골 N명 전체에게
+        try {
+          const msg = (document.getElementById('sms-message').value || '').trim();
+          if (!msg) { _postBack({ type: 'poomai-sms-result', ok: false, error: 'empty_message' }); return; }
+          await sendSms();
+          _postBack({
+            type: 'poomai-sms-result', ok: true,
+            recipient_name: `${match} 단골`,
+            recipient_count: customerPool.length,
+            message: msg,
+          });
+        } catch(e) {
+          _postBack({ type: 'poomai-sms-result', ok: false, error: String(e.message) });
+        }
+      } else {
+        toast(`${match} 단골 불러옴`);
+      }
     } catch(e) {
       console.error('autoFillFromURL producer error:', e);
-      toast('생산자 조회 실패: ' + e.message);
+      if (autoSend) _postBack({ type: 'poomai-sms-result', ok: false, error: String(e.message) });
+      else toast('생산자 조회 실패: ' + e.message);
     }
     return;
   }
@@ -1950,19 +2038,37 @@ async function autoFillFromURL(params) {
   if (name) {
     try {
       const candidates = await _fetchMemberByName(name);
-      if (!candidates.length) { toast(`"${name}" 조합원 없음`); return; }
+      if (!candidates.length) {
+        if (autoSend) _postBack({ type: 'poomai-sms-result', ok: false, error: 'member_not_found', name });
+        else toast(`"${name}" 조합원 없음`);
+        return;
+      }
       if (candidates.length === 1) {
-        _applySingleMember(candidates[0]);
-        toast(`${candidates[0].member_name} 선택됨`);
+        if (autoSend) await _autoFireSend(candidates[0]);
+        else { _applySingleMember(candidates[0]); toast(`${candidates[0].member_name} 선택됨`); }
       } else {
-        _showAmbiguousModal(candidates, (picked) => {
-          _applySingleMember(picked);
-          toast(`${picked.member_name} 선택됨`);
-        });
+        if (autoSend) {
+          // 위젯에게 동명이인 후보 전달, 사람 선택 받으면 member_id로 재호출
+          _postBack({
+            type: 'poomai-sms-ambiguous',
+            name,
+            candidates: candidates.map(c => ({
+              member_id: c.member_id,
+              member_name: c.member_name,
+              phone_masked: _maskPhone(c.phone),
+            })),
+          });
+        } else {
+          _showAmbiguousModal(candidates, (picked) => {
+            _applySingleMember(picked);
+            toast(`${picked.member_name} 선택됨`);
+          });
+        }
       }
     } catch(e) {
       console.error('autoFillFromURL name error:', e);
-      toast('이름 조회 실패: ' + e.message);
+      if (autoSend) _postBack({ type: 'poomai-sms-result', ok: false, error: String(e.message) });
+      else toast('이름 조회 실패: ' + e.message);
     }
   }
 }

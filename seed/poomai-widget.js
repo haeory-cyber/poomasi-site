@@ -615,6 +615,192 @@
     el.style.height = Math.min(Math.max(scrollH, minH), maxH) + 'px';
   }
 
+  // ── SMS 액션 (engine 안 거치고 위젯이 store.html sendSms 직접 호출) ──
+  // 보고체→평서체 (engine.py _normalize_reported_speech 17개 규칙 1:1 포팅)
+  function normalizeReportedSpeech(text) {
+    var rules = [
+      [/되었다고$/,'됐어요'], [/되었었다고$/,'됐었어요'], [/됐다고$/,'됐어요'],
+      [/했다고$/,'했어요'], [/왔다고$/,'왔어요'], [/갔다고$/,'갔어요'],
+      [/였다고$/,'였어요'], [/었다고$/,'었어요'], [/았다고$/,'았어요'],
+      [/있다고$/,'있어요'], [/없다고$/,'없어요'], [/한다고$/,'해요'],
+      [/온다고$/,'와요'], [/간다고$/,'가요'], [/된다고$/,'돼요'],
+      [/(\S)이라고$/,'$1이에요'], [/(\S)라고$/,'$1예요'],
+      [/다고$/,'다'],
+    ];
+    for (var i = 0; i < rules.length; i++) {
+      var nt = text.replace(rules[i][0], rules[i][1]);
+      if (nt !== text) return nt;
+    }
+    return text;
+  }
+
+  // 메시지 본문 추출 (engine.py _extract_msg_text 포팅)
+  function extractSmsBody(query) {
+    var qm = query.match(/["'](.*?)["']/);
+    if (qm) return qm[1].trim();
+    var bm = query.match(/(?:에게|한테|께)\s*(.+?)(?:\s*(?:문자보내|문자 보내|알려줘|알려 줘|전달해|전달 해|문자주세요|문자 주세요|문자))/);
+    if (bm) return normalizeReportedSpeech(bm[1].trim());
+    return query.trim();
+  }
+
+  // SMS intent 매칭 (engine.py _detect_sms_intent 포팅)
+  // 반환: null | {mode:'name'|'producer'|'item', value, message}
+  function detectSmsIntent(query) {
+    var SMS_KW = ['문자','문자보내','문자 보내','sms','SMS','알림보내','알림 보내','문자메시지'];
+    var ql = query.toLowerCase();
+    var hasSms = SMS_KW.some(function(k){ return ql.indexOf(k.toLowerCase()) !== -1; });
+    var hasNotify = (query.indexOf('알려줘') !== -1 || query.indexOf('알려 줘') !== -1 || query.indexOf('알림') !== -1);
+    if (!hasSms && !hasNotify) return null;
+
+    var groupMarkers = ['단골조합원','단골고객','단골들','단골 분','단골님','단골에게','단골한테','고객들','고객한테'];
+    var isGroup = groupMarkers.some(function(m){ return query.indexOf(m) !== -1; });
+
+    // 개별 발송: 이름 + 조합원/씨/님 (그룹 표지 없을 때)
+    if (!isGroup) {
+      var im = query.match(/([가-힣]{2,4})\s*(?:조합원|씨|님)(?!들)/);
+      if (im && im[1] !== '단골' && im[1] !== '고객') {
+        return { mode: 'name', value: im[1], message: extractSmsBody(query) };
+      }
+    }
+
+    // 그룹 발송
+    var groupKw = ['단골','고객','자주 사','자주사','사람들','들한테'];
+    var hasGroupKw = groupKw.some(function(k){ return query.indexOf(k) !== -1; });
+    if (isGroup || hasGroupKw) {
+      // producer 우선
+      var pm = query.match(/([가-힣]{2,4})\s*(?:생산자|농부|농가|농민)/);
+      if (pm) return { mode: 'producer', value: pm[1], message: extractSmsBody(query) };
+      // item
+      var stop = ['단골','고객','문자','보내','알려','조합원','사람들','오늘','입고','됐다','됐어','왔어','알림','메시지','생산자','농부','농가','농민'];
+      var words = query.match(/[가-힣]{2,6}/g) || [];
+      var item = null;
+      for (var w = 0; w < words.length; w++) {
+        if (stop.indexOf(words[w]) === -1 && words[w].length >= 2) { item = words[w]; break; }
+      }
+      return { mode: 'item', value: item, message: extractSmsBody(query) };
+    }
+    return null;
+  }
+
+  // SMS 액션 상태 (동명이인 후보 보관용)
+  var smsState = {
+    pendingCandidates: null,  // [{member_id, member_name, phone_masked}]
+    pendingMessage: null,
+    sessionCounter: 0,
+  };
+
+  // hidden iframe으로 store.html 호출 → postMessage 결과 수신
+  function fireSmsIframe(urlParams, sessionId) {
+    return new Promise(function(resolve) {
+      var iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.src = '/seed/store.html?' + urlParams.toString();
+
+      var done = false;
+      var timer = setTimeout(function() {
+        if (done) return;
+        done = true;
+        cleanup();
+        resolve({ type: 'poomai-sms-result', ok: false, error: 'timeout' });
+      }, 25000);
+
+      function onMsg(ev) {
+        if (!ev.data || ev.data.source !== 'poomai-store') return;
+        if (ev.data.session_id !== sessionId) return;
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        cleanup();
+        resolve(ev.data);
+      }
+      function cleanup() {
+        window.removeEventListener('message', onMsg);
+        try { iframe.remove(); } catch(_) {}
+      }
+      window.addEventListener('message', onMsg);
+      document.body.appendChild(iframe);
+    });
+  }
+
+  // SMS intent 처리 (engine 우회)
+  async function handleSmsIntent(intent) {
+    var sessionId = 'sms-' + (++smsState.sessionCounter) + '-' + Date.now();
+    var params = new URLSearchParams();
+    params.set('sms_text', intent.message);
+    params.set('auto_send', '1');
+    params.set('session_id', sessionId);
+    if (intent.mode === 'name') params.set('name', intent.value);
+    else if (intent.mode === 'producer') params.set('producer', intent.value);
+    else if (intent.mode === 'item') params.set('item', intent.value);
+
+    showTyping();
+    var result = await fireSmsIframe(params, sessionId);
+    hideTyping();
+
+    if (result.type === 'poomai-sms-ambiguous') {
+      smsState.pendingCandidates = result.candidates;
+      smsState.pendingMessage = intent.message;
+      var lines = result.candidates.map(function(c, i) {
+        return (i+1) + '. ' + c.member_name + ' — ' + c.phone_masked;
+      }).join('\n');
+      var msg = result.name + ' 님이 ' + result.candidates.length + '명 있어요:\n' + lines + '\n몇 번으로 보낼까요?';
+      addMessage('assistant', msg);
+      history.push({ role: 'assistant', content: msg });
+      saveHistory();
+      return;
+    }
+    if (result.type === 'poomai-sms-result' && result.ok) {
+      var line;
+      if (result.recipient_count) {
+        line = '✅ ' + result.recipient_name + ' ' + result.recipient_count + '명에게 보냈어요.\n내용: ' + result.message;
+      } else {
+        line = '✅ ' + (result.recipient_name || '수신자') + ' (' + (result.phone_masked || '') + ')에게 보냈어요.\n내용: ' + result.message;
+      }
+      addMessage('assistant', line);
+      history.push({ role: 'assistant', content: line });
+      saveHistory();
+      return;
+    }
+    var errMsg = '발송 실패: ' + (result.error || '알 수 없는 오류');
+    addMessage('assistant', errMsg);
+    history.push({ role: 'assistant', content: errMsg });
+    saveHistory();
+  }
+
+  // 동명이인 선택 처리 ("1", "2" 같은 숫자 입력)
+  async function handleSmsAmbiguousPick(query) {
+    var nm = query.trim().match(/^\d+$/);
+    if (!nm || !smsState.pendingCandidates) return false;
+    var idx = parseInt(query.trim(), 10) - 1;
+    if (idx < 0 || idx >= smsState.pendingCandidates.length) return false;
+    var picked = smsState.pendingCandidates[idx];
+    var message = smsState.pendingMessage;
+    smsState.pendingCandidates = null;
+    smsState.pendingMessage = null;
+
+    var sessionId = 'sms-' + (++smsState.sessionCounter) + '-' + Date.now();
+    var params = new URLSearchParams();
+    params.set('member_id', picked.member_id);
+    params.set('sms_text', message);
+    params.set('auto_send', '1');
+    params.set('session_id', sessionId);
+
+    showTyping();
+    var result = await fireSmsIframe(params, sessionId);
+    hideTyping();
+
+    var line;
+    if (result.type === 'poomai-sms-result' && result.ok) {
+      line = '✅ ' + (result.recipient_name || picked.member_name) + ' (' + (result.phone_masked || picked.phone_masked) + ')에게 보냈어요.\n내용: ' + message;
+    } else {
+      line = '발송 실패: ' + (result.error || '알 수 없는 오류');
+    }
+    addMessage('assistant', line);
+    history.push({ role: 'assistant', content: line });
+    saveHistory();
+    return true;
+  }
+
   // ── API: 채팅 ──
   async function sendChat(query) {
     if (isLoading || !query.trim()) return;
@@ -626,6 +812,33 @@
     addMessage('user', query);
     history.push({ role: 'user', content: query });
     saveHistory();
+
+    // 1) 동명이인 후보 대기 중이면 숫자 선택 처리
+    if (smsState.pendingCandidates) {
+      var picked = await handleSmsAmbiguousPick(query);
+      if (picked) {
+        isLoading = false;
+        sendBtn.disabled = false;
+        textarea.focus();
+        return;
+      }
+    }
+
+    // 2) SMS intent 매칭 → 위젯이 직접 처리 (engine 우회)
+    var smsIntent = detectSmsIntent(query);
+    if (smsIntent) {
+      try {
+        await handleSmsIntent(smsIntent);
+      } catch (e) {
+        console.error('SMS handle error:', e);
+        addErrorMessage('SMS 처리 중 오류: ' + (e.message || e));
+      } finally {
+        isLoading = false;
+        sendBtn.disabled = false;
+        textarea.focus();
+      }
+      return;
+    }
 
     showTyping();
 
