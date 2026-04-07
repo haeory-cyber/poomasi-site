@@ -248,6 +248,132 @@ async def auth_login(request: Request):
         )
 
 
+# ── 개인화 SMS ───────────────────────────────────────
+@app.post("/api/personalize-sms")
+async def personalize_sms(request: Request):
+    """조합원별 구매이력 기반 개인화 문자 메시지 생성."""
+    ip = request.client.host if request.client else "unknown"
+    email = _extract_email(request)
+    if not email:
+        return JSONResponse(status_code=401, content={"error": "인증이 필요합니다."})
+
+    if not _check_rate(ip, True):
+        return JSONResponse(status_code=429, content={"error": "요청 한도 초과. 잠시 후 다시 시도해주세요."})
+
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        return JSONResponse(status_code=503, content={"error": "데이터베이스 설정이 없습니다."})
+
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse(status_code=400, content={"error": "잘못된 요청 형식입니다."})
+
+    members = body.get("members", [])
+    broadcast = body.get("broadcast", "").strip()
+
+    if not members:
+        return JSONResponse(status_code=400, content={"error": "members가 비어 있습니다."})
+    if not broadcast:
+        return JSONResponse(status_code=400, content={"error": "broadcast 텍스트가 없습니다."})
+
+    # 최대 100명 제한
+    members = members[:100]
+
+    # broadcast에서 품목 추출: "- 품목명(가격)" 패턴 파싱
+    import re
+    broadcast_lines = broadcast.splitlines()
+    broadcast_items = []  # [(item_name, original_line), ...]
+    for line in broadcast_lines:
+        m = re.match(r'\s*[-•]\s*(.+)', line)
+        if m:
+            item_text = m.group(1).strip()
+            # 괄호 앞 품목명 추출
+            item_name = re.split(r'[\(（]', item_text)[0].strip()
+            if item_name:
+                broadcast_items.append((item_name, line.strip()))
+
+    broadcast_item_names = [name for name, _ in broadcast_items]
+
+    cutoff_date = (
+        __import__('datetime').datetime.utcnow()
+        - __import__('datetime').timedelta(days=90)
+    ).strftime("%Y-%m-%dT%H:%M:%S")
+
+    results = []
+
+    async with httpx.AsyncClient() as client:
+        for member in members:
+            mid  = member.get("member_id", "")
+            name = member.get("member_name", mid)
+            phone_raw = member.get("phone", "")
+            phone = phone_raw.replace("-", "")
+
+            if not phone:
+                continue
+
+            # 최근 90일 구매 품목 조회 (최대 500건)
+            top_items = []
+            try:
+                url = (
+                    f"{SUPABASE_URL}/rest/v1/pos_transactions"
+                    f"?select=item_name"
+                    f"&member_id=eq.{mid}"
+                    f"&sold_at=gte.{cutoff_date}"
+                    f"&order=sold_at.desc"
+                    f"&limit=500"
+                )
+                resp = await client.get(
+                    url,
+                    headers={
+                        "apikey": SUPABASE_KEY,
+                        "Authorization": f"Bearer {SUPABASE_KEY}",
+                    },
+                    timeout=8,
+                )
+                if resp.status_code == 200:
+                    rows = resp.json()
+                    # 품목별 빈도 집계
+                    freq: dict[str, int] = {}
+                    for row in rows:
+                        iname = (row.get("item_name") or "").strip()
+                        if iname:
+                            freq[iname] = freq.get(iname, 0) + 1
+                    top_items = sorted(freq.items(), key=lambda x: x[1], reverse=True)[:5]
+                    top_items = [name_f for name_f, _ in top_items]
+            except Exception:
+                pass  # 조회 실패해도 나머지 처리 계속
+
+            # broadcast 품목과 교집합
+            intersection = []
+            for b_name, b_line in broadcast_items:
+                for t_item in top_items:
+                    # 부분 일치 (broadcast 품목명이 구매이력 품목에 포함되거나 반대)
+                    if b_name in t_item or t_item in b_name:
+                        intersection.append((b_name, b_line))
+                        break
+
+            if intersection:
+                first_name, first_line = intersection[0]
+                intersect_lines = "\n".join(line for _, line in intersection)
+                text = (
+                    f"{name}님, 자주 찾으시는 {first_name} 오늘도 들어왔어요!\n\n"
+                    f"{intersect_lines}\n\n"
+                    f"품앗이마을 지족점"
+                )
+            else:
+                summary_lines = [l for l in broadcast_lines if l.strip()][:3]
+                summary = "\n".join(summary_lines)
+                text = (
+                    f"{name}님, 이번 주 품앗이마을 소식이에요!\n\n"
+                    f"{summary}\n\n"
+                    f"품앗이마을 지족점"
+                )
+
+            results.append({"member_id": mid, "phone": phone, "text": text})
+
+    return results
+
+
 # ── 정적 파일 (API 라우트보다 뒤에 마운트) ─────────────
 app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
 
