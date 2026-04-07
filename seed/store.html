@@ -1948,14 +1948,12 @@ async function autoFillFromURL(params) {
         _postBack({ type: 'poomai-sms-result', ok: false, error: 'empty_message' });
         return;
       }
-      // sendSms 호출 (기존 함수 그대로)
-      await sendSms();
-      // 발송 결과 영역에서 성공 여부 추출 (sendSms는 sms-result에 결과 그림)
-      const ok = (document.getElementById('sms-result').textContent || '').includes('성공') ||
-                 (document.getElementById('sms-result-list').textContent || '').includes('성공');
+      // sendSms는 결과 객체를 return — 진짜 성공/실패를 위젯에 통보
+      const r = await sendSms();
       _postBack({
         type: 'poomai-sms-result',
-        ok: true, // sendSms가 throw 안 했으면 일단 ok
+        ok: !!(r && r.ok),
+        error: r && !r.ok ? r.error : null,
         recipient_name: memberObj.member_name || memberObj.member_id,
         phone_masked: _maskPhone(memberObj.phone),
         message: msg,
@@ -2013,9 +2011,11 @@ async function autoFillFromURL(params) {
         try {
           const msg = (document.getElementById('sms-message').value || '').trim();
           if (!msg) { _postBack({ type: 'poomai-sms-result', ok: false, error: 'empty_message' }); return; }
-          await sendSms();
+          const r = await sendSms();
           _postBack({
-            type: 'poomai-sms-result', ok: true,
+            type: 'poomai-sms-result',
+            ok: !!(r && r.ok),
+            error: r && !r.ok ? r.error : null,
             recipient_name: `${match} 단골`,
             recipient_count: customerPool.length,
             message: msg,
@@ -2150,10 +2150,10 @@ async function hmacSha256Hex(secret, message) {
 
 async function sendSms() {
   const message = document.getElementById('sms-message').value.trim();
-  if (!message) { toast('문자 내용을 입력하세요.'); return; }
+  if (!message) { toast('문자 내용을 입력하세요.'); return { ok: false, error: '메시지가 비어 있음' }; }
 
   const checked = [...document.querySelectorAll('.customer-cb:checked')];
-  if (!checked.length) { toast('수신자를 선택하세요.'); return; }
+  if (!checked.length) { toast('수신자를 선택하세요.'); return { ok: false, error: '수신자 미선택' }; }
 
   const apiKey    = localStorage.getItem('solapi_key')    || document.getElementById('solapi-key').value.trim();
   const apiSecret = localStorage.getItem('solapi_secret') || document.getElementById('solapi-secret').value.trim();
@@ -2161,14 +2161,14 @@ async function sendSms() {
 
   if (!apiKey || !apiSecret || !fromNum) {
     toast('⚙ Solapi API 설정을 먼저 입력·저장하세요.');
-    return;
+    return { ok: false, error: 'Solapi API 키가 이 브라우저에 저장돼 있지 않음 (store.html 이음SMS 탭에서 키 설정 필요)' };
   }
 
   const recipients = checked
     .map(cb => customerPool[+cb.dataset.idx])
     .filter(c => c && c.phone);
 
-  if (!recipients.length) { toast('전화번호가 있는 수신자가 없습니다.'); return; }
+  if (!recipients.length) { toast('전화번호가 있는 수신자가 없습니다.'); return { ok: false, error: '전화번호 있는 수신자 없음' }; }
 
   const resDiv  = document.getElementById('sms-result');
   const resList = document.getElementById('sms-result-list');
@@ -2196,7 +2196,7 @@ async function sendSms() {
 
     if (!resp.ok) {
       resList.innerHTML = `<div class="empty-row" style="color:var(--red);">오류: ${result.message || resp.status}</div>`;
-      return;
+      return { ok: false, error: `Solapi 응답 오류: ${result.message || resp.status}` };
     }
 
     const successCount = result.count?.success ?? result.groupInfo?.count?.total ?? recipients.length;
@@ -2219,8 +2219,11 @@ async function sendSms() {
       sender: fromNum,
     });
 
+    return { ok: true, count: successCount, fail: failCount };
+
   } catch(e) {
     resList.innerHTML = `<div class="empty-row" style="color:var(--red);">네트워크 오류: ${e.message}</div>`;
+    return { ok: false, error: `네트워크 오류: ${e.message}` };
   }
 }
 
