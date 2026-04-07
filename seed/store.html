@@ -1792,7 +1792,14 @@ function initApp() {
 // ══ 이음SMS ════════════════════════════════════════════
 
 let allFarmerNames = [];
-let customerPool   = []; // [{member_id, member_name, purchase_count, phone}]
+let customerPool   = []; // [{member_id, member_name, purchase_count, phone, preferred_store}]
+let _smsStoreFilter = null; // '지족점' | '관저점' | '전체' | null (URL params로 위젯에서 주입)
+
+// '지족점' → '품앗이마을 지족점' (백엔드 _format_sms_text의 store_branch 인자 형식)
+function _storeBranchLabel(short) {
+  if (!short) return null;
+  return short.startsWith('품앗이마을') ? short : `품앗이마을 ${short}`;
+}
 
 async function loadFarmerList() {
   try {
@@ -1841,21 +1848,33 @@ async function loadTopCustomers() {
     if (e1) throw e1;
     if (!fm || !fm.length) { list.innerHTML = '<div class="empty-row">단골 없음</div>'; return; }
 
-    // 전화번호 조회
+    // 전화번호 + 매장 조회 (매장 필터 + sms_optin 적용)
     const memberIds = fm.map(r => r.member_id);
-    const { data: members, error: e2 } = await sb
+    let q = sb
       .from('members')
-      .select('member_id,member_name,phone')
-      .in('member_id', memberIds);
+      .select('member_id,member_name,phone,preferred_store,sms_optin')
+      .in('member_id', memberIds)
+      .eq('sms_optin', true);
+    if (_smsStoreFilter && _smsStoreFilter !== '전체') {
+      q = q.eq('preferred_store', _smsStoreFilter);
+    }
+    const { data: members, error: e2 } = await q;
     if (e2) throw e2;
-    const phoneMap = Object.fromEntries((members || []).map(m => [m.member_id, m.phone || '']));
+    const memberMap = Object.fromEntries((members || []).map(m => [m.member_id, m]));
 
-    customerPool = fm.map(r => ({
-      member_id:      r.member_id,
-      member_name:    r.member_name || r.member_id,
-      purchase_count: r.purchase_count,
-      phone:          phoneMap[r.member_id] || '',
-    }));
+    customerPool = fm
+      .map(r => {
+        const m = memberMap[r.member_id];
+        if (!m) return null; // 매장 필터/sms_optin으로 제외
+        return {
+          member_id:       r.member_id,
+          member_name:     r.member_name || m.member_name || r.member_id,
+          purchase_count:  r.purchase_count,
+          phone:           m.phone || '',
+          preferred_store: m.preferred_store || null,
+        };
+      })
+      .filter(Boolean);
 
     renderCustomerList();
   } catch(e) {
@@ -1912,6 +1931,8 @@ async function autoFillFromURL(params) {
   const smsText   = params.get('sms_text');
   const autoSend  = params.get('auto_send') === '1';
   const sessionId = params.get('session_id') || '';
+  const storeFilter = params.get('store_filter'); // '지족점' | '관저점' | '전체'
+  if (storeFilter) _smsStoreFilter = storeFilter;
 
   if (!name && !memberId && !producer && !item && !smsText) return;
 
@@ -1969,7 +1990,7 @@ async function autoFillFromURL(params) {
     try {
       const { data, error } = await sb
         .from('members')
-        .select('member_id,member_name,phone')
+        .select('member_id,member_name,phone,preferred_store')
         .eq('member_id', memberId)
         .limit(1)
         .single();
@@ -2073,13 +2094,18 @@ async function autoFillFromURL(params) {
   }
 }
 
-// members 테이블에서 이름으로 조회 (동명이인 포함)
+// members 테이블에서 이름으로 조회 (동명이인 포함, sms_optin + 매장 필터 적용)
 async function _fetchMemberByName(name) {
-  const { data, error } = await sb
+  let q = sb
     .from('members')
-    .select('member_id,member_name,phone')
+    .select('member_id,member_name,phone,preferred_store,sms_optin')
     .eq('member_name', name)
+    .eq('sms_optin', true)
     .limit(50);
+  if (_smsStoreFilter && _smsStoreFilter !== '전체') {
+    q = q.eq('preferred_store', _smsStoreFilter);
+  }
+  const { data, error } = await q;
   if (error) throw error;
   return (data || []).filter(m => m.phone);
 }
@@ -2097,10 +2123,11 @@ function _maskPhone(phone) {
 // 단일 조합원을 customerPool에 주입하고 리스트 렌더
 function _applySingleMember(m) {
   customerPool = [{
-    member_id:      m.member_id,
-    member_name:    m.member_name || m.member_id,
-    purchase_count: 0,
-    phone:          m.phone || '',
+    member_id:       m.member_id,
+    member_name:     m.member_name || m.member_id,
+    purchase_count:  0,
+    phone:           m.phone || '',
+    preferred_store: m.preferred_store || null,
   }];
   const card = document.getElementById('customer-card');
   if (card) card.style.display = '';
@@ -2167,11 +2194,12 @@ async function sendSms() {
   resList.innerHTML = '<div class="loading-row">발송 중…</div>';
 
   // 백엔드 프록시 호출 (.env의 SOLAPI 키 사용 — localStorage 의존 제거)
-  // recipient_name을 같이 보내면 백엔드가 "{매장}입니다.\n{이름} 조합원님, {본문}" 자동 prefix
+  // recipient_name + store_branch를 같이 보내면 백엔드가 "{매장}입니다.\n{이름} 조합원님, {본문}" 자동 prefix
   const messages = recipients.map(c => ({
     to: c.phone.replace(/-/g, ''),
     text: message,
     recipient_name: c.member_name || null,
+    store_branch: _storeBranchLabel(c.preferred_store), // 회원별 매장 prefix (NULL이면 백엔드 STORE_NAME fallback)
   }));
 
   try {

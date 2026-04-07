@@ -392,18 +392,22 @@ SOLAPI_FROM       = os.environ.get("SOLAPI_FROM", "")
 STORE_NAME        = os.environ.get("STORE_NAME", "품앗이마을 지족점")  # 발신 매장명
 
 
-def _format_sms_text(text: str, recipient_name: str | None) -> str:
+def _format_sms_text(text: str, recipient_name: str | None, store_branch: str | None = None) -> str:
     """SMS 본문에 매장명 + 조합원 호명 prefix 자동 추가.
 
-    포맷: "{STORE_NAME}입니다.\n{이름} 조합원님, {본문}"
-    recipient_name이 없으면 매장명만 prefix.
+    포맷: "[{지족점}] 품앗이마을입니다.\n{이름} 조합원님, {본문}"
+    store_branch 입력은 "품앗이마을 지족점" 또는 "지족점" 둘 다 허용.
+    매장 단축명("지족점")만 대괄호로 추출. 매장 미식별 시 그냥 "품앗이마을입니다".
     """
     text = (text or "").strip()
     if not text:
         return text
+    branch_input = (store_branch or "").strip() or STORE_NAME
+    branch_short = branch_input.replace("품앗이마을", "").strip()
+    prefix = f"[{branch_short}] 품앗이마을입니다." if branch_short else "품앗이마을입니다."
     if recipient_name:
-        return f"{STORE_NAME}입니다.\n{recipient_name} 조합원님, {text}"
-    return f"{STORE_NAME}입니다.\n{text}"
+        return f"{prefix}\n{recipient_name} 조합원님, {text}"
+    return f"{prefix}\n{text}"
 
 
 @app.post("/api/sms-send")
@@ -439,7 +443,12 @@ async def sms_send(request: Request):
         text = body.get("text") or ""
         if not to or not text:
             return JSONResponse(status_code=400, content={"ok": False, "error": "to, text 필수"})
-        raw_messages = [{"to": to, "text": text, "recipient_name": body.get("recipient_name")}]
+        raw_messages = [{
+            "to": to,
+            "text": text,
+            "recipient_name": body.get("recipient_name"),
+            "store_branch": body.get("store_branch"),
+        }]
 
     from_clean = SOLAPI_FROM.replace("-", "")
     messages_norm = []
@@ -447,9 +456,10 @@ async def sms_send(request: Request):
         to_clean = (m.get("to") or "").replace("-", "")
         text_raw = (m.get("text") or "").strip()
         recipient = (m.get("recipient_name") or "").strip() or None
+        store_branch = (m.get("store_branch") or "").strip() or None
         if not to_clean or not text_raw:
             continue
-        text_formatted = _format_sms_text(text_raw, recipient)
+        text_formatted = _format_sms_text(text_raw, recipient, store_branch)
         messages_norm.append({"to": to_clean, "from": from_clean, "text": text_formatted})
 
     if not messages_norm:

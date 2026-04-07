@@ -643,6 +643,15 @@
     return query.trim();
   }
 
+  // 매장 키워드 추출 — '지족점' | '관저점' | '전체' | null
+  // '전체'는 컨텍스트(조합원/단골/회원) 동반 시만 매칭 (오탐 방지)
+  function extractStoreFilter(query) {
+    if (/지족점|지족동|지족/.test(query)) return '지족점';
+    if (/관저점|관저동|관저/.test(query)) return '관저점';
+    if (/전체\s*(?:조합원|단골|회원)|모든\s*(?:조합원|단골|회원)|전체에게|모두에게/.test(query)) return '전체';
+    return null;
+  }
+
   // SMS intent 매칭 (engine.py _detect_sms_intent 포팅)
   // 반환: null | {mode:'name'|'producer'|'item', value, message}
   function detectSmsIntent(query) {
@@ -682,10 +691,11 @@
     return null;
   }
 
-  // SMS 액션 상태 (동명이인 후보 보관용)
+  // SMS 액션 상태 (동명이인 후보 / 매장 선택 대기)
   var smsState = {
     pendingCandidates: null,  // [{member_id, member_name, phone_masked}]
     pendingMessage: null,
+    pendingStoreIntent: null, // 매장 미지정 producer intent {mode, value, message, storeFilter}
     sessionCounter: 0,
   };
 
@@ -724,11 +734,21 @@
 
   // SMS intent 처리 (engine 우회)
   async function handleSmsIntent(intent) {
+    // producer 모드(단골 발송) + 매장 미지정 → 사용자에게 묻기
+    if (intent.mode === 'producer' && !intent.storeFilter) {
+      smsState.pendingStoreIntent = intent;
+      var ask = '어느 매장 단골에게 보낼까요?\n1. 지족점\n2. 관저점\n3. 전체\n번호로 답해주세요.';
+      addMessage('assistant', ask);
+      history.push({ role: 'assistant', content: ask });
+      saveHistory();
+      return;
+    }
     var sessionId = 'sms-' + (++smsState.sessionCounter) + '-' + Date.now();
     var params = new URLSearchParams();
     params.set('sms_text', intent.message);
     params.set('auto_send', '1');
     params.set('session_id', sessionId);
+    if (intent.storeFilter) params.set('store_filter', intent.storeFilter);
     if (intent.mode === 'name') params.set('name', intent.value);
     else if (intent.mode === 'producer') params.set('producer', intent.value);
     else if (intent.mode === 'item') params.set('item', intent.value);
@@ -765,6 +785,20 @@
     addMessage('assistant', errMsg);
     history.push({ role: 'assistant', content: errMsg });
     saveHistory();
+  }
+
+  // 매장 선택 처리 ("1"=지족점, "2"=관저점, "3"=전체) — pendingStoreIntent 대기 중
+  async function handleSmsStoreFilterPick(query) {
+    var nm = query.trim().match(/^\d+$/);
+    if (!nm || !smsState.pendingStoreIntent) return false;
+    var idx = parseInt(query.trim(), 10);
+    var map = { 1: '지족점', 2: '관저점', 3: '전체' };
+    if (!map[idx]) return false;
+    var intent = smsState.pendingStoreIntent;
+    intent.storeFilter = map[idx];
+    smsState.pendingStoreIntent = null;
+    await handleSmsIntent(intent);
+    return true;
   }
 
   // 동명이인 선택 처리 ("1", "2" 같은 숫자 입력)
@@ -824,9 +858,21 @@
       }
     }
 
+    // 1-b) 매장 선택 대기 중이면 숫자 선택 처리
+    if (smsState.pendingStoreIntent) {
+      var storePicked = await handleSmsStoreFilterPick(query);
+      if (storePicked) {
+        isLoading = false;
+        sendBtn.disabled = false;
+        textarea.focus();
+        return;
+      }
+    }
+
     // 2) SMS intent 매칭 → 위젯이 직접 처리 (engine 우회)
     var smsIntent = detectSmsIntent(query);
     if (smsIntent) {
+      smsIntent.storeFilter = extractStoreFilter(query); // null이면 producer 모드에서 모달로 묻기
       try {
         await handleSmsIntent(smsIntent);
       } catch (e) {
