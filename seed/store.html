@@ -1079,6 +1079,18 @@
             </div>
           </div>
 
+          <!-- 이름 동명이인 선택 모달 (autoFillFromURL용) -->
+          <div id="name-ambiguous-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:10000;overflow-y:auto;padding:2rem 1rem;">
+            <div style="max-width:520px;margin:0 auto;background:var(--soil);border:1px solid rgba(196,128,58,0.3);padding:1.5rem;position:relative;">
+              <div style="font-family:'Noto Serif KR',serif;font-size:1rem;letter-spacing:0.1em;color:var(--amber);margin-bottom:0.5rem;">동명이인 선택</div>
+              <div style="font-size:0.78rem;color:var(--dust);margin-bottom:1rem;">같은 이름이 여러 명입니다. 발송 대상을 고르세요.</div>
+              <div id="name-ambiguous-list" style="max-height:60vh;overflow-y:auto;margin-bottom:1.5rem;display:flex;flex-direction:column;gap:0.5rem;"></div>
+              <div style="display:flex;gap:0.5rem;">
+                <button class="btn-primary" style="flex:1;background:var(--bark);border-color:var(--dust);" onclick="document.getElementById('name-ambiguous-modal').style.display='none'">취소</button>
+              </div>
+            </div>
+          </div>
+
           <!-- 발송 결과 -->
           <div id="sms-result" style="margin-top:1rem;display:none;">
             <div class="card-title" style="margin-bottom:0.5rem;">발송 결과</div>
@@ -1771,6 +1783,9 @@ function initApp() {
     document.querySelectorAll('.tab-btn').forEach(b => { if (b.textContent.includes('발주')) b.classList.add('active'); });
   }
 
+  // 이음SMS 딥링크 자동 채움 (?name= / ?producer= / ?item=)
+  autoFillFromURL(params);
+
   requestAnimationFrame(adjustContentPadding);
 }
 
@@ -1878,6 +1893,133 @@ function updateCharCount() {
   const el  = document.getElementById('sms-char-count');
   el.textContent = msg.length + ' / 90';
   el.className = 'sms-char' + (msg.length >= 90 ? ' over' : '');
+}
+
+// ── 이음SMS 딥링크 자동 채움 ──────────────────────────
+// URL 파라미터: ?name=홍길동 (조합원 이름) / ?producer=김농부 (생산자) / ?item=사과 (품목, M2 연기)
+async function autoFillFromURL(params) {
+  const name     = params.get('name');
+  const producer = params.get('producer');
+  const item     = params.get('item');
+  const smsText  = params.get('sms_text');
+
+  if (!name && !producer && !item && !smsText) return;
+
+  // 이음SMS 탭으로 전환
+  try {
+    switchTab('sms', null);
+    document.querySelectorAll('.tab-btn').forEach(b => { if (b.textContent.includes('SMS') || b.textContent.includes('이음')) b.classList.add('active'); });
+  } catch(e) { console.warn('switchTab(sms) 실패:', e); }
+
+  // 메시지 자동 채움 (대상 선택과 무관하게 적용)
+  if (smsText) {
+    const ta = document.getElementById('sms-message');
+    if (ta) {
+      ta.value = smsText.slice(0, 90);
+      try { updateCharCount(); } catch(e) {}
+    }
+  }
+
+  // item 모드 — farmer_members에 품목 컬럼 없음. M2 연기
+  if (item && !name && !producer) {
+    setTimeout(() => toast('품목 기반 발송은 준비 중입니다. name 또는 producer로 호출하세요.'), 300);
+    return;
+  }
+
+  // producer 모드 — 기존 loadTopCustomers 파이프라인 재사용
+  if (producer) {
+    try {
+      // farmer-select 로딩 대기
+      await loadFarmerList();
+      const sel = document.getElementById('farmer-select');
+      if (!sel) return;
+      // 후보 매칭
+      const match = allFarmerNames.find(n => n === producer) || allFarmerNames.find(n => n && n.includes(producer));
+      if (!match) { toast(`생산자 "${producer}" 없음`); return; }
+      sel.value = match;
+      await loadTopCustomers();
+      toast(`${match} 단골 불러옴`);
+    } catch(e) {
+      console.error('autoFillFromURL producer error:', e);
+      toast('생산자 조회 실패: ' + e.message);
+    }
+    return;
+  }
+
+  // name 모드 — members 테이블에서 이름으로 직접 조회
+  if (name) {
+    try {
+      const candidates = await _fetchMemberByName(name);
+      if (!candidates.length) { toast(`"${name}" 조합원 없음`); return; }
+      if (candidates.length === 1) {
+        _applySingleMember(candidates[0]);
+        toast(`${candidates[0].member_name} 선택됨`);
+      } else {
+        _showAmbiguousModal(candidates, (picked) => {
+          _applySingleMember(picked);
+          toast(`${picked.member_name} 선택됨`);
+        });
+      }
+    } catch(e) {
+      console.error('autoFillFromURL name error:', e);
+      toast('이름 조회 실패: ' + e.message);
+    }
+  }
+}
+
+// members 테이블에서 이름으로 조회 (동명이인 포함)
+async function _fetchMemberByName(name) {
+  const { data, error } = await sb
+    .from('members')
+    .select('member_id,member_name,phone')
+    .eq('member_name', name)
+    .limit(50);
+  if (error) throw error;
+  return (data || []).filter(m => m.phone);
+}
+
+// 전화번호 마스킹 (010-1234-5678 → 010-○○○○-5678)
+function _maskPhone(phone) {
+  if (!phone) return '번호없음';
+  const digits = String(phone).replace(/\D/g, '');
+  if (digits.length < 8) return phone;
+  const head = digits.slice(0, 3);
+  const tail = digits.slice(-4);
+  return `${head}-○○○○-${tail}`;
+}
+
+// 단일 조합원을 customerPool에 주입하고 리스트 렌더
+function _applySingleMember(m) {
+  customerPool = [{
+    member_id:      m.member_id,
+    member_name:    m.member_name || m.member_id,
+    purchase_count: 0,
+    phone:          m.phone || '',
+  }];
+  const card = document.getElementById('customer-card');
+  if (card) card.style.display = '';
+  renderCustomerList();
+}
+
+// 동명이인 선택 모달
+function _showAmbiguousModal(candidates, onPick) {
+  const modal = document.getElementById('name-ambiguous-modal');
+  const list  = document.getElementById('name-ambiguous-list');
+  if (!modal || !list) return;
+  list.innerHTML = candidates.map((c, i) => `
+    <button type="button" data-idx="${i}" style="display:flex;align-items:center;gap:0.6rem;padding:0.6rem 0.8rem;background:rgba(196,128,58,0.08);border:1px solid rgba(196,128,58,0.2);color:var(--cream);cursor:pointer;text-align:left;">
+      <span style="flex:1;font-size:0.85rem;">${c.member_name || c.member_id}</span>
+      <span style="font-size:0.75rem;color:var(--amber-light);">${_maskPhone(c.phone)}</span>
+    </button>
+  `).join('');
+  list.querySelectorAll('button[data-idx]').forEach(btn => {
+    btn.onclick = () => {
+      const idx = Number(btn.dataset.idx);
+      modal.style.display = 'none';
+      onPick(candidates[idx]);
+    };
+  });
+  modal.style.display = '';
 }
 
 function saveApiConfig() {
