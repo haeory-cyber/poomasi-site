@@ -384,6 +384,137 @@ async def personalize_sms(request: Request):
     return results
 
 
+# ── SMS 발송 (Solapi 프록시) ──────────────────────────
+# localStorage 의존 제거. 위젯·store.html 모두 이 엔드포인트로 호출.
+SOLAPI_API_KEY    = os.environ.get("SOLAPI_API_KEY", "")
+SOLAPI_API_SECRET = os.environ.get("SOLAPI_API_SECRET", "")
+SOLAPI_FROM       = os.environ.get("SOLAPI_FROM", "")
+
+
+@app.post("/api/sms-send")
+async def sms_send(request: Request):
+    """Solapi SMS 발송 프록시.
+
+    POST body 형태:
+      { "messages": [{ "to": "01012345678", "text": "..." }, ...] }
+      또는 단일: { "to": "01012345678", "text": "..." }
+
+    응답: { "ok": true, "count": N, "fail": M, "group_id": "..." }
+       또는 { "ok": false, "error": "..." }
+    """
+    ip = request.client.host if request.client else "unknown"
+
+    # rate limit (익명 호출 30/분/IP)
+    if not _check_rate(ip, False):
+        return JSONResponse(status_code=429, content={"ok": False, "error": "요청 한도 초과. 잠시 후 다시 시도해주세요."})
+
+    if not SOLAPI_API_KEY or not SOLAPI_API_SECRET or not SOLAPI_FROM:
+        return JSONResponse(status_code=503, content={"ok": False, "error": "Solapi 환경변수 미설정 (.env)"})
+
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse(status_code=400, content={"ok": False, "error": "JSON 파싱 실패"})
+
+    raw_messages = body.get("messages")
+    if not raw_messages:
+        to = body.get("to") or ""
+        text = body.get("text") or ""
+        if not to or not text:
+            return JSONResponse(status_code=400, content={"ok": False, "error": "to, text 필수"})
+        raw_messages = [{"to": to, "text": text}]
+
+    from_clean = SOLAPI_FROM.replace("-", "")
+    messages_norm = []
+    for m in raw_messages[:50]:  # 최대 50건/요청
+        to_clean = (m.get("to") or "").replace("-", "")
+        text_clean = (m.get("text") or "").strip()
+        if not to_clean or not text_clean:
+            continue
+        messages_norm.append({"to": to_clean, "from": from_clean, "text": text_clean})
+
+    if not messages_norm:
+        return JSONResponse(status_code=400, content={"ok": False, "error": "유효한 메시지 없음"})
+
+    # Solapi HMAC-SHA256 인증
+    import hmac as _hmac
+    import hashlib as _hashlib
+    import datetime as _dt
+    import secrets as _secrets
+
+    date = _dt.datetime.utcnow().isoformat() + "Z"
+    salt = _secrets.token_hex(16)
+    sig = _hmac.new(
+        SOLAPI_API_SECRET.encode(),
+        (date + salt).encode(),
+        _hashlib.sha256,
+    ).hexdigest()
+    auth_header = f"HMAC-SHA256 apiKey={SOLAPI_API_KEY}, date={date}, salt={salt}, signature={sig}"
+
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.post(
+                "https://api.solapi.com/messages/v4/send-many",
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": auth_header,
+                },
+                json={"messages": messages_norm},
+            )
+    except Exception as e:
+        return JSONResponse(status_code=502, content={"ok": False, "error": f"Solapi 호출 실패: {e}"})
+
+    if resp.status_code != 200:
+        try:
+            err = resp.json()
+            err_msg = err.get("message") or err.get("errorMessage") or str(err)[:200]
+        except Exception:
+            err_msg = resp.text[:200]
+        return JSONResponse(status_code=502, content={"ok": False, "error": f"Solapi 응답 {resp.status_code}: {err_msg}"})
+
+    try:
+        result = resp.json()
+    except Exception:
+        return JSONResponse(status_code=502, content={"ok": False, "error": "Solapi 응답 파싱 실패"})
+
+    # Solapi send-many 응답: count/groupId/status가 최상위 키
+    # count = { total, sentTotal, sentSuccess, sentFailed, sentPending,
+    #           registeredSuccess, registeredFailed, ... }
+    # status: "SENDING" | "COMPLETE" | "PENDING" | ...
+    count_obj = result.get("count") or {}
+    total            = count_obj.get("total")             or 0
+    sent_success     = count_obj.get("sentSuccess")       or 0
+    sent_failed      = count_obj.get("sentFailed")        or 0
+    registered_ok    = count_obj.get("registeredSuccess") or 0
+    registered_fail  = count_obj.get("registeredFailed")  or 0
+
+    group_id = result.get("groupId") or result.get("_id") or ""
+    status_str = result.get("status", "")
+
+    # 등록 자체 실패 (잘못된 번호 형식 등 사전 검증 실패)
+    if registered_fail > 0 and registered_ok == 0:
+        return JSONResponse(status_code=502, content={
+            "ok": False,
+            "error": f"메시지 등록 실패 ({registered_fail}건). group: {group_id}",
+        })
+
+    # 등록 성공 + status가 발송 흐름이면 ok (실제 도착은 비동기)
+    if registered_ok > 0 or sent_success > 0 or status_str in ("SENDING", "COMPLETE", "PENDING"):
+        return {
+            "ok": True,
+            "count": sent_success or registered_ok or total,
+            "fail": sent_failed + registered_fail,
+            "group_id": group_id,
+            "status": status_str,
+        }
+
+    # 알 수 없는 상태
+    return JSONResponse(status_code=502, content={
+        "ok": False,
+        "error": f"Solapi 응답 분석 불가 — total:{total}, status:{status_str}, group:{group_id}",
+    })
+
+
 # ── 정적 파일 (API 라우트보다 뒤에 마운트) ─────────────
 app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
 

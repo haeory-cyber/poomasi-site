@@ -2155,15 +2155,6 @@ async function sendSms() {
   const checked = [...document.querySelectorAll('.customer-cb:checked')];
   if (!checked.length) { toast('수신자를 선택하세요.'); return { ok: false, error: '수신자 미선택' }; }
 
-  const apiKey    = localStorage.getItem('solapi_key')    || document.getElementById('solapi-key').value.trim();
-  const apiSecret = localStorage.getItem('solapi_secret') || document.getElementById('solapi-secret').value.trim();
-  const fromNum   = localStorage.getItem('solapi_from')   || document.getElementById('solapi-from').value.trim();
-
-  if (!apiKey || !apiSecret || !fromNum) {
-    toast('⚙ Solapi API 설정을 먼저 입력·저장하세요.');
-    return { ok: false, error: 'Solapi API 키가 이 브라우저에 저장돼 있지 않음 (store.html 이음SMS 탭에서 키 설정 필요)' };
-  }
-
   const recipients = checked
     .map(cb => customerPool[+cb.dataset.idx])
     .filter(c => c && c.phone);
@@ -2175,32 +2166,28 @@ async function sendSms() {
   resDiv.style.display = '';
   resList.innerHTML = '<div class="loading-row">발송 중…</div>';
 
-  const date = new Date().toISOString();
-  const salt = Math.random().toString(36).substring(2, 14);
-  const sig  = await hmacSha256Hex(apiSecret, date + salt);
-  const auth = `HMAC-SHA256 apiKey=${apiKey}, date=${date}, salt=${salt}, signature=${sig}`;
-
+  // 백엔드 프록시 호출 (.env의 SOLAPI 키 사용 — localStorage 의존 제거)
   const messages = recipients.map(c => ({
-    to:   c.phone.replace(/-/g, ''),
-    from: fromNum.replace(/-/g, ''),
+    to: c.phone.replace(/-/g, ''),
     text: message,
   }));
 
   try {
-    const resp = await fetch('https://api.solapi.com/messages/v4/send-many', {
+    const resp = await fetch('https://seed.poomasi.org/api/sms-send', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': auth },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ messages }),
     });
-    const result = await resp.json();
+    const result = await resp.json().catch(() => ({}));
 
-    if (!resp.ok) {
-      resList.innerHTML = `<div class="empty-row" style="color:var(--red);">오류: ${result.message || resp.status}</div>`;
-      return { ok: false, error: `Solapi 응답 오류: ${result.message || resp.status}` };
+    if (!resp.ok || !result.ok) {
+      const err = result.error || `HTTP ${resp.status}`;
+      resList.innerHTML = `<div class="empty-row" style="color:var(--red);">오류: ${err}</div>`;
+      return { ok: false, error: err };
     }
 
-    const successCount = result.count?.success ?? result.groupInfo?.count?.total ?? recipients.length;
-    const failCount    = result.count?.fail    ?? 0;
+    const successCount = result.count ?? recipients.length;
+    const failCount    = result.fail  ?? 0;
 
     resList.innerHTML = `
       <div style="padding:0.6rem 0;font-size:0.85rem;">
@@ -2213,11 +2200,13 @@ async function sendSms() {
 
     toast(`${successCount}명 발송 완료`);
 
-    await sb.from('sms_history').insert({
-      member_ids: recipients.map(c => c.member_id),
-      message,
-      sender: fromNum,
-    });
+    try {
+      await sb.from('sms_history').insert({
+        member_ids: recipients.map(c => c.member_id),
+        message,
+        sender: 'backend',
+      });
+    } catch(_) {}
 
     return { ok: true, count: successCount, fail: failCount };
 
