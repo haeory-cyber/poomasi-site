@@ -44,8 +44,9 @@ python3 ~/poomasi/ai_bridge.py record_result staging-ready "work.html 발주탭 
 
 ## 공지사항
 
+- 2026-04-08: **매장 가격태그 QR 404 복구 — Cloudflare Page Rule로 해결** — `poomasi.org/tags.html*` → `https://seed.poomasi.org/tags.html$1` (301, 쿼리 `$1` 보존). Page Rules 슬롯 2/3 사용. 코드/배포 0건, DNS 0건, 대시보드 설정만. 배경: 4/7 seed 완전 분리 때 root `tags.html` 삭제로 매장 QR이 죽음. **진단 3회 헛다리(`_redirects` 부활 2회+매장 재인쇄 제안)로 후니님 신뢰 철회 사건.** origin=GitHub Pages라 `_redirects` 미지원 사실 미확인이 원인. 상세: `~/_shared_ai/lessons/errors/20260408_tags_qr_404_진단헛다리_page_rule.md`.
 - 2026-03-26: **웹 지미 개통** — jimmy.poomasi.org에서 폰으로 지미와 실시간 채팅. annual_report.html AI섹션 10번 카드 추가, notices.json 공지 추가.
-- 2026-03-21: **배포 원칙 확정** — 지미가 최종 게이트. 후니님 지시 → poomasi-site-git에서 git pull → 백업 → 수정 → diff → "배포해" 승인 → commit → push. poomasi-site/ 폴더 사용 금지. Cloudflare Pages 자동 반영 (Netlify 아님).
+- 2026-03-21: **배포 원칙 확정** — 지미가 최종 게이트. 후니님 지시 → poomasi-site-git에서 git pull → 백업 → 수정 → diff → "배포해" 승인 → commit → push. poomasi-site/ 폴더 사용 금지. **origin 호스팅 = GitHub Pages** (앞단 Cloudflare CDN proxied). ⚠️ **`_redirects` / `netlify.toml` 미지원** — URL 구조 긴급 수정은 Cloudflare 대시보드 Page Rules로. (2026-04-08 정정: 이전에 "Cloudflare Pages 자동 반영"으로 잘못 기재되어 매장 tags.html 404 사고 3회 헛다리의 원인이 되었음. 상세: `lessons/errors/20260408_tags_qr_404_진단헛다리_page_rule.md`)
 - 2026-03-21: **조합원말씀 시스템 배포** — feedback.html(익명폼) + work.html 조합원말씀탭 + 자료실탭 + QR안내물/수기양식 인쇄용 + index.html 네비 링크.
 - 2026-03-21: **사무국 탭 구조 개편** — 12개→6개 그룹화. 매장운영(발주/이음SMS/이벤트등록/출퇴근부), 경영관리(프로젝트/지원사업/AI경영지원실), 소통(조합원말씀/사무국공지). Supabase 키 publishable→legacy anon JWT 교체.
 - 2026-03-18: **배포 흐름 변경** — `패미(staging push) → 지미(diff 검토·승인) → main 머지 → Cloudflare`. 패미는 staging 브랜치만, main 직접 push 금지. 지미가 최종 배포 책임.
