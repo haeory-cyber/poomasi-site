@@ -9,7 +9,3 @@
 /*.bak /404.html 404
 /*.bak_* /404.html 404
 /*.bak2_* /404.html 404
-
-# 매장 종이 가격태그 QR 호환 — 기존 인쇄물의 poomasi.org/tags.html?barcode=... 보존
-# (rewrite 200 — URL 그대로, 내용만 seed/tags.html에서 로드)
-/tags.html /seed/tags.html 200
