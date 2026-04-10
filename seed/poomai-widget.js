@@ -398,6 +398,44 @@
       height: 18px;
     }
 
+    /* 빠른 버튼 영역 */
+    #poomai-quick-btns {
+      display: flex;
+      gap: 6px;
+      padding: 8px 16px 4px;
+      background: #1e1510;
+      border-top: 1px solid rgba(196, 128, 58, 0.12);
+      overflow-x: auto;
+      flex-shrink: 0;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    #poomai-quick-btns::-webkit-scrollbar {
+      display: none;
+    }
+    .poomai-quick-btn {
+      flex-shrink: 0;
+      background: rgba(196, 128, 58, 0.12);
+      border: 1px solid rgba(196, 128, 58, 0.3);
+      border-radius: 14px;
+      color: #e8c48a;
+      font-size: 12px;
+      font-family: 'Noto Sans KR', sans-serif;
+      padding: 4px 12px;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+      white-space: nowrap;
+      line-height: 1.6;
+    }
+    .poomai-quick-btn:hover {
+      background: rgba(196, 128, 58, 0.25);
+      border-color: #c4803a;
+      color: #f2ead8;
+    }
+    .poomai-quick-btn:active {
+      background: rgba(196, 128, 58, 0.35);
+    }
+
     /* 모바일 전체화면 */
     @media (max-width: 480px) {
       #poomai-widget-root {
@@ -444,6 +482,14 @@
         <button type="button" id="poomai-login-submit">로그인</button>
       </div>
       <div id="poomai-messages"></div>
+      <div id="poomai-quick-btns">
+        <button class="poomai-quick-btn" type="button" data-label="발주요청" data-first="어떤 품목 발주 요청하실까요?">발주요청</button>
+        <button class="poomai-quick-btn" type="button" data-label="단골 확인" data-first="어떤 생산자, 물품의 단골 현황이 궁금하세요?">단골 확인</button>
+        <button class="poomai-quick-btn" type="button" data-label="문자 발송" data-first="누구에게 어떤 내용으로 보낼까요?">문자 발송</button>
+        <button class="poomai-quick-btn" type="button" data-label="태그 뽑기" data-first="어떤 상품 태그 뽑아드릴까요?">태그 뽑기</button>
+        <button class="poomai-quick-btn" type="button" data-label="조합원말씀" data-first="조합원 말씀을 기록해드릴게요. 어떤 내용이었나요?">조합원말씀</button>
+        <button class="poomai-quick-btn" type="button" data-label="신규기능요청" data-first="어떤 기능이 있으면 좋을 것 같으세요?">신규기능요청</button>
+      </div>
       <div id="poomai-input-area">
         <textarea id="poomai-textarea" placeholder="무엇이든 물어보세요..." rows="1"></textarea>
         <button id="poomai-send-btn" type="button" aria-label="전송">
@@ -842,6 +888,12 @@
     isLoading = true;
     sendBtn.disabled = true;
 
+    // 신규기능요청 모드이면 prefix 붙이고 flag 초기화
+    if (isFRMode) {
+      query = '[신규기능요청] ' + query;
+      isFRMode = false;
+    }
+
     // 사용자 메시지 추가
     addMessage('user', query);
     history.push({ role: 'user', content: query });
@@ -1053,7 +1105,40 @@
     loginForm.classList.remove('show');
   }
 
+  // ── 빠른 버튼 처리 ──
+  var isFRMode = false; // 신규기능요청 모드 flag
+
+  function handleQuickBtn(firstMessage, label) {
+    // 패널이 닫혀있으면 먼저 열기
+    if (!isOpen) {
+      openPanel();
+    }
+    // 로그인 안 됐으면 로그인 폼 표시 후 종료
+    if (!token) {
+      toggleLoginForm(true);
+      return;
+    }
+    // 신규기능요청 버튼이면 flag 설정
+    if (label === '신규기능요청') {
+      isFRMode = true;
+    }
+    // 품아이 첫 마디를 assistant 말풍선으로 직접 표시 (API 호출 없음)
+    addMessage('assistant', firstMessage);
+    history.push({ role: 'assistant', content: firstMessage });
+    saveHistory();
+    textarea.focus();
+  }
+
   // ── 이벤트 바인딩 ──
+
+  // 빠른 버튼 클릭
+  document.getElementById('poomai-quick-btns').addEventListener('click', function (e) {
+    var btn = e.target.closest('.poomai-quick-btn');
+    if (!btn) return;
+    var firstMessage = btn.getAttribute('data-first');
+    var label = btn.getAttribute('data-label');
+    if (firstMessage) handleQuickBtn(firstMessage, label);
+  });
 
   // FAB 클릭
   fab.addEventListener('click', function (e) {

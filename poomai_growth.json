@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-04-07",
-  "age_days": 15,
+  "last_updated": "2026-04-10",
+  "age_days": 18,
   "axes": {
     "knowledge": {
       "label": "지식(知)",
@@ -104,7 +104,7 @@
       "label": "사고 프로토콜"
     },
     {
-      "value": "15",
+      "value": "18",
       "unit": "일",
       "label": "성장 기간"
     }
