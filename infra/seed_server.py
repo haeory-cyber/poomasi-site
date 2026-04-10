@@ -544,6 +544,17 @@ async def sms_send(request: Request):
     })
 
 
+# ── 위젯 JS 캐시 방지 (자주 업데이트되는 파일) ──────────
+from starlette.responses import FileResponse
+
+@app.get("/poomai-widget.js")
+async def widget_js():
+    return FileResponse(
+        os.path.join(STATIC_DIR, "poomai-widget.js"),
+        media_type="application/javascript",
+        headers={"Cache-Control": "no-cache, must-revalidate"},
+    )
+
 # ── 정적 파일 (API 라우트보다 뒤에 마운트) ─────────────
 app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
 
