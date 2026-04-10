@@ -655,7 +655,7 @@
   // SMS intent 매칭 (engine.py _detect_sms_intent 포팅)
   // 반환: null | {mode:'name'|'producer'|'item', value, message}
   function detectSmsIntent(query) {
-    var SMS_KW = ['문자','문자보내','문자 보내','sms','SMS','알림보내','알림 보내','문자메시지'];
+    var SMS_KW = ['문자','문자보내','문자 보내','sms','SMS','알림보내','알림 보내','문자메시지','메시지','메시지보내','메시지 보내'];
     var ql = query.toLowerCase();
     var hasSms = SMS_KW.some(function(k){ return ql.indexOf(k.toLowerCase()) !== -1; });
     var hasNotify = (query.indexOf('알려줘') !== -1 || query.indexOf('알려 줘') !== -1 || query.indexOf('알림') !== -1);
