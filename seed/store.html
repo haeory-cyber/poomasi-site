@@ -3629,8 +3629,8 @@ function initTagTab() {
         div.className = 'tag-search-item';
         div.innerHTML =
           '<span class="si-name">' + p.product_name + '</span>' +
-          '<span class="si-farmer">' + (p.category || '') + '</span>' +
-          '<span class="si-price">' + (p.unit || '') + '</span>';
+          '<span class="si-farmer">' + (p.farmer_name || '') + '</span>' +
+          '<span class="si-price">' + (p.price ? p.price.toLocaleString() + '원' : '') + '</span>';
         div.addEventListener('click', function() { tagSelectQuick(p, div); });
         tagResultsEl.appendChild(div);
       });
