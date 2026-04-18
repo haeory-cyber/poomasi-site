@@ -571,8 +571,8 @@
       </div>
     </li>
     <li><a href="https://www.youtube.com/@local_counterattack" target="_blank" rel="noopener noreferrer" class="nav-yt">유튜브</a></li>
-    <!-- TODO: 로그인 버튼 — seed_server.py JWT 연동 필요. 현재 placeholder -->
-    <li><a href="https://seed.poomasi.org/login.html" class="nav-login" id="nav-login-btn">로그인</a></li>
+    <!-- TODO: 로그인 버튼 — seed_server.py JWT 연동 필요. 현재는 안내 alert만. 연동 시 href 복구 + onclick 제거 -->
+    <li><a href="#" class="nav-login" id="nav-login-btn" onclick="alert('로그인 기능 준비 중입니다.\n현재는 비로그인(Gemini) 응답만 가능합니다.'); return false;">로그인</a></li>
   </ul>
 </nav>
 
@@ -707,6 +707,6 @@
     }
   });
 </script>
-<script src="https://seed.poomasi.org/poomai-widget.js?v=20260410a" data-mode="fullscreen" data-target="#poomai-chat-main"></script>
+<script src="https://seed.poomasi.org/poomai-widget.js?v=20260419a" data-mode="fullscreen" data-target="#poomai-chat-main"></script>
 </body>
 </html>
