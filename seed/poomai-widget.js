@@ -468,6 +468,10 @@
     }
     #poomai-chat-main .poomai-fullscreen-panel {
       position: relative !important;
+      top: 0 !important;
+      bottom: auto !important;
+      left: auto !important;
+      right: auto !important;
       width: 100% !important;
       height: 100% !important;
       min-height: 520px;
