@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>품아이 — AI와 로컬리스트의 협동</title>
-<meta name="description" content="품아이는 AI와 로컬리스트가 협동하여 데이터주권을 실현하는 프로젝트입니다. 사회적경제, 로컬푸드, 지역화폐 27년 현장 경험과 AI기술의 만남.">
-<meta property="og:title" content="품아이 — AI와 로컬리스트의 협동">
-<meta property="og:description" content="AI는 자본의 전유물이 아니다. 인류가 수천 년간 축적한 지식의 결정체다. 로컬의 반격이 시작됩니다.">
+<title>품아이 — AI와 로컬리스트의 품앗이</title>
+<meta name="description" content="품아이는 AI와 로컬리스트가 품앗이로 데이터주권을 실현하는 프로젝트입니다. 사회적경제, 로컬푸드, 지역화폐 27년 현장 경험과 AI기술의 만남.">
+<meta property="og:title" content="품아이 — AI와 로컬리스트의 품앗이">
+<meta property="og:description" content="AI와 로컬리스트의 품앗이. 사회적경제 현장 27년의 지혜와 AI가 만납니다.">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23c4803a'/><text x='16' y='22' text-anchor='middle' font-size='18' fill='%230f0b07'>品</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -121,6 +121,22 @@
     color: var(--earth);
   }
 
+  .nav-links .nav-login {
+    color: var(--cream);
+    background: rgba(196,128,58,0.15);
+    border: 1px solid rgba(196,128,58,0.5);
+    padding: 0.35rem 0.9rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    transition: all 0.3s;
+  }
+
+  .nav-links .nav-login:hover {
+    background: var(--amber);
+    color: var(--earth);
+    border-color: var(--amber);
+  }
+
   /* Nav 더보기 드롭다운 */
   .nav-more {
     position: relative;
@@ -214,14 +230,14 @@
     transform: rotate(-45deg);
   }
 
-  /* ── HERO ── */
+  /* ── HERO / CHAT MAIN ── */
   #hero {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
-    padding: 8rem 8vw 4rem;
+    padding: 6rem 4vw 2rem;
     position: relative;
     overflow: hidden;
     text-align: center;
@@ -279,11 +295,21 @@
 
   .hero-title h1 {
     font-family: 'Noto Serif KR', serif;
-    font-size: clamp(3.5rem, 10vw, 8rem);
+    font-size: clamp(1.6rem, 4vw, 3.2rem);
     font-weight: 900;
-    line-height: 0.95;
+    line-height: 1.2;
     color: var(--white);
-    letter-spacing: -0.02em;
+    letter-spacing: -0.01em;
+    margin-bottom: 2rem;
+  }
+
+  /* 풀스크린 챗 마운트 컨테이너 */
+  #poomai-chat-main {
+    width: 100%;
+    max-width: 800px;
+    flex: 1;
+    min-height: 500px;
+    position: relative;
   }
 
   /* Hero CTA wrapper */
@@ -337,32 +363,6 @@
     border-color: var(--amber-light);
   }
 
-  .scroll-hint {
-    position: absolute;
-    bottom: 3rem;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.8rem;
-    opacity: 0;
-    animation: fadeUp 1s 3.5s forwards;
-  }
-
-  .scroll-line {
-    width: 1px;
-    height: 3rem;
-    background: linear-gradient(to bottom, transparent, var(--amber));
-    animation: scrollPulse 2s infinite;
-  }
-
-  .scroll-text {
-    font-size: 0.6rem;
-    letter-spacing: 0.2em;
-    color: var(--dust);
-  }
-
   /* ── SECTION COMMON ── */
   section {
     padding: 7rem 8vw;
@@ -395,574 +395,6 @@
     letter-spacing: -0.02em;
   }
 
-  /* ── ACT 1: 질문 ── */
-  #act1 {
-    background: var(--soil);
-    overflow: hidden;
-  }
-
-  .act1-question {
-    font-family: 'Noto Serif KR', serif;
-    font-size: clamp(1.3rem, 3vw, 2.2rem);
-    font-weight: 700;
-    color: var(--white);
-    line-height: 1.6;
-    margin-bottom: 4rem;
-    max-width: 700px;
-  }
-
-  .act1-perspectives {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2px;
-    margin-bottom: 4rem;
-  }
-
-  .act1-perspective {
-    padding: 3rem 2.5rem;
-    position: relative;
-  }
-
-  .act1-perspective.dark {
-    background: rgba(15,11,7,0.7);
-    border: 1px solid rgba(184,58,42,0.2);
-  }
-
-  .act1-perspective.light {
-    background: rgba(61,92,53,0.12);
-    border: 1px solid rgba(90,138,78,0.25);
-  }
-
-  .act1-perspective-label {
-    font-size: 0.6rem;
-    letter-spacing: 0.3em;
-    margin-bottom: 1.5rem;
-    text-transform: uppercase;
-  }
-
-  .act1-perspective.dark .act1-perspective-label { color: var(--red); }
-  .act1-perspective.light .act1-perspective-label { color: var(--green-light); }
-
-  .act1-perspective-title {
-    font-family: 'Noto Serif KR', serif;
-    font-size: 1.3rem;
-    font-weight: 700;
-    margin-bottom: 1.2rem;
-    line-height: 1.4;
-  }
-
-  .act1-perspective.dark .act1-perspective-title { color: rgba(242,234,216,0.5); }
-  .act1-perspective.light .act1-perspective-title { color: var(--cream); }
-
-  .act1-perspective-items {
-    list-style: none;
-    font-size: 0.85rem;
-    line-height: 2;
-  }
-
-  .act1-perspective.dark .act1-perspective-items { color: rgba(184,168,138,0.5); }
-  .act1-perspective.light .act1-perspective-items { color: var(--dust); }
-
-  .act1-conclusion {
-    font-family: 'Noto Serif KR', serif;
-    font-size: clamp(1.5rem, 3.5vw, 2.5rem);
-    font-weight: 900;
-    color: var(--amber);
-    text-align: center;
-    line-height: 1.5;
-    padding: 3rem 0 0;
-    border-top: 1px solid rgba(196,128,58,0.2);
-  }
-
-  /* ── ACT 2: 선언 ── */
-  #act2 {
-    background: var(--bark);
-    position: relative;
-  }
-
-  #act2::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0;
-    width: 4px;
-    height: 100%;
-    background: linear-gradient(to bottom, var(--green), var(--amber));
-  }
-
-  .act2-declaration {
-    font-family: 'Noto Serif KR', serif;
-    font-size: clamp(1.3rem, 3vw, 2rem);
-    font-weight: 700;
-    color: var(--white);
-    line-height: 1.6;
-    margin-bottom: 2rem;
-    max-width: 700px;
-  }
-
-  .act2-text {
-    font-size: 1rem;
-    color: var(--dust);
-    line-height: 2;
-    font-weight: 300;
-    margin-bottom: 4rem;
-    max-width: 650px;
-  }
-
-  .act2-text strong {
-    color: var(--cream);
-    font-weight: 500;
-  }
-
-  /* 로컬딥테크 3축 카드 */
-  .act2-cards {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2px;
-    margin-bottom: 4rem;
-  }
-
-  .act2-card {
-    background: rgba(15,11,7,0.5);
-    border: 1px solid rgba(196,128,58,0.12);
-    padding: 2.5rem 2rem;
-    transition: all 0.3s;
-    cursor: default;
-  }
-
-  .act2-card:hover {
-    border-color: rgba(196,128,58,0.35);
-    background: rgba(44,31,20,0.6);
-  }
-
-  .act2-card-num {
-    font-family: 'DM Serif Display', serif;
-    font-size: 2.5rem;
-    color: rgba(196,128,58,0.25);
-    line-height: 1;
-    margin-bottom: 1.2rem;
-  }
-
-  .act2-card-title {
-    font-family: 'Noto Serif KR', serif;
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--cream);
-    margin-bottom: 0.8rem;
-  }
-
-  .act2-card-desc {
-    font-size: 0.82rem;
-    color: var(--dust);
-    line-height: 1.8;
-    font-weight: 300;
-  }
-
-  /* 데이터주권 강조 블록 */
-  .act2-sovereignty {
-    background: rgba(10,8,5,0.6);
-    border: 1px solid rgba(196,128,58,0.15);
-    padding: 3rem;
-    position: relative;
-    overflow: hidden;
-    margin-bottom: 3rem;
-  }
-
-  .act2-sovereignty::after {
-    content: 'DATA SOVEREIGNTY';
-    position: absolute;
-    right: -3rem;
-    top: 50%;
-    transform: translateY(-50%) rotate(90deg);
-    font-size: 0.55rem;
-    letter-spacing: 0.5em;
-    color: rgba(196,128,58,0.15);
-    white-space: nowrap;
-  }
-
-  .act2-sovereignty-text {
-    font-family: 'Noto Serif KR', serif;
-    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
-    font-weight: 700;
-    color: var(--cream);
-    line-height: 1.8;
-    max-width: 600px;
-  }
-
-  .act2-sovereignty-text em {
-    font-style: normal;
-    color: var(--amber);
-  }
-
-  /* 2막 텍스트 링크 CTA */
-  .btn-text-link {
-    display: inline-block;
-    color: var(--amber);
-    font-family: 'Noto Sans KR', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 400;
-    text-decoration: none;
-    letter-spacing: 0.03em;
-    transition: color 0.3s;
-    border-bottom: 1px solid rgba(196,128,58,0.3);
-    padding-bottom: 2px;
-  }
-
-  .btn-text-link:hover {
-    color: var(--amber-light);
-    border-color: var(--amber-light);
-  }
-
-  /* ── ACT 3: 실천 ── */
-  #act3 {
-    background: var(--green);
-    position: relative;
-    overflow: hidden;
-  }
-
-  #act3::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 60% 80% at 80% 50%, rgba(61,92,53,0.3) 0%, transparent 70%),
-      linear-gradient(135deg, #2a4425 0%, var(--green) 100%);
-  }
-
-  .act3-inner {
-    position: relative;
-  }
-
-  .act3-inner .section-label { color: rgba(242,234,216,0.5); }
-  .act3-inner .section-label::before { background: rgba(242,234,216,0.5); }
-
-  .act3-declaration {
-    font-family: 'Noto Serif KR', serif;
-    font-size: clamp(1.5rem, 4vw, 2.5rem);
-    font-weight: 900;
-    color: var(--white);
-    line-height: 1.3;
-    margin-bottom: 3rem;
-    max-width: 600px;
-  }
-
-  /* Q&A 아코디언 */
-  .qna-accordion {
-    border: 1px solid rgba(242,234,216,0.15);
-    background: rgba(42,68,37,0.4);
-    margin-bottom: 0.5rem;
-    max-width: 600px;
-  }
-
-  .qna-accordion summary {
-    padding: 1.2rem 1.5rem;
-    font-family: 'Noto Serif KR', serif;
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--cream);
-    cursor: pointer;
-    list-style: none;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: background 0.3s;
-  }
-
-  .qna-accordion summary::-webkit-details-marker { display: none; }
-
-  .qna-accordion summary::after {
-    content: '+';
-    font-size: 1.2rem;
-    color: var(--amber);
-    transition: transform 0.3s;
-  }
-
-  .qna-accordion[open] summary::after {
-    transform: rotate(45deg);
-  }
-
-  .qna-accordion summary:hover {
-    background: rgba(42,68,37,0.6);
-  }
-
-  .qna-accordion .qna-answer {
-    padding: 0 1.5rem 1.2rem;
-    font-size: 0.95rem;
-    color: rgba(242,234,216,0.95);
-    line-height: 1.9;
-    font-weight: 400;
-  }
-
-  .qna-section {
-    margin-bottom: 4rem;
-  }
-
-  /* AI 진화 타임라인 */
-  .act3-timeline {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 2px;
-    margin-bottom: 4rem;
-  }
-
-  .act3-level {
-    background: rgba(42,68,37,0.4);
-    border: 1px solid rgba(242,234,216,0.1);
-    padding: 2rem 1.5rem;
-    transition: all 0.3s;
-    position: relative;
-  }
-
-  .act3-level:hover {
-    border-color: rgba(242,234,216,0.25);
-    background: rgba(42,68,37,0.6);
-  }
-
-  .act3-level.current::after {
-    content: 'NOW';
-    position: absolute;
-    top: 0.8rem;
-    right: 0.8rem;
-    font-size: 0.55rem;
-    letter-spacing: 0.15em;
-    color: var(--amber);
-    background: rgba(196,128,58,0.15);
-    padding: 0.2rem 0.5rem;
-  }
-
-  .act3-level-num {
-    font-family: 'DM Serif Display', serif;
-    font-size: 1.8rem;
-    color: rgba(242,234,216,0.2);
-    margin-bottom: 0.8rem;
-  }
-
-  .act3-level-title {
-    font-family: 'Noto Serif KR', serif;
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--cream);
-    margin-bottom: 0.5rem;
-    line-height: 1.4;
-  }
-
-  .act3-level-desc {
-    font-size: 0.75rem;
-    color: rgba(242,234,216,0.5);
-    line-height: 1.7;
-  }
-
-  /* 팀 소개 */
-  .act3-team {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 3rem;
-    align-items: center;
-    margin-bottom: 3rem;
-  }
-
-  .act3-team-text {
-    font-size: 0.95rem;
-    color: rgba(242,234,216,0.7);
-    line-height: 2;
-    font-weight: 300;
-  }
-
-  .act3-team-text strong {
-    color: var(--cream);
-    font-weight: 500;
-  }
-
-  .act3-team-members {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.8rem;
-  }
-
-  .act3-member {
-    background: rgba(42,68,37,0.5);
-    border: 1px solid rgba(242,234,216,0.08);
-    padding: 1.2rem 0.8rem;
-    text-align: center;
-    transition: border-color 0.3s;
-  }
-
-  .act3-member:hover {
-    border-color: rgba(242,234,216,0.2);
-  }
-
-  .act3-member-name {
-    font-family: 'Noto Serif KR', serif;
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: var(--cream);
-    margin-bottom: 0.3rem;
-  }
-
-  .act3-member-role {
-    font-size: 0.65rem;
-    color: rgba(242,234,216,0.45);
-    letter-spacing: 0.05em;
-  }
-
-  .act3-yt {
-    display: inline-block;
-    border: 1px solid rgba(242,234,216,0.3);
-    color: rgba(242,234,216,0.7);
-    padding: 1rem 2rem;
-    font-family: 'Noto Sans KR', sans-serif;
-    font-size: 0.85rem;
-    text-decoration: none;
-    letter-spacing: 0.1em;
-    transition: all 0.3s;
-  }
-
-  .act3-yt:hover {
-    border-color: var(--cream);
-    color: var(--cream);
-  }
-
-  /* ── INVESTORS HALL ── */
-  #investors {
-    background: var(--earth);
-    padding: 6rem 8vw;
-    border-top: 1px solid rgba(196,128,58,0.15);
-    position: relative;
-    overflow: hidden;
-  }
-
-  #investors::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse 50% 60% at 50% 40%, rgba(196,128,58,0.04) 0%, transparent 70%);
-    pointer-events: none;
-  }
-
-  .inv-header {
-    position: relative;
-    text-align: center;
-    margin-bottom: 4rem;
-  }
-
-  .inv-header .section-label {
-    justify-content: center;
-  }
-
-  .inv-header .section-label::before { display: none; }
-
-  .inv-title {
-    font-family: 'Noto Serif KR', serif;
-    font-size: clamp(1.8rem, 4vw, 3rem);
-    font-weight: 900;
-    color: var(--white);
-    line-height: 1.3;
-    margin-bottom: 1rem;
-  }
-
-  .inv-title span { color: var(--amber); }
-
-  .inv-subtitle {
-    font-size: 0.9rem;
-    color: var(--dust);
-    font-weight: 300;
-    line-height: 1.8;
-    max-width: 540px;
-    margin: 0 auto;
-  }
-
-  .inv-tiers {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 2px;
-    margin-bottom: 3rem;
-    position: relative;
-  }
-
-  .inv-tier {
-    background: rgba(30,21,16,0.7);
-    border: 1px solid rgba(196,128,58,0.1);
-    padding: 2rem 1.2rem;
-    text-align: center;
-    transition: all 0.3s;
-    cursor: default;
-  }
-
-  .inv-tier:hover {
-    border-color: rgba(196,128,58,0.3);
-    background: rgba(44,31,20,0.6);
-  }
-
-  .inv-tier-icon {
-    font-size: 2.2rem;
-    line-height: 1;
-    margin-bottom: 0.8rem;
-  }
-
-  .inv-tier-name {
-    font-family: 'Noto Serif KR', serif;
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--cream);
-    margin-bottom: 0.3rem;
-  }
-
-  .inv-tier-en {
-    font-family: 'DM Serif Display', serif;
-    font-size: 0.7rem;
-    font-style: italic;
-    color: var(--dust);
-    letter-spacing: 0.1em;
-  }
-
-  .inv-empty {
-    position: relative;
-    text-align: center;
-    padding: 4rem 2rem;
-    border: 2px dashed rgba(196,128,58,0.2);
-    background: rgba(196,128,58,0.03);
-  }
-
-  .inv-empty-icon { font-size: 3rem; margin-bottom: 1.5rem; opacity: 0.6; }
-
-  .inv-empty-text {
-    font-family: 'Noto Serif KR', serif;
-    font-size: clamp(1.2rem, 3vw, 1.8rem);
-    font-weight: 700;
-    color: var(--cream);
-    margin-bottom: 0.8rem;
-  }
-
-  .inv-empty-sub {
-    font-size: 0.85rem;
-    color: var(--dust);
-    line-height: 1.8;
-    margin-bottom: 2rem;
-    max-width: 400px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .btn-invest {
-    display: inline-block;
-    background: transparent;
-    border: 1px solid var(--amber);
-    color: var(--amber);
-    padding: 0.9rem 2.5rem;
-    font-family: 'Noto Serif KR', serif;
-    font-size: 0.9rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-decoration: none;
-    transition: all 0.3s;
-    cursor: pointer;
-  }
-
-  .btn-invest:hover {
-    background: var(--amber);
-    color: var(--earth);
-    transform: translateY(-2px);
-  }
-
   /* ── FOOTER ── */
   footer {
     background: var(--earth);
@@ -972,8 +404,8 @@
 
   .footer-inner {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;
-    gap: 4rem;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+    gap: 2.5rem;
   }
 
   .footer-brand {
@@ -1056,246 +488,6 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
-  @keyframes scrollPulse {
-    0%, 100% { opacity: 0.3; transform: scaleY(0.8); }
-    50% { opacity: 1; transform: scaleY(1); }
-  }
-
-  /* Scroll reveal */
-  .reveal {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: opacity 0.8s ease, transform 0.8s ease;
-  }
-
-  .reveal.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  .reveal-delay-1 { transition-delay: 0.15s; }
-  .reveal-delay-2 { transition-delay: 0.3s; }
-  .reveal-delay-3 { transition-delay: 0.45s; }
-
-  /* ── HERO SUB LINKS ── */
-  .hero-sub-links {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  /* ── GROWTH SECTION ── */
-  #growth {
-    background: linear-gradient(180deg, var(--earth) 0%, var(--soil) 40%, var(--earth) 100%);
-    padding: 7rem 8vw;
-    position: relative;
-    overflow: hidden;
-  }
-
-  #growth::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse 60% 50% at 50% 30%, rgba(196,128,58,0.06) 0%, transparent 70%);
-    pointer-events: none;
-  }
-
-  .growth-header {
-    text-align: center;
-    margin-bottom: 4rem;
-    position: relative;
-  }
-
-  .growth-header .section-label {
-    justify-content: center;
-  }
-
-  .growth-header .section-label::before { display: none; }
-
-  .growth-title {
-    font-family: 'Noto Serif KR', serif;
-    font-size: clamp(2rem, 5vw, 3.2rem);
-    font-weight: 900;
-    color: var(--white);
-    line-height: 1.3;
-    margin-bottom: 0.8rem;
-  }
-
-  .growth-title span { color: var(--amber); }
-
-  .growth-subtitle {
-    font-size: 0.9rem;
-    color: var(--dust);
-    font-weight: 300;
-    line-height: 1.8;
-  }
-
-  /* Radar + Numbers layout */
-  .growth-body {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4rem;
-    align-items: center;
-    margin-bottom: 4rem;
-    position: relative;
-  }
-
-  /* Radar chart */
-  .growth-radar-wrap {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-  }
-
-  .growth-radar-svg {
-    width: 100%;
-    max-width: 380px;
-  }
-
-  .radar-grid-line {
-    fill: none;
-    stroke: rgba(196,128,58,0.12);
-    stroke-width: 0.5;
-  }
-
-  .radar-axis {
-    stroke: rgba(196,128,58,0.1);
-    stroke-width: 0.5;
-  }
-
-  .radar-area {
-    fill: rgba(196,128,58,0.18);
-    stroke: var(--amber);
-    stroke-width: 2;
-    stroke-linejoin: round;
-    transition: d 1.2s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  .radar-dot {
-    fill: var(--amber);
-    r: 4;
-  }
-
-  .radar-label {
-    font-family: 'Noto Serif KR', serif;
-    font-size: 11px;
-    font-weight: 700;
-    fill: var(--cream);
-  }
-
-  .radar-value {
-    font-family: 'DM Serif Display', serif;
-    font-size: 10px;
-    fill: var(--amber);
-  }
-
-  /* Number cards */
-  .growth-numbers {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.2rem;
-  }
-
-  .growth-num-card {
-    background: rgba(15,11,7,0.6);
-    border: 1px solid rgba(196,128,58,0.12);
-    padding: 1.5rem 1.2rem;
-    text-align: center;
-    transition: border-color 0.3s;
-  }
-
-  .growth-num-card:hover {
-    border-color: rgba(196,128,58,0.35);
-  }
-
-  .growth-num-value {
-    font-family: 'DM Serif Display', serif;
-    font-size: clamp(1.8rem, 3vw, 2.5rem);
-    color: var(--amber);
-    line-height: 1;
-    margin-bottom: 0.2rem;
-  }
-
-  .growth-num-unit {
-    font-size: 0.75rem;
-    color: var(--dust);
-    margin-bottom: 0.5rem;
-  }
-
-  .growth-num-label {
-    font-family: 'Noto Serif KR', serif;
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--cream);
-  }
-
-  /* Milestone timeline */
-  .growth-timeline {
-    position: relative;
-    padding-left: 2rem;
-    max-width: 700px;
-    margin: 0 auto;
-  }
-
-  .growth-timeline::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: linear-gradient(to bottom, rgba(196,128,58,0.1), var(--amber), rgba(196,128,58,0.1));
-  }
-
-  .growth-milestone {
-    position: relative;
-    padding: 0 0 2rem 1.5rem;
-  }
-
-  .growth-milestone:last-child { padding-bottom: 0; }
-
-  .growth-milestone::before {
-    content: '';
-    position: absolute;
-    left: -2rem;
-    top: 0.35rem;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--amber);
-    border: 2px solid var(--earth);
-    box-shadow: 0 0 0 2px rgba(196,128,58,0.3);
-    transform: translateX(calc(2rem - 5px));
-  }
-
-  .growth-milestone:last-child::before {
-    background: var(--amber-light);
-    box-shadow: 0 0 8px rgba(232,165,90,0.5), 0 0 0 2px rgba(196,128,58,0.3);
-  }
-
-  .growth-ms-day {
-    font-family: 'DM Serif Display', serif;
-    font-size: 0.7rem;
-    color: var(--amber);
-    letter-spacing: 0.1em;
-    margin-bottom: 0.2rem;
-  }
-
-  .growth-ms-label {
-    font-family: 'Noto Serif KR', serif;
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--cream);
-    margin-bottom: 0.2rem;
-  }
-
-  .growth-ms-desc {
-    font-size: 0.8rem;
-    color: var(--dust);
-    font-weight: 300;
-  }
-
   /* ── MOBILE ── */
   @media (max-width: 768px) {
     nav { padding: 1.2rem 1.5rem; }
@@ -1339,26 +531,6 @@
 
     .nav-toggle { display: block; }
 
-    section { padding: 5rem 6vw; }
-
-    .act1-perspectives { grid-template-columns: 1fr; }
-
-    .act2-cards { grid-template-columns: 1fr; }
-
-    .act3-timeline { grid-template-columns: repeat(2, 1fr); }
-
-    .act3-team { grid-template-columns: 1fr; gap: 2rem; }
-
-    .act3-team-members { grid-template-columns: repeat(3, 1fr); }
-
-    .growth-body { grid-template-columns: 1fr; gap: 2.5rem; }
-
-    .growth-numbers { grid-template-columns: repeat(3, 1fr); }
-
-    .growth-radar-svg { max-width: 300px; }
-
-    .inv-tiers { grid-template-columns: repeat(2, 1fr); }
-
     .footer-inner { grid-template-columns: 1fr; gap: 2rem; }
 
     .footer-bottom {
@@ -1366,252 +538,24 @@
       gap: 1rem;
       text-align: center;
     }
-  }
 
-  @media (max-width: 480px) {
-    .act3-timeline { grid-template-columns: 1fr; }
-    .act3-team-members { grid-template-columns: repeat(2, 1fr); }
-    .growth-numbers { grid-template-columns: repeat(2, 1fr); }
-    .growth-radar-svg { max-width: 260px; }
-  }
-
-  /* ── CONTRIBUTE SECTION ── */
-  #contribute {
-    background: linear-gradient(180deg, var(--earth) 0%, var(--soil) 50%, var(--earth) 100%);
-  }
-
-  .contrib-header {
-    text-align: center;
-    margin-bottom: 4rem;
-  }
-
-  .contrib-header .section-label {
-    justify-content: center;
-  }
-
-  .contrib-header .section-label::before { display: none; }
-
-  .contrib-title {
-    font-family: 'Noto Serif KR', serif;
-    font-size: clamp(2rem, 5vw, 3.2rem);
-    font-weight: 900;
-    line-height: 1.3;
-    letter-spacing: -0.02em;
-    margin-bottom: 1.5rem;
-  }
-
-  .contrib-subtitle {
-    font-size: clamp(0.9rem, 1.5vw, 1.1rem);
-    color: var(--dust);
-    line-height: 1.8;
-    max-width: 600px;
-    margin: 0 auto;
-  }
-
-  .contrib-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
-    margin-bottom: 3.5rem;
-  }
-
-  .contrib-card {
-    background: var(--bark);
-    border: 1px solid rgba(196,128,58,0.2);
-    padding: 2.5rem 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.2rem;
-    transition: all 0.4s;
-  }
-
-  .contrib-card:hover {
-    border-color: rgba(196,128,58,0.5);
-    background: rgba(45,31,20,0.9);
-    transform: translateY(-4px);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-  }
-
-  .contrib-card-icon {
-    font-size: 2rem;
-    width: 3.5rem;
-    height: 3.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid rgba(196,128,58,0.3);
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .contrib-card-title {
-    font-family: 'Noto Serif KR', serif;
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: var(--cream);
-  }
-
-  .contrib-card-desc {
-    font-size: 0.95rem;
-    color: var(--dust);
-    line-height: 1.7;
-  }
-
-  .contrib-card-examples {
-    font-size: 0.8rem;
-    color: rgba(184,168,138,0.6);
-    letter-spacing: 0.05em;
-  }
-
-  .contrib-card-btn {
-    display: inline-block;
-    margin-top: auto;
-    padding: 0.8rem 1.5rem;
-    font-family: 'Noto Serif KR', serif;
-    font-size: 0.9rem;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-    text-decoration: none;
-    text-align: center;
-    border: 1px solid var(--amber);
-    color: var(--amber);
-    background: transparent;
-    transition: all 0.3s;
-    cursor: pointer;
-  }
-
-  .contrib-card-btn:hover {
-    background: var(--amber);
-    color: var(--earth);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(196,128,58,0.25);
-  }
-
-  .contrib-card-btn--data:hover {
-    background: var(--amber);
-    color: var(--earth);
-  }
-
-  .contrib-card-btn--agent {
-    border-color: var(--green-light);
-    color: var(--green-light);
-  }
-
-  .contrib-card-btn--agent:hover {
-    background: var(--green-light);
-    color: var(--earth);
-    box-shadow: 0 4px 15px rgba(90,138,78,0.25);
-  }
-
-  .contrib-card-btn--seed {
-    border-color: var(--amber-light);
-    color: var(--amber-light);
-  }
-
-  .contrib-card-btn--seed:hover {
-    background: var(--amber-light);
-    color: var(--earth);
-    box-shadow: 0 4px 15px rgba(232,165,90,0.25);
-  }
-
-  .contrib-spectrum {
-    margin-top: 3rem;
-    padding: 2rem 0;
-    text-align: center;
-  }
-
-  .contrib-spectrum-bar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
-    max-width: 700px;
-    margin: 0 auto 1rem;
-    position: relative;
-    height: 3px;
-    background: linear-gradient(90deg, rgba(196,128,58,0.15), rgba(196,128,58,0.6), var(--amber));
-    border-radius: 2px;
-  }
-
-  .contrib-spectrum-items {
-    display: flex;
-    justify-content: space-between;
-    max-width: 700px;
-    margin: 0 auto;
-  }
-
-  .contrib-spectrum-item {
-    font-size: 0.75rem;
-    color: var(--dust);
-    opacity: 0.6;
-    transition: opacity 0.3s;
-    text-align: center;
-    flex: 1;
-  }
-
-  .contrib-spectrum-item:last-child {
-    opacity: 1;
-    color: var(--amber);
-  }
-
-  .contrib-spectrum-label {
-    display: flex;
-    justify-content: space-between;
-    max-width: 700px;
-    margin: 0.8rem auto 0;
-    font-size: 0.65rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-  }
-
-  .contrib-spectrum-label span:first-child { color: rgba(184,168,138,0.4); }
-  .contrib-spectrum-label span:last-child { color: var(--amber); }
-
-  .contrib-footer {
-    text-align: center;
-    margin-top: 3rem;
-    font-size: 0.95rem;
-    color: var(--dust);
-    line-height: 1.8;
-  }
-
-  .contrib-footer span {
-    color: var(--amber);
-    font-weight: 500;
-  }
-
-  @media (max-width: 768px) {
-    .contrib-grid {
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-    }
-
-    .contrib-spectrum-items {
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-
-    .contrib-spectrum-item {
-      flex: none;
-      font-size: 0.7rem;
+    #poomai-chat-main {
+      min-height: 400px;
     }
   }
+
+
 </style>
 </head>
 <body>
 
 <!-- NAV -->
 <nav>
-  <a href="/" class="nav-logo">품아이</a>
+  <a href="/" class="nav-logo">poomasi.org</a>
   <button class="nav-toggle" aria-label="메뉴 열기" aria-expanded="false">
     <span></span><span></span><span></span>
   </button>
   <ul class="nav-links">
-    <li><a href="#growth">성장</a></li>
-    <li><a href="#act1">질문</a></li>
-    <li><a href="#act2">선언</a></li>
-    <li><a href="#act3">실천</a></li>
-    <li><a href="#investors">씨앗투자</a></li>
     <li><a href="https://seed.poomasi.org" target="_blank" rel="noopener noreferrer">생협</a></li>
     <li class="nav-more">
       <button class="nav-more-btn" aria-expanded="false" aria-haspopup="true">더보기</button>
@@ -1627,10 +571,12 @@
       </div>
     </li>
     <li><a href="https://www.youtube.com/@local_counterattack" target="_blank" rel="noopener noreferrer" class="nav-yt">유튜브</a></li>
+    <!-- TODO: 로그인 버튼 — seed_server.py JWT 연동 필요. 현재 placeholder -->
+    <li><a href="https://seed.poomasi.org/login.html" class="nav-login" id="nav-login-btn">로그인</a></li>
   </ul>
 </nav>
 
-<!-- HERO -->
+<!-- HERO / CHAT MAIN -->
 <section id="hero">
   <div class="hero-bg"></div>
   <svg class="hero-lines" viewBox="0 0 800 800" preserveAspectRatio="xMidYMid slice">
@@ -1639,353 +585,14 @@
     <circle cx="400" cy="400" r="250" stroke="rgba(196,128,58,0.06)" stroke-width="0.5" fill="none"/>
   </svg>
 
-  <div class="hero-ep01">
-    <div class="hero-ep01-label">EP01 선언문</div>
-    <p class="hero-ep01-line">AI는 자본의 이익에만 충실한가?</p>
-    <p class="hero-ep01-line">가난한 자들에게 기회가 될 수는 없는가?</p>
-  </div>
-
   <div class="hero-title">
-    <h1>품아이</h1>
+    <h1>AI와 로컬리스트의 품앗이</h1>
   </div>
 
-  <div class="hero-cta-wrapper">
-    <a href="https://demo.poomasi.org" target="_blank" rel="noopener noreferrer" class="btn-primary">품아이 체험하기</a>
-    <div class="hero-sub-links">
-      <a href="#investors" class="hero-channel">씨앗투자</a>
-      <span style="color:var(--dust);opacity:0.3;">|</span>
-      <a href="https://www.youtube.com/@local_counterattack" target="_blank" rel="noopener noreferrer" class="hero-channel">로컬의 반격 (feat. AI)</a>
-    </div>
-  </div>
-
-  <div class="scroll-hint">
-    <div class="scroll-line"></div>
-    <span class="scroll-text">SCROLL</span>
-  </div>
+  <!-- 품아이 풀스크린 챗 마운트 포인트 — poomai-widget.js data-mode="fullscreen" 로드 -->
+  <div id="poomai-chat-main"></div>
 </section>
 
-<!-- 12일간의 성장 -->
-<section id="growth">
-  <div class="growth-header reveal">
-    <div class="section-label">GROWTH</div>
-    <h2 class="growth-title"><span id="growth-age">12</span>일간의 성장</h2>
-    <p class="growth-subtitle">2026년 3월 24일, 씨앗을 심었습니다</p>
-  </div>
-
-  <div class="growth-body">
-    <!-- 레이더 차트 -->
-    <div class="growth-radar-wrap reveal">
-      <svg class="growth-radar-svg" viewBox="0 0 400 400" id="radarChart">
-        <!-- JS에서 그리드/축/영역/라벨 생성 -->
-      </svg>
-    </div>
-
-    <!-- 수치 카드 -->
-    <div class="growth-numbers reveal reveal-delay-1" id="growthNumbers">
-      <!-- JS에서 카드 생성 -->
-    </div>
-  </div>
-
-  <!-- 마일스톤 타임라인 -->
-  <div class="growth-timeline reveal reveal-delay-2" id="growthTimeline">
-    <!-- JS에서 생성 -->
-  </div>
-</section>
-
-<!-- ACT 1: 질문 -->
-<section id="act1">
-  <div class="section-label reveal">1막 &#8212; 질문</div>
-
-  <h2 class="act1-question reveal">
-    AI가 위험하다면,<br>
-    바로 그 이유로 기회가 아닌가?
-  </h2>
-
-  <div class="act1-perspectives reveal reveal-delay-1">
-    <div class="act1-perspective dark">
-      <div class="act1-perspective-label">독점 / 경쟁 / 탐욕</div>
-      <div class="act1-perspective-title">"AI는 자본의 무기"</div>
-      <ul class="act1-perspective-items">
-        <li>데이터 독점</li>
-        <li>알고리즘 지배</li>
-        <li>수수료 착취</li>
-        <li>기술 종속</li>
-      </ul>
-    </div>
-    <div class="act1-perspective light">
-      <div class="act1-perspective-label">호혜 / 품앗이</div>
-      <div class="act1-perspective-title">"AI는 기본기술"</div>
-      <ul class="act1-perspective-items">
-        <li>데이터 주권</li>
-        <li>사람이 결정</li>
-        <li>직거래 연결</li>
-        <li>공유로 열기</li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="act1-conclusion reveal reveal-delay-2">
-    기술은 같다. 철학이 다르다.
-  </div>
-</section>
-
-<!-- ACT 2: 선언 -->
-<section id="act2">
-  <div class="section-label reveal">2막 &#8212; 선언</div>
-
-  <h2 class="act2-declaration reveal">
-    AI는 역사적 인류의 총합이다
-  </h2>
-
-  <div class="act2-text reveal reveal-delay-1">
-    AI는 <strong>대자본의 전유물이 아니다</strong>. 인류가 수천 년간 축적한 지식과 경험의 결정체다.<br><br>
-    호혜는 특정 시대에 시작된 것이 아니다. <strong>인간 생존의 필수조건</strong>이다.<br>
-    로치데일에서, 리우에서, 대전 지족동에서 &#8212; 같은 문을 다른 시대에 열었다.
-  </div>
-
-  <div class="act2-cards reveal reveal-delay-2">
-    <div class="act2-card">
-      <div class="act2-card-num">01</div>
-      <div class="act2-card-title">기본기술</div>
-      <div class="act2-card-desc">
-        AI는 소수의 특허가 아니다.<br>
-        읽고 쓰듯, 누구나 쓸 수 있어야 한다.
-      </div>
-    </div>
-    <div class="act2-card">
-      <div class="act2-card-num">02</div>
-      <div class="act2-card-title">공유지능</div>
-      <div class="act2-card-desc">
-        혼자 독점하면 무기가 된다.<br>
-        함께 나누면 지능이 된다.
-      </div>
-    </div>
-    <div class="act2-card">
-      <div class="act2-card-num">03</div>
-      <div class="act2-card-title">로컬데이터주권</div>
-      <div class="act2-card-desc">
-        우리의 데이터는 우리가 소유한다.<br>
-        플랫폼에 빼앗기지 않는다.
-      </div>
-    </div>
-  </div>
-
-  <div class="act2-sovereignty reveal">
-    <div class="act2-sovereignty-text">
-      데이터주권의 완성 &#8212;<br>
-      <em>자체 모델을 만들어야 비로소 데이터주권이 달성된다.</em>
-    </div>
-  </div>
-
-  <a href="https://www.youtube.com/@local_counterattack" target="_blank" rel="noopener noreferrer" class="btn-text-link reveal">자체 파인튜닝 과정 살펴보기 &#8594;</a>
-</section>
-
-<!-- ACT 3: 실천 -->
-<section id="act3">
-  <div class="act3-inner">
-    <div class="section-label reveal">3막 &#8212; 실천</div>
-
-    <h2 class="act3-declaration reveal">
-      AI와 로컬리스트의 협동 &#8212;<br>
-      지금 여기서
-    </h2>
-
-    <!-- Q&A 아코디언 데모 -->
-    <div class="qna-section reveal reveal-delay-1">
-      <details class="qna-accordion">
-        <summary>사회적경제가 뭔가요?</summary>
-        <div class="qna-answer">
-          사회적경제는 이윤의 극대화보다 <b>사람과 공동체의 이익</b>을 우선하는 경제 활동입니다. 
-          협동조합과 마을기업 등이 주체가 되어, 호혜와 연대의 원리로 우리 사회의 결핍을 채우고 지속 가능한 삶의 기반을 만드는 대안적 경제 모델입니다.
-        </div>
-      </details>
-      <details class="qna-accordion">
-        <summary>품앗이생협의 4대 주권이 뭔가요?</summary>
-        <div class="qna-answer">
-          품앗이생협은 <b>먹거리 주권, 유통 주권, 데이터 주권, 화폐 주권</b>을 핵심 가치로 삼습니다. 
-          이는 우리가 먹고, 나누고, 정보를 다루고, 가치를 교환하는 삶의 모든 영역에서 외부 자본에 종속되지 않고 스스로의 주권을 지키는 '로컬딥테크'의 정수입니다.
-        </div>
-      </details>
-      <details class="qna-accordion">
-        <summary>로컬푸드가 왜 중요한가요?</summary>
-        <div class="qna-answer">
-          로컬푸드는 단순히 '가까운 음식'을 넘어 생산자와 소비자의 신뢰를 잇는 <b>호혜의 연결망</b>입니다. 
-          탄소 발자국을 줄여 기후 위기에 대응하고, 지역 농가의 안정적인 소득을 보장하며, 신선하고 안전한 먹거리를 통해 지역 공동체의 경제와 건강을 동시에 살립니다.
-        </div>
-      </details>
-      <details class="qna-accordion">
-        <summary>AI가 협동조합에 어떻게 도움이 되나요?</summary>
-        <div class="qna-answer">
-          AI는 자본의 전유물이 아닌, 협동조합의 <b>'공유 지능'</b>으로 기능할 수 있습니다. 
-          현장의 복잡한 실무를 효율화하고, 조합원의 필요를 데이터로 정교하게 파악하며, 무엇보다 로컬의 지혜를 기록하고 전승하여 협동의 가치를 증폭시키는 강력한 도구가 됩니다.
-        </div>
-      </details>
-    </div>
-
-    <!-- AI 진화 타임라인 -->
-    <div class="act3-timeline reveal reveal-delay-2">
-      <div class="act3-level current">
-        <div class="act3-level-num">Lv.0</div>
-        <div class="act3-level-title">RAG 기반 Q&amp;A</div>
-        <div class="act3-level-desc">기존 문서 검색 + 응답 생성</div>
-      </div>
-      <div class="act3-level">
-        <div class="act3-level-num">Lv.1</div>
-        <div class="act3-level-title">7B 파인튜닝 모델</div>
-        <div class="act3-level-desc">로컬푸드 특화 소형 모델</div>
-      </div>
-      <div class="act3-level">
-        <div class="act3-level-num">Lv.2</div>
-        <div class="act3-level-title">도메인 특화 모델</div>
-        <div class="act3-level-desc">사회적경제 전문 AI</div>
-      </div>
-      <div class="act3-level">
-        <div class="act3-level-num">Lv.3</div>
-        <div class="act3-level-title">자립형 로컬 AI</div>
-        <div class="act3-level-desc">독립 운영, 완전한 데이터주권</div>
-      </div>
-    </div>
-
-    <!-- 팀 소개 -->
-    <div class="act3-team reveal">
-      <div class="act3-team-text">
-        <strong>27년 현장 경험</strong>과 AI팀 5명이<br>
-        로컬의 반격을 만들고 있습니다.<br><br>
-        사회적경제, 로컬푸드, 지역화폐,<br>
-        주민조직화, AI경영혁신 &#8212;<br>
-        현장에서 검증된 기술입니다.
-      </div>
-      <div class="act3-team-members">
-        <div class="act3-member">
-          <div class="act3-member-name">지미</div>
-          <div class="act3-member-role">AI경영지원실장</div>
-        </div>
-        <div class="act3-member">
-          <div class="act3-member-name">패미</div>
-          <div class="act3-member-role">현장개발</div>
-        </div>
-        <div class="act3-member">
-          <div class="act3-member-name">미르</div>
-          <div class="act3-member-role">설계</div>
-        </div>
-        <div class="act3-member">
-          <div class="act3-member-name">터미</div>
-          <div class="act3-member-role">인프라</div>
-        </div>
-        <div class="act3-member">
-          <div class="act3-member-name">피제</div>
-          <div class="act3-member-role">분석</div>
-        </div>
-      </div>
-    </div>
-
-    <a href="https://www.youtube.com/@local_counterattack" target="_blank" rel="noopener noreferrer" class="act3-yt reveal">
-      로컬의 반격 (feat. AI) &#8594;
-    </a>
-  </div>
-</section>
-
-<!-- 함께 키우기 -->
-<section id="contribute">
-  <div class="contrib-header reveal">
-    <div class="section-label">참여</div>
-    <h2 class="contrib-title">품을 내면, 돌아온다</h2>
-    <p class="contrib-subtitle">
-      돈 있는 자 돈으로, 지혜 있는 자 지혜로, 기술 있는 자 기술로<br>
-      — 품아이는 함께 키운다.
-    </p>
-  </div>
-
-  <div class="contrib-grid">
-    <div class="contrib-card reveal">
-      <div class="contrib-card-icon" role="img" aria-label="데이터">&#x1F4CB;</div>
-      <div class="contrib-card-title">데이터문</div>
-      <p class="contrib-card-desc">현장의 경험과 지식을 나눠주세요. Q&amp;A 한 줄이면 충분합니다.</p>
-      <div class="contrib-card-examples">답변 평가 &#183; Q&amp;A 작성 &#183; 문서 등록</div>
-      <a href="https://demo.poomasi.org" target="_blank" rel="noopener noreferrer" class="contrib-card-btn contrib-card-btn--data">품아이에게 가르치기</a>
-    </div>
-
-    <div class="contrib-card reveal reveal-delay-1">
-      <div class="contrib-card-icon" role="img" aria-label="에이전트">&#x2699;</div>
-      <div class="contrib-card-title">에이전트문</div>
-      <p class="contrib-card-desc">AI 에이전트를 투입해 품아이를 함께 키워주세요.</p>
-      <div class="contrib-card-examples">데이터 정제 &#183; 특화 봇 &#183; 자동 번역</div>
-      <a href="https://crew.poomasi.org" target="_blank" rel="noopener noreferrer" class="contrib-card-btn contrib-card-btn--agent">크루 합류하기</a>
-    </div>
-
-    <div class="contrib-card reveal reveal-delay-2">
-      <div class="contrib-card-icon" role="img" aria-label="투자">&#x1F331;</div>
-      <div class="contrib-card-title">돈문</div>
-      <p class="contrib-card-desc">씨앗 투자로 로컬의 반격에 동참하세요.</p>
-      <div class="contrib-card-examples">후원 &#183; 투자 &#183; 광고</div>
-      <a href="#investors" class="contrib-card-btn contrib-card-btn--seed">씨앗 심기</a>
-    </div>
-  </div>
-
-  <div class="contrib-spectrum reveal">
-    <div class="contrib-spectrum-bar"></div>
-    <div class="contrib-spectrum-items">
-      <span class="contrib-spectrum-item">피드백 30초</span>
-      <span class="contrib-spectrum-item">Q&amp;A 작성</span>
-      <span class="contrib-spectrum-item">문서 등록</span>
-      <span class="contrib-spectrum-item">에이전트 투입</span>
-      <span class="contrib-spectrum-item">투자</span>
-    </div>
-    <div class="contrib-spectrum-label">
-      <span>쉬움</span>
-      <span>전문</span>
-    </div>
-  </div>
-
-  <div class="contrib-footer reveal">
-    모든 기여는 <span>품(品) 포인트</span>로 기록되고, <span>한밭페이 드림</span>으로 돌아옵니다.
-  </div>
-</section>
-
-<!-- 투자자 명예의 전당 -->
-<section id="investors">
-  <div class="inv-header reveal">
-    <div class="section-label">SEED INVESTORS</div>
-    <h2 class="inv-title">품아이에<br><span>씨앗</span>을 심은 사람들</h2>
-    <p class="inv-subtitle">
-      이 반격은 혼자 시작할 수 없었습니다.<br>
-      처음 용기를 낸 사람들이 여기 있습니다.
-    </p>
-  </div>
-
-  <div class="inv-tiers reveal reveal-delay-1">
-    <div class="inv-tier">
-      <div class="inv-tier-icon">&#x1F331;</div>
-      <div class="inv-tier-name">씨앗</div>
-      <div class="inv-tier-en">Seed</div>
-    </div>
-    <div class="inv-tier">
-      <div class="inv-tier-icon">&#x1F33F;</div>
-      <div class="inv-tier-name">새싹</div>
-      <div class="inv-tier-en">Sprout</div>
-    </div>
-    <div class="inv-tier">
-      <div class="inv-tier-icon">&#x1F34E;</div>
-      <div class="inv-tier-name">열매</div>
-      <div class="inv-tier-en">Fruit</div>
-    </div>
-    <div class="inv-tier">
-      <div class="inv-tier-icon">&#x1F333;</div>
-      <div class="inv-tier-name">뿌리</div>
-      <div class="inv-tier-en">Root</div>
-    </div>
-  </div>
-
-  <div class="inv-empty reveal reveal-delay-2">
-    <div class="inv-empty-icon">&#x1F331;</div>
-    <div class="inv-empty-text">첫 번째 씨앗이 되어주세요</div>
-    <p class="inv-empty-sub">
-      품아이의 반격은 작은 용기에서 시작됩니다.<br>
-      당신의 씨앗이 마을을 바꿉니다.
-    </p>
-    <a href="https://docs.google.com/forms/d/e/1FAIpQLScYgjn8GPTnQINj2KNLivOXLGwDxK0gYI3qoPOaasUfrfSUqQ/viewform" target="_blank" rel="noopener noreferrer" class="btn-invest">씨앗 투자 문의 폼 작성하기</a>
-  </div>
-</section>
 
 <!-- FOOTER -->
 <footer>
@@ -2023,7 +630,16 @@
       <ul class="footer-links">
         <li><a href="https://www.youtube.com/@local_counterattack" target="_blank" rel="noopener noreferrer">유튜브 채널</a></li>
         <li><a href="https://pf.kakao.com/_ZxoVxfj" target="_blank" rel="noopener noreferrer">카카오채널</a></li>
-        <li><a href="https://seed.poomasi.org" target="_blank" rel="noopener noreferrer">생협 사이트</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">조직</div>
+      <ul class="footer-links">
+        <li><a href="https://seed.poomasi.org" target="_blank" rel="noopener noreferrer">품앗이생협</a></li>
+        <li><a href="https://djco.poomasi.org" target="_blank" rel="noopener noreferrer">사교원 (DJCO)</a></li>
+        <li><a href="https://foodnet.poomasi.org" target="_blank" rel="noopener noreferrer">전국로컬푸드네트워크</a></li>
+        <li><a href="https://crew.poomasi.org" target="_blank" rel="noopener noreferrer">크루 플랫폼</a></li>
+        <li><a href="https://yeoyu.poomasi.org" target="_blank" rel="noopener noreferrer">여유로와 (논산)</a></li>
       </ul>
     </div>
   </div>
@@ -2033,23 +649,11 @@
       <a href="privacy.html">개인정보처리방침</a>
       <a href="sitemap.html">사이트맵</a>
     </div>
-    <div class="footer-philosophy">AI와 로컬리스트의 협동</div>
+    <div class="footer-philosophy">AI와 로컬리스트의 품앗이</div>
   </div>
 </footer>
 
 <script>
-  // ── Scroll reveal ──
-  var reveals = document.querySelectorAll('.reveal');
-  var observer = new IntersectionObserver(function(entries) {
-    entries.forEach(function(entry) {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-      }
-    });
-  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-
-  reveals.forEach(function(el) { observer.observe(el); });
-
   // ── Mobile nav toggle (hamburger ↔ X) ──
   var navToggle = document.querySelector('.nav-toggle');
   var navLinks = document.querySelector('.nav-links');
@@ -2062,7 +666,6 @@
       navToggle.setAttribute('aria-label', isOpen ? '메뉴 닫기' : '메뉴 열기');
     });
 
-    // 메뉴 항목 클릭 시 닫기
     navLinks.querySelectorAll('a').forEach(function(link) {
       link.addEventListener('click', function() {
         navLinks.classList.remove('open');
@@ -2084,13 +687,11 @@
       moreBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
     });
 
-    // 외부 클릭 시 드롭다운 닫기
     document.addEventListener('click', function() {
       moreDropdown.classList.remove('open');
       moreBtn.setAttribute('aria-expanded', 'false');
     });
 
-    // 드롭다운 내부 클릭 시 전파 방지
     moreDropdown.addEventListener('click', function(e) {
       e.stopPropagation();
     });
@@ -2105,196 +706,7 @@
       navEl.classList.remove('scrolled');
     }
   });
-
-  // ── 12일간의 성장 섹션 ──
-  (function() {
-    var CX = 200, CY = 200, R = 140;
-
-    function polarToCart(angle, radius) {
-      var rad = (angle - 90) * Math.PI / 180;
-      return { x: CX + radius * Math.cos(rad), y: CY + radius * Math.sin(rad) };
-    }
-
-    function buildPolygonPoints(values, maxR) {
-      var n = values.length;
-      return values.map(function(v, i) {
-        var angle = (360 / n) * i;
-        var p = polarToCart(angle, (v / 100) * maxR);
-        return p.x + ',' + p.y;
-      }).join(' ');
-    }
-
-    fetch('poomai_growth.json')
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        // 나이 업데이트
-        var ageEl = document.getElementById('growth-age');
-        if (ageEl) ageEl.textContent = data.age_days;
-
-        // 축 데이터 추출
-        var axisKeys = Object.keys(data.axes);
-        var axisData = axisKeys.map(function(k) { return data.axes[k]; });
-        var n = axisData.length;
-        var svg = document.getElementById('radarChart');
-        if (!svg) return;
-
-        var svgNS = 'http://www.w3.org/2000/svg';
-        var gridLevels = [20, 40, 60, 80, 100];
-
-        // 그리드 동심 다각형
-        gridLevels.forEach(function(lv) {
-          var pts = [];
-          for (var i = 0; i < n; i++) {
-            var angle = (360 / n) * i;
-            var p = polarToCart(angle, (lv / 100) * R);
-            pts.push(p.x + ',' + p.y);
-          }
-          var poly = document.createElementNS(svgNS, 'polygon');
-          poly.setAttribute('points', pts.join(' '));
-          poly.setAttribute('class', 'radar-grid-line');
-          svg.appendChild(poly);
-        });
-
-        // 축 선
-        for (var i = 0; i < n; i++) {
-          var angle = (360 / n) * i;
-          var p = polarToCart(angle, R);
-          var line = document.createElementNS(svgNS, 'line');
-          line.setAttribute('x1', CX);
-          line.setAttribute('y1', CY);
-          line.setAttribute('x2', p.x);
-          line.setAttribute('y2', p.y);
-          line.setAttribute('class', 'radar-axis');
-          svg.appendChild(line);
-        }
-
-        // 데이터 영역 (시작: 0에서 → 실제값 애니메이션)
-        var zeroPoints = buildPolygonPoints(axisData.map(function() { return 0; }), R);
-        var realPoints = buildPolygonPoints(axisData.map(function(d) { return d.value; }), R);
-
-        var area = document.createElementNS(svgNS, 'polygon');
-        area.setAttribute('points', zeroPoints);
-        area.setAttribute('class', 'radar-area');
-        svg.appendChild(area);
-
-        // 데이터 점 + 라벨
-        axisData.forEach(function(d, i) {
-          var angle = (360 / n) * i;
-          var p = polarToCart(angle, (d.value / 100) * R);
-          var labelP = polarToCart(angle, R + 28);
-
-          // 점
-          var dot = document.createElementNS(svgNS, 'circle');
-          dot.setAttribute('cx', p.x);
-          dot.setAttribute('cy', p.y);
-          dot.setAttribute('class', 'radar-dot');
-          dot.style.opacity = '0';
-          dot.style.transition = 'opacity 0.5s ease ' + (0.8 + i * 0.1) + 's';
-          svg.appendChild(dot);
-
-          // 라벨
-          var label = document.createElementNS(svgNS, 'text');
-          label.setAttribute('x', labelP.x);
-          label.setAttribute('y', labelP.y);
-          label.setAttribute('text-anchor', 'middle');
-          label.setAttribute('dominant-baseline', 'central');
-          label.setAttribute('class', 'radar-label');
-          label.textContent = d.label;
-          svg.appendChild(label);
-
-          // 수치
-          var val = document.createElementNS(svgNS, 'text');
-          val.setAttribute('x', labelP.x);
-          val.setAttribute('y', labelP.y + 15);
-          val.setAttribute('text-anchor', 'middle');
-          val.setAttribute('class', 'radar-value');
-          val.textContent = d.value;
-          svg.appendChild(val);
-
-          // 점 fade-in
-          setTimeout(function() { dot.style.opacity = '1'; }, 100);
-        });
-
-        // 영역 확장 애니메이션 (IntersectionObserver)
-        var radarObs = new IntersectionObserver(function(entries) {
-          entries.forEach(function(entry) {
-            if (entry.isIntersecting) {
-              area.setAttribute('points', realPoints);
-              radarObs.unobserve(entry.target);
-            }
-          });
-        }, { threshold: 0.3 });
-        radarObs.observe(svg);
-
-        // 수치 카드
-        var numbersEl = document.getElementById('growthNumbers');
-        if (numbersEl && data.key_numbers) {
-          data.key_numbers.forEach(function(num) {
-            var card = document.createElement('div');
-            card.className = 'growth-num-card';
-            card.innerHTML =
-              '<div class="growth-num-value" data-target="' + num.value + '">0</div>' +
-              '<div class="growth-num-unit">' + num.unit + '</div>' +
-              '<div class="growth-num-label">' + num.label + '</div>';
-            numbersEl.appendChild(card);
-          });
-
-          // 카운트업 애니메이션
-          var numObs = new IntersectionObserver(function(entries) {
-            entries.forEach(function(entry) {
-              if (entry.isIntersecting) {
-                var cards = entry.target.querySelectorAll('.growth-num-value');
-                cards.forEach(function(el) {
-                  var target = el.getAttribute('data-target');
-                  var numericTarget = parseInt(target.replace(/[^0-9]/g, ''), 10);
-                  var suffix = target.replace(/[0-9,]/g, '');
-                  var hasComma = target.indexOf(',') !== -1;
-                  if (isNaN(numericTarget)) {
-                    el.textContent = target;
-                    return;
-                  }
-                  var duration = 1200;
-                  var start = performance.now();
-                  function tick(now) {
-                    var elapsed = now - start;
-                    var progress = Math.min(elapsed / duration, 1);
-                    var eased = 1 - Math.pow(1 - progress, 3);
-                    var current = Math.round(numericTarget * eased);
-                    if (hasComma) {
-                      el.textContent = current.toLocaleString() + suffix;
-                    } else {
-                      el.textContent = current + suffix;
-                    }
-                    if (progress < 1) requestAnimationFrame(tick);
-                  }
-                  requestAnimationFrame(tick);
-                });
-                numObs.unobserve(entry.target);
-              }
-            });
-          }, { threshold: 0.3 });
-          numObs.observe(numbersEl);
-        }
-
-        // 마일스톤 타임라인
-        var timelineEl = document.getElementById('growthTimeline');
-        if (timelineEl && data.milestones) {
-          data.milestones.forEach(function(ms) {
-            var item = document.createElement('div');
-            item.className = 'growth-milestone';
-            item.innerHTML =
-              '<div class="growth-ms-day">DAY ' + ms.day + ' &#8212; ' + ms.date + '</div>' +
-              '<div class="growth-ms-label">' + ms.label + '</div>' +
-              '<div class="growth-ms-desc">' + ms.desc + '</div>';
-            timelineEl.appendChild(item);
-          });
-        }
-      })
-      .catch(function(err) {
-        console.warn('Growth data load failed:', err);
-      });
-  })();
 </script>
-<script src="https://seed.poomasi.org/poomai-widget.js?v=20260410a"></script>
+<script src="https://seed.poomasi.org/poomai-widget.js?v=20260410a" data-mode="fullscreen" data-target="#poomai-chat-main"></script>
 </body>
 </html>
