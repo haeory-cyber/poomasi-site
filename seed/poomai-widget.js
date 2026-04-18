@@ -436,7 +436,7 @@
       background: rgba(196, 128, 58, 0.35);
     }
 
-    /* 모바일 전체화면 */
+    /* 모바일 전체화면 (버블 모드) */
     @media (max-width: 480px) {
       #poomai-widget-root {
         bottom: 16px;
@@ -459,53 +459,127 @@
         to { opacity: 1; }
       }
     }
+
+    /* ── 풀스크린 모드 (메인 페이지용) ── */
+    #poomai-chat-main #poomai-widget-root {
+      position: static;
+      width: 100%;
+      height: 100%;
+    }
+    #poomai-chat-main .poomai-fullscreen-panel {
+      position: relative !important;
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 520px;
+      max-width: 100% !important;
+      max-height: none !important;
+      border-radius: 8px !important;
+      border: 1px solid rgba(196,128,58,0.25) !important;
+      display: flex !important;
+      flex-direction: column;
+      opacity: 1 !important;
+      transform: none !important;
+      visibility: visible !important;
+      pointer-events: auto !important;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.5) !important;
+    }
+    #poomai-chat-main #poomai-messages {
+      flex: 1;
+      min-height: 300px;
+    }
   `;
   document.head.appendChild(STYLE);
+
+  // ── fullscreen 모드 감지 ──
+  // <script src="...poomai-widget.js" data-mode="fullscreen" data-target="#poomai-chat-main">
+  const _thisScript = document.currentScript;
+  const _isFullscreen = _thisScript && _thisScript.getAttribute('data-mode') === 'fullscreen';
+  const _targetSelector = _thisScript && _thisScript.getAttribute('data-target');
+  const _targetEl = _targetSelector ? document.querySelector(_targetSelector) : null;
 
   // ── DOM 생성 ──
   const ROOT = document.createElement('div');
   ROOT.id = 'poomai-widget-root';
 
-  ROOT.innerHTML = `
-    <div id="poomai-panel">
-      <div id="poomai-header">
-        <span id="poomai-header-title">품아이</span>
-        <div id="poomai-header-actions">
-          <button class="poomai-header-btn" id="poomai-auth-btn" type="button"></button>
-          <button class="poomai-header-btn" id="poomai-close-btn" type="button" aria-label="닫기">&times;</button>
+  // fullscreen 모드: FAB 없이 target 컨테이너에 직접 패널 마운트
+  if (_isFullscreen && _targetEl) {
+    ROOT.innerHTML = `
+      <div id="poomai-panel" class="poomai-fullscreen-panel">
+        <div id="poomai-header">
+          <span id="poomai-header-title">품아이</span>
+          <div id="poomai-header-actions">
+            <button class="poomai-header-btn" id="poomai-auth-btn" type="button"></button>
+          </div>
+        </div>
+        <div id="poomai-login-form">
+          <input type="email" id="poomai-login-email" placeholder="이메일" autocomplete="email">
+          <input type="password" id="poomai-login-pw" placeholder="비밀번호" autocomplete="current-password">
+          <div id="poomai-login-error"></div>
+          <button type="button" id="poomai-login-submit">로그인</button>
+        </div>
+        <div id="poomai-messages"></div>
+        <div id="poomai-quick-btns">
+          <button class="poomai-quick-btn" type="button" data-label="발주요청" data-first="어떤 품목 발주 요청하실까요?">발주요청</button>
+          <button class="poomai-quick-btn" type="button" data-label="단골 확인" data-first="어떤 생산자, 물품의 단골 현황이 궁금하세요?">단골 확인</button>
+          <button class="poomai-quick-btn" type="button" data-label="문자 발송" data-first="누구에게 어떤 내용으로 보낼까요?">문자 발송</button>
+          <button class="poomai-quick-btn" type="button" data-label="태그 뽑기" data-first="어떤 상품 태그 뽑아드릴까요?">태그 뽑기</button>
+          <button class="poomai-quick-btn" type="button" data-label="조합원말씀" data-first="조합원 말씀을 기록해드릴게요. 어떤 내용이었나요?">조합원말씀</button>
+          <button class="poomai-quick-btn" type="button" data-label="신규기능요청" data-first="어떤 기능이 있으면 좋을 것 같으세요?">신규기능요청</button>
+        </div>
+        <div id="poomai-input-area">
+          <textarea id="poomai-textarea" placeholder="무엇이든 물어보세요..." rows="1"></textarea>
+          <button id="poomai-send-btn" type="button" aria-label="전송">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#0f0b07" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 2L11 13"/>
+              <path d="M22 2L15 22L11 13L2 9L22 2Z"/>
+            </svg>
+          </button>
         </div>
       </div>
-      <div id="poomai-login-form">
-        <input type="email" id="poomai-login-email" placeholder="이메일" autocomplete="email">
-        <input type="password" id="poomai-login-pw" placeholder="비밀번호" autocomplete="current-password">
-        <div id="poomai-login-error"></div>
-        <button type="button" id="poomai-login-submit">로그인</button>
+    `;
+    _targetEl.appendChild(ROOT);
+  } else {
+    // 기본 버블 모드 (서브도메인 기존 동작)
+    ROOT.innerHTML = `
+      <div id="poomai-panel">
+        <div id="poomai-header">
+          <span id="poomai-header-title">품아이</span>
+          <div id="poomai-header-actions">
+            <button class="poomai-header-btn" id="poomai-auth-btn" type="button"></button>
+            <button class="poomai-header-btn" id="poomai-close-btn" type="button" aria-label="닫기">&times;</button>
+          </div>
+        </div>
+        <div id="poomai-login-form">
+          <input type="email" id="poomai-login-email" placeholder="이메일" autocomplete="email">
+          <input type="password" id="poomai-login-pw" placeholder="비밀번호" autocomplete="current-password">
+          <div id="poomai-login-error"></div>
+          <button type="button" id="poomai-login-submit">로그인</button>
+        </div>
+        <div id="poomai-messages"></div>
+        <div id="poomai-quick-btns">
+          <button class="poomai-quick-btn" type="button" data-label="발주요청" data-first="어떤 품목 발주 요청하실까요?">발주요청</button>
+          <button class="poomai-quick-btn" type="button" data-label="단골 확인" data-first="어떤 생산자, 물품의 단골 현황이 궁금하세요?">단골 확인</button>
+          <button class="poomai-quick-btn" type="button" data-label="문자 발송" data-first="누구에게 어떤 내용으로 보낼까요?">문자 발송</button>
+          <button class="poomai-quick-btn" type="button" data-label="태그 뽑기" data-first="어떤 상품 태그 뽑아드릴까요?">태그 뽑기</button>
+          <button class="poomai-quick-btn" type="button" data-label="조합원말씀" data-first="조합원 말씀을 기록해드릴게요. 어떤 내용이었나요?">조합원말씀</button>
+          <button class="poomai-quick-btn" type="button" data-label="신규기능요청" data-first="어떤 기능이 있으면 좋을 것 같으세요?">신규기능요청</button>
+        </div>
+        <div id="poomai-input-area">
+          <textarea id="poomai-textarea" placeholder="무엇이든 물어보세요..." rows="1"></textarea>
+          <button id="poomai-send-btn" type="button" aria-label="전송">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#0f0b07" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 2L11 13"/>
+              <path d="M22 2L15 22L11 13L2 9L22 2Z"/>
+            </svg>
+          </button>
+        </div>
       </div>
-      <div id="poomai-messages"></div>
-      <div id="poomai-quick-btns">
-        <button class="poomai-quick-btn" type="button" data-label="발주요청" data-first="어떤 품목 발주 요청하실까요?">발주요청</button>
-        <button class="poomai-quick-btn" type="button" data-label="단골 확인" data-first="어떤 생산자, 물품의 단골 현황이 궁금하세요?">단골 확인</button>
-        <button class="poomai-quick-btn" type="button" data-label="문자 발송" data-first="누구에게 어떤 내용으로 보낼까요?">문자 발송</button>
-        <button class="poomai-quick-btn" type="button" data-label="태그 뽑기" data-first="어떤 상품 태그 뽑아드릴까요?">태그 뽑기</button>
-        <button class="poomai-quick-btn" type="button" data-label="조합원말씀" data-first="조합원 말씀을 기록해드릴게요. 어떤 내용이었나요?">조합원말씀</button>
-        <button class="poomai-quick-btn" type="button" data-label="신규기능요청" data-first="어떤 기능이 있으면 좋을 것 같으세요?">신규기능요청</button>
-      </div>
-      <div id="poomai-input-area">
-        <textarea id="poomai-textarea" placeholder="무엇이든 물어보세요..." rows="1"></textarea>
-        <button id="poomai-send-btn" type="button" aria-label="전송">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#0f0b07" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 2L11 13"/>
-            <path d="M22 2L15 22L11 13L2 9L22 2Z"/>
-          </svg>
-        </button>
-      </div>
-    </div>
-    <button id="poomai-fab" type="button" aria-label="품아이 채팅">
-      <span class="fab-icon">&#x1F33E;</span>
-    </button>
-  `;
-
-  document.body.appendChild(ROOT);
+      <button id="poomai-fab" type="button" aria-label="품아이 채팅">
+        <span class="fab-icon">&#x1F33E;</span>
+      </button>
+    `;
+    document.body.appendChild(ROOT);
+  }
 
   // ── 요소 참조 ──
   const fab = document.getElementById('poomai-fab');
@@ -1140,21 +1214,25 @@
     if (firstMessage) handleQuickBtn(firstMessage, label);
   });
 
-  // FAB 클릭
-  fab.addEventListener('click', function (e) {
-    e.stopPropagation();
-    e.preventDefault();
-    if (isOpen) {
-      closePanel();
-    } else {
-      openPanel();
-    }
-  });
+  // FAB 클릭 (버블 모드에서만 존재)
+  if (fab) {
+    fab.addEventListener('click', function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      if (isOpen) {
+        closePanel();
+      } else {
+        openPanel();
+      }
+    });
+  }
 
-  // 닫기 버튼
-  closeBtn.addEventListener('click', function () {
-    closePanel();
-  });
+  // 닫기 버튼 (버블 모드에서만 존재)
+  if (closeBtn) {
+    closeBtn.addEventListener('click', function () {
+      closePanel();
+    });
+  }
 
   // 로그인/로그아웃 버튼
   authBtn.addEventListener('click', function () {
@@ -1214,7 +1292,11 @@
   });
 
   // ── 초기 상태 복원 ──
-  if (isOpen) {
+  if (_isFullscreen && _targetEl) {
+    // fullscreen 모드: 자동으로 패널 활성화
+    openPanel();
+  } else if (isOpen) {
+    // 버블 모드: 이전 세션 상태 복원
     openPanel();
   }
 
