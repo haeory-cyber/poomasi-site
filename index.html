@@ -237,7 +237,8 @@
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-    padding: 3rem 4vw 2rem;
+    /* nav가 position:fixed라 padding-top은 nav 높이(약 5rem) 이상 필요 */
+    padding: 6rem 4vw 2rem;
     position: relative;
     overflow: hidden;
     text-align: center;
@@ -308,9 +309,10 @@
     width: 100%;
     max-width: 900px;
     flex: none;
-    height: calc(100vh - 240px);
-    min-height: 520px;
-    max-height: 780px;
+    /* nav(5rem) + hero padding(6rem+2rem) + slogan(~4rem) = 약 17rem = 272px */
+    height: calc(100vh - 280px);
+    min-height: 480px;
+    max-height: 760px;
     position: relative;
   }
 
