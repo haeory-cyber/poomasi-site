@@ -13,6 +13,27 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
+# ── CLI 브릿지 (v2.1 — 로그인 유저 전용) ─────────────
+# POOMAI_CLI_BRIDGE=off 이면 모든 경로 Gemini 폴백
+_cli_bridge = None
+_cli_bridge_load_error = None
+try:
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "poomai"))
+    from cli_bridge import (
+        send_message as _cli_send,
+        get_user_slug as _get_user_slug,
+        is_cli_bridge_enabled as _cli_enabled,
+        get_or_restore_session as _get_session,
+        cleanup_on_shutdown as _cli_cleanup,
+        check_quota_alert as _check_quota,
+        get_today_message_count as _today_count,
+        _ALLOWED_EMAIL,
+    )
+    _cli_bridge = True
+except Exception as _e:
+    _cli_bridge_load_error = str(_e)
+    _cli_bridge = False
+
 # ── 설정 ──────────────────────────────────────────────
 PORT = 8030
 # Phase 2: live serving dir is a symlink (seed-live → seed-releases/v_*),
@@ -86,7 +107,17 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"[seed] RAGEngine 초기화 실패: {e}")
         engine = None
+    if _cli_bridge_load_error:
+        print(f"[seed] CLI 브릿지 로드 실패 (Gemini 폴백): {_cli_bridge_load_error}")
+    elif _cli_bridge:
+        print("[seed] CLI 브릿지 로드 완료")
     yield
+    # CLI 브릿지 세션 정리
+    if _cli_bridge:
+        try:
+            _cli_cleanup()
+        except Exception:
+            pass
     print("[seed] 서버 종료")
 
 
@@ -167,11 +198,72 @@ async def chat(request: Request):
             "/ai-tools.html": "AI경영지원실 페이지",
             "/annual_report.html": "경영 연차 보고서 페이지",
             "/display.html": "일일 판매 현황 디스플레이",
+            "/poomasi_philosophy.html": "품앗이생협 철학 페이지",
+            "/privacy.html": "개인정보처리방침 페이지",
+            "/sitemap.html": "전체 사이트맵 페이지",
+            "/delivery_app.html": "배달 관리(관리자) 페이지",
+            "/workshop.html": "데이터 파이프라인 작업실 페이지",
+            "/tags.html": "QR 가격태그 인쇄 페이지",
+            "/print_tags_6m.html": "비농산물 가격태그 일괄인쇄 페이지",
+            "/print_qr_notice.html": "조합원말씀 QR 안내물 인쇄 페이지",
+            "/print_paper_form.html": "조합원말씀 수기 양식 인쇄 페이지",
+            "/location.html": "매장 위치 인증 페이지",
+            "/carbon/index.html": "탄소중립 실천 포인트 페이지",
+            "/carbon/scan.html": "탄소중립 QR 스캔 페이지",
+            "/ai-dashboard.html": "AI 비용/에이전트 대시보드 페이지",
         }
         hint = page_hints.get(page_context, "")
         if hint:
             query = f"[현재 페이지: {hint}] {query}"
 
+    # ── CLI 브릿지 분기 (로그인 + 화이트리스트 유저) ──────
+    # POOMAI_CLI_BRIDGE=off 이면 이 블록 전체 스킵 → Gemini 폴백
+    if (
+        _cli_bridge
+        and email
+        and _cli_enabled()
+        and _get_user_slug(email) is not None
+    ):
+        # 쿼터 체크 (95% 도달 시 신규 세션 거절)
+        today_count = _today_count()
+        quota_level = _check_quota(today_count)
+
+        if quota_level == "deny_95":
+            # 기존 세션 유지, 신규만 거절
+            existing_session = _get_session(email)
+            if not existing_session:
+                return JSONResponse(
+                    status_code=503,
+                    content={"error": "오늘 AI 사용 한도가 거의 소진되었습니다. 잠시 후 다시 시도해주세요."},
+                )
+
+        # CLI 호출
+        try:
+            session_id = body.get("session_id") or _get_session(email)
+            result = await _cli_send(email, query, session_id=session_id)
+
+            if result.get("via") == "cli":
+                answer = result.get("answer", "")
+                tool_summaries = result.get("tool_summaries", [])
+                resp: dict = {
+                    "answer": answer,
+                    "refs": [],
+                    "via": "cli",
+                    "session_id": result.get("session_id"),
+                }
+                if tool_summaries:
+                    resp["tool_summaries"] = tool_summaries
+                # 쿼터 경고 80% 알림 (비동기 MCP 알림은 pending_alerts.jsonl 경유)
+                if quota_level == "warn_80":
+                    import asyncio as _asyncio
+                    _asyncio.create_task(_send_quota_alert(today_count))
+                return resp
+            # via == "gemini_fallback" → 아래 Gemini 경로로 계속
+        except Exception as e:
+            # CLI 오류 시 Gemini 폴백 (사용자에게 투명하게)
+            print(f"[seed] CLI 브릿지 오류 — Gemini 폴백: {e}")
+
+    # ── Gemini 경로 (비로그인 또는 CLI 브릿지 off/fallback) ──
     # Engine 호출
     try:
         answer, refs = engine.generate(
@@ -193,6 +285,25 @@ async def chat(request: Request):
             status_code=500,
             content={"error": f"처리 중 오류가 발생했습니다: {str(e)}"},
         )
+
+
+async def _send_quota_alert(today_count: int):
+    """80% 쿼터 도달 시 pending_alerts.jsonl에 기록 (텔레그램 알림용)"""
+    import json as _json
+    from pathlib import Path as _Path
+    from datetime import datetime as _dt, timezone as _tz
+    alert_file = _Path(__file__).parent / "logs" / "pending_alerts.jsonl"
+    alert_file.parent.mkdir(exist_ok=True)
+    entry = {
+        "ts": _dt.now(_tz.utc).astimezone().isoformat(),
+        "type": "quota_warn_80",
+        "message": f"[품아이 쿼터 경고] 오늘 메시지 수: {today_count}건 — 한도 80% 도달",
+    }
+    try:
+        with alert_file.open("a", encoding="utf-8") as f:
+            f.write(_json.dumps(entry, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
 
 
 @app.post("/api/auth/login")
