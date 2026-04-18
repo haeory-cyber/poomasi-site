@@ -232,12 +232,12 @@
 
   /* ── HERO / CHAT MAIN ── */
   #hero {
-    min-height: 100vh;
+    min-height: auto;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-    padding: 6rem 4vw 2rem;
+    padding: 3rem 4vw 2rem;
     position: relative;
     overflow: hidden;
     text-align: center;
@@ -289,26 +289,28 @@
 
   .hero-title {
     position: relative;
-    opacity: 0;
-    animation: fadeUp 1s 2.4s forwards;
+    opacity: 1;
+    margin-bottom: 2rem;
   }
 
   .hero-title h1 {
     font-family: 'Noto Serif KR', serif;
-    font-size: clamp(1.6rem, 4vw, 3.2rem);
+    font-size: clamp(1.3rem, 2.8vw, 2.2rem);
     font-weight: 900;
     line-height: 1.2;
     color: var(--white);
     letter-spacing: -0.01em;
-    margin-bottom: 2rem;
+    margin-bottom: 0;
   }
 
   /* 풀스크린 챗 마운트 컨테이너 */
   #poomai-chat-main {
     width: 100%;
-    max-width: 800px;
-    flex: 1;
-    min-height: 500px;
+    max-width: 900px;
+    flex: none;
+    height: calc(100vh - 240px);
+    min-height: 520px;
+    max-height: 780px;
     position: relative;
   }
 
