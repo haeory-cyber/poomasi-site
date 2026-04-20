@@ -1,0 +1,59 @@
+# robots.txt — poomasi.org
+# AI시대 품앗이, 로컬의 반격 프로젝트
+# 업데이트: 2026-04-20
+
+# ─── 일반 크롤러 ───────────────────────────────────────────────
+User-agent: *
+Allow: /
+Disallow: /functions/
+Disallow: /infra/
+
+# ─── AI 답변엔진·검색 크롤러 (명시 허용) ──────────────────────
+
+# OpenAI — 학습 및 ChatGPT 브라우징
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+# Anthropic — Claude 학습
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+# Google — Gemini/Bard 학습 (일반 Googlebot과 별개)
+User-agent: Google-Extended
+Allow: /
+
+# Perplexity AI
+User-agent: PerplexityBot
+Allow: /
+
+# Apple Intelligence
+User-agent: Applebot-Extended
+Allow: /
+
+# Common Crawl — 오픈 웹 아카이브
+User-agent: CCBot
+Allow: /
+
+# ByteDance
+User-agent: Bytespider
+Allow: /
+
+# Meta — LLaMA 학습
+User-agent: meta-externalagent
+Allow: /
+
+# Amazon Alexa / Bedrock
+User-agent: Amazonbot
+Allow: /
+
+# ─── 사이트맵 ──────────────────────────────────────────────────
+Sitemap: https://poomasi.org/sitemap.xml

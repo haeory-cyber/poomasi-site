@@ -27,6 +27,8 @@ infra/.snapshots/
 
 # 기타
 *.txt
+!robots.txt
+!llms.txt
 *.sql
 *.exe
 *.yml
