@@ -1231,6 +1231,22 @@
         </table>
       </div>
     </div>
+
+    <!-- 일자별 근로시간 매트릭스 -->
+    <div class="card" style="margin-top:1rem;">
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>일자별 근로시간 <span style="color:var(--dust);font-weight:400;font-size:0.78rem;">(시간 단위, 토·일은 색 구분)</span></span>
+        <button class="btn-sm" onclick="downloadDailyMatrix()">↓ 엑셀</button>
+      </div>
+      <div style="overflow-x:auto;margin-top:0.5rem;">
+        <table id="attend-daily-matrix" style="border-collapse:collapse;font-size:0.78rem;white-space:nowrap;">
+          <thead id="attend-daily-thead"></thead>
+          <tbody id="attend-daily-tbody">
+            <tr><td class="loading-row">로딩 중…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </section>
 
   <!-- ══ TAB: 공동구매 ══ -->
@@ -3306,6 +3322,7 @@ let employeeMap = {};
 let monthlySummaryCache = [];
 let monthlySummaryMonth = '';
 let attendanceCache = [];
+let dailyMatrixCache = null;
 
 function ymdLocal(d) {
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
@@ -3460,13 +3477,19 @@ async function loadMonthlySummary() {
   const tbody = document.getElementById('attend-monthly-tbody');
   monthlySummaryCache = [];
   monthlySummaryMonth = month;
-  if (error) { tbody.innerHTML = '<tr><td colspan="5" style="padding:0.8rem;color:var(--dust);">조회 실패: ' + error.message + '</td></tr>'; return; }
-  if (!data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="padding:0.8rem;color:var(--dust);">기록 없음</td></tr>'; return; }
+  if (error) { tbody.innerHTML = '<tr><td colspan="5" style="padding:0.8rem;color:var(--dust);">조회 실패: ' + error.message + '</td></tr>'; renderDailyMatrix(null); return; }
+  if (!data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="padding:0.8rem;color:var(--dust);">기록 없음</td></tr>'; renderDailyMatrix(null); return; }
   const summary = {};
+  const byEmpDay = {};
   data.forEach(r => {
-    if (!summary[r.employee_id]) summary[r.employee_id] = { days: new Set(), totalMin: 0 };
+    if (!summary[r.employee_id]) { summary[r.employee_id] = { days: new Set(), totalMin: 0 }; byEmpDay[r.employee_id] = {}; }
     summary[r.employee_id].days.add(r.date);
-    if (r.work_minutes) summary[r.employee_id].totalMin += r.work_minutes;
+    if (r.work_minutes) {
+      summary[r.employee_id].totalMin += r.work_minutes;
+      byEmpDay[r.employee_id][r.date] = (byEmpDay[r.employee_id][r.date] || 0) + r.work_minutes;
+    } else if (!byEmpDay[r.employee_id][r.date]) {
+      byEmpDay[r.employee_id][r.date] = 0;
+    }
   });
   monthlySummaryCache = Object.entries(summary).map(([eid, s]) => {
     const emp = employeeMap[eid] || {};
@@ -3474,7 +3497,7 @@ async function loadMonthlySummary() {
     const totalMin = s.totalMin;
     const hours = totalMin / 60;
     const pay = Math.round(hours * wage);
-    return { name: emp.name || eid, store: emp.store || '-', days: s.days.size, hours, pay, wage };
+    return { eid, name: emp.name || eid, store: emp.store || '-', days: s.days.size, hours, pay, wage };
   }).sort((a, b) => (a.store + a.name).localeCompare(b.store + b.name));
   tbody.innerHTML = monthlySummaryCache.map(r =>
     '<tr style="border-bottom:1px solid var(--border);">' +
@@ -3484,6 +3507,79 @@ async function loadMonthlySummary() {
       '<td style="padding:0.5rem 0.4rem;">' + r.hours.toFixed(1) + '시간</td>' +
       '<td style="padding:0.5rem 0.4rem;color:var(--amber);">₩' + r.pay.toLocaleString('ko-KR') + '</td></tr>'
   ).join('');
+  renderDailyMatrix({ month, byEmpDay });
+}
+
+function renderDailyMatrix(payload) {
+  const thead = document.getElementById('attend-daily-thead');
+  const tbody = document.getElementById('attend-daily-tbody');
+  if (!payload) {
+    dailyMatrixCache = null;
+    thead.innerHTML = '';
+    tbody.innerHTML = '<tr><td style="padding:0.8rem;color:var(--dust);">기록 없음</td></tr>';
+    return;
+  }
+  const { month, byEmpDay } = payload;
+  const [yy, mm] = month.split('-').map(Number);
+  const lastDay = new Date(yy, mm, 0).getDate();
+  const days = [];
+  for (let d = 1; d <= lastDay; d++) {
+    const date = month + '-' + String(d).padStart(2, '0');
+    const dow = new Date(yy, mm - 1, d).getDay();
+    days.push({ d, date, dow });
+  }
+  const dowName = ['일','월','화','수','목','금','토'];
+  const headStyle = (dow) => 'padding:0.4rem 0.3rem;text-align:center;border-bottom:1px solid var(--border);' +
+    (dow === 0 ? 'color:#f87171;' : dow === 6 ? 'color:#60a5fa;' : 'color:var(--dust);');
+  thead.innerHTML = '<tr>' +
+    '<th style="padding:0.4rem 0.5rem;text-align:left;border-bottom:1px solid var(--border);color:var(--dust);position:sticky;left:0;background:var(--surface);z-index:1;">이름</th>' +
+    '<th style="padding:0.4rem 0.5rem;text-align:left;border-bottom:1px solid var(--border);color:var(--dust);">매장</th>' +
+    days.map(x => '<th style="' + headStyle(x.dow) + '">' + x.d + '<br><span style="font-size:0.7rem;">' + dowName[x.dow] + '</span></th>').join('') +
+    '<th style="padding:0.4rem 0.5rem;text-align:right;border-bottom:1px solid var(--border);color:var(--amber);">합계</th>' +
+    '</tr>';
+  const cellStyle = (dow) => 'padding:0.35rem 0.3rem;text-align:center;border-bottom:1px solid rgba(255,255,255,0.04);' +
+    (dow === 0 ? 'background:rgba(248,113,113,0.06);' : dow === 6 ? 'background:rgba(96,165,250,0.06);' : '');
+  tbody.innerHTML = monthlySummaryCache.map(r => {
+    const dayMap = byEmpDay[r.eid] || {};
+    const cells = days.map(x => {
+      const min = dayMap[x.date];
+      const txt = (min == null) ? '' : (min === 0 ? '·' : (min / 60).toFixed(1));
+      return '<td style="' + cellStyle(x.dow) + '">' + txt + '</td>';
+    }).join('');
+    return '<tr>' +
+      '<td style="padding:0.4rem 0.5rem;border-bottom:1px solid rgba(255,255,255,0.04);position:sticky;left:0;background:var(--bg);">' + r.name + '</td>' +
+      '<td style="padding:0.4rem 0.5rem;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--dust);">' + r.store + '</td>' +
+      cells +
+      '<td style="padding:0.4rem 0.5rem;text-align:right;color:var(--amber);border-bottom:1px solid rgba(255,255,255,0.04);">' + r.hours.toFixed(1) + 'h</td>' +
+      '</tr>';
+  }).join('');
+  dailyMatrixCache = { month, days, byEmpDay };
+}
+
+function downloadDailyMatrix() {
+  if (!dailyMatrixCache || !monthlySummaryCache.length) { toast('내려받을 데이터가 없습니다'); return; }
+  const { month, days, byEmpDay } = dailyMatrixCache;
+  const dowName = ['일','월','화','수','목','금','토'];
+  const header = ['이름', '매장'].concat(days.map(x => x.d + '일(' + dowName[x.dow] + ')')).concat(['합계(시간)']);
+  const rows = monthlySummaryCache.map(r => {
+    const dayMap = byEmpDay[r.eid] || {};
+    const cells = days.map(x => {
+      const min = dayMap[x.date];
+      return (min == null || min === 0) ? '' : (min / 60).toFixed(2);
+    });
+    return [r.name, r.store, ...cells, r.hours.toFixed(2)];
+  });
+  const escape = v => '"' + String(v).replace(/"/g, '""') + '"';
+  const csv = '﻿' + [header, ...rows].map(row => row.map(escape).join(',')).join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '일자별근로시간_' + month + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 function downloadMonthlySummary() {
