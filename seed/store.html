@@ -1152,14 +1152,24 @@
         <div class="sec-label">ATTENDANCE</div>
         <div class="sec-title">출퇴근부</div>
       </div>
-      <div style="display:flex;gap:0.5rem;align-items:center;">
+      <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
         <select id="attend-store-filter" onchange="loadAttendance()" style="padding:0.4rem 0.6rem;background:var(--surface);color:var(--cream);border:1px solid var(--border);border-radius:4px;font-size:0.8rem;">
           <option value="">전체 매장</option>
           <option value="지족점">지족점</option>
           <option value="관저점">관저점</option>
         </select>
-        <input type="date" id="attend-date-filter" onchange="loadAttendance()" style="padding:0.4rem 0.6rem;background:var(--surface);color:var(--cream);border:1px solid var(--border);border-radius:4px;font-size:0.8rem;">
+        <input type="date" id="attend-date-from" onchange="loadAttendance()" style="padding:0.4rem 0.6rem;background:var(--surface);color:var(--cream);border:1px solid var(--border);border-radius:4px;font-size:0.8rem;">
+        <span style="color:var(--dust);font-size:0.8rem;">~</span>
+        <input type="date" id="attend-date-to" onchange="loadAttendance()" style="padding:0.4rem 0.6rem;background:var(--surface);color:var(--cream);border:1px solid var(--border);border-radius:4px;font-size:0.8rem;">
       </div>
+    </div>
+
+    <!-- 빠른 선택 -->
+    <div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.8rem;">
+      <button class="btn-sm" onclick="setAttendRange('today')">오늘</button>
+      <button class="btn-sm" onclick="setAttendRange('week')">최근 7일</button>
+      <button class="btn-sm" onclick="setAttendRange('month')">이번 달</button>
+      <button class="btn-sm" onclick="setAttendRange('lastMonth')">지난 달</button>
     </div>
 
     <!-- 오늘 요약 -->
@@ -1172,7 +1182,10 @@
 
     <!-- 출퇴근 기록 테이블 -->
     <div class="card">
-      <div class="card-title">출퇴근 기록</div>
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>출퇴근 기록 <span id="attend-records-count" style="color:var(--dust);font-weight:400;font-size:0.78rem;"></span></span>
+        <button class="btn-sm" onclick="downloadAttendanceRecords()">↓ 엑셀</button>
+      </div>
       <div style="overflow-x:auto;margin-top:0.5rem;">
         <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
           <thead>
@@ -3292,10 +3305,20 @@ function goToOrder(supplierName) {
 let employeeMap = {};
 let monthlySummaryCache = [];
 let monthlySummaryMonth = '';
+let attendanceCache = [];
+
+function ymdLocal(d) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
 
 function initAttendTab() {
-  const dateInput = document.getElementById('attend-date-filter');
-  if (!dateInput.value) dateInput.value = new Date().toISOString().slice(0, 10);
+  const fromEl = document.getElementById('attend-date-from');
+  const toEl = document.getElementById('attend-date-to');
+  if (!fromEl.value || !toEl.value) {
+    const now = new Date();
+    fromEl.value = ymdLocal(new Date(now.getFullYear(), now.getMonth(), 1));
+    toEl.value = ymdLocal(now);
+  }
   const monthSel = document.getElementById('attend-month-filter');
   if (monthSel.options.length === 0) {
     const now = new Date();
@@ -3308,6 +3331,26 @@ function initAttendTab() {
   }
 }
 
+function setAttendRange(kind) {
+  const now = new Date();
+  let from, to;
+  if (kind === 'today') {
+    from = to = now;
+  } else if (kind === 'week') {
+    to = now;
+    from = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
+  } else if (kind === 'month') {
+    from = new Date(now.getFullYear(), now.getMonth(), 1);
+    to = now;
+  } else if (kind === 'lastMonth') {
+    from = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    to = new Date(now.getFullYear(), now.getMonth(), 0);
+  }
+  document.getElementById('attend-date-from').value = ymdLocal(from);
+  document.getElementById('attend-date-to').value = ymdLocal(to);
+  loadAttendance();
+}
+
 async function loadEmployees() {
   if (Object.keys(employeeMap).length > 0) return;
   const { data } = await sb.from('employee').select('*');
@@ -3317,51 +3360,92 @@ async function loadEmployees() {
 async function loadAttendance() {
   await loadEmployees();
   const store = document.getElementById('attend-store-filter').value;
-  const date = document.getElementById('attend-date-filter').value;
-  let q = sb.from('attendance').select('*').order('check_in', { ascending: false });
+  const fromDate = document.getElementById('attend-date-from').value;
+  const toDate = document.getElementById('attend-date-to').value;
+  let q = sb.from('attendance').select('*').order('date', { ascending: false }).order('check_in', { ascending: false });
   if (store) q = q.eq('store', store);
-  if (date) q = q.eq('date', date);
-  q = q.limit(100);
+  if (fromDate) q = q.gte('date', fromDate);
+  if (toDate) {
+    const [y, m, d] = toDate.split('-').map(Number);
+    const after = new Date(y, m - 1, d + 1);
+    q = q.lt('date', ymdLocal(after));
+  }
+  q = q.limit(1000);
   const { data, error } = await q;
   const tbody = document.getElementById('attend-tbody');
   const summaryEl = document.getElementById('attend-summary');
+  const countEl = document.getElementById('attend-records-count');
   const total = Object.values(employeeMap).filter(e => e.is_active).length;
+  attendanceCache = [];
   if (error || !data) {
-    tbody.innerHTML = '<tr><td colspan="6" style="padding:0.8rem;color:var(--dust);">조회 실패</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="padding:0.8rem;color:var(--dust);">조회 실패' + (error ? ': ' + error.message : '') + '</td></tr>';
     summaryEl.innerHTML = '<div style="color:var(--dust);font-size:0.82rem;">조회 실패</div>';
+    countEl.textContent = '';
     return;
   }
+  attendanceCache = data;
+  countEl.textContent = '· ' + fromDate + ' ~ ' + toDate + ' · ' + data.length + '건';
   if (data.length === 0) {
     tbody.innerHTML = '<tr><td colspan="6" style="padding:0.8rem;color:var(--dust);">기록 없음</td></tr>';
-    summaryEl.innerHTML =
-      '<div style="text-align:center;padding:0.5rem 1rem;"><div style="font-size:1.5rem;font-weight:700;color:var(--dust);">0</div><div style="font-size:0.72rem;color:var(--dust);">근무중</div></div>' +
-      '<div style="text-align:center;padding:0.5rem 1rem;"><div style="font-size:1.5rem;font-weight:700;color:var(--dust);">0</div><div style="font-size:0.72rem;color:var(--dust);">퇴근</div></div>' +
-      '<div style="text-align:center;padding:0.5rem 1rem;"><div style="font-size:1.5rem;font-weight:700;color:var(--cream);">' + total + '</div><div style="font-size:0.72rem;color:var(--dust);">전체 직원</div></div>';
-    return;
+  } else {
+    tbody.innerHTML = data.map(r => {
+      const emp = employeeMap[r.employee_id] || {};
+      const ci = r.check_in ? new Date(r.check_in).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '-';
+      const co = r.check_out ? new Date(r.check_out).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '근무중';
+      const mins = r.work_minutes != null ? r.work_minutes : '-';
+      return '<tr style="border-bottom:1px solid var(--border);">' +
+        '<td style="padding:0.5rem 0.4rem;">' + (emp.name || r.employee_id) + '</td>' +
+        '<td style="padding:0.5rem 0.4rem;">' + (r.store || '-') + '</td>' +
+        '<td style="padding:0.5rem 0.4rem;">' + (r.date || '-') + '</td>' +
+        '<td style="padding:0.5rem 0.4rem;color:#4ade80;">' + ci + '</td>' +
+        '<td style="padding:0.5rem 0.4rem;color:' + (r.check_out ? '#f87171' : 'var(--amber)') + ';">' + co + '</td>' +
+        '<td style="padding:0.5rem 0.4rem;">' + mins + '</td></tr>';
+    }).join('');
   }
-  tbody.innerHTML = data.map(r => {
-    const emp = employeeMap[r.employee_id] || {};
-    const ci = r.check_in ? new Date(r.check_in).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '-';
-    const co = r.check_out ? new Date(r.check_out).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '근무중';
-    const mins = r.work_minutes != null ? r.work_minutes : '-';
-    return '<tr style="border-bottom:1px solid var(--border);">' +
-      '<td style="padding:0.5rem 0.4rem;">' + (emp.name || r.employee_id) + '</td>' +
-      '<td style="padding:0.5rem 0.4rem;">' + (r.store || '-') + '</td>' +
-      '<td style="padding:0.5rem 0.4rem;">' + (r.date || '-') + '</td>' +
-      '<td style="padding:0.5rem 0.4rem;color:#4ade80;">' + ci + '</td>' +
-      '<td style="padding:0.5rem 0.4rem;color:' + (r.check_out ? '#f87171' : 'var(--amber)') + ';">' + co + '</td>' +
-      '<td style="padding:0.5rem 0.4rem;">' + mins + '</td></tr>';
-  }).join('');
 
-  // 오늘 요약
-  const today = new Date().toISOString().slice(0, 10);
-  const todayData = date === today ? data : [];
+  // 오늘 요약 (오늘이 기간에 포함될 때만 의미 있음)
+  const today = ymdLocal(new Date());
+  const todayData = (fromDate <= today && today <= toDate) ? data.filter(r => r.date === today) : [];
   const checkedIn = todayData.filter(r => r.check_in && !r.check_out).length;
   const done = todayData.filter(r => r.check_out).length;
   summaryEl.innerHTML =
     '<div style="text-align:center;padding:0.5rem 1rem;"><div style="font-size:1.5rem;font-weight:700;color:#4ade80;">' + checkedIn + '</div><div style="font-size:0.72rem;color:var(--dust);">근무중</div></div>' +
     '<div style="text-align:center;padding:0.5rem 1rem;"><div style="font-size:1.5rem;font-weight:700;color:var(--dust);">' + done + '</div><div style="font-size:0.72rem;color:var(--dust);">퇴근</div></div>' +
     '<div style="text-align:center;padding:0.5rem 1rem;"><div style="font-size:1.5rem;font-weight:700;color:var(--cream);">' + total + '</div><div style="font-size:0.72rem;color:var(--dust);">전체 직원</div></div>';
+}
+
+function downloadAttendanceRecords() {
+  if (!attendanceCache.length) { toast('내려받을 기록이 없습니다'); return; }
+  const fromDate = document.getElementById('attend-date-from').value;
+  const toDate = document.getElementById('attend-date-to').value;
+  const header = ['이름', '매장', '날짜', '요일', '출근', '퇴근', '근무(분)', '근무(시간)'];
+  const dow = ['일', '월', '화', '수', '목', '금', '토'];
+  const sorted = attendanceCache.slice().sort((a, b) => {
+    if (a.date !== b.date) return a.date < b.date ? -1 : 1;
+    const an = (employeeMap[a.employee_id] || {}).name || '';
+    const bn = (employeeMap[b.employee_id] || {}).name || '';
+    return an.localeCompare(bn);
+  });
+  const rows = sorted.map(r => {
+    const emp = employeeMap[r.employee_id] || {};
+    const ci = r.check_in ? new Date(r.check_in).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '';
+    const co = r.check_out ? new Date(r.check_out).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '';
+    const wd = r.date ? dow[new Date(r.date + 'T00:00:00').getDay()] : '';
+    const mins = r.work_minutes != null ? r.work_minutes : '';
+    const hours = r.work_minutes != null ? (r.work_minutes / 60).toFixed(2) : '';
+    return [emp.name || r.employee_id, r.store || '', r.date || '', wd, ci, co, mins, hours];
+  });
+  const escape = v => '"' + String(v).replace(/"/g, '""') + '"';
+  const csv = '﻿' + [header, ...rows].map(row => row.map(escape).join(',')).join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '출퇴근기록_' + fromDate + '_' + toDate + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 async function loadMonthlySummary() {
