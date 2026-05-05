@@ -1196,7 +1196,10 @@
     <div class="card" style="margin-top:1rem;">
       <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
         월간 급여 요약
-        <select id="attend-month-filter" onchange="loadMonthlySummary()" style="padding:0.3rem 0.5rem;background:var(--surface);color:var(--cream);border:1px solid var(--border);border-radius:4px;font-size:0.78rem;"></select>
+        <div style="display:flex;gap:0.5rem;align-items:center;">
+          <button class="btn-sm" onclick="downloadMonthlySummary()">↓ 엑셀</button>
+          <select id="attend-month-filter" onchange="loadMonthlySummary()" style="padding:0.3rem 0.5rem;background:var(--surface);color:var(--cream);border:1px solid var(--border);border-radius:4px;font-size:0.78rem;"></select>
+        </div>
       </div>
       <div style="overflow-x:auto;margin-top:0.5rem;">
         <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
@@ -3287,6 +3290,8 @@ function goToOrder(supplierName) {
 
 // ── 출퇴근부 ──────────────────────────────────────────────
 let employeeMap = {};
+let monthlySummaryCache = [];
+let monthlySummaryMonth = '';
 
 function initAttendTab() {
   const dateInput = document.getElementById('attend-date-filter');
@@ -3364,9 +3369,14 @@ async function loadMonthlySummary() {
   const month = document.getElementById('attend-month-filter').value;
   if (!month) return;
   const startDate = month + '-01';
-  const endDate = month + '-31';
-  const { data } = await sb.from('attendance').select('*').gte('date', startDate).lte('date', endDate);
+  const [yy, mm] = month.split('-').map(Number);
+  const next = new Date(yy, mm, 1);
+  const endDate = next.getFullYear() + '-' + String(next.getMonth() + 1).padStart(2, '0') + '-01';
+  const { data, error } = await sb.from('attendance').select('*').gte('date', startDate).lt('date', endDate);
   const tbody = document.getElementById('attend-monthly-tbody');
+  monthlySummaryCache = [];
+  monthlySummaryMonth = month;
+  if (error) { tbody.innerHTML = '<tr><td colspan="5" style="padding:0.8rem;color:var(--dust);">조회 실패: ' + error.message + '</td></tr>'; return; }
   if (!data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="padding:0.8rem;color:var(--dust);">기록 없음</td></tr>'; return; }
   const summary = {};
   data.forEach(r => {
@@ -3374,18 +3384,39 @@ async function loadMonthlySummary() {
     summary[r.employee_id].days.add(r.date);
     if (r.work_minutes) summary[r.employee_id].totalMin += r.work_minutes;
   });
-  tbody.innerHTML = Object.entries(summary).map(([eid, s]) => {
+  monthlySummaryCache = Object.entries(summary).map(([eid, s]) => {
     const emp = employeeMap[eid] || {};
-    const hours = (s.totalMin / 60).toFixed(1);
     const wage = emp.hourly_wage || 10320;
-    const pay = Math.round(s.totalMin / 60 * wage).toLocaleString('ko-KR');
-    return '<tr style="border-bottom:1px solid var(--border);">' +
-      '<td style="padding:0.5rem 0.4rem;">' + (emp.name || eid) + '</td>' +
-      '<td style="padding:0.5rem 0.4rem;">' + (emp.store || '-') + '</td>' +
-      '<td style="padding:0.5rem 0.4rem;">' + s.days.size + '일</td>' +
-      '<td style="padding:0.5rem 0.4rem;">' + hours + '시간</td>' +
-      '<td style="padding:0.5rem 0.4rem;color:var(--amber);">₩' + pay + '</td></tr>';
-  }).join('');
+    const totalMin = s.totalMin;
+    const hours = totalMin / 60;
+    const pay = Math.round(hours * wage);
+    return { name: emp.name || eid, store: emp.store || '-', days: s.days.size, hours, pay, wage };
+  }).sort((a, b) => (a.store + a.name).localeCompare(b.store + b.name));
+  tbody.innerHTML = monthlySummaryCache.map(r =>
+    '<tr style="border-bottom:1px solid var(--border);">' +
+      '<td style="padding:0.5rem 0.4rem;">' + r.name + '</td>' +
+      '<td style="padding:0.5rem 0.4rem;">' + r.store + '</td>' +
+      '<td style="padding:0.5rem 0.4rem;">' + r.days + '일</td>' +
+      '<td style="padding:0.5rem 0.4rem;">' + r.hours.toFixed(1) + '시간</td>' +
+      '<td style="padding:0.5rem 0.4rem;color:var(--amber);">₩' + r.pay.toLocaleString('ko-KR') + '</td></tr>'
+  ).join('');
+}
+
+function downloadMonthlySummary() {
+  if (!monthlySummaryCache.length) { toast('내려받을 데이터가 없습니다'); return; }
+  const header = ['이름', '매장', '출근일수', '총근무(시간)', '시급', '예상급여'];
+  const rows = monthlySummaryCache.map(r => [r.name, r.store, r.days, r.hours.toFixed(1), r.wage, r.pay]);
+  const escape = v => '"' + String(v).replace(/"/g, '""') + '"';
+  const csv = '﻿' + [header, ...rows].map(row => row.map(escape).join(',')).join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '급여요약_' + monthlySummaryMonth + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 // ══ 가격표 기능 ════════════════════════════════════════
