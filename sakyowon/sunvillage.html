@@ -1,0 +1,2632 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>☀ 햇빛소득마을 종합 업무도우미</title>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A0E17;--sf:#111827;--sf2:#1a2236;--sf3:#202d40;
+  --bd:#2d3a4f;--bd2:#1e2a3a;
+  --tx:#e8eef6;--mu:#7a8ba0;--mu2:#4a5a70;
+  --ac:#3b82f6;--ac2:#1d4ed8;
+  --gr:#22c55e;--gr2:#166534;--gr3:rgba(34,197,94,.12);
+  --warn:#f59e0b;--red:#ef4444;--red2:rgba(239,68,68,.12);
+  --pu:#a855f7;--teal:#14b8a6;--org:#f97316;--sky:#0ea5e9;
+  --sun:#F5A623;--sun2:#C47D0A;--sun3:rgba(245,166,35,.12);
+  --r:10px;--r2:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Pretendard',-apple-system,'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;font-size:14px;line-height:1.6;overflow-x:hidden}
+
+/* ── HEADER ── */
+#hdr{background:rgba(10,14,23,.97);backdrop-filter:blur(16px);border-bottom:1px solid rgba(245,166,35,.15);padding:0 20px;height:56px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:600}
+.logo{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.logo-sun{width:34px;height:34px;background:linear-gradient(135deg,var(--sun),var(--sun2));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 0 14px rgba(245,166,35,.3)}
+.logo-text{font-size:15px;font-weight:900;background:linear-gradient(135deg,#fff 60%,var(--sun));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-sub{font-size:10px;color:var(--mu);margin-top:-2px}
+.hright{margin-left:auto;display:flex;align-items:center;gap:8px}
+.hbtn{background:var(--sf2);border:1px solid var(--bd);color:var(--mu);padding:5px 12px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:5px}
+.hbtn:hover{border-color:var(--sun);color:var(--tx)}
+.hbtn.active{background:var(--sun3);border-color:var(--sun);color:var(--sun)}
+.manual-link{background:linear-gradient(135deg,var(--sun3),transparent);border:1px solid rgba(245,166,35,.3);color:var(--sun);padding:5px 14px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s}
+.manual-link:hover{background:var(--sun3);box-shadow:0 0 12px rgba(245,166,35,.2)}
+
+/* ── TABBAR ── */
+#tabbar{background:var(--sf);border-bottom:1px solid var(--bd);padding:0 20px;display:flex;overflow-x:auto;scrollbar-width:none;gap:2px;position:sticky;top:56px;z-index:500}
+#tabbar::-webkit-scrollbar{display:none}
+.tab{padding:12px 14px;font-size:12.5px;font-weight:700;color:var(--mu);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s;user-select:none;display:flex;align-items:center;gap:5px;flex-shrink:0}
+.tab:hover{color:var(--tx)}
+.tab.on{color:var(--sun);border-bottom-color:var(--sun)}
+.tbadge{font-size:9px;font-weight:900;padding:1px 5px;border-radius:5px;color:#000;background:var(--sun)}
+
+/* ── LAYOUT ── */
+.main{max-width:1300px;margin:0 auto;padding:22px 20px}
+.sec{display:none}.sec.on{display:block}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.four{display:grid;grid-template-columns:repeat(4,1fr);gap:11px}
+@media(max-width:900px){.two,.three,.four{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.two,.three,.four{grid-template-columns:1fr}}
+
+/* ── CARD ── */
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden}
+.ch{padding:12px 16px;border-bottom:1px solid var(--bd2);display:flex;align-items:center;gap:8px;background:var(--sf2);font-size:13px;font-weight:700;flex-wrap:wrap}
+.ch-r{margin-left:auto;display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.cb{padding:16px}
+
+/* ── UPLOAD ZONE ── */
+.uz{border:2px dashed var(--bd);border-radius:10px;padding:20px 16px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(255,255,255,.01);position:relative;margin-bottom:10px}
+.uz:hover,.uz.drag{border-color:var(--sun);background:rgba(245,166,35,.04)}
+.uz input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.uz-ic{font-size:30px;margin-bottom:8px;display:block}
+.uz-t{font-size:13px;font-weight:800;margin-bottom:3px}
+.uz-s{font-size:11px;color:var(--mu);line-height:1.6}
+.fmts{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-top:7px}
+.fmt{font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;background:var(--sun3);color:var(--sun);border:1px solid rgba(245,166,35,.25)}
+.fpg{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;margin-bottom:8px}
+.fpi{position:relative;border:1px solid var(--bd);border-radius:7px;overflow:hidden;background:var(--sf2)}
+.fpi img{width:100%;height:58px;object-fit:cover;display:block}
+.fpi-ic{width:100%;height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:20px;gap:2px}
+.fpi-ext{font-size:8px;color:var(--mu);font-weight:700}
+.fpi-nm{font-size:9px;color:var(--mu);padding:3px 4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fpi-del{position:absolute;top:2px;right:2px;background:rgba(239,68,68,.9);color:#fff;border:none;border-radius:50%;width:15px;height:15px;font-size:9px;cursor:pointer;display:none;align-items:center;justify-content:center;font-weight:700}
+.fpi:hover .fpi-del{display:flex}
+
+/* ── FORMS ── */
+.field{margin-bottom:10px}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--mu);margin-bottom:3px;letter-spacing:.04em;text-transform:uppercase}
+input[type=text],input[type=date],input[type=number],select,textarea{
+  width:100%;background:var(--bg);border:1px solid var(--bd);color:var(--tx);
+  padding:8px 11px;border-radius:var(--r2);font-size:13px;font-family:inherit;outline:none;transition:border-color .15s
+}
+input:focus,select:focus,textarea:focus{border-color:var(--sun);box-shadow:0 0 0 3px rgba(245,166,35,.08)}
+select option{background:var(--sf)}
+textarea{resize:vertical;line-height:1.7}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px}
+.f3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.f4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 15px;border-radius:var(--r2);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;border:none;transition:all .15s;white-space:nowrap}
+.btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none!important;filter:none!important}
+.b-sun{background:linear-gradient(135deg,var(--sun),var(--sun2));color:#000}
+.b-blue{background:var(--ac);color:#fff}
+.b-green{background:var(--gr);color:#fff}
+.b-teal{background:var(--teal);color:#fff}
+.b-pu{background:var(--pu);color:#fff}
+.b-org{background:var(--org);color:#fff}
+.b-red{background:var(--red);color:#fff}
+.b-warn{background:var(--warn);color:#000}
+.b-dark{background:var(--sf3);color:var(--tx);border:1px solid var(--bd)}
+.b-out{background:transparent;border:1px solid var(--bd);color:var(--tx)}
+.b-out:hover{border-color:var(--sun);color:var(--sun)}
+.b-sm{padding:5px 10px;font-size:12px}
+.b-xs{padding:3px 8px;font-size:11px}
+.brow{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+
+/* ── RESULT BOX ── */
+.rb{padding:14px 16px;font-size:13px;line-height:1.9;color:var(--tx);max-height:520px;overflow-y:auto;white-space:pre-wrap;word-break:break-word;min-height:60px;font-family:inherit}
+.rb:empty::before{content:'여기에 결과가 표시됩니다';color:var(--mu)}
+.streaming::after{content:"▋";animation:blink .6s step-end infinite;color:var(--sun)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.spin{width:13px;height:13px;border:2px solid var(--bd2);border-top-color:var(--sun);border-radius:50%;animation:sp .6s linear infinite;display:inline-block;flex-shrink:0}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ── INFO BOX ── */
+.ib{border-radius:var(--r2);padding:10px 13px;font-size:12.5px;line-height:1.75;margin-bottom:10px;display:flex;gap:9px;align-items:flex-start}
+.ib.sun{background:var(--sun3);border-left:3px solid var(--sun)}
+.ib.blue{background:rgba(59,130,246,.1);border-left:3px solid var(--ac)}
+.ib.green{background:rgba(34,197,94,.1);border-left:3px solid var(--gr)}
+.ib.warn{background:rgba(245,158,11,.1);border-left:3px solid var(--warn)}
+.ib.red{background:var(--red2);border-left:3px solid var(--red)}
+.ib.teal{background:rgba(20,184,166,.1);border-left:3px solid var(--teal)}
+.ib.pu{background:rgba(168,85,247,.1);border-left:3px solid var(--pu)}
+
+/* ── PILL / TAG ── */
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:12px;font-size:11px;font-weight:700;border:1px solid;cursor:default}
+.pill.done{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.3);color:var(--gr)}
+.pill.doing{background:var(--sun3);border-color:rgba(245,166,35,.3);color:var(--sun)}
+.pill.todo{background:transparent;border-color:var(--bd);color:var(--mu)}
+
+/* ── VILLAGE CARD ── */
+.vcard{background:var(--sf);border:2px solid var(--bd);border-radius:12px;padding:16px;cursor:pointer;transition:all .2s;position:relative}
+.vcard:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.vcard.active{border-color:var(--sun);background:var(--sun3)}
+.vc-num{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#000;background:linear-gradient(135deg,var(--sun),var(--sun2));flex-shrink:0}
+.vc-bar{height:3px;background:var(--bd);border-radius:2px;overflow:hidden;margin-top:8px}
+.vc-fill{height:100%;background:linear-gradient(90deg,var(--sun),var(--gr));border-radius:2px;transition:width .4s}
+.vc-add{border:2px dashed var(--bd);border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:all .2s}
+.vc-add:hover{border-color:var(--sun);background:var(--sun3)}
+
+/* ── CHAT ── */
+.chat-area{display:flex;flex-direction:column;gap:14px;padding:16px;max-height:450px;overflow-y:auto;background:var(--bg);border-radius:var(--r2)}
+.msg{display:flex;gap:10px;align-items:flex-start}
+.msg.user{flex-direction:row-reverse}
+.msg-av{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.msg.ai .msg-av{background:linear-gradient(135deg,var(--sun),var(--sun2));color:#000}
+.msg.user .msg-av{background:var(--ac);color:#fff;font-size:11px;font-weight:900}
+.msg-bbl{padding:10px 14px;border-radius:10px;font-size:13px;line-height:1.8;max-width:85%}
+.msg.ai .msg-bbl{background:var(--sf);border:1px solid var(--bd)}
+.msg.user .msg-bbl{background:var(--ac);color:#fff}
+.chip-row{display:flex;flex-wrap:wrap;gap:6px;padding:10px 16px}
+.chip{padding:6px 13px;border:1px solid var(--bd);border-radius:16px;font-size:12px;color:var(--mu);cursor:pointer;transition:all .15s;background:var(--sf2);font-family:inherit}
+.chip:hover{border-color:var(--sun);color:var(--sun)}
+.chat-input-row{display:flex;gap:8px;padding:10px 16px;border-top:1px solid var(--bd);background:var(--sf)}
+.chat-input-row textarea{flex:1;border-radius:8px;min-height:42px;max-height:100px;resize:none;padding:8px 12px;font-size:13px}
+.chat-send{width:42px;height:42px;background:linear-gradient(135deg,var(--sun),var(--sun2));border:none;border-radius:8px;cursor:pointer;font-size:18px;color:#000;flex-shrink:0;transition:all .15s}
+.chat-send:hover{transform:scale(1.05)}
+.chat-send:disabled{background:var(--sf3);cursor:not-allowed;transform:none}
+.typing-dots{display:flex;gap:4px;padding:12px 14px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--mu);animation:tdot .8s infinite}
+.dot:nth-child(2){animation-delay:.15s}
+.dot:nth-child(3){animation-delay:.3s}
+@keyframes tdot{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+/* ── DOC PREVIEW ── */
+.doc-preview{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r2);padding:16px;font-size:13px;line-height:1.9;max-height:480px;overflow-y:auto;white-space:pre-wrap;word-break:break-word}
+.doc-preview:empty::before{content:'생성된 문서가 여기에 표시됩니다';color:var(--mu)}
+.doc-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+
+/* ── STEP BADGE ── */
+.step-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:12px;font-size:11px;font-weight:700;border:1px solid}
+.s1{background:rgba(245,166,35,.12);border-color:rgba(245,166,35,.3);color:var(--sun)}
+.s2{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.3);color:var(--gr)}
+.s3{background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.3);color:var(--ac)}
+.s4{background:rgba(249,115,22,.12);border-color:rgba(249,115,22,.3);color:var(--org)}
+.s5{background:rgba(168,85,247,.12);border-color:rgba(168,85,247,.3);color:var(--pu)}
+.s6{background:rgba(20,184,166,.12);border-color:rgba(20,184,166,.3);color:var(--teal)}
+
+/* ── BAR CHART ── */
+.bar-item{margin-bottom:7px}
+.bar-hd{display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px}
+.bar-track{height:16px;background:var(--sf3);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:7px;transition:width .6s ease}
+.bar-pct{font-size:9px;font-weight:900;color:#000;white-space:nowrap}
+
+/* ── REVIEW ITEM ── */
+.review-item{background:var(--sf2);border:1px solid var(--bd);border-radius:9px;padding:13px 14px;margin-bottom:8px;transition:all .15s}
+.review-item:hover{border-color:var(--sun)}
+.review-item h4{font-size:13px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:7px}
+.review-item p{font-size:12px;color:var(--mu);line-height:1.7}
+.rv-ok{border-left:3px solid var(--gr)}
+.rv-warn{border-left:3px solid var(--warn)}
+.rv-err{border-left:3px solid var(--red)}
+
+/* ── DASHBOARD KPI ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+@media(max-width:700px){.kpi-grid{grid-template-columns:1fr 1fr}}
+.kpi{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:18px;text-align:center;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--sun),var(--gr))}
+.kpi-n{font-size:28px;font-weight:900;color:var(--sun);line-height:1}
+.kpi-l{font-size:11px;color:var(--mu);margin-top:5px}
+.kpi-sub{font-size:10px;color:var(--gr);margin-top:2px;font-weight:700}
+
+/* ── PROGRESS TIMELINE ── */
+.timeline{display:flex;flex-direction:column;gap:0}
+.tl-item{display:flex;gap:14px;align-items:flex-start;position:relative}
+.tl-item:not(:last-child)::after{content:'';position:absolute;left:15px;top:34px;width:2px;height:calc(100% - 14px);background:linear-gradient(to bottom,var(--sun),var(--bd))}
+.tl-dot{width:32px;height:32px;border-radius:50%;border:2px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0;z-index:1;transition:all .2s}
+.tl-dot.done{background:var(--gr);border-color:var(--gr);color:#fff}
+.tl-dot.doing{background:var(--sun);border-color:var(--sun);color:#000;box-shadow:0 0 12px rgba(245,166,35,.4)}
+.tl-dot.todo{background:var(--sf2);color:var(--mu)}
+.tl-body{flex:1;padding:6px 0 18px}
+.tl-title{font-size:13px;font-weight:700;margin-bottom:3px}
+.tl-desc{font-size:12px;color:var(--mu);line-height:1.6}
+
+/* ── LAW CARD ── */
+.law-card{background:var(--sf2);border:1px solid var(--bd);border-radius:9px;padding:13px 14px;margin-bottom:8px}
+.law-card h4{font-size:12px;font-weight:700;color:var(--org);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.law-card p{font-size:12px;color:var(--mu);line-height:1.75}
+.law-tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;background:rgba(249,115,22,.12);color:var(--org)}
+
+/* ── CHECKLIST ── */
+.chk-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd2);cursor:pointer;user-select:none;transition:all .1s}
+.chk-item:hover{background:rgba(245,166,35,.03)}
+.chk-item:last-child{border-bottom:none}
+.chk-box{width:18px;height:18px;border:2px solid var(--bd);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:all .15s}
+.chk-item.done .chk-box{background:var(--gr);border-color:var(--gr);color:#fff;font-size:10px}
+.chk-item.done .chk-text{color:var(--mu);text-decoration:line-through}
+.chk-text{font-size:13px;line-height:1.6}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--mu2)}
+
+/* ── MODAL ── */
+#modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:900;align-items:center;justify-content:center;padding:20px}
+#modal-ov.open{display:flex}
+#modal{background:var(--sf);border:1px solid var(--bd);border-radius:14px;width:100%;max-width:680px;max-height:85vh;overflow:hidden;display:flex;flex-direction:column}
+#modal-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--bd);font-weight:700}
+#modal-body{flex:1;overflow-y:auto;padding:16px 18px}
+#modal-close{background:var(--sf2);border:1px solid var(--bd);color:var(--mu);width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+</style>
+</head>
+<body>
+
+<div id="hdr">
+  <div class="logo">
+    <div class="logo-sun">☀</div>
+    <div>
+      <div class="logo-text">햇빛소득마을 업무도우미</div>
+      <div class="logo-sub">2026 공모사업 전용 · Claude AI 구동</div>
+    </div>
+  </div>
+  <div class="hright">
+    <div id="village-chip" style="display:flex;align-items:center;gap:6px;background:var(--sf2);border:1px solid var(--bd);border-radius:20px;padding:4px 12px;font-size:12px">
+      <span id="village-dot" style="width:8px;height:8px;border-radius:50%;background:var(--mu)"></span>
+      <span id="village-name-chip">마을 미선택</span>
+    </div>
+    <button class="manual-link" onclick="openManual()">📖 메뉴얼북 열기</button>
+  </div>
+</div>
+
+<div id="tabbar">
+  <div class="tab on" onclick="go('dash',this)">🏠 대시보드</div>
+  <div class="tab" onclick="go('villages',this)">🏘 마을 관리</div>
+  <div class="tab" onclick="go('docs',this)">📝 문서 작성 <span class="tbadge">AI</span></div>
+  <div class="tab" onclick="go('review',this)">📄 서류 검토 <span class="tbadge">AI</span></div>
+  <div class="tab" onclick="go('bizplan',this)">📋 사업계획서 <span class="tbadge">AI</span></div>
+  <div class="tab" onclick="go('law',this)">⚖️ 법령·인허가 <span class="tbadge">AI</span></div>
+  <div class="tab" onclick="go('revenue',this)">💰 수익 분석</div>
+  <div class="tab" onclick="go('checklist',this)">✅ 준비도 체크</div>
+  <div class="tab" onclick="go('chat',this)">💬 AI 상담</div>
+</div>
+
+<!-- ════════════════════════════════ 대시보드 ════════════════════════════════ -->
+<div class="sec on main" id="sec-dash">
+  <div class="kpi-grid" id="kpi-grid">
+    <div class="kpi"><div class="kpi-n" id="kpi-total">0</div><div class="kpi-l">관리 마을 수</div></div>
+    <div class="kpi"><div class="kpi-n" id="kpi-ready">0</div><div class="kpi-l">신청 가능 마을</div><div class="kpi-sub">준비도 70%↑</div></div>
+    <div class="kpi"><div class="kpi-n" id="kpi-deadline">D-<span id="d-day">?</span></div><div class="kpi-l">1차 마감</div><div class="kpi-sub">2026.5.31</div></div>
+    <div class="kpi"><div class="kpi-n" id="kpi-docs">0</div><div class="kpi-l">생성 문서 수</div></div>
+  </div>
+
+  <div class="two">
+    <div class="card">
+      <div class="ch">📊 마을별 진행 현황
+        <div class="ch-r"><button class="btn b-sm b-sun" onclick="go('villages',document.querySelectorAll('.tab')[1])">+ 마을 추가</button></div>
+      </div>
+      <div class="cb" id="dash-villages">
+        <div class="ib sun"><span>☀</span><div>마을을 추가하면 여기에 진행 현황이 표시됩니다.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch">⚡ 빠른 실행</div>
+      <div class="cb">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button class="btn b-sun" style="justify-content:center" onclick="go('docs',document.querySelectorAll('.tab')[2])">📝 회의록 작성</button>
+          <button class="btn b-blue" style="justify-content:center" onclick="go('review',document.querySelectorAll('.tab')[3])">📄 서류 검토</button>
+          <button class="btn b-green" style="justify-content:center" onclick="go('bizplan',document.querySelectorAll('.tab')[4])">📋 사업계획서</button>
+          <button class="btn b-org" style="justify-content:center" onclick="go('law',document.querySelectorAll('.tab')[5])">⚖️ 법령 검토</button>
+          <button class="btn b-teal" style="justify-content:center" onclick="go('revenue',document.querySelectorAll('.tab')[6])">💰 수익 분석</button>
+          <button class="btn b-pu" style="justify-content:center" onclick="go('chat',document.querySelectorAll('.tab')[8])">💬 AI 상담</button>
+        </div>
+        <div style="margin-top:12px">
+          <div class="ib warn"><span>⚠️</span><div><strong>D-<span id="d-day2">?</span></strong> — 1차 마감까지 남은 시간. 지금 준비 안 된 마을은 2차(7.31)로 목표 변경 검토.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <div class="ch">📅 2026 공모 주요 일정</div>
+    <div class="cb">
+      <div class="timeline">
+        <div class="tl-item"><div class="tl-dot done">✓</div><div class="tl-body"><div class="tl-title">공고일 · 기준일 <span class="step-badge s1">2026.3.31</span></div><div class="tl-desc">주민 자격 기준일 (해당 마을 주민등록 기준) · 발기인 모집 시작 가능</div></div></div>
+        <div class="tl-item"><div class="tl-dot doing">1차</div><div class="tl-body"><div class="tl-title">1차 공모 마감 <span class="step-badge s2">2026.5.31</span></div><div class="tl-desc">협동조합 등기 완료 + 서식1~4 + 기타증빙 제출 완료 · 마감 1일 전까지 권장</div></div></div>
+        <div class="tl-item"><div class="tl-dot todo">1결</div><div class="tl-body"><div class="tl-title">1차 선정 결과 <span class="step-badge s3">2026.7.31</span></div><div class="tl-desc">행안부 추진단에서 결과 발표 · 선정 통보 후 6개월 이내 발전사업허가 필수</div></div></div>
+        <div class="tl-item"><div class="tl-dot todo">2차</div><div class="tl-body"><div class="tl-title">2차 공모 마감 <span class="step-badge s4">2026.7.31</span></div><div class="tl-desc">1차 미선정 마을 재신청 또는 신규 신청 가능</div></div></div>
+        <div class="tl-item"><div class="tl-dot todo">2결</div><div class="tl-body"><div class="tl-title">2차 선정 결과 <span class="step-badge s5">2026.9.30</span></div><div class="tl-desc">이격거리 예외조항 시행(9.18) 이후 → 신재생에너지법 제27조의3 적용 가능</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ 마을 관리 ════════════════════ -->
+<div class="sec main" id="sec-villages">
+  <div class="ib sun"><span>☀</span><div>마을을 먼저 등록하면 모든 탭에서 해당 마을 데이터를 기반으로 작동합니다.</div></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-bottom:16px" id="village-cards">
+    <div class="vc-add" onclick="openAddVillage()">
+      <div style="font-size:28px;margin-bottom:8px">+</div>
+      <div style="font-size:13px;font-weight:700">새 마을 추가</div>
+      <div style="font-size:11px;color:var(--mu);margin-top:4px">클릭해서 마을 정보 입력</div>
+    </div>
+  </div>
+  <div class="card" id="village-detail" style="display:none">
+    <div class="ch" id="vd-title">마을 상세 정보</div>
+    <div class="cb" id="vd-body"></div>
+  </div>
+</div>
+
+<!-- ════════════════════ 문서 작성 AI ════════════════════ -->
+<div class="sec main" id="sec-docs">
+  <div class="two">
+    <div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="ch">📝 문서 종류 선택</div>
+        <div class="cb">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <button class="btn b-out" onclick="selectDoc('minutes')" id="docbtn-minutes">📋 회의록</button>
+            <button class="btn b-out" onclick="selectDoc('assembly')" id="docbtn-assembly">🏛 총회 의사록</button>
+            <button class="btn b-out" onclick="selectDoc('founding')" id="docbtn-founding">🤝 창립총회 의사록</button>
+            <button class="btn b-out" onclick="selectDoc('consent')" id="docbtn-consent">✍️ 주민 동의서</button>
+            <button class="btn b-out" onclick="selectDoc('notice')" id="docbtn-notice">📢 마을 공고문</button>
+            <button class="btn b-out" onclick="selectDoc('report')" id="docbtn-report">📊 진행 보고서</button>
+            <button class="btn b-out" onclick="selectDoc('official')" id="docbtn-official">📮 공문 초안</button>
+            <button class="btn b-out" onclick="selectDoc('charter')" id="docbtn-charter">⚖️ 정관 조항 검토</button>
+          </div>
+        </div>
+      </div>
+      <div class="card" id="doc-form-card">
+        <div class="ch" id="doc-form-title">📋 입력 정보</div>
+        <div class="cb" id="doc-form"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch">📄 생성된 문서
+        <div class="ch-r" id="doc-result-actions" style="display:none">
+          <button class="btn b-sm b-dark" onclick="cpEl('doc-result')">복사</button>
+          <button class="btn b-sm b-dark" onclick="dlTxt('doc-result','document.txt')">⬇ TXT</button>
+          <button class="btn b-sm b-sun" onclick="printDoc()">🖨 인쇄</button>
+        </div>
+      </div>
+      <div class="rb doc-preview" id="doc-result"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ 서류 검토 AI ════════════════════ -->
+<div class="sec main" id="sec-review">
+  <div class="ib sun"><span>📄</span><div>토지대장·건축물대장·계통검토의견서·탄소인증서 등을 업로드하면 AI가 햇빛소득마을 기준으로 검토합니다.</div></div>
+  <div class="two">
+    <div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="ch">📁 검토할 서류 선택</div>
+        <div class="cb">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+            <button class="btn b-out" onclick="selectReview('land')" id="rvbtn-land">🗺 토지대장</button>
+            <button class="btn b-out" onclick="selectReview('building')" id="rvbtn-building">🏗 건축물대장</button>
+            <button class="btn b-out" onclick="selectReview('grid')" id="rvbtn-grid">⚡ 계통검토의견서</button>
+            <button class="btn b-out" onclick="selectReview('carbon')" id="rvbtn-carbon">🌱 탄소인증서</button>
+            <button class="btn b-out" onclick="selectReview('ks')" id="rvbtn-ks">✅ KS인증서</button>
+            <button class="btn b-out" onclick="selectReview('charter')" id="rvbtn-charter">⚖️ 협동조합 정관</button>
+            <button class="btn b-out" onclick="selectReview('contract')" id="rvbtn-contract">📋 계약서 검토</button>
+            <button class="btn b-out" onclick="selectReview('general')" id="rvbtn-general">📎 기타 서류</button>
+          </div>
+        </div>
+      </div>
+      <div class="card" id="review-upload-card">
+        <div class="ch" id="review-upload-title">📎 파일 업로드</div>
+        <div class="cb" id="review-upload-form">
+          <div class="ib blue"><span>👆</span><div>왼쪽에서 검토할 서류 종류를 먼저 선택하세요.</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch">🔍 AI 검토 결과
+        <div class="ch-r" id="review-result-actions" style="display:none">
+          <button class="btn b-sm b-dark" onclick="cpEl('review-result')">복사</button>
+          <button class="btn b-sm b-dark" onclick="dlTxt('review-result','검토결과.txt')">⬇ TXT</button>
+        </div>
+      </div>
+      <div class="rb" id="review-result"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ 사업계획서 AI ════════════════════ -->
+<div class="sec main" id="sec-bizplan">
+  <div class="ib green"><span>📋</span><div>서식3 사업계획서 각 항목을 AI가 자동 작성합니다. 마을 기본정보 → 협동조합 현황 → 발전소 계획 → 수익활용까지 전체 항목 생성.</div></div>
+  <div class="two">
+    <div>
+      <div class="card">
+        <div class="ch">📝 마을·사업 정보 입력</div>
+        <div class="cb">
+          <div class="field"><label>마을명 (행정리)</label><input type="text" id="bp-name" placeholder="예: 전남 해남군 북일면 OO리"></div>
+          <div class="f2">
+            <div class="field"><label>총 주민수 (명)</label><input type="number" id="bp-pop" placeholder="68"></div>
+            <div class="field"><label>조합원 수 (명)</label><input type="number" id="bp-members" placeholder="23"></div>
+          </div>
+          <div class="f2">
+            <div class="field"><label>주민동의율 (%)</label><input type="number" id="bp-agree" placeholder="78"></div>
+            <div class="field"><label>설치 용량 (kW)</label>
+              <select id="bp-kw"><option value="300">300kW</option><option value="500" selected>500kW</option><option value="700">700kW</option><option value="1000">1,000kW</option></select>
+            </div>
+          </div>
+          <div class="f2">
+            <div class="field"><label>협동조합명</label><input type="text" id="bp-coop" placeholder="OO마을 햇빛소득 협동조합"></div>
+            <div class="field"><label>이사장 성명</label><input type="text" id="bp-chief" placeholder="홍길동"></div>
+          </div>
+          <div class="f2">
+            <div class="field"><label>설치 형태</label>
+              <select id="bp-type"><option>지상형</option><option>건물형</option><option>수상형</option><option>혼합형</option></select>
+            </div>
+            <div class="field"><label>계통연계</label>
+              <select id="bp-grid"><option>계통연계 가능</option><option>ESS 설치 예정</option><option>확인 중</option></select>
+            </div>
+          </div>
+          <div class="f2">
+            <div class="field"><label>총 설치비 (백만원)</label><input type="number" id="bp-cost" placeholder="900"></div>
+            <div class="field"><label>자부담 확보</label><input type="text" id="bp-selfpay" placeholder="예: 마을기금 1억원"></div>
+          </div>
+          <div class="field"><label>마을기금 활용 계획</label><textarea id="bp-use" rows="2" placeholder="예: 경로당 냉난방비, 어르신 교통비, 마을공동급식 지원"></textarea></div>
+          <div class="field"><label>모듈 제조사/모델 (저탄소)</label><input type="text" id="bp-module" placeholder="예: 한화큐셀 QPeak / 490kgCO₂/kW"></div>
+          <div class="field"><label>인버터 제조사/모델 (KS인증)</label><input type="text" id="bp-inverter" placeholder="예: SMA STP50-40 / KS인증 완료"></div>
+          <div class="brow">
+            <button class="btn b-sun" onclick="genBizplan()" id="bp-gen-btn">✨ 전체 사업계획서 초안 생성</button>
+            <button class="btn b-blue" onclick="genBizplanSection()" id="bp-sec-btn">📄 특정 항목만 작성</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch">📄 사업계획서 초안 (서식3)
+        <div class="ch-r" id="bp-result-actions" style="display:none">
+          <button class="btn b-sm b-dark" onclick="cpEl('bp-result')">복사</button>
+          <button class="btn b-sm b-dark" onclick="dlTxt('bp-result','사업계획서_초안.txt')">⬇ TXT</button>
+          <button class="btn b-sm b-sun" onclick="refineBp()">✨ AI 보완</button>
+          <button class="btn b-sm b-green" onclick="printDoc('bp-result')">🖨 인쇄</button>
+        </div>
+      </div>
+      <div class="rb doc-preview" id="bp-result"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ 법령·인허가 AI ════════════════════ -->
+<div class="sec main" id="sec-law">
+  <div class="two">
+    <div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="ch">⚖️ 검토 유형 선택</div>
+        <div class="cb">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+            <button class="btn b-out" onclick="selectLaw('setback')" id="lwbtn-setback">📏 이격거리 조례</button>
+            <button class="btn b-out" onclick="selectLaw('permit')" id="lwbtn-permit">🏗 발전사업허가</button>
+            <button class="btn b-out" onclick="selectLaw('devact')" id="lwbtn-devact">🌿 개발행위허가</button>
+            <button class="btn b-out" onclick="selectLaw('agri')" id="lwbtn-agri">🌾 농지전용·산지전용</button>
+            <button class="btn b-out" onclick="selectLaw('coop')" id="lwbtn-coop">🤝 협동조합법</button>
+            <button class="btn b-out" onclick="selectLaw('elec')" id="lwbtn-elec">⚡ 전기사업법</button>
+            <button class="btn b-out" onclick="selectLaw('land')" id="lwbtn-land">🗺 토지·지목 분석</button>
+            <button class="btn b-out" onclick="selectLaw('resc')" id="lwbtn-resc">🔧 ReSCO 계약 검토</button>
+          </div>
+        </div>
+      </div>
+      <div class="card" id="law-input-card">
+        <div class="ch" id="law-input-title">⚖️ 상황 입력</div>
+        <div class="cb" id="law-input-form">
+          <div class="ib blue"><span>👆</span><div>왼쪽에서 검토 유형을 선택하면 입력 폼이 나타납니다.</div></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <div class="ch">📚 핵심 법령 빠른 참조</div>
+        <div class="cb">
+          <div class="law-card"><h4><span class="law-tag">이격거리</span> 신재생에너지법 제27조의3</h4><p>이격거리 예외 조항 시행 2026.9.18. 시행 전까지는 지자체 조례로만 완화 가능. 여주시 사례 참고 — 마을공동체 소유·임대 태양광은 예외 허가 가능.</p></div>
+          <div class="law-card"><h4><span class="law-tag">발전허가</span> 전기사업법 제7조</h4><p>3,000kW 이하 소규모 발전사업자 허가. 관할 시·도지사 신청. 선정 후 6개월 이내 취득 의무 (미취득 시 선정 취소).</p></div>
+          <div class="law-card"><h4><span class="law-tag">협동조합</span> 협동조합기본법 제15조</h4><p>설립신고: 5인 이상 발기인 → 창립총회 → 시도지사 신고 → 설립등기. 결산 후 4개월 이내 경영공시 의무 (coop.go.kr).</p></div>
+          <div class="law-card"><h4><span class="law-tag">농지전용</span> 농지법 제34조</h4><p>태양광 발전시설 설치를 위한 농지전용허가 또는 협의 필요. 농업진흥구역 내 원칙적 불가. 진흥구역 외 1,000㎡ 미만은 농지전용신고로 가능.</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch">🔍 AI 법령 검토 결과
+        <div class="ch-r" id="law-result-actions" style="display:none">
+          <button class="btn b-sm b-dark" onclick="cpEl('law-result')">복사</button>
+          <button class="btn b-sm b-dark" onclick="dlTxt('law-result','법령검토.txt')">⬇ TXT</button>
+        </div>
+      </div>
+      <div class="rb" id="law-result"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ 수익 분석 ════════════════════ -->
+<div class="sec main" id="sec-revenue">
+  <div class="two">
+    <div class="card">
+      <div class="ch">💰 수익성 계산기</div>
+      <div class="cb">
+        <div class="f2">
+          <div class="field"><label>설치 용량 (kW)</label>
+            <select id="rv-kw"><option value="300">300kW</option><option value="500" selected>500kW</option><option value="700">700kW</option><option value="1000">1,000kW</option></select>
+          </div>
+          <div class="field"><label>지역 (일조시간)</label>
+            <select id="rv-region">
+              <option value="3.95">해남군 (3.95h)</option>
+              <option value="3.90">진도군 (3.90h)</option>
+              <option value="3.88">완도군 (3.88h)</option>
+              <option value="3.85">신안군 (3.85h)</option>
+              <option value="3.82">고흥군 (3.82h)</option>
+              <option value="3.75">영암군 (3.75h)</option>
+              <option value="3.68">나주시 (3.68h)</option>
+              <option value="3.58">순천시 (3.58h)</option>
+            </select>
+          </div>
+        </div>
+        <div class="f2">
+          <div class="field"><label>SMP 단가 (원/kWh)</label><input type="number" id="rv-smp" value="109.8"></div>
+          <div class="field"><label>REC 단가 (원/MWh)</label><input type="number" id="rv-rec" value="70356"></div>
+        </div>
+        <div class="f2">
+          <div class="field"><label>REC 가중치</label>
+            <select id="rv-weight"><option value="1.0">1.0 (기본)</option><option value="1.2" selected>1.2 (+0.2 주민참여)</option><option value="1.5">1.5 (ESS 연계)</option></select>
+          </div>
+          <div class="field"><label>융자 비율 (%)</label><input type="number" id="rv-loan" value="85"></div>
+        </div>
+        <div class="f2">
+          <div class="field"><label>마을 가구수</label><input type="number" id="rv-house" placeholder="68"></div>
+          <div class="field"><label>마을귀속 비율 (%)</label><input type="number" id="rv-share" value="80"></div>
+        </div>
+        <button class="btn b-sun" onclick="calcRevenue()" style="width:100%;justify-content:center">📊 수익 계산</button>
+        <div id="rv-result" style="display:none;margin-top:14px">
+          <div class="kpi-grid" style="grid-template-columns:1fr 1fr;gap:10px">
+            <div class="kpi"><div class="kpi-n" id="rv-annual">-</div><div class="kpi-l">연간 총수익 (만원)</div></div>
+            <div class="kpi"><div class="kpi-n" id="rv-net">-</div><div class="kpi-l">연간 순수익 (만원)</div></div>
+            <div class="kpi"><div class="kpi-n" id="rv-village">-</div><div class="kpi-l">마을귀속 (만원/년)</div></div>
+            <div class="kpi"><div class="kpi-n" id="rv-20y">-</div><div class="kpi-l">20년 누적순익 (만원)</div></div>
+          </div>
+          <div style="margin-top:12px">
+            <div class="bar-item"><div class="bar-hd"><span class="bar-lbl">SMP 수익</span><span id="rv-bar-smp-v" class="bar-val">-</span></div><div class="bar-track"><div class="bar-fill" id="rv-bar-smp" style="width:0%;background:var(--sun)"><span class="bar-pct">SMP</span></div></div></div>
+            <div class="bar-item"><div class="bar-hd"><span class="bar-lbl">REC 수익</span><span id="rv-bar-rec-v" class="bar-val">-</span></div><div class="bar-track"><div class="bar-fill" id="rv-bar-rec" style="width:0%;background:var(--gr)"><span class="bar-pct">REC</span></div></div></div>
+            <div class="bar-item"><div class="bar-hd"><span class="bar-lbl">유지보수+이자</span><span id="rv-bar-cost-v" class="bar-val">-</span></div><div class="bar-track"><div class="bar-fill" id="rv-bar-cost" style="width:0%;background:var(--red)"><span class="bar-pct">비용</span></div></div></div>
+          </div>
+          <button class="btn b-pu" onclick="genRevenueReport()" style="width:100%;justify-content:center;margin-top:10px" id="rv-report-btn">📄 주민 설명용 리포트 생성</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch">📄 수익성 리포트
+        <div class="ch-r" id="rv-rpt-actions" style="display:none">
+          <button class="btn b-sm b-dark" onclick="cpEl('rv-report')">복사</button>
+          <button class="btn b-sm b-sun" onclick="printDoc('rv-report')">🖨 인쇄</button>
+        </div>
+      </div>
+      <div class="rb doc-preview" id="rv-report"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ 준비도 체크 ════════════════════ -->
+<div class="sec main" id="sec-checklist">
+  <div class="ib sun"><span>✅</span><div>마을 현황을 입력하면 AI가 공모 신청 준비 완료 여부를 진단하고 다음 액션을 알려드립니다.</div></div>
+  <div class="two">
+    <div>
+      <div class="card">
+        <div class="ch">🔍 현황 체크</div>
+        <div class="cb">
+          <div id="readiness-checks"></div>
+          <div class="field" style="margin-top:12px"><label>마을명</label><input type="text" id="rd-name" placeholder="OO리"></div>
+          <div class="brow">
+            <button class="btn b-sun" onclick="runReadiness()" id="rd-btn">🔍 AI 준비도 진단</button>
+            <button class="btn b-dark" onclick="resetReadiness()">초기화</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="ch">📊 진단 결과</div>
+        <div class="cb" id="rd-result">
+          <div class="ib blue"><span>👆</span><div>왼쪽에서 현황을 체크하고 진단을 실행하세요.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ AI 상담 ════════════════════ -->
+<div class="sec main" id="sec-chat">
+  <div class="card">
+    <div class="ch">💬 햇빛소득마을 AI 상담
+      <div class="ch-r"><button class="btn b-sm b-dark" onclick="clearChat()">대화 초기화</button></div>
+    </div>
+    <div class="chat-area" id="chat-area">
+      <div class="ib sun" style="margin:0"><span>☀</span><div><strong>2026 공모 공고문 전체를 학습한 AI 컨설턴트입니다.</strong><br>서류 작성, 법령 해석, 현장 상황 등 무엇이든 물어보세요.</div></div>
+    </div>
+    <div class="chip-row" id="chat-chips">
+      <button class="chip" onclick="sendChip(this)">주민 70% 기준이 정확히 어떻게 되나요?</button>
+      <button class="chip" onclick="sendChip(this)">협동조합 vs 사회적협동조합 어떤 걸 선택해야 하나요?</button>
+      <button class="chip" onclick="sendChip(this)">이격거리 조례 때문에 부지가 탈락될 수 있나요?</button>
+      <button class="chip" onclick="sendChip(this)">자부담 15% 어디서 조달하나요?</button>
+      <button class="chip" onclick="sendChip(this)">산업생태계 기여 15점 어떻게 받나요?</button>
+      <button class="chip" onclick="sendChip(this)">선정 후 6개월 안에 뭘 해야 하나요?</button>
+    </div>
+    <div class="chat-input-row">
+      <textarea id="chat-input" placeholder="질문 입력... (Ctrl+Enter로 전송)" rows="2" onkeydown="chatKey(event)" oninput="chatResize(this)"></textarea>
+      <button class="chat-send" id="chat-send-btn" onclick="sendChat()">↑</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ MODAL (마을 추가) ════════════════════ -->
+<div id="modal-ov">
+  <div id="modal">
+    <div id="modal-head">
+      <span id="modal-title">➕ 새 마을 추가</span>
+      <button id="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modal-body">
+      <div class="f2">
+        <div class="field"><label>마을명 (행정리)</label><input type="text" id="vm-name" placeholder="예: 해남군 북일면 OO리"></div>
+        <div class="field"><label>담당 컨설턴트</label><input type="text" id="vm-consultant" placeholder="효상"></div>
+      </div>
+      <div class="f3">
+        <div class="field"><label>총 주민수</label><input type="number" id="vm-pop" placeholder="명"></div>
+        <div class="field"><label>총 가구수</label><input type="number" id="vm-house" placeholder="가구"></div>
+        <div class="field"><label>설치 목표 kW</label><input type="number" id="vm-kw" placeholder="500"></div>
+      </div>
+      <div class="f2">
+        <div class="field"><label>이장 성명</label><input type="text" id="vm-chief" placeholder="성명"></div>
+        <div class="field"><label>이장 연락처</label><input type="text" id="vm-tel" placeholder="010-XXXX-XXXX"></div>
+      </div>
+      <div class="field"><label>현재 진행 단계</label>
+        <select id="vm-stage">
+          <option value="0">STEP 1 — 첫 방문·설득</option>
+          <option value="1">STEP 2 — 주민 조직·동의</option>
+          <option value="2">STEP 3 — 협동조합 설립</option>
+          <option value="3">STEP 4 — 발전소 준비</option>
+          <option value="4">STEP 5 — 수익 구조 설계</option>
+          <option value="5">STEP 6 — 운영 중</option>
+        </select>
+      </div>
+      <div class="field"><label>메모</label><textarea id="vm-memo" rows="2" placeholder="현장 특이사항, 다음 액션 등"></textarea></div>
+      <div class="brow">
+        <button class="btn b-sun" onclick="saveVillage()">✅ 마을 저장</button>
+        <button class="btn b-dark" onclick="closeModal()">취소</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════
+// 공고문 전체 텍스트
+// ══════════════════════════════════════
+const GONGGO = `[1페이지]
+- 1 -
+행정안전부 공고 제2026-475호
+지역경제 활성화 및 재생에너지 확산을 위한 「2026년도 햇빛소득마을」 지원
+사업에 참여할 마을을 선정하기 위해 다음과 같이 공고합니다.2026. 3. 31.
+행정안전부장관
+2026년 햇빛소득마을 선정 공모 공고
+햇빛소득마을 참여 유의 사항
+□ 햇빛소득마을로 선정되고 지원받고자 하는 마을 공동체 등 관련자는 서류제출 전에
+본 공고 사항 및 관련 법령 등을 숙지하고 이를 준수하여야 함
+□ 햇빛소득마을은 마을 주민들이 협동조합 또는 사회적협동조합을 설립하고 태양광 
+발전소를 건설·운영하며 이로부터 발생한 수익을 마을 복지사업 등 주민에게 환원
+하고 공유한다는 사업 취지를 이해하여야 함
+□ 햇빛소득마을은 참여 주민이 사업 운영 책임을 공동으로 부담하게 되는 바 협동
+조합의 투명성과 공정성 유지에 대한 협조가 필요함
+□ 햇빛소득마을 참여를 위해서는 태양광 건설 등을 위한 자금의 조달이 필요한 만큼, 마을 주민, 협동조합은 투자 전 재정적 부담에 대한 충분한 검토와 의사 결정이 필요함
+□ 태양광 발전사업 수익은 기후환경, 발전 효율 등에 따라 변동될 수 있으므로, 이에 대한 충분한 사전검토와 의사 결정이 필요함
+□ 햇빛소득마을을 추진하기 위해서는 관련 법규와 인허가 절차를 준수해야 함
+□ 햇빛소득마을 추진을 위한 협동조합 구성 및 태양광 발전소 설치·운영 과정에서 마을 
+주민 간 상호 협력과 공동의 노력이 필요함
+
+[2페이지]
+- 2 -
+목 차
+ Ⅰ. 사업 개요 ··········································································3
+ Ⅱ. 참여 자격 ··············································································3
+ 가. 참여 대상
+ 나. 참여 요건
+ 다. 사업 참여시 준수 사항
+ 라. 권고 사항
+ Ⅲ. 햇빛소득마을 선정시 지원 내용 ···································10
+ Ⅳ. 신청 세부내용 ···································································12
+ 가. 신청 대상
+ 나. 신청 접수 기간
+ 다. 신청 접수 방법 및 장소
+ 라. 선정 결과 발표
+ 마. 제출 서류
+ Ⅴ. 지원신청서 평가 ·······························································15
+ 가. 평가 대상 및 방법
+ 나. 평가 기준
+ 다. 세부 평가 지침
+ Ⅵ. 참여 유의사항 등 ·····························································24
+ Ⅶ. 별첨 서류 (서식 등) ·························································25
+
+[3페이지]
+- 3 -
+Ⅰ 사업 개요
+□ 사업 목적
+ㅇ 주민 주도형 태양광 발전사업을 통해 지역 내 에너지 자립 기반을
+구축하고, 발전 수익 공유를 통해 지역경제 활성화를 도모
+□ 사업 대상
+ㅇ 협동조합 또는 사회적협동조합
+□ 사업 내용
+ㅇ 햇빛소득마을 사업에 참여할 마을을 선정하여 태양광발전소 설치 
+및 운영 지원
+□ 지원 규모 : 500개 이상
+ * 전국 확산을 위해 추가 확대를 검토 중이며, 최종 지원 규모는 추후 안내 예정
+Ⅱ 참여 자격
+가. 참여 대상
+□ 마을에 태양광 발전소(사업용)를 건설하고, 전력판매로 발생한 수입을
+마을 복지사업, 주민소득 환원 등에 활용하고자 하는 마을 공동체
+ㅇ (신청자) 사업대상지에 법인 주소를 등록한 협동조합 또는 사회적
+협동조합이 사업을 주관하고 관할 기초 지방정부와 협력하여 신청
+ * 필요시 사회연대경제조직 또는 중간지원조직 전문가도 협력을 통해 참여 가능
+ ** 하나의 행정리에는 하나의 (사회적)협동조합이 신청 가능 (하나의 행정리에 다수의
+(사회적)협동조합 신청시 각각의 신청은 무효 처리될 수 있음)
+*** 다수의 마을이 하나의 협동조합을 구성하여 태양광 사업 추진 가능
+
+[4페이지]
+- 4 -
+ㅇ (제출자) 사업 관할 기초 지방정부
+ * (제출서류) ①사업계획서(‘(사회적)협동조합’ 작성) 및 ②사업지원 계획서(‘기초 지방정부’ 작성) 
+나. 참여 요건
+ 다음의 마을·주민·조합원의 범위와 마을 공동체의 정의를 만족하여야 함
+ㅇ (마을의 범위) 광역·기초 지방정부의 조례에 따른 행정리 
+ㅇ (주민의 범위) 2026.3.31일 기준 해당 마을에 주민등록이 되어있는 자
+ㅇ (조합원의 범위) 공고일 전일 기준 해당 마을 내 1년 이상 거주 중인
+18세 이상의 주민으로서, 마을 자치규약 등에 따라 주민 자격을 갖춘 자
+ㅇ (조합의 정의) 상기 조합원 범위에 해당하는 자 10인 이상이 조합원
+으로 참여하여 설립된 「협동조합 기본법」상 협동조합 또는 사회적협동조합
+ㅇ (발기인의 범위) 조합원 자격을 갖추고 협동조합 설립 의사를 가진 
+최소 5인 이상로 구성되며, 한 가구에서 1명 초과 인원은 불인정
+ 태양광 발전사업을 추진 가능하여야 함
+ㅇ (발전사업 추진) 「전기사업법」에 따른 태양광 발전사업이 가능토록 
+주민 수용성, 자금, 부지와 계통* 등을 확보할 수 있어야 함
+ * 정부, 지방정부 지원 등을 통해 ESS를 연계하는 경우도 포함
+ㅇ (태양광 발전사업의 규모) 총 300kW 이상 1,000kW 이하 원칙
+ * 다만, 1,000kW 초과일 경우, 별도의 평가위원회를 통해 他요건 충족 여부, 우수성 등을
+종합적으로 고려하여 예외적으로 선정 가능
+ㅇ (재원) 발전사업 허가 취득을 위해 태양광 설치비의 15% 이상의
+재원을 확보하여야 함(부지 매입, ESS 설치 비용은 별도)
+
+[5페이지]
+- 5 -
+ - (재원 조달) 마을 공동체 기금(기존 마을 기금, 마을 펀딩* 등), 정부⋅
+지방정부 정책 자금 지원 등을 통해 사업 추진이 가능하여야 함
+ * 마을 펀딩 및 출자시 개인 출자 비율은 전체 주민 출자금의 10% 이내로 제한
+ - (지역금융 협력) 지역 농·수협, 새마을금고, 신협 등 상호금융기관과
+협력을 통한 지역 기반 자금조달(대출, 출자) 참여 가능
+ * 다만, 자금조달 시 상호금융기관에 과도한 배당은 지양
+ㅇ 동 사업은 주민이 직접 신규로 준비·추진하는 경우를 원칙으로 하며, 기존 발전소를 활용한 참여와 발전사업허가 등 관련 인허가*를 
+이미 득한 경우 또는 발전소의 양수·양도를 통한 참여는 제한함
+ * 공고일 이후 발전사업허가를 득한 경우에만 해당 사업 참여 가능
+다. 사업 참여시 준수 사항 
+ 햇빛소득마을 신청을 위해 마을 주민의 동의를 득하여야 함
+ㅇ (주민 동의) 햇빛소득마을 신청 및 선정을 위해 ① 마을 자치규약에
+따른 총회의 승인 및 ② 마을 자치규약에 따라 자격을 갖춘 주민이 
+70% 이상 동의하여야 함 / 두 가지 요건을 모두 충족하여야 함
+ 마을 공동체는 공정성⋅투명성 등 공공성을 확보하여야 함 
+ㅇ (주요 사업) 협동조합 정관에 주요사업으로 ‘재생에너지 사업’ 명시
+ㅇ (공정성 확보) 마을 주민 의견을 수렴·반영하는 등 민주적으로 
+운영하여야 하며, 수입금의 활용에 대해 증빙할 수 있어야 함
+ㅇ (투명성 확보) 마을 공동체는 주요 의사결정, 협동조합 및 발전소 
+건설⋅운영, 수입금 활용 등 사업추진에 있어 투명성을 확보해야 함
+ ※ 관련법에 따라 협동조합(조합원수가 200인 미만 포함) 및 사회적협동조합은 매 회계
+연도 결산일로부터 4개월 이내에 경영공시를 하여야 함
+
+[6페이지]
+- 6 -
+ㅇ (수익 활용) 사업 수익은 마을 공동 활용(주민복지 사업 등), 지역주민 
+배분(지역 화폐를 원칙*으로 함) 등 지역 환원 구조로 운영하여야 함
+ * 다만, 지역화폐 배분이 어려운 특별한 사유가 인정되는 경우, 별도심사를 통해 검토 예정
+ * 수익 활용 방식에 대해서는 반드시 정관에 명시하여야 함 
+ 발전소 건설은 재생에너지 종합서비스기업(ReSCO)을 통해 추진되어야 함 ㅇ (종합서비스기업 활용) 태양광 건설 관련 일정수준 이상의 시공능력· 실적 등이 확인된 재생에너지 종합서비스기업을 통해 추진해야 함
+ * 재생에너지 종합서비스기업(ReSCO, Renewable Energy Service Company)은 한국
+에너지공단 신·재생에너지센터 홈페이지를 통해 공개 예정
+ 태양광 모듈은 저탄소 모듈을 사용하여야 하며, 인버터, 구조물 등 
+각종 기자재도 산업·경제적 기여가 가능하여야 함 
+ㅇ (저탄소 모듈 사용) 태양광 모듈은 탄소배출량 검증제품 중 
+655kgCO2/kW 이하인 제품을 사용하여야 함
+ㅇ (인버터 등 기자재) KS 등 관련 기준을 충족하는 제품을 사용하되, 산업·경제적 파급효과 등을 종합적으로 고려하여야 함
+ 수입은 고정가격계약 경쟁입찰 또는 PPA 계약을 통해 확보하여야 함
+ㅇ (경쟁입찰 참여) 햇빛소득마을로 선정된 마을은 발전사업 허가일로부터 
+12개월 이내에 태양광 고정가격계약 경쟁입찰에 참여하여 선정되거나, 전력거래계약(PPA)을 체결하여 수입확보 방안을 마련하여야 함
+ * PPA계약은 민간 당사자간 자율적으로 체결되는 사항으로, 정부가 직접 매칭 등을 
+하지는 않으며, 사업자 중심으로 계약을 추진하는 방식임
+
+[7페이지]
+- 7 -
+ 발전소 설치 시 전기설비 법정안전검사 준수
+ㅇ (사용전검사) 검사 실시 이전에 반드시 전기안전공사 관할 사업소
+에서 사전기술검토를 완료해야함
+ㅇ (정기검사) 최초 사용전검사 실시 후 설비 주기에 맞춰 검사 실시
+ * 정기검사 주기 : 태양광(4년), ESS(옥내:1년, 옥외:2년(단, 배터리용량1MWh 이상 1년))
+ 발전소는 햇빛소득마을 선정일로부터 일정 기한내 건설 필요
+ㅇ (발전소 건설 기한) 선정일로부터 6개월 이내에 발전사업허가를 득
+하여야 하며, 허가 후 12개월 이내에 사용전검사 완료를 목표로 함
+ * 환경영향평가 절차 등을 이유로 행정 처리가 늦어지는 경우, 별도 심사를 통해 연장 검토
+ 발전소의 안정적 운영을 확인하기 위해 REMS에 연동 가능하여야 함
+ * REMS : Renewable Energy Monitoring System(한국에너지공단 운영)
+ㅇ REMS를 통해 태양광 발전설비의 전력생산량 및 고장유무 등 확인
+ 햇빛소득마을로 선정될 당시의 참여요건을 유지하고 의무사항을 준수
+하여야 하며, 사업 추진여부 확인을 위한 자료 요구에 응하여야 함
+ㅇ (유지 의무) 햇빛소득마을로 선정될 당시의 신청, 평가한 요건과 동일한
+수준을 유지해야 하며, 부득이한 경우 심의를 통해 변경 여부 결정
+ * 햇빛소득마을 참여요건, 의무사항 등 평가에 영향을 주는 요소와 관련없는 마을공동체
+정관의 변경, 협동조합 구성원의 변경 등은 심의 대상에서 제외
+ㅇ (제공 의무) 햇빛소득마을 선정 당시의 신청내용, 사업계획서 내용 등
+유지여부와 추진현황 파악을 위해 자료 요청시 제공의무가 있음
+□10 햇빛소득마을로 선정시 발전사업 허가 등 인허가 완료 후 한전에 
+전력거래계약 신청을 신속히 하여야 함
+
+[8페이지]
+- 8 -
+ㅇ 사업계획서 작성, 마을선정 및 발전사업 허가단계에서 여유용량이 
+있더라도 한전 전력거래계약 신청 후에 연계여유용량 변동 등이 
+발생할 수 있으므로 반드시 신속한 신청 필요
+□11 햇빛소득마을 통합 네트워크에 참여하여야 함
+ㅇ 사업 지속성 확보 및 효율적 운영 관리를 위해 ‘햇빛소득마을 통합 
+네트워크’(가칭, 한국에너지공단 구축 예정)에 참여하여야 함
+ * (주요기능) 마을 리더 등 보수교육, 마을복지사업 우수사례 공유 등 
+라. 권고 사항 
+□ (의사 결정) 햇빛소득마을을 추진하기 위한 의사결정과정에서 민주적
+이고 투명·공정하게 추진하며, 주민 간 갈등이 발생하지 않도록 노력
+□ (지방정부 협업) 마을 공동체가 협동조합 구성과 태양광 발전사업 계획
+등 준비과정에서 광역·기초 지방정부의 지원을 최대한 활용 권고 
+□ (이격거리) 기초 지방정부에서는 「신재생에너지법」 제27조의3 이격거리
+예외 조항 시행(‘26.9.18) 전, 원활한 사업 추진을 위해 필요시 
+햇빛소득마을에 대해서는 이격거리 기준을 완화할 것을 권고
+<여주시(구양리) 사례 참고>
+(여주시 도시계획 조례 별표2) 4. 사. 바목에도 불구하고 다음의 어느 하나에 해당하는
+경우에는 태양광발전시설을 허가할 수 있다... 2) 「여주시 에너지 기본 조례」 제13조제1호, 제3호 및 제4호
+(여주시 에너지 기본조례 제13조제1호) 마을공동체가 소유하거나 부지를 임대하는 
+태양광 발전사업
+□ (유휴부지 활용) 안정적인 사업 추진 및 경제성 제고를 위해 정부, 지방정부, 공공기관 국·공유지와 건축물 상부(마을 공동시설 등) 활용 권고
+
+[9페이지]
+- 9 -
+□ (계통부족지역) 전력계통의 연계용량 여유가 없는 지역의 경우 ESS 
+설치 지원을 계획중이며, 발전효율 제고를 위해 동서 수직형 태양광 
+등 다양한 방식 활용 권고
+ * ESS 설치 조건으로 계통 접속하는 경우 계통 포화 시간대에 ESS 충전 의무 이행 필요. □ (다른 에너지사업과의 연계) 햇빛소득마을 사업 추진과정에서 다른 
+에너지사업과 연계를 통한 재생에너지 확산 및 지역경제 활성화 권고
+ * 유기성 폐자원을 활용한 바이오가스의 생산 및 이용 촉진법에 따른 바이오가스의 
+생산, 이용 및 발전사업 등 다른 재생에너지사업과의 연계 통해 지역경제 활성화
+□ (표준계약서 활용) 마을 공동체와 ReSCO의 태양광 발전사업 추진
+계약 과정에서 한국에너지공단의 도급계약서 활용을 권고
+ * 한국에너지공단 신·재생에너지센터 홈페이지(자료실-공지사항)에서 도급계약서 참고
+□ (표준정관 활용) 햇빛소득마을 추진을 위한 마을 주민 조직화 과정
+에서 햇빛소득추진단의 표준정관 활용을 권고
+ * 표준정관(안)은 공고 이후 지방정부를 통해 배포할 예정
+
+[10페이지]
+- 10 -
+Ⅲ 햇빛소득마을 선정시 지원 내용
+ (태양광 발전설비 금융 지원) 재생에너지 금융지원사업 지원
+ㅇ 햇빛소득마을 사업에 선정된 사업자에 대해 2026년도 재생에너지 
+금융지원사업 중 ‘햇빛소득마을 태양광’에 지원자격을 부여
+ * ‘26년도 재생에너지 금융지원사업 공고(한국에너지공단 신·재생에너지센터 홈페이지) 참조
+ (주민참여 가중치) 재생에너지 공급인증서(REC) 가중치 적용
+ㅇ 재생에너지 공급의무화제도(RPS)의 주민참여사업 기준에 충족(범위, 이격거리 기준, 주민 참여율 등)할 경우 최대 0.2의 추가 가중치 부여
+ * 기준: 「신·재생에너지 공급의무화제도 및 연료 혼합의무화제도 관리·운영지침」[별표2] 비고 16
+ → 이격거리 완화 관련 재생에너지법 개정법 시행(‘26.9.18일) 이후 변동 가능
+주민참여
+금액비율
+가중치 적용기준
+500kW이상 태양광* 이격거리 기준미준수 이격거리 기준준수
+총사업비의 1%이상~2%미만 (최종 가중치 부여 값)
+총사업비의 2%이상~3%미만 (최종 가중치 부여 값) + 0.08 (최종 가중치 부여 값) +0.1
+총사업비의 3%이상~4%미만 (최종 가중치 부여 값) + 0.12 (최종 가중치 부여 값) +0.15
+총사업비의 4%이상 (최종 가중치 부여 값) + 0.16 (최종 가중치 부여 값) +0.2
+2) 이격거리 기준 준수라 함은 지자체가 조례 등을 통해 주거지역 100m, 도로 0m 이내로 이격거리 
+기준을 규정하거나 별도의 이격거리 기준을 정하지 아니하는 경우를 말하며, 이격거리 기준 
+미준수라 함은 이격거리 기준 준수에 해당하는 경우 외의 모든 경우를 말함
+3) 총사업비는 해당 발전사업의 공사비, 보상비, 시설 부대경비 등 사업 추진에 소요되는 경비를 
+말하며 구체적인 항목은 공급인증기관의 장이 정한다.
+ * 500kW 이상 설치 시 주민참여 추가 가중치 부여 가능
+ (계통확인 지원) 햇빛소득마을 추진과정에서 개별 마을의 계통연계 
+가능여부에 대한 확인은 민관합동 현장지원단을 통해 상시 지원 
+ * 한전 ON 홈페이지의 전력계통 통합정보에서 계통연계 가능여부 확인 가능(참고)
+
+[11페이지]
+- 11 -
+ (계통연계 위한 ESS 설치비 지원) 태양광 연계 ESS 설치비 지원
+ㅇ 햇빛소득마을 선정시 계통 부족지역 중심으로 태양광과 연계하는 
+ESS 설치비용의 최대 90% 지원(정부 50%, 지방정부 40%)
+ (교육 지원) 햇빛소득마을 사업 개요 및 기초 관리방안 등 교육
+ㅇ 햇빛소득마을 기본개념 및 태양광 발전사업 운영 관련 전문강사(사회
+연대경제조직 등)가 마을 리더, 주민 등을 대상으로 교육을 제공할 계획
+ (사업추진 기반 조성지원) 주민 조직화, 부지 발굴 등 지원
+ㅇ (주민조직화) 사회연대경제조직 또는 중간지원조직 전문가 등을 
+활용해 협동조합 구성·운영에 대한 컨설팅 지원 예정
+ㅇ (부지발굴) 지방정부, 한국농어촌공사 등 공공기관 중심으로 유휴
+부지를 사전에 발굴·제공하고, 부지확인 신청 시 신속 안내 
+ - 마을 선정부지가 농업 기반 자원(비축농지, 저수지 등)일 경우, 농업적
+타당성, 적합성 등을 우선 확인하고 사업가능한 부지를 발굴·지원
+ (인허가 등 신속처리) 행정절차 처리에 대한 신속 지원
+ㅇ 발전사업허가 등 각종 인허가, 전기안전검사, RPS 설비확인 등 각종 
+행정절차에 대해 지방정부 및 관계기관과 협력하여 신속 처리 지원
+ (다른 지원사업과의 연계) 기타 정부⋅지방정부 등 지원사업과 연계
+하여 협동조합의 부담을 완화하기 위해 검토할 계획
+ * 마을기업 보조금, 지방소멸대응기금, 송변전설비 주변지역 지원사업 등
+ (보완 컨설팅 제공) 금회 선정되지 않은 협동조합 또는 사회적협동
+조합에 대해서는 추진단, 민관합동 현장지원단이 사업 준비도 제고를
+위한 교육, 컨설팅을 제공하여 향후 사업 재신청을 지원할 계획
+
+[12페이지]
+- 12 -
+Ⅳ 신청 세부내용
+< 햇빛소득마을 선정 추진 절차 >
+공고 ⇒ 신청서 접수 및 제출 ⇒
+참여자격 등 확인
+및 계량평가 ⇒
+추진단 기초 지방정부 → 추진단 추진단
+사업계획서 평가
+(필요시) 현장 평가 ⇒ 사업대상 선정 ⇒ 선정결과 안내
+평가위원회 추진단 추진단 → 광역 → 기초
+가. 신청 대상
+□ 햇빛소득마을 사업은 협동조합 또는 사회적협동조합이 사업을 주관
+하고 관할 기초 지방정부와 협력하여 신청
+ * (사회적)협동조합은 관할 기초 지방정부 햇빛소득마을 담당부서에 사업계획서를 제출
+나. 신청 접수 기간
+< 신청 접수 기간 >
+◇ 공고일 : 2026년 3월 31일 
+◇ 접수 마감일 : (1차) ~ 5월 31일, (2차) ~ 7월 31일
+□ 신청서 접수일까지 형식적 접수 요건을 갖추지 못한 마을은 평가
+대상에서 제외 (제출 필요서류 누락 등)
+ * 신청서 접수 마감일에는 신청건수 폭증으로 접수 여부가 확인이 어려울 수 있으니
+가급적 마감 1일전까지 제출완료 권고
+
+[13페이지]
+- 13 -
+다. 신청·제출 방법 및 장소 
+□ (신청 방법) 마을 공동체가 사업계획서 등을 작성하고, 기초 지방정부는
+사업계획 지원서를 작성하여 공문으로 “행정안전부 자치혁신실 햇빛
+소득마을추진단”에 신청
+□ (제출 방법) 기초 지방정부가 신청서 서류 일체를 PDF로 변환하여 “행정안전부 자치혁신실 햇빛소득마을추진단”에 공문으로 제출
+ * 공문에 일부 대용량 파일이 첨부가 안되는 경우, 신청 서류 전체를 전자우편
+(solar2026@korea.kr)으로 별첨 송부
+ * 기초 지방정부·관계기관 등 연락처는 별도 붙임파일 참고
+□ (접수기준일) 신청 접수일은 햇빛소득마을추진단의 공문 수신일로 함
+□ (제출서류에 대한 보완) 제출서류에 미비·오류가 있거나 불명확하여 
+심사가 곤란한 경우에는 기한을 정하여 보완하게 할 수 있으며 요구한
+기한까지 보완서류가 제출되지 아니한 경우에는 당초 제출된 서류
+만으로 평가함
+라. 선정 결과 발표
+< 선정결과 발표 예정일 >
+◇ 1차 접수에 대한 선정 결과 발표 : 2026년 7월 31일 (예정)
+◇ 2차 접수에 대한 선정 결과 발표 : 2026년 9월 30일 (예정)
+마. 제출서류
+ ※ 제출서류는 PDF로 제출하여야 하며, 파일이 정상적인지 반드시 확인
+ ※ 각 파일명 엄수, 붙임 파일이 여러 개일 경우 제출서류 목록 문서를 엄수하여 
+1개의 PDF 파일로 묶어서 제출
+
+[14페이지]
+- 14 -
+< 제출 필요서류 목록 >
+번호 내용
+1 햇빛소득마을 신청전 체크리스트(서식1) 
+※파일명: 붙임1_체크리스트(00시·군 00면 00리)
+2
+햇빛소득마을 지원 신청서 (서식2) 
+※파일명: 붙임2_햇빛소득마을 지원 신청서(00시·군 00면 00리)
+첨부 : 마을총회 의결서(붙임 서식1)
+첨부 : 마을대표 증명서(이장 재직증명서 등)
+첨부 : 사업추진, 개인정보 수집·이용 및 제3자 제공 동의서(마을주민용) (붙임 서식2)
+3
+햇빛소득마을 사업계획서(마을공동체용, 서식3) 
+※파일명: 붙임3_햇빛소득마을 사업계획서(00시·군 00면 00리)
+첨부 : 협동조합/사회적협동조합 설립인가서
+첨부 : 협동조합/사회적협동조합 정관(별첨 정관(안) 참고)
+첨부 : 조합원 명부(붙임 서식3)
+첨부 : 개인정보 수집·이용 및 제3자 제공 동의서(조합원용) (붙임 서식4)
+첨부 : 조합원별 거주 확인 위한 주민등록표 초본
+* 주민등록번호 뒷자리는 비공개 처리하여 제출 
+4
+기타 증빙자료
+※파일명: 붙임4_기타 증빙자료(00시·군 00면 00리)
+첨부 : 태양광 건설예정지 증빙자료(토지대장, 건축물대장 등)
+첨부 : 태양광 건설예정지 소유 증빙자료(토지대장, 건축물대장, 국공유지 임대의향서 등)
+첨부 : 마을기금 통장사본 등 재원 증빙 서류
+첨부 : 계통 연계 가능여부 검토의견 서류(한전 제공)
+첨부 : 재생에너지 산업생태계 기여 계획 증빙자료
+ (사용 예정제품의 탄소배출량 검증인정서(모듈), KS인증서(모듈, 인버터) 등)
+첨부 : (필요시) 기타 증빙서류
+5
+햇빛소득마을 사업지원계획서(기초 지방정부용, 서식4) 
+※파일명: 붙임5_햇빛소득마을 사업지원계획서(00시·군 00면 00리)
+첨부 : (필요시) 기타 증빙서류
+
+[15페이지]
+- 15 -
+Ⅴ 지원신청서 평가
+가. 평가 대상 및 방법
+□ (평가 대상) 햇빛소득마을 참여 요건을 만족하고, ‘햇빛소득마을 
+지원신청서 등’ 필요 서류를 모두 제출한 마을을 대상으로 평가함
+ㅇ 공고의 참여 요건을 만족하지 못하거나 관련 서류를 누락할 경우 
+평가 대상에서 제외될 수 있음
+□ (평가 방법) 마을이 제출한 ‘햇빛소득마을 지원신청서 등’의 평가는 
+정량평가와 정성평가(사업계획서 평가)로 구분하여 진행(가점 평가 
+포함)하고, 사업계획서 평가과정에서 필요시 현장평가를 진행할 수 
+있으며, 사업계획서 및 현장 평가는 평가위원회를 통해 평가 함
+ㅇ 공고에서 접수기간을 달리 정하는 경우에는 접수와 평가, 선정의 
+절차를 각각 구분하여 추진할 수 있음
+ㅇ 평가의 점수는 소수점 이하 숫자가 있는 경우에는 소수점 셋째자리
+에서 반올림하여 소수점 둘째자리까지 계산함
+□ (평가위원의 위촉) 햇빛소득마을추진단장(이하 ‘단장’)은 사업계획서의
+평가를 위해 학계·연구계 등 전문가를 평가위원으로 위촉할 수 있음
+□ (평가위원회 구성) 사업계획서의 평가는 1개 위원회에 학계·연구계 등 
+관련 분야 전문가 7인 이상 15인 이하의 평가위원을 위촉하여 평가 함
+ㅇ 지역별로 다수의 평가위원회를 구성·운영하여 평가할 수 있으며, 각 평가위원회의 위원장은 위원중에서 호선함
+
+[16페이지]
+- 16 -
+ㅇ 평가위원회별로 각 평가를 위하여 간사 1인을 두도록 하며, 간사는 
+햇빛소득마을추진단장이 소속 공무원 또는 관계기관 직원 중에서 지명
+□ (평가위원회의 책임) 평가위원회 위원은 평가위원회의 직무와 관련하여
+「부정청탁 및 금품등 수수의 금지에 관한 법률」 제5조부터 제9조까지를
+준수하여야 하며, 이 경우 ‘공직자등’은 ‘위원’으로 ‘소속기관장’은 ‘햇빛소득마을추진단장’으로 봄
+ㅇ 햇빛소득마을추진단장은 평가위원회 위원이 부정청탁을 받고 평가
+등을 수행하여 업무의 공정한 수행에 지장을 주었다고 확인되는 
+경우에는 부정청탁을 받은 위원을 해촉하여야 함
+□ (계량평가·사업계획서의 평가) 사업계획서 최종평가 점수는 최고점수와
+최저점수를 부여한 위원의 점수를 제외한 나머지 위원의 평가점수를
+합산하여 산술평균한 점수로 하며, 최고 또는 최저점수가 2개 이상
+일 때에는 이중 하나만 제외 함
+□ (현장 평가) 평가한 사업계획서 중 사업계획서 내용을 확인·평가하기
+위해 현장평가를 진행할 수 있으며, 평가위원 3분의 2이상이 필요하
+다고 인정할 경우 진행
+ㅇ 현장평가는 필요한 경우 해당 사업계획서 평가위원과 다른 평가위원을
+위촉하여 평가하거나, 민관합동 현장지원단으로 하여금 현장을 확인
+하고 작성한 현장확인 보고서를 기준으로 평가할 수 있음
+□ (최종 평가대상과 선정) 계량평가 점수, 사업계획서의 평가 점수, 가점의
+합(이하 ‘종합점수’)이 60점 이상인 마을을 선정 가능 대상으로 함
+ㅇ 선정 가능 대상 마을에 대해 종합점수 고득점 순으로 순번을 부여
+
+[17페이지]
+- 17 -
+ㅇ 전체 수요 현황에 따라 필요시 사업 추진 여건·계통 현황 등을 
+고려하여 특정지역에 과도하게 편중되지 않도록 선정할 계획
+□ (동점 처리 기준) ‘햇빛소득마을’ 선정 과정에서 점수가 같을 경우에는
+다음 각 호의 순위에 따라 우선하여 선정
+ ① 사업(지원)계획서 평가점수가 높은 경우 
+ ② 평가지표 중 주민수용성(동의) 점수가 높은 경우
+ ③ 평가지표 중 사업의 준비 정도 점수가 높은 경우
+ ④ 평가지표 중 지방정부 참여 정도 점수가 높은 경우
+□ (선정 통보) ‘햇빛소득마을’로 선정된 마을에 대해서는 관할 지방정부에
+공문을 통해 통지 예정임
+※ “(가칭)햇빛소득마을 평가·관리 지침” 수립 예정으로 평가 대상 및 
+방법은 추후 일부 변경될 수 있으며, 이 경우 별도 안내 예정
+
+[18페이지]
+- 18 -
+나. 펑가 기준
+구분 평가지표 세부내용 및 평가기준 배점
+계량
+평가
+(최대 
+15점
+주민
+수용성
+ㅇ 햇빛소득마을, 태양광 발전소 건설에 대한 마을공동체의 
+주민수용성 확보 수준을 평가
+➀ 마을총회
+의결서 제출(필수) ➁ 주민동의서 제출 ➀+➁ 합계
+10점 ((주민동의비율(%) - 70%) / 30%) × 5점 최대 15점
+ * ➁ 주민동의비율은 70% 초과분에 대해 평가
+15점
+사업
+계획서
+평가
+(최대
+85점)
+마을공동체
+투명성
+ㅇ 마을공동체 구성·운영, 햇빛소득마을 사업 구조가 투명하고
+합리적으로 계획되었는지 평가
+15점
+- 협동조합 의사결정 구조의 민주성 (5점) - 협동조합 운영의 투명성 확보 (5점) - 출자, 적립, 배분 등 수입 활용 계획의 공정성·타당성 (5점)
+사업의
+준비 정도
+ㅇ 발전사업 추진을 위한 준비 수준 종합평가 - 발전사업 추진위한 부지 확보의 적정성 (8점) 15점
+- 발전사업 추진위한 재원 확보의 적정성 (7점)
+사업 계획의 
+타당성 ㅇ 발전사업 건설·운영 계획의 합리성 10점
+산업·경제
+효과 ㅇ 재생에너지 산업생태계(국내 경제·공급망) 기여도 평가 15점
+사업관리의
+합리성 ㅇ 발전사업 관리계획, 수익활동·회계관리 계획 등 합리성 10점
+지방정부
+참여 정도
+ㅇ 햇빛소득마을 추진에 대한 광역·기초지방정부의 역할 종합 검토
+20점
+- 이격거리 규제 완화를 위한 노력(5점) - 발전사업 추진을 위한 인허가 검토 등 노력 (6점) - 지방정부의 설명회 및 교육, 컨설팅, 전담조직 구성 등 
+기타 노력 (9점) ※ 햇빛소득마을 관련 내용에 한함
+가점
+(최대
+8점)
+정책 목표
+우대
+(계량평가)
+ㅇ 관련법에 따른 인구감소(관심)지역 또는 송·변전설비 주
+변지역 해당여부
+인구감소(관심)지역 또는 송·변전설비 주변지역 해당없음
+3점 0점
+3점
+지방정부
+참여 정도
+(사업계획평가)
+ㅇ 지방정부 (공공기관 포함)의 부지 제공 여부 3점
+사업관리
+(사업계획평가) ㅇ 햇빛소득마을 관리자의 채용 및 활용 계획 2점
+합계 (최대 100점을 초과할 수 없음) 100점
+* 주민동의비율, 주민 수용성, 사업규모는 소수점 셋째자리에서 반올림하여 소수점 둘째자리까지 계산
+
+[19페이지]
+- 19 -
+다. 세부 평가지침
+< 계량 평가 >
+□ 주민수용성(15점)
+ㅇ 햇빛소득마을, 태양광 발전소 건설에 대한 마을공동체의 주민수용성
+확보 수준을 평가
+➀ 마을총회
+의결서 제출(필수) ➁ 주민동의서 제출 ➀+➁ 합계
+10점 ((주민동의비율(%) - 70%) / 30%) × 5점 최대 15점
+ * ➁ 주민동의비율은 70% 초과분에 대해 평가
+< 세부 평가내용 >
+□ ➀마을 총회 의결서는 햇빛소득마을의 신청(태양광 발전소 건설 추진을 포함)에 
+대한 마을 자체 규약에 따른 마을 총회 의결한 결과를 제출
+ㅇ 햇빛소득마을 신청과 태양광 발전소 건설에 대해 최종 결정한 내용이 모두 포함
+되어야 하며, 마을 규약에 따른 대표 또는 마을의 직인이 날인되어 있어야 함
+□ ➁주민동의서는 햇빛소득마을 신청과 태양광 발전소 건설에 대해 주민 동의서 
+제출, 제공된 양식에 따라 마을 주민에 대한 주민 동의 확인
+< 사업계획서 평가 >
+□ 마을 공동체 투명성(15점)
+ㅇ 마을공동체 구성·운영, 햇빛소득마을 사업 구조가 투명하고 합리적으로
+계획되었는지 평가
+
+[20페이지]
+- 20 -
+ - 협동조합 의사결정 구조의 민주성(5점)
+< 세부 평가내용 >
+□ 정관에 ❶ 조합원의 가입 자격을 민주적으로 설정한지 여부, ❷ 임원·감사의 선출과
+임기·연임 수준 등이 적절한지 여부, ❸ 총회의 소집·통지, ❹ 조합원의 의견수렴 및 그에
+대한 논의·의결 방안이 적절한지 여부, ❺ 총회, 이사회 등의 의사결정 불복시 절차
+규정 및 이해관계자의 분쟁 처리 규정의 마련 등 의사결정 구조의 민주성을 평가
+ - 협동조합 운영의 투명성 확보(5점)
+< 세부 평가내용 >
+□ 정관에 ❶ 운영 정보의 공개 여부와 그 방법, 수준이 적절한지 여부와 ❷ 의사결정
+과정의 공개 여부 등을 평가
+ - 출자, 적립, 배분 등 수입의 활용 계획의 공정성·타당성(5점)
+< 세부 평가내용 >
+□ 적립, 배분 등 수입의 활용 계획의 구체성과 타당성을 평가
+□ 사업의 준비 정도(15점)
+ㅇ 발전사업 추진을 위한 준비 수준 종합평가
+ - 발전사업 추진을 위한 부지 확보의 적정성(8점)
+< 세부 평가내용 >
+□ 태양광 발전사업을 추진하기 위해 적정한 위치, 타당한 수준의 부지와 면적을 확보
+하였는지를 평가
+
+[21페이지]
+- 21 -
+ - 발전사업 추진을 위한 재원 확보의 적정성(7점)
+< 세부 평가내용 >
+□ 태양광 발전사업을 추진하기 위해 적절한 비용을 산정하였는 지와 그에 따른 재원
+확보 수준을 평가
+□ 사업 계획의 타당성(10점)
+ㅇ 발전사업 건설·운영 계획의 합리성
+< 세부 평가내용 >
+□ 태양광 발전사업의 추진계획(발전사업 허가부터 준공까지 일정과 마을복지 또는 
+수익배분을 위한 수입의 확보 계획 등)의 합리성 평가
+ㅇ 태양광 발전사업 형태를 고려한 고정가격계약 경쟁입찰 또는 전력거래계약
+(PPA)의 참여 방안, 참여 시기, 전력판매금액의 적절성을 평가
+ㅇ 안정적 태양광 발전사업 추진위한 설비 유지관리 등 계획 등 평가
+□ 산업·경제 효과(15점)
+ㅇ 재생에너지 산업생태계(국내 경제·공급망) 기여도 평가
+< 세부 평가내용 >
+□ 태양광 발전소 건설과 관련하여 산업 생태계 기여 여부 등에 대해 평가
+ㅇ 모듈, 인버터, 구조물 등에 대한 인증제품 및 제조국에 대한 명확한 증빙 필요
+□ 사업관리의 합리성(10점)
+ㅇ 회계관리 계획, 사업 운영계획 등 합리성
+< 세부 평가내용 >
+□ 수입의 체계적이고 효과적인 활용 계획(마을 복지활용 또는 배분)과 그에 대한 
+체계적이고 투명한 회계관리 계획 등 사업 운영계획의 합리성 평가
+
+[22페이지]
+- 22 -
+□ 지방정부 참여 정도(20점)
+ㅇ 햇빛소득마을 추진에 대한 광역·기초 지방정부의 역할 종합 검토
+ - 이격거리 규제 완화를 위한 노력(5점)
+< 세부 평가내용 >
+□ 원활한 햇빛소득마을 사업 추진을 위해 조례 개정 등 이격거리 규제 완화 노력에
+대해 평가, 이미 이격거리가 없는 경우는 노력을 한 것으로 평가
+ - 발전사업 추진을 위한 인허가 검토 등 노력(6점)
+< 세부 평가내용 >
+□ 태양광 발전사업을 추진하기 위해 태양광 발전사업에 대한 인허가(발전사업, 개발
+행위 등)에 대해 사전 검토 및 그 수준에 대해 평가
+ - 지방정부의 설명회 및 교육, 컨설팅, 전담 조직 구성 등 기타 노력(9점)
+< 세부 평가내용 >
+□ 지방정부가 햇빛소득마을의 체계적이고 안정적인 추진을 위한 마을(이장단, 마을 
+주민 등) 대상 설명회 개최여부, 마을 공동체 대상 교육 여부(이장단, 마을 주민 등)
+및 컨설팅 추진 여부, 그 외 전담조직 구성·운영 등 지방정부의 추가적인 노력에 
+대해 종합 평가
+ ※ 다양한 부처 또는 부서의 노력 증빙시 우대(예: 에너지 부서와 마을 공동체 관리
+부서 등 참여), 평가 내용은 햇빛소득마을 관련 내용에 한함
+< 가점 >
+□ 정책목표 우대(3점)
+ㅇ 인구감소(관심)지역 또는 송·변전설비 주변지역 해당여부
+인구감소(관심)지역 또는 송·변전설비 주변지역 해당없음
+3점 0점
+
+[23페이지]
+- 23 -
+< 세부 평가내용 >
+□ 지역경제 활성화 및 재생에너지 중심 에너지 대전환을 위해 「지방자치분권 및 
+지역균형발전에 관한 특별법」에 따라 지정된 ①인구감소(관심)지역(공고일 시점) 
+및 「송·변전설비 주변지역의 보상 및 지원에 관한 법률」에 따른 ②송·변전설비 
+주변지역에 해당할 경우 가점을 부여
+① 행정안전부 홈페이지(업무안내>자치혁신실>지방소멸대응>인구감소지역지정) 참고 
+② 한국전력공사 홈페이지(정보공개>사전정보공표>기타>송변전설비 건설지역 현황) 참고 
+□ 지방정부의 참여 정도(3점)
+ㅇ 지방정부(공공기관 포함)의 부지 제공 여부
+< 세부 평가내용 >
+□ 태양광 발전사업을 추진하기 위해 광역·기초 지방정부 소유의 부지(지방 공공기관 포함)를
+마을 공동체에 제공하였는지 여부를 평가
+ㅇ 마을 공동체가 태양광 발전사업 추진을 위한 입지를 발굴하고 부족한 입지에 
+대해 지방정부 소유의 부지 제공 여부와 수준을 평가
+ㅇ 마을공동체가 태양광 발전사업 추진을 위한 전체 입지를 확보시 만점으로 적용
+□ 사업관리(2점)
+ㅇ 햇빛소득마을 관리자의 채용 및 활용 계획
+< 세부 평가내용 >
+□ 마을 공동체 중심의 햇빛소득마을의 안정적 추진 위해 햇빛소득마을 관리자를 
+별도로 지정하고, 이에 대한 업무(회계, 정산 및 태양광 기초 유지관리 등)를 부여시
+가점을 부여, 관리자 선정과정에서 공정성·투명성 등을 고려
+□ 햇빛소득마을의 사업 운영과정에서 사후관리 통해 확인 예정
+
+[24페이지]
+- 24 -
+Ⅵ 참여 유의사항 등
+□ (사업계획 변경) 햇빛소득마을로 선정된 이후에도 공고문의 참여 
+요건을 유지하고, 준수 사항 및 사업계획을 이행하여야 함. 다만, 부득
+이한 경우로 사업계획의 변경이 필요한 마을의 경우에는 변경내용 
+발생일로부터 30일 이내에 기초 지방정부를 통해 공문으로 햇빛소
+득마을추진단에게 변경요청을 해야 하며, 햇빛소득마을추진단은 
+내부 검토 또는 평가위원회를 통해 변경요청을 심의·의결 할 수 있음
+□ (사후관리) 햇빛소득마을추진단에서 사업의 추진 여부를 확인하기 위한 
+자료를 요청시 별다른 사유가 없는 경우, 이에 의무적으로 응해야 함
+□ (사업계획 미이행) 햇빛소득마을추진단장은 햇빛소득마을로 선정된 
+마을이 평가시 제출한 사업계획을 미이행하는 경우 개선 및 이행을
+요구할 수 있음
+□ (사업 이행기한) 햇빛소득마을로 선정된 마을은 선정일로부터 일정
+기한 내에 발전사업허가, 고정가격계약 경쟁입찰, 발전소 건설을
+추진하여야 함
+① 선정일로부터 6개월 이내에 태양광 발전사업허가를 득하여야 함
+② 발전사업 허가일로부터 12개월 이내에 고정가격계약 경쟁입찰에 
+선정되어야하거나, 전력거래계약(PPA)을 체결하여야 함
+③ 발전사업 허가일로부터 12개월 이내에 사용전검사를 목표로 함
+□ (계통 연계) 사업계획서 작성, 마을선정 및 발전사업 허가단계에서 여유
+용량이 있더라도 한전 전력거래계약 신청 후 연계가능여부 변동 가능
+
+[25페이지]
+- 25 -
+□ (사업취소 안내) 사업 신청 시 제출된 서류에 허위사실 기재, 위·변조, 기타 부정한 방법으로 신청한 경우에는 별도의 평가위원회를 거쳐 
+선정 이후 즉시 취소될 수 있으며, 향후 관련 사업 참여에 제한을 
+받을 수 있음 
+※ “(가칭)햇빛소득마을 평가·관리 지침” 수립 예정으로 참여 유의사항
+등은 추후 일부 변경될 수 있으며, 이 경우 별도 안내 예정
+Ⅶ 별첨 서류 (서식 등)
+[서 식 1] 햇빛소득마을 신청전 체크리스트 1부.
+[서 식 2] 햇빛소득마을 지원 신청서 1부.
+[붙임 서식1] 마을총회 의결서 1부. 
+[붙임 서식2] 사업추진, 개인정보 수집·이용, 제3자 제공 동의서(마을주민용) 1부.
+[서식 3] 햇빛소득마을 사업계획서(마을 공동체용) 1부.
+[붙임 서식3] 조합원 명부 1부.
+[붙임 서식4] 개인정보 수집·이용 및 제3자 제공 동의서(조합원용) 1부.
+[서 식 4] 햇빛소득마을 사업지원계획서(기초 지방정부용) 1부.
+
+[26페이지]
+- 26 -
+[서 식 1] 햇빛소득마을 신청전 체크리스트
+햇빛소득마을 신청전 체크리스트
+구분 검토 내용 충족 여부
+1
+(수용성 확보) 마을 자치규약에 따른 총회, 주민 
+70%이상 동의 등을 통해 마을 공동체의 수용
+성을 확보하였는지?
+□ 예 □ 아니오
+2
+(협동조합 구성) 협동조합 기본법에 따른 협동
+조합 또는 사회적 협동조합을 구성하고, 등기를 
+완료 하였는지?
+□ 예 □ 아니오
+3
+(협동조합 구성원) 마을에 1년 이상 거주하는 
+주민 10인 이상으로만 협동조합을 구성하였는지? □ 예 □ 아니오
+4
+(협동조합 정관) 협동조합 정관에 주요사업으로 
+‘재생에너지 사업’을 명시하고, 협동조합 운영에 
+투명성과 공정성을 확보하였는지?
+□ 예 □ 아니오
+5
+(재원 확보) 협동조합을 구성하고, 태양광 발전소를
+추진하는데 있어서 마을 기금, 마을 펀딩을 통해
+재원을 확보하였는지?
+※ 마을 공동체와 정부·지방정부, 지역상호금융
+기관의 재원 지원 이외의 외부 재원 지원은 
+햇빛소득마을에 신청이 불가하며, 추후 확인시
+선정 취소할 수 있음
+□ 예 □ 아니오
+6
+(태양광 발전설비 계획) 태양광 발전소를 건설
+하기 위해 입지의 확보, 계통연계 가능여부 확인, 투자비 확보, 수익성 확보 방안 등 태양광 설치 
+및 투자 계획에 대해 검토 하였는지?
+□ 예 □ 아니오
+7
+(사업구조의 확인) 햇빛소득마을을 통해 태양광 
+발전소를 건설하고, 그 수익에 대한 활용방안에 
+대해 검토 하였는지? 
+□ 예 □ 아니오
+8
+(교육의 참여) 햇빛소득마을 사업 구조, 위험성 , 유의사항 등을 파악하기 위해 정부 또는 지방정부
+에서 추진하는 교육을 참여하였는지?
+□ 예 □ 아니오
+9
+(공고문의 확인) 햇빛소득마을 신청을 위한 참여
+대상, 참여요건, 준수사항과 권고사항을 확인 
+하였는지?
+□ 예 □ 아니오
+10 (햇빛소득마을 신청) 기초 지방정부가 참여하여 
+적극 지원하는지? □ 예 □ 아니오
+
+[27페이지]
+- 27 -
+[서 식 2] 햇빛소득마을 지원 신청서
+2026년 햇빛소득마을 지원 신청서
+신청
+법인
+협동조합명 이사장(회장) 성명
+법인 주소 전화번호
+설립인가번호 조합원 수
+사업자등록번호
+협동조합 형태 □ 협동조합 □ 사회적협동조합
+신청
+담당자
+담당자 성명 E-mail
+전화 핸드폰
+마을
+현황
+마을 소재지
+마을 
+총 주민수 명 사업참여 주 민 수 명 주 민동의율 %
+담당자
+현황
+➀협동조합명 담당자 전화
+담당자 E-mail
+➁기초 지방정부명 담당자 전화
+담당자 E-mail
+➂ 담당자 전화
+담당자 E-mail
+태양광
+사업
+계획
+총 용량(kW) kW
+설치형태
+및 용량(kW)
+□ 지상형 □ 건물형 □ 수상형
+kW kW kW
+계통연계
+가능여부 □ 계통연계 가능 □ 계통연계 불가
+ (ESS설치 등)
+태양광 설치비
+(백만원)
+총 예상 설치비 자부담
+백만원(100%) 백만원(00%)
+수입활용 방안 □ 주민복지사업 □ 수익 분배 □ 기타(지역환원 등)
+정책 목표 우대
+(지방정부에 확인필요) □ 인구감소(관심)지역 □ 송·변전 주변지역 □ 해당없음
+위와 같이 햇빛소득마을 공모를 신청하며, 사실과 다름 없음을 확인 합니다. 년 월 일
+신청자 (서명 또는 인)
+
+[28페이지]
+- 28 -
+[붙임 서식1] 마을총회 의결서
+000 마을 총회 결과
+1. 총회 개요
+ㅇ 일시 : 2026.00.00.O(요일) 00:00 ~ 00:00
+ㅇ 장소 : OOO 마을회관
+2. 의결 안건
+ㅇ 안건명 : 햇빛소득마을 사업 참여
+3. 의결 내용
+ㅇ 의결결과 : 찬성/반대(찬성 00표, 반대 00표, 기권 00표)
+- 본 마을은 햇빛소득마을 참여 및 추진에 대해 마을 총회에서
+의결하였으며, 참석자 과반수 이상의 찬성으로 가결되었음을
+확인함
+2026년 0월 0일
+OO리 마을 대표 000(이장 등) (서명 또는 직인)
+
+[29페이지]
+- 29 -
+[붙임 서식2] 사업추진, 개인정보 수집·이용, 제3자 제공 동의서(마을주민용)
+사업추진, 개인정보 수집·이용 및 제3자 제공 동의서
+아래와 같이 귀하의 개인정보를 수집·이용하고, 제3자에게 제공하고자 합니다. 내용을 자세히 읽으신 후, 주민동의 명부에 동의 여부를 결정하여 주세요. ▶ 개인정보 수집․이용 내역
+항목 수집․이용 목적 보유․이용기간
+성명
+거주지(행정동/리)
+사업추진 동의여부
+햇빛소득마을 사업추진 
+주민 동의 여부 확인 사업신청 후 3년
+※ 위의 사업추진 및 개인정보 수집․이용에 대한 동의를 거부할 
+권리가 있습니다. 그러나 동의를 거부할 경우 마을주민 여부를 
+확인할 수 없어 사업대상자 선정에 제한을 받을 수 있습니다. ▶ 개인정보 제3자 제공 내역
+항목 수집․이용 목적 보유․이용기간
+성명
+거주지(행정동/리)
+사업추진 동의여부
+햇빛소득마을 사업추진 
+주민 동의 여부 확인 사업신청 후 3년
+※ 위의 사업추진 및 개인정보 수집․이용에 대한 동의를 거부할 
+권리가 있습니다. 그러나 동의를 거부할 경우 마을주민 여부를 
+확인할 수 없어 사업대상자 선정에 제한을 받을 수 있습니다. * (붙임) OO협동조합 햇빛소득마을 사업 마을주민 동의 여부
+ 행정안전부장관(햇빛소득마을추진단장) 귀하
+
+[30페이지]
+- 30 -
+00협동조합 햇빛소득마을 사업 마을주민 동의 명부
+순번 성명 거주지
+(행정리)
+개인정보 수집·제공
+동의 여부 사업추진 동의 여부 날짜 서명
+1 □동의 □동의하지 않음 □동의 □동의하지 않음
+2 □동의 □동의하지 않음 □동의 □동의하지 않음
+3 □동의 □동의하지 않음 □동의 □동의하지 않음
+4 □동의 □동의하지 않음 □동의 □동의하지 않음
+5 □동의 □동의하지 않음 □동의 □동의하지 않음
+6 □동의 □동의하지 않음 □동의 □동의하지 않음
+7 □동의 □동의하지 않음 □동의 □동의하지 않음
+8 □동의 □동의하지 않음 □동의 □동의하지 않음
+9 □동의 □동의하지 않음 □동의 □동의하지 않음
+10 □동의 □동의하지 않음 □동의 □동의하지 않음
+11 □동의 □동의하지 않음 □동의 □동의하지 않음
+12 □동의 □동의하지 않음 □동의 □동의하지 않음
+13 □동의 □동의하지 않음 □동의 □동의하지 않음
+14 □동의 □동의하지 않음 □동의 □동의하지 않음
+15 □동의 □동의하지 않음 □동의 □동의하지 않음
+
+[31페이지]
+- 31 -
+[서식 3] 햇빛소득마을 사업계획서
+2026년 햇빛소득마을 사업계획서(마을 공동체용)
+1. 협동조합 현황
+협동조합명
+(주관기관)
+이사장(회장) 성명
+법인 주소 전화번호
+설립인가번호 조합원 수
+사업자등록번호 설립 인가일
+협동조합 형태 협동조합 또는 사회적협동조합
+2. 마을 공동체 현황 
+가. 마을 현황
+구분 내 용
+마을명
+소재지
+행정 구역
+인구 정보
+나. 주민 및 주민 동의 현황
+인구 정보 동의 현황
+주민수 동의한 주민수 동의율(%)
+
+[32페이지]
+- 32 -
+3. 협동조합 세부 현황
+가. 협동조합의 의사결정 구조
+나. 협동조합의 운영체계
+
+[33페이지]
+- 33 -
+다. 출자, 수입의 적립, 배분 등 구조
+
+[34페이지]
+- 34 -
+4. 태양광 발전사업 추진 계획
+가. 태양광 발전사업 추진 계획 총괄표
+나. 세부 태양광 발전사업 추진 계획(부지)
+번호 주소 설치형태
+구분
+부지
+소유자
+부지확보
+여부
+설치용량
+(kW)
+1
+지상형
+건물형
+수상형 중 
+택1
+O / X
+2
+3
+···
+···
+··· 합계
+총 용량(kW) kW
+설치형태(택1) 및 용량(kW)
+□ 지상형 □ 건물형 □ 수상형
+kW kW kW
+계통연계
+가능여부 □ 계통연계 가능 □ 계통연계 불가
+ (ESS설치 등)
+총 예상 설치비
+(백만원) 백만원(100%)
+예상 사업일정 □ 발전사업허가 □ 공사계획인가 □ 상업운전개시
+20ㅇㅇ년 ㅇㅇ월 20ㅇㅇ년 ㅇㅇ월 20ㅇㅇ년 ㅇㅇ월
+
+[35페이지]
+- 35 -
+다. 세부 태양광 발전사업 추진 계획(부지 확보계획)
+라. 세부 태양광 발전사업 추진 계획(태양광 설치비 현황)
+총 예상 설치비 자부담 확보 현황
+백만원(100%) 백만원(00%) * 총 예상 태양광 설치비의 15% 이상 자부담 확보해야 함
+마. 세부 태양광 발전사업 추진 계획 예시(총 예상 태양광 설치비 산출 근거)
+구분 수량 금액(백만원)
+순공사비
+직접비
+기자재비
+모듈
+인버터
+구조물
+기타
+시공비
+기계공사비
+계전공사비
+토목공사비
+건축공사비
+부대공사비
+간접비
+설계용역비
+외자조작비
+사업주 제경비
+건설이자
+합계
+
+[36페이지]
+- 36 -
+바. 세부 태양광 발전사업 추진 계획(태양광 설치비 확보계획)
+사. 세부 태양광 발전사업 추진 계획(주요 설비 개요)
+구분 수량 출력(Wp)
+모듈1
+모델명
+인증번호 KS인증번호
+모듈2
+모델명
+인증번호 KS인증번호
+인버터1
+모델명
+인증번호 KS인증번호
+인버터2
+모델명
+인증번호 KS인증번호
+접속함
+모델명
+인증번호 KS인증번호
+아. 재생에너지 산업 생태계 기여 계획
+
+[37페이지]
+- 37 -
+5. 태양광 발전사업 사업관리 계획
+가. 수입 확보계획(수입 수준 등 검토한 내용 포함)
+수입확보 방안 입찰 예상금액(SMP+1REC, 원/MWh)
+□ 고정가격계약 
+ 경쟁입찰 □ PPA 원/MWh
+나. 설비 유지관리 등 운영 계획
+다. 기타 사항
+
+[38페이지]
+- 38 -
+6. 햇빛소득마을 사업관리 계획
+가. 수익 활용 계획 
+나. 회계관리 계획
+다. 햇빛소득마을 관리자 채용 및 활용 계획
+라. 기타 사항
+
+[39페이지]
+- 39 -
+7. 태양광 설치 계획 참고자료
+구분 설치 예정지 현황 설치
+주소
+전주번호
+(연계점)
+부지
+소유자
+부지
+확보여부 설치형태 설치계획용량(kW)
+예상투자비
+(백만원)
+1 사진 한전간100
+개인, 마을. 지방정부, 공공기관 등
+ㅇ / X
+지상형, 건물형, 수상형 
+중 택1
+2 사진 한전간100
+개인, 마을. 지방정부, 공공기관 등
+ㅇ / X
+지상형, 건물형, 수상형 
+중 택1
+3
+4
+5
+6
+··· 합 계
+
+[40페이지]
+- 40 -
+[붙임 서식3] 조합원 명부
+조합원 명부
+순번 생년월일 성명 주소 연락처 가입일 출자금액
+
+[41페이지]
+- 41 -
+[붙임 서식4] 개인정보 수집·이용 및 제3자 제공 동의서(조합원용)
+개인정보 수집·이용 및 제3자 제공 동의서
+아래와 같이 귀하의 개인정보를 수집·이용하고, 제3자에게 제공하고자 합니다. 내용을 자세히 읽으신 후 동의여부를 결정하여 주세요. ▶ 개인정보 수집․이용 내역
+항 목 수집․이용 목적 보유․이용기간
+대표자명, 생년월일, 성별, 주소, 일반전화, 휴대전화, 이메일
+햇빛소득마을 공모신청 (사업기간 및 사후관리에 
+필요한 기간)
+※ 위의 개인정보 수집․이용에 대한 동의를 거부할 권리가 있습니다. 그러나 동의를 거부할 
+경우 적합한 대상자 여부를 확인할 수 없어 사업대상자 선정에 제한을 받을 수 있습니다. ☞ 위와 같이 개인정보를 수집․이용하는데 동의하십니까? 동의 미동의
+▶ 개인정보 제3자 제공 내역
+항 목 수집․이용 목적 보유․이용기간
+대표자명, 생년월일, 성별, 주소, 일반전화, 휴대전화, 이메일
+햇빛소득마을 공모신청 (사업기간 및 사후관리에 
+필요한 기간)
+※ 위의 개인정보 수집․이용에 대한 동의를 거부할 권리가 있습니다. 그러나 동의를 거부할 
+경우 적합한 대상자 여부를 확인할 수 없어 사업대상자 선정에 제한을 받을 수 있습니다. ☞ 위와 같이 개인정보를 제3자에게 제공하는데 동의하십니까? 동의 미동의
+년 월 일
+ 본인 성명 (서명 또는 인)
+ 행정안전부장관 귀하
+
+[42페이지]
+- 42 -
+[서 식 4] 햇빛소득마을 사업지원계획서(기초 지방정부용)
+2026년 햇빛소득마을 사업지원계획서(기초 지방정부용)
+1. 지방정부 및 담당자 현황
+지방정부명
+담당자 성명
+전화번호
+E-mail
+2. 마을 현황
+구 분 내 용
+마을명
+소재지
+행정 구역
+주민 정보
+3. 지방정부의 햇빛소득마을(태양광 발전사업) 추진을 위한 검토 의견
+가. 발전사업허가 검토
+
+[43페이지]
+- 43 -
+나. 개발행위허가 검토
+다. 환경영향평가 등 기타 허가·승인사항 검토
+라. 추가 지원계획 검토
+마. 기타 사항
+바. 종합 검토
+
+[44페이지]
+- 44 -
+4. 지방정부의 햇빛소득마을(태양광 발전사업) 추진을 위한 참여 현황
+가. 설명회 개최
+나. 교육
+다. 컨설팅
+라. 기타 노력`;
+
+const SYSTEM = `당신은 2026년 햇빛소득마을 공모사업 전문 컨설턴트 AI입니다.
+아래 공고문 전체를 기반으로 정확하고 실용적인 답변을 제공하세요.
+
+${GONGGO}
+
+답변 원칙:
+1. 공고문 내용을 정확하게 인용해서 근거 있는 답변
+2. 컨설턴트가 현장에서 바로 활용할 수 있는 실용적 조언
+3. 복잡한 내용은 번호·글머리표로 정리
+4. 주민에게 설명할 때 쓸 수 있는 쉬운 표현도 함께
+5. 공고문에 없는 내용은 명확히 "공고문 외 사항"으로 안내
+6. 한국어로 답변`;
+
+// ══════════════════════════════════════
+// 전역 상태
+// ══════════════════════════════════════
+let villages = JSON.parse(localStorage.getItem('hsv_villages') || '[]');
+let selectedVid = null;
+let chatHistory = [];
+let docCount = parseInt(localStorage.getItem('hsv_doccount') || '0');
+let stores = {}; // 파일 스토어
+
+// ══════════════════════════════════════
+// 탭 전환
+// ══════════════════════════════════════
+function go(id, tab) {
+  document.querySelectorAll('.sec').forEach(s => s.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  const sec = document.getElementById('sec-' + id);
+  if (sec) sec.classList.add('on');
+  if (tab) tab.classList.add('on');
+  else {
+    const tabs = document.querySelectorAll('.tab');
+    const map = {dash:0,villages:1,docs:2,review:3,bizplan:4,law:5,revenue:6,checklist:7,chat:8};
+    if (map[id] !== undefined) tabs[map[id]].classList.add('on');
+  }
+  if (id === 'dash') renderDash();
+  if (id === 'villages') renderVillages();
+  if (id === 'checklist') renderReadiness();
+}
+
+// ══════════════════════════════════════
+// API 호출 (스트리밍)
+// ══════════════════════════════════════
+async function callAI(messages, targetId, spinId, sys, maxT) {
+  const target = document.getElementById(targetId);
+  const spin = spinId ? document.getElementById(spinId) : null;
+  if (spin) spin.style.display = 'inline-block';
+  if (target) { target.textContent = ''; target.classList.add('streaming'); }
+
+  try {
+    const res = await fetch('/api/ai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514', max_tokens: maxT || 2500, stream: true,
+        system: sys || SYSTEM, messages
+      })
+    });
+    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error?.message || 'HTTP ' + res.status); }
+    const reader = res.body.getReader();
+    const dec = new TextDecoder();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      for (const line of dec.decode(value).split('\n')) {
+        if (!line.startsWith('data:')) continue;
+        const d = line.slice(5).trim();
+        if (d === '[DONE]') break;
+        try {
+          const j = JSON.parse(d);
+          if (j.type === 'content_block_delta' && j.delta?.text && target) {
+            target.textContent += j.delta.text;
+            target.scrollTop = target.scrollHeight;
+          }
+        } catch {}
+      }
+    }
+  } catch (e) {
+    if (target) target.textContent = '⚠️ 오류: ' + e.message;
+  }
+  if (spin) spin.style.display = 'none';
+  if (target) target.classList.remove('streaming');
+  return target ? target.textContent : '';
+}
+
+async function callAIOnce(messages, sys, maxT) {
+  const res = await fetch('/api/ai', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514', max_tokens: maxT || 1500,
+      system: sys || SYSTEM, messages
+    })
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.content[0].text;
+}
+
+// ══════════════════════════════════════
+// 대시보드
+// ══════════════════════════════════════
+function renderDash() {
+  const deadline = new Date('2026-05-31');
+  const today = new Date();
+  const dday = Math.ceil((deadline - today) / 86400000);
+  document.getElementById('d-day').textContent = dday > 0 ? dday : '마감';
+  document.getElementById('d-day2').textContent = dday > 0 ? dday : '마감';
+  document.getElementById('kpi-total').textContent = villages.length;
+  document.getElementById('kpi-docs').textContent = docCount;
+  const ready = villages.filter(v => v.stage >= 3).length;
+  document.getElementById('kpi-ready').textContent = ready;
+
+  const container = document.getElementById('dash-villages');
+  if (villages.length === 0) {
+    container.innerHTML = '<div class="ib sun"><span>☀</span><div>마을을 추가하면 여기에 진행 현황이 표시됩니다.</div></div>';
+    return;
+  }
+  const stageColors = ['var(--sun)','var(--gr)','var(--ac)','var(--org)','var(--pu)','var(--teal)'];
+  const stageLabels = ['STEP1 첫방문','STEP2 주민조직','STEP3 협동조합','STEP4 발전소','STEP5 수익설계','STEP6 운영중'];
+  container.innerHTML = villages.map(v => `
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bd2);cursor:pointer" onclick="go('villages');selectVillage('${v.id}')">
+      <div style="width:8px;height:8px;border-radius:50%;background:${stageColors[v.stage]||'var(--mu)'};flex-shrink:0"></div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700">${v.name}</div>
+        <div style="font-size:11px;color:var(--mu)">${stageLabels[v.stage]||''} · ${v.pop||'?'}명 · 담당: ${v.consultant||'-'}</div>
+      </div>
+      <div class="step-badge s${v.stage+1}" style="font-size:10px">${stageLabels[v.stage]||''}</div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════
+// 마을 관리
+// ══════════════════════════════════════
+function renderVillages() {
+  const stageColors = ['var(--sun)','var(--gr)','var(--ac)','var(--org)','var(--pu)','var(--teal)'];
+  const stageLabels = ['STEP1','STEP2','STEP3','STEP4','STEP5','STEP6'];
+  const stageProgress = [15, 35, 55, 70, 85, 100];
+  let html = villages.map(v => `
+    <div class="vcard${selectedVid===v.id?' active':''}" onclick="selectVillage('${v.id}')">
+      <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px">
+        <div class="vc-num">${stageLabels[v.stage]||'S1'}</div>
+        <div style="flex:1">
+          <div style="font-size:15px;font-weight:900">${v.name}</div>
+          <div style="font-size:11px;color:var(--mu);margin-top:2px">담당: ${v.consultant||'-'} · ${v.pop||'?'}명 · ${v.kw||500}kW · 이장: ${v.chief||'-'}</div>
+        </div>
+        <button class="btn b-xs b-dark" onclick="event.stopPropagation();editVillage('${v.id}')">수정</button>
+      </div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">
+        <span class="step-badge s${v.stage+1}">${['첫방문','주민조직','협동조합','발전소','수익설계','운영중'][v.stage]||''}</span>
+        ${v.agree ? `<span class="pill doing">동의 ${v.agree}%</span>` : ''}
+        ${v.memo ? `<span style="font-size:11px;color:var(--mu);padding:2px 8px;background:var(--sf3);border-radius:5px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${v.memo}</span>` : ''}
+      </div>
+      <div class="vc-bar"><div class="vc-fill" style="width:${stageProgress[v.stage]||15}%"></div></div>
+    </div>`).join('');
+  html += `<div class="vc-add" onclick="openAddVillage()"><div style="font-size:28px;margin-bottom:8px">+</div><div style="font-size:13px;font-weight:700">새 마을 추가</div></div>`;
+  document.getElementById('village-cards').innerHTML = html;
+
+  if (selectedVid) {
+    const v = villages.find(v => v.id === selectedVid);
+    if (v) showVillageDetail(v);
+  }
+}
+
+function selectVillage(id) {
+  selectedVid = id;
+  const v = villages.find(v => v.id === id);
+  if (!v) return;
+  // 헤더 칩 업데이트
+  document.getElementById('village-name-chip').textContent = v.name;
+  document.getElementById('village-dot').style.background = 'var(--sun)';
+  // 사업계획서 폼 자동 채우기
+  if (document.getElementById('bp-name')) document.getElementById('bp-name').value = v.name || '';
+  if (document.getElementById('bp-pop')) document.getElementById('bp-pop').value = v.pop || '';
+  if (document.getElementById('bp-members')) document.getElementById('bp-members').value = Math.round((v.pop||0)*0.4) || '';
+  if (document.getElementById('bp-kw')) document.getElementById('bp-kw').value = v.kw || 500;
+  if (document.getElementById('bp-chief')) document.getElementById('bp-chief').value = v.chief || '';
+  renderVillages();
+  showVillageDetail(v);
+}
+
+function showVillageDetail(v) {
+  const stageLabels = ['STEP1 첫방문','STEP2 주민조직','STEP3 협동조합','STEP4 발전소','STEP5 수익설계','STEP6 운영중'];
+  document.getElementById('village-detail').style.display = '';
+  document.getElementById('vd-title').textContent = '📍 ' + v.name + ' 상세 정보';
+  document.getElementById('vd-body').innerHTML = `
+    <div class="f3" style="margin-bottom:14px">
+      <div><div style="font-size:10px;color:var(--mu);font-weight:700;margin-bottom:3px">현재 단계</div><div class="step-badge s${v.stage+1}">${stageLabels[v.stage]}</div></div>
+      <div><div style="font-size:10px;color:var(--mu);font-weight:700;margin-bottom:3px">주민수</div><div style="font-size:14px;font-weight:900;color:var(--tx)">${v.pop||'-'}명</div></div>
+      <div><div style="font-size:10px;color:var(--mu);font-weight:700;margin-bottom:3px">목표 용량</div><div style="font-size:14px;font-weight:900;color:var(--sun)">${v.kw||500}kW</div></div>
+    </div>
+    <div class="f2" style="margin-bottom:12px">
+      <div><div style="font-size:10px;color:var(--mu);font-weight:700;margin-bottom:3px">이장</div><div style="font-size:13px">${v.chief||'-'} / ${v.tel||'-'}</div></div>
+      <div><div style="font-size:10px;color:var(--mu);font-weight:700;margin-bottom:3px">담당 컨설턴트</div><div style="font-size:13px">${v.consultant||'-'}</div></div>
+    </div>
+    ${v.memo ? `<div class="ib blue" style="margin-bottom:10px"><span>📝</span><div>${v.memo}</div></div>` : ''}
+    <div class="brow">
+      <button class="btn b-sm b-sun" onclick="go('docs');autoFillDocs('${v.id}')">📝 문서 작성</button>
+      <button class="btn b-sm b-blue" onclick="go('bizplan');selectVillage('${v.id}')">📋 사업계획서</button>
+      <button class="btn b-sm b-green" onclick="go('revenue')">💰 수익 계산</button>
+      <button class="btn b-sm b-org" onclick="go('law')">⚖️ 법령 검토</button>
+      <button class="btn b-sm b-red" onclick="deleteVillage('${v.id}')">삭제</button>
+    </div>`;
+}
+
+function openAddVillage(id) {
+  if (id) {
+    const v = villages.find(v => v.id === id);
+    if (v) {
+      document.getElementById('vm-name').value = v.name || '';
+      document.getElementById('vm-consultant').value = v.consultant || '';
+      document.getElementById('vm-pop').value = v.pop || '';
+      document.getElementById('vm-house').value = v.house || '';
+      document.getElementById('vm-kw').value = v.kw || 500;
+      document.getElementById('vm-chief').value = v.chief || '';
+      document.getElementById('vm-tel').value = v.tel || '';
+      document.getElementById('vm-stage').value = v.stage || 0;
+      document.getElementById('vm-memo').value = v.memo || '';
+      document.getElementById('modal-title').textContent = '✏️ 마을 정보 수정';
+      document.getElementById('modal-ov').dataset.editId = id;
+    }
+  } else {
+    ['vm-name','vm-consultant','vm-pop','vm-house','vm-kw','vm-chief','vm-tel','vm-memo'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+    document.getElementById('vm-stage').value = 0;
+    document.getElementById('modal-title').textContent = '➕ 새 마을 추가';
+    delete document.getElementById('modal-ov').dataset.editId;
+  }
+  document.getElementById('modal-ov').classList.add('open');
+}
+function editVillage(id) { openAddVillage(id); }
+
+function saveVillage() {
+  const n = document.getElementById('vm-name').value.trim();
+  if (!n) { alert('마을명을 입력하세요.'); return; }
+  const editId = document.getElementById('modal-ov').dataset.editId;
+  const data = {
+    name: n, consultant: document.getElementById('vm-consultant').value,
+    pop: parseInt(document.getElementById('vm-pop').value)||0,
+    house: parseInt(document.getElementById('vm-house').value)||0,
+    kw: parseInt(document.getElementById('vm-kw').value)||500,
+    chief: document.getElementById('vm-chief').value,
+    tel: document.getElementById('vm-tel').value,
+    stage: parseInt(document.getElementById('vm-stage').value)||0,
+    memo: document.getElementById('vm-memo').value,
+  };
+  if (editId) {
+    const idx = villages.findIndex(v => v.id === editId);
+    if (idx >= 0) { villages[idx] = { ...villages[idx], ...data }; }
+  } else {
+    data.id = 'v' + Date.now();
+    villages.push(data);
+  }
+  localStorage.setItem('hsv_villages', JSON.stringify(villages));
+  closeModal();
+  renderVillages();
+  renderDash();
+}
+
+function deleteVillage(id) {
+  if (!confirm('이 마을을 삭제할까요?')) return;
+  villages = villages.filter(v => v.id !== id);
+  localStorage.setItem('hsv_villages', JSON.stringify(villages));
+  selectedVid = null;
+  document.getElementById('village-detail').style.display = 'none';
+  renderVillages();
+  renderDash();
+}
+
+function closeModal() {
+  document.getElementById('modal-ov').classList.remove('open');
+}
+
+// ══════════════════════════════════════
+// 파일 업로드 처리
+// ══════════════════════════════════════
+function addUz(k, files) {
+  if (!stores[k]) stores[k] = [];
+  Array.from(files).forEach(f => {
+    const r = new FileReader();
+    r.onload = e => {
+      stores[k].push({ id: Date.now() + Math.random(), name: f.name, size: f.size, mimeType: f.type, data: e.target.result });
+      renderFpg(k);
+    };
+    r.readAsDataURL(f);
+  });
+}
+
+function renderFpg(k) {
+  const container = document.getElementById('fpg-' + k);
+  if (!container || !stores[k]) return;
+  const exts = { 'application/pdf': '📄', 'image/jpeg': '🖼', 'image/png': '🖼', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '📝', 'application/vnd.ms-excel': '📊' };
+  container.innerHTML = (stores[k] || []).map(f => `
+    <div class="fpi">
+      ${f.mimeType.startsWith('image/') ? `<img src="${f.data}" alt="${f.name}">` : `<div class="fpi-ic"><span>${exts[f.mimeType]||'📎'}</span><span class="fpi-ext">${f.name.split('.').pop().toUpperCase()}</span></div>`}
+      <div class="fpi-nm">${f.name}</div>
+      <button class="fpi-del" onclick="delF('${k}','${f.id}')">×</button>
+    </div>`).join('');
+}
+
+function delF(k, id) {
+  if (stores[k]) stores[k] = stores[k].filter(f => String(f.id) !== String(id));
+  renderFpg(k);
+}
+
+// ══════════════════════════════════════
+// 문서 작성
+// ══════════════════════════════════════
+const docTypes = {
+  minutes: {
+    title: '📋 회의록',
+    fields: `<div class="f2"><div class="field"><label>마을명</label><input type="text" id="dc-village" placeholder="예: 해남군 북일면 OO리"></div><div class="field"><label>회의 일시</label><input type="date" id="dc-date"></div></div>
+    <div class="field"><label>회의 장소</label><input type="text" id="dc-place" placeholder="예: OO리 마을회관"></div>
+    <div class="f2"><div class="field"><label>참석 인원 수</label><input type="number" id="dc-count" placeholder="명"></div><div class="field"><label>회의 주제</label><input type="text" id="dc-topic" placeholder="예: 햇빛소득마을 사업 추진 논의"></div></div>
+    <div class="field"><label>논의 내용 (주요 발언·결정사항)</label><textarea id="dc-content" rows="4" placeholder="예: - 이장: 부지 확보 현황 보고\n- 주민 A: 수익 배분 방식 질의\n- 결정: 다음 주 총회 개최 확정"></textarea></div>
+    <div class="brow"><button class="btn b-sun" onclick="genDoc('minutes')">📝 회의록 생성</button></div>`,
+  },
+  assembly: {
+    title: '🏛 마을총회 의사록',
+    fields: `<div class="f2"><div class="field"><label>마을명</label><input type="text" id="dc-village" placeholder="해남군 북일면 OO리"></div><div class="field"><label>총회 일시</label><input type="date" id="dc-date"></div></div>
+    <div class="f2"><div class="field"><label>총 주민수</label><input type="number" id="dc-total" placeholder="명"></div><div class="field"><label>참석 주민수</label><input type="number" id="dc-attend" placeholder="명"></div></div>
+    <div class="field"><label>안건</label><textarea id="dc-content" rows="3" placeholder="예: 1. 햇빛소득마을 사업 참여 결의\n2. 협동조합 설립 동의\n3. 이사장 선출"></textarea></div>
+    <div class="f2"><div class="field"><label>찬성 수</label><input type="number" id="dc-yes" placeholder="명"></div><div class="field"><label>반대/기권</label><input type="number" id="dc-no" placeholder="명"></div></div>
+    <div class="brow"><button class="btn b-sun" onclick="genDoc('assembly')">🏛 총회 의사록 생성</button></div>`,
+  },
+  founding: {
+    title: '🤝 창립총회 의사록',
+    fields: `<div class="f2"><div class="field"><label>협동조합명</label><input type="text" id="dc-coop" placeholder="OO마을 햇빛소득 협동조합"></div><div class="field"><label>개최 일시</label><input type="date" id="dc-date"></div></div>
+    <div class="f3"><div class="field"><label>발기인 총수</label><input type="number" id="dc-founders" placeholder="명"></div><div class="field"><label>출석 발기인</label><input type="number" id="dc-attend" placeholder="명"></div><div class="field"><label>이사장 성명</label><input type="text" id="dc-chief" placeholder="성명"></div></div>
+    <div class="field"><label>의결 안건</label><textarea id="dc-content" rows="3" placeholder="1. 정관 채택\n2. 임원 선출 (이사장·이사·감사)\n3. 사업계획·예산 승인\n4. 출자금 납입 결의"></textarea></div>
+    <div class="f2"><div class="field"><label>1좌 금액 (원)</label><input type="number" id="dc-share" placeholder="100000"></div><div class="field"><label>출자 납입기한</label><input type="date" id="dc-paydate"></div></div>
+    <div class="brow"><button class="btn b-sun" onclick="genDoc('founding')">🤝 창립총회 의사록 생성</button></div>`,
+  },
+  report: {
+    title: '📊 진행 보고서',
+    fields: `<div class="f2"><div class="field"><label>마을명</label><input type="text" id="dc-village" placeholder="OO리"></div><div class="field"><label>보고 기준일</label><input type="date" id="dc-date"></div></div>
+    <div class="field"><label>현재 진행 단계</label>
+    <select id="dc-stage"><option>STEP1 첫방문·설득</option><option>STEP2 주민조직·동의</option><option>STEP3 협동조합설립</option><option>STEP4 발전소준비</option><option>STEP5 수익구조설계</option><option>STEP6 운영중</option></select></div>
+    <div class="field"><label>완료된 사항</label><textarea id="dc-done" rows="2" placeholder="예: 주민 동의 78% 완료, 마을총회 의결"></textarea></div>
+    <div class="field"><label>진행 중인 사항</label><textarea id="dc-doing" rows="2" placeholder="예: 협동조합 설립신고 진행 중, 부지 계통검토 신청"></textarea></div>
+    <div class="field"><label>향후 계획</label><textarea id="dc-content" rows="2" placeholder="예: 창립총회 5.10 예정, 사업계획서 작성 5.20까지"></textarea></div>
+    <div class="brow"><button class="btn b-sun" onclick="genDoc('report')">📊 보고서 생성</button></div>`,
+  },
+  official: {
+    title: '📮 공문 초안',
+    fields: `<div class="f2"><div class="field"><label>발신처 (협동조합명)</label><input type="text" id="dc-from" placeholder="OO마을 햇빛소득 협동조합"></div><div class="field"><label>수신처</label><input type="text" id="dc-to" placeholder="예: OO군청 에너지과장"></div></div>
+    <div class="field"><label>제목</label><input type="text" id="dc-subject" placeholder="예: 햇빛소득마을 이격거리 완화 검토 요청의 건"></div>
+    <div class="field"><label>공문 내용 (요청 사항)</label><textarea id="dc-content" rows="4" placeholder="예: 당 협동조합은 2026년 햇빛소득마을 공모사업에 신청 예정이며, 태양광 발전소 설치를 위한 이격거리 기준 완화를 요청합니다..."></textarea></div>
+    <div class="brow"><button class="btn b-sun" onclick="genDoc('official')">📮 공문 초안 생성</button></div>`,
+  },
+  notice: {
+    title: '📢 마을 공고문',
+    fields: `<div class="f2"><div class="field"><label>마을명</label><input type="text" id="dc-village" placeholder="OO리"></div><div class="field"><label>공고 일시</label><input type="date" id="dc-date"></div></div>
+    <div class="field"><label>공고 내용 (주민 총회 또는 사업 안내)</label>
+    <select id="dc-type" style="margin-bottom:8px"><option>주민 총회 소집 공고</option><option>햇빛소득마을 사업 안내</option><option>협동조합 창립총회 소집</option></select>
+    <textarea id="dc-content" rows="3" placeholder="공고할 내용의 주요 사항을 입력하세요"></textarea></div>
+    <div class="brow"><button class="btn b-sun" onclick="genDoc('notice')">📢 공고문 생성</button></div>`,
+  },
+  consent: {
+    title: '✍️ 주민 동의서',
+    fields: `<div class="field"><label>마을명 (행정리)</label><input type="text" id="dc-village" placeholder="해남군 북일면 OO리"></div>
+    <div class="field"><label>협동조합명</label><input type="text" id="dc-coop" placeholder="OO마을 햇빛소득 협동조합"></div>
+    <div class="field"><label>동의 대상 행위</label><textarea id="dc-content" rows="2" placeholder="예: 햇빛소득마을 공모 신청 및 태양광 발전소 건설 추진에 동의합니다"></textarea></div>
+    <div class="brow"><button class="btn b-sun" onclick="genDoc('consent')">✍️ 동의서 양식 생성</button></div>`,
+  },
+  charter: {
+    title: '⚖️ 정관 조항 검토',
+    fields: `<div class="field"><label>검토할 정관 조항 붙여넣기</label><textarea id="dc-content" rows="6" placeholder="검토가 필요한 정관 조항을 붙여넣으세요. AI가 공고문 기준으로 충돌 여부를 분석합니다."></textarea></div>
+    <div class="brow"><button class="btn b-sun" onclick="genDoc('charter')">⚖️ 정관 조항 검토</button></div>`,
+  },
+};
+
+function selectDoc(type) {
+  Object.keys(docTypes).forEach(k => {
+    const btn = document.getElementById('docbtn-' + k);
+    if (btn) btn.className = 'btn b-' + (k === type ? 'sun' : 'out');
+  });
+  const d = docTypes[type];
+  if (!d) return;
+  document.getElementById('doc-form-title').textContent = d.title;
+  document.getElementById('doc-form').innerHTML = d.fields;
+  // 선택된 마을 자동 입력
+  if (selectedVid) {
+    const v = villages.find(v => v.id === selectedVid);
+    if (v) {
+      const vField = document.getElementById('dc-village');
+      if (vField) vField.value = v.name || '';
+      const coopField = document.getElementById('dc-coop');
+      if (coopField) coopField.value = v.coop || (v.name + ' 햇빛소득 협동조합');
+    }
+  }
+  const dateField = document.getElementById('dc-date');
+  if (dateField) dateField.value = new Date().toISOString().split('T')[0];
+}
+
+function autoFillDocs(vid) {
+  selectDoc('minutes');
+}
+
+async function genDoc(type) {
+  const result = document.getElementById('doc-result');
+  result.textContent = ''; result.classList.add('streaming');
+
+  const g = id => (document.getElementById(id) || {}).value || '';
+  const prompts = {
+    minutes: `다음 정보를 바탕으로 햇빛소득마을 추진 회의록을 공식 행정문서 형식으로 작성해주세요.\n마을: ${g('dc-village')}\n일시: ${g('dc-date')}\n장소: ${g('dc-place')}\n참석: ${g('dc-count')}명\n주제: ${g('dc-topic')}\n논의내용:\n${g('dc-content')}`,
+    assembly: `다음 정보를 바탕으로 햇빛소득마을 마을총회 의사록을 법적 효력이 있는 공식 서식으로 작성해주세요.\n마을: ${g('dc-village')}\n일시: ${g('dc-date')}\n총 주민: ${g('dc-total')}명 / 참석: ${g('dc-attend')}명\n안건: ${g('dc-content')}\n찬성: ${g('dc-yes')}명 / 반대기권: ${g('dc-no')}명\n\n마을총회 의결서 형식(붙임 서식1)에 맞게 작성. 이장 날인란 포함.`,
+    founding: `다음 정보로 협동조합 창립총회 의사록을 협동조합기본법에 맞는 법정 형식으로 작성해주세요.\n협동조합: ${g('dc-coop')}\n일시: ${g('dc-date')}\n발기인: ${g('dc-founders')}명 중 ${g('dc-attend')}명 출석\n이사장: ${g('dc-chief')}\n안건: ${g('dc-content')}\n출자: 1좌 ${g('dc-share')}원 / 납입기한: ${g('dc-paydate')}`,
+    report: `다음 현황으로 햇빛소득마을 추진 진행 보고서를 작성해주세요.\n마을: ${g('dc-village')}\n기준일: ${g('dc-date')}\n단계: ${g('dc-stage')}\n완료사항: ${g('dc-done')}\n진행중: ${g('dc-doing')}\n향후계획: ${g('dc-content')}`,
+    official: `다음 내용으로 행정 공문 초안을 작성해주세요. 공식 공문 형식(수신, 제목, 본문, 붙임, 발신처)을 갖춰주세요.\n발신: ${g('dc-from')}\n수신: ${g('dc-to')}\n제목: ${g('dc-subject')}\n내용: ${g('dc-content')}`,
+    notice: `다음 내용으로 마을 공고문을 작성해주세요. 공고문 형식(공고번호, 제목, 내용, 날짜, 이장 서명란)을 갖춰주세요.\n마을: ${g('dc-village')}\n일시: ${g('dc-date')}\n종류: ${g('dc-type')}\n내용: ${g('dc-content')}`,
+    consent: `다음 내용으로 햇빛소득마을 주민 동의서 양식을 만들어주세요. 개인정보 수집동의 및 사업추진 동의가 포함된 공고문 붙임서식2 형식으로 작성해주세요.\n마을: ${g('dc-village')}\n협동조합: ${g('dc-coop')}\n동의내용: ${g('dc-content')}`,
+    charter: `다음 협동조합 정관 조항을 2026년 햇빛소득마을 공고문 기준으로 검토해주세요. 충돌·결함·누락 항목을 명확히 분석하고 수정 방향을 제시해주세요.\n\n[정관 조항]\n${g('dc-content')}`,
+  };
+
+  await callAI([{role:'user', content: prompts[type] || '문서를 작성해주세요.'}], 'doc-result', null, SYSTEM, 2500);
+
+  document.getElementById('doc-result-actions').style.display = 'flex';
+  docCount++; localStorage.setItem('hsv_doccount', docCount);
+}
+
+// ══════════════════════════════════════
+// 서류 검토
+// ══════════════════════════════════════
+const reviewTypes = {
+  land: {
+    title: '🗺 토지대장 검토',
+    prompt: '토지대장을 햇빛소득마을 태양광 발전소 설치 관점에서 검토해주세요. 지목·면적·소유자·권리관계를 확인하고 문제 여부를 분석해주세요.',
+    formats: ['JPG','PNG','PDF']
+  },
+  building: {
+    title: '🏗 건축물대장 검토',
+    prompt: '건축물대장을 햇빛소득마을 건물형 태양광 설치 관점에서 검토해주세요. 구조·면적·건축연도·위반건축물 여부를 확인해주세요.',
+    formats: ['JPG','PNG','PDF']
+  },
+  grid: {
+    title: '⚡ 계통연계 검토의견서',
+    prompt: '한전에서 발급한 계통연계 검토의견서를 분석해주세요. 여유용량·연계 가능 여부·조건사항을 확인하고 사업계획서 기재 방법을 안내해주세요.',
+    formats: ['JPG','PNG','PDF']
+  },
+  carbon: {
+    title: '🌱 탄소배출량 검증인정서',
+    prompt: '태양광 모듈 탄소배출량 검증인정서를 검토해주세요. 공고문 기준(655kgCO₂/kW 이하) 충족 여부와 사업계획서 기재 방법을 안내해주세요.',
+    formats: ['JPG','PNG','PDF']
+  },
+  ks: {
+    title: '✅ KS인증서 검토',
+    prompt: 'KS인증서를 검토해주세요. 모듈/인버터/접속함 기준 충족 여부와 사업계획서 서식3-사 항목에 기재할 내용을 안내해주세요.',
+    formats: ['JPG','PNG','PDF']
+  },
+  charter: {
+    title: '⚖️ 협동조합 정관 검토',
+    prompt: '협동조합 정관을 2026년 햇빛소득마을 공고문 기준으로 검토해주세요. 5대 필수요건(재생에너지사업명시·수익배분·의사결정·투명성·배분방식) 충족 여부를 분석해주세요.',
+    formats: ['PDF','JPG','PNG','DOCX']
+  },
+  contract: {
+    title: '📋 계약서 검토',
+    prompt: '계약서(ReSCO 도급계약서 또는 PPA계약서)를 검토해주세요. 공고문 기준에 맞는지, 마을에 불리한 조항은 없는지 분석해주세요.',
+    formats: ['PDF','DOCX','JPG']
+  },
+  general: {
+    title: '📎 기타 서류 검토',
+    prompt: '업로드된 서류를 햇빛소득마을 공모 신청 관점에서 검토해주세요. 서류의 용도와 완성도, 보완이 필요한 부분을 분석해주세요.',
+    formats: ['PDF','JPG','PNG','DOCX','XLSX']
+  },
+};
+
+function selectReview(type) {
+  Object.keys(reviewTypes).forEach(k => {
+    const btn = document.getElementById('rvbtn-' + k);
+    if (btn) btn.className = 'btn b-' + (k === type ? 'org' : 'out');
+  });
+  const d = reviewTypes[type];
+  if (!d) return;
+  document.getElementById('review-upload-title').textContent = d.title;
+  document.getElementById('review-upload-form').innerHTML = `
+    <div class="ib teal"><span>ℹ️</span><div>${d.prompt}</div></div>
+    <div class="uz" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="event.preventDefault();this.classList.remove('drag');addUz('rv-${type}',event.dataTransfer.files)">
+      <input type="file" accept="${d.formats.map(f=>'.'+f.toLowerCase()).join(',')},image/*" multiple onchange="addUz('rv-${type}',this.files)">
+      <span class="uz-ic">📎</span>
+      <div class="uz-t">파일을 드래그하거나 클릭해서 업로드</div>
+      <div class="uz-s">스캔본, 사진, PDF 모두 가능</div>
+      <div class="fmts">${d.formats.map(f=>`<span class="fmt">${f}</span>`).join('')}</div>
+    </div>
+    <div class="fpg" id="fpg-rv-${type}"></div>
+    <div class="field"><label>추가 메모 (선택)</label><textarea id="rv-memo" rows="2" placeholder="예: 이 부지의 지목이 농지인지 확인 필요, 이격거리 조례 적용 여부 검토 요청 등"></textarea></div>
+    <div class="brow">
+      <button class="btn b-org" onclick="runReview('${type}')"><span class="spin" id="rv-spin" style="display:none"></span> 🔍 AI 검토 실행</button>
+    </div>`;
+}
+
+async function runReview(type) {
+  const d = reviewTypes[type];
+  const files = stores['rv-' + type] || [];
+  const memo = (document.getElementById('rv-memo') || {}).value || '';
+
+  const messages = [];
+  const content = [];
+
+  if (files.length > 0) {
+    files.forEach(f => {
+      if (f.mimeType.startsWith('image/')) {
+        content.push({ type: 'image', source: { type: 'base64', media_type: f.mimeType, data: f.data.split(',')[1] } });
+      }
+    });
+    content.push({ type: 'text', text: d.prompt + (memo ? '\n\n추가 요청사항: ' + memo : '') + '\n\n위 파일을 분석하여 검토 결과를 제공해주세요.' });
+  } else {
+    content.push({ type: 'text', text: (memo || d.prompt) + '\n\n업로드된 파일 없이 일반적인 검토 기준과 주의사항을 안내해주세요.' });
+  }
+
+  messages.push({ role: 'user', content });
+  await callAI(messages, 'review-result', 'rv-spin', SYSTEM, 2000);
+  document.getElementById('review-result-actions').style.display = 'flex';
+  docCount++; localStorage.setItem('hsv_doccount', docCount);
+}
+
+// ══════════════════════════════════════
+// 사업계획서
+// ══════════════════════════════════════
+async function genBizplan() {
+  const btn = document.getElementById('bp-gen-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span> 작성 중...';
+
+  const g = id => (document.getElementById(id) || {}).value || '';
+  const prompt = `다음 정보를 바탕으로 2026년 햇빛소득마을 사업계획서(서식3) 전체 초안을 작성해주세요.
+
+[마을 정보]
+- 마을명: ${g('bp-name')}
+- 총 주민수: ${g('bp-pop')}명 / 조합원수: ${g('bp-members')}명
+- 주민동의율: ${g('bp-agree')}%
+- 협동조합명: ${g('bp-coop')}
+- 이사장: ${g('bp-chief')}
+
+[발전소 계획]
+- 설치 용량: ${g('bp-kw')}kW (${g('bp-type')})
+- 계통연계: ${g('bp-grid')}
+- 총 설치비: ${g('bp-cost')}백만원
+- 자부담: ${g('bp-selfpay')}
+
+[수익 활용]
+- 마을기금 활용: ${g('bp-use')}
+
+[기자재]
+- 모듈: ${g('bp-module')}
+- 인버터: ${g('bp-inverter')}
+
+서식3의 6개 항목(1.협동조합현황 2.마을공동체현황 3.협동조합세부현황 4.태양광발전사업추진계획 5.태양광발전사업관리계획 6.햇빛소득마을사업관리계획) 순서로 실무에서 바로 활용 가능한 수준으로 작성해주세요.`;
+
+  await callAI([{role:'user', content: prompt}], 'bp-result', null, SYSTEM, 3000);
+  document.getElementById('bp-result-actions').style.display = 'flex';
+  docCount++; localStorage.setItem('hsv_doccount', docCount);
+  btn.disabled = false; btn.innerHTML = '✨ 전체 사업계획서 초안 생성';
+}
+
+async function genBizplanSection() {
+  const section = prompt('어떤 항목을 작성할까요?\n1. 협동조합 현황\n2. 마을공동체 현황\n3. 협동조합 세부현황 (의사결정·운영·수익배분)\n4. 태양광 발전사업 추진계획 (부지·설치비·기자재)\n5. 태양광 발전사업 관리계획\n6. 햇빛소득마을 사업관리계획 (수익활용·회계·관리자)\n\n번호를 입력하세요:');
+  if (!section) return;
+  const g = id => (document.getElementById(id) || {}).value || '';
+  const p = `서식3의 ${section}항 내용을 마을명 "${g('bp-name')}", 용량 ${g('bp-kw')}kW, 조합원 ${g('bp-members')}명 기준으로 작성해주세요.`;
+  await callAI([{role:'user',content:p}], 'bp-result', null, SYSTEM, 2000);
+  document.getElementById('bp-result-actions').style.display = 'flex';
+}
+
+async function refineBp() {
+  const current = document.getElementById('bp-result').textContent;
+  if (!current.trim()) return;
+  await callAI([{role:'user',content:`다음 사업계획서 초안을 공고문 평가기준에 맞게 보완·강화해주세요. 평가 점수를 높일 수 있는 방향으로 개선해주세요.\n\n${current}`}], 'bp-result', null, SYSTEM, 3000);
+}
+
+// ══════════════════════════════════════
+// 법령·인허가
+// ══════════════════════════════════════
+const lawTypes = {
+  setback: {
+    title: '📏 이격거리 조례 분석',
+    form: `<div class="field"><label>지역 (군·시명)</label><input type="text" id="lw-region" placeholder="예: 전남 해남군"></div>
+    <div class="f2"><div class="field"><label>가장 가까운 주거지역까지 거리</label><input type="text" id="lw-dist1" placeholder="예: 약 150m"></div><div class="field"><label>가장 가까운 도로까지 거리</label><input type="text" id="lw-dist2" placeholder="예: 약 30m"></div></div>
+    <div class="field"><label>지자체 조례 완화 협의 여부</label><select id="lw-status"><option>미협의</option><option>협의 중</option><option>완화 완료</option><option>완화 불가</option></select></div>
+    <div class="field"><label>추가 상황</label><textarea id="lw-detail" rows="2" placeholder="마을공동체 소유 부지인지, 기존 조례 조항 내용 등"></textarea></div>`,
+  },
+  permit: {
+    title: '🏗 발전사업허가 체크',
+    form: `<div class="f2"><div class="field"><label>설치 용량 (kW)</label><input type="number" id="lw-kw" placeholder="500"></div><div class="field"><label>설치 형태</label><select id="lw-type"><option>지상형</option><option>건물형</option><option>수상형</option></select></div></div>
+    <div class="field"><label>현재 진행 상황</label><select id="lw-status"><option>허가 전 (계획 중)</option><option>허가 신청 예정</option><option>허가 신청 완료</option><option>허가 취득 완료</option></select></div>
+    <div class="field"><label>선정일 (알 경우)</label><input type="date" id="lw-date"></div>
+    <div class="field"><label>특이사항</label><textarea id="lw-detail" rows="2" placeholder="환경영향평가 대상 여부, 군사시설보호구역 여부 등"></textarea></div>`,
+  },
+  devact: {
+    title: '🌿 개발행위허가 분석',
+    form: `<div class="f2"><div class="field"><label>부지 지목</label><select id="lw-jmok"><option>잡종지</option><option>답(논)</option><option>전(밭)</option><option>임야</option><option>대지</option><option>기타</option></select></div><div class="field"><label>부지 면적 (㎡)</label><input type="number" id="lw-area" placeholder="3000"></div></div>
+    <div class="field"><label>농업진흥구역 여부</label><select id="lw-agri"><option>해당 없음</option><option>농업진흥구역 내</option><option>농업보호구역 내</option><option>확인 필요</option></select></div>
+    <div class="field"><label>기타 제한구역</label><textarea id="lw-detail" rows="2" placeholder="군사시설보호구역, 문화재보호구역, 수계구역 등"></textarea></div>`,
+  },
+  agri: {
+    title: '🌾 농지전용 분석',
+    form: `<div class="f2"><div class="field"><label>부지 면적 (㎡)</label><input type="number" id="lw-area" placeholder="3000"></div><div class="field"><label>지목</label><select id="lw-jmok"><option>답(논)</option><option>전(밭)</option><option>과수원</option><option>목장용지</option></select></div></div>
+    <div class="field"><label>농업진흥구역 여부</label><select id="lw-agri"><option>진흥구역 외</option><option>농업진흥구역 내</option><option>농업보호구역 내</option></select></div>
+    <div class="field"><label>추가 상황</label><textarea id="lw-detail" rows="2" placeholder="기존 농업 활용 현황, 공공기관 부지 여부 등"></textarea></div>`,
+  },
+  coop: {
+    title: '🤝 협동조합법 검토',
+    form: `<div class="field"><label>검토 사항</label><textarea id="lw-detail" rows="4" placeholder="예: 발기인 중 한 가구에서 2명이 참여해도 되는지\n협동조합 설립 후 1년 이내 외부 자금 유치 가능한지\n정관 변경 시 총회 의결 없이 가능한지 등"></textarea></div>`,
+  },
+  elec: {
+    title: '⚡ 전기사업법 검토',
+    form: `<div class="f2"><div class="field"><label>설치 용량</label><input type="number" id="lw-kw" placeholder="500"></div><div class="field"><label>사업 단계</label><select id="lw-status"><option>발전사업허가 전</option><option>허가 신청 단계</option><option>공사계획인가 단계</option><option>사용전검사 단계</option></select></div></div>
+    <div class="field"><label>질문 사항</label><textarea id="lw-detail" rows="3" placeholder="예: 발전사업허가 후 12개월 이내 고정가격계약 못하면 어떻게 되나요?"></textarea></div>`,
+  },
+  land: {
+    title: '🗺 토지·지목 분석',
+    form: `<div class="f3"><div class="field"><label>지목</label><input type="text" id="lw-jmok" placeholder="예: 잡종지"></div><div class="field"><label>면적 (㎡)</label><input type="number" id="lw-area" placeholder="3000"></div><div class="field"><label>소유자</label><select id="lw-owner"><option>개인(마을주민)</option><option>마을공동</option><option>국공유지</option><option>농어촌공사</option></select></div></div>
+    <div class="field"><label>추가 정보 (주소, 특이사항)</label><textarea id="lw-detail" rows="3" placeholder="예: 전남 해남군 북일면 OO리 123번지, 기존 창고 있음, 진입로 있음"></textarea></div>`,
+  },
+  resc: {
+    title: '🔧 ReSCO 계약 검토',
+    form: `<div class="field"><label>계약서 내용 붙여넣기 또는 질문 사항</label><textarea id="lw-detail" rows="5" placeholder="예: ReSCO 계약서에서 '발전 수익의 20%를 ReSCO에 귀속'이라는 조항이 있는데 이것이 적법한지?\n또는 계약서의 특정 조항을 붙여넣어 검토 요청"></textarea></div>`,
+  },
+};
+
+function selectLaw(type) {
+  Object.keys(lawTypes).forEach(k => {
+    const btn = document.getElementById('lwbtn-' + k);
+    if (btn) btn.className = 'btn b-' + (k === type ? 'warn' : 'out');
+  });
+  const d = lawTypes[type];
+  if (!d) return;
+  document.getElementById('law-input-title').textContent = d.title;
+  document.getElementById('law-input-form').innerHTML = d.form + `
+    <div class="brow"><button class="btn b-warn" onclick="runLaw('${type}')"><span class="spin" id="lw-spin" style="display:none"></span> ⚖️ AI 법령 검토</button></div>`;
+}
+
+async function runLaw(type) {
+  const d = lawTypes[type];
+  const g = id => (document.getElementById(id) || {}).value || '';
+  const lawPrompts = {
+    setback: `지역: ${g('lw-region')}, 주거지 이격: ${g('lw-dist1')}, 도로 이격: ${g('lw-dist2')}, 조례협의: ${g('lw-status')}\n추가상황: ${g('lw-detail')}\n\n이 조건에서 태양광 발전소 설치 시 이격거리 관련 법령·조례 검토를 해주세요. 공고문 REC 가중치 조건(이격거리 기준 준수 여부)도 함께 분석해주세요.`,
+    permit: `용량: ${g('lw-kw')}kW, 형태: ${g('lw-type')}, 현황: ${g('lw-status')}, 선정일: ${g('lw-date')}\n특이사항: ${g('lw-detail')}\n\n발전사업허가 절차, 필요서류, 공고문상 6개월 의무 준수 여부를 검토해주세요.`,
+    devact: `지목: ${g('lw-jmok')}, 면적: ${g('lw-area')}㎡, 농업진흥: ${g('lw-agri')}\n기타제한: ${g('lw-detail')}\n\n개발행위허가 필요 여부와 신청 절차를 검토해주세요.`,
+    agri: `지목: ${g('lw-jmok')}, 면적: ${g('lw-area')}㎡, 농업진흥: ${g('lw-agri')}\n추가: ${g('lw-detail')}\n\n농지전용허가 또는 신고 대상 여부, 절차를 검토해주세요.`,
+    coop: `${g('lw-detail')}\n\n협동조합기본법 기준으로 위 사항을 검토해주세요.`,
+    elec: `용량: ${g('lw-kw')}kW, 단계: ${g('lw-status')}\n질문: ${g('lw-detail')}\n\n전기사업법 기준으로 검토해주세요.`,
+    land: `지목: ${g('lw-jmok')}, 면적: ${g('lw-area')}㎡, 소유자: ${g('lw-owner')}\n상세: ${g('lw-detail')}\n\n이 토지에 태양광 발전소 설치 가능 여부와 필요한 인허가 절차를 종합 검토해주세요.`,
+    resc: `${g('lw-detail')}\n\nReSCO 계약 관련 공고문 기준(ReSCO 등록 여부, 표준계약서 활용 권고 등)과 법적 검토를 해주세요.`,
+  };
+  await callAI([{role:'user', content: lawPrompts[type] || g('lw-detail')}], 'law-result', 'lw-spin', SYSTEM, 2000);
+  document.getElementById('law-result-actions').style.display = 'flex';
+}
+
+// ══════════════════════════════════════
+// 수익 계산
+// ══════════════════════════════════════
+function calcRevenue() {
+  const kw = parseInt(document.getElementById('rv-kw').value) || 500;
+  const sun = parseFloat(document.getElementById('rv-region').value) || 3.6;
+  const smp = parseFloat(document.getElementById('rv-smp').value) || 109.8;
+  const rec = parseFloat(document.getElementById('rv-rec').value) || 70356;
+  const weight = parseFloat(document.getElementById('rv-weight').value) || 1.2;
+  const loanPct = parseFloat(document.getElementById('rv-loan').value) / 100 || 0.85;
+  const share = parseFloat(document.getElementById('rv-share').value) / 100 || 0.8;
+
+  const annualKwh = kw * sun * 365;
+  const annualMwh = annualKwh / 1000;
+  const smpRev = Math.round(annualKwh * smp / 10000);
+  const recRev = Math.round(annualMwh * rec * weight / 10000);
+  const totalRev = smpRev + recRev;
+  const maint = Math.round(kw * 0.3);
+  const loanCost = Math.round(kw * 180 * loanPct * 0.0175 / 10000);
+  const cost = maint + loanCost;
+  const net = totalRev - cost;
+  const village = Math.round(net * share);
+  const net20 = Math.round(net * 18);
+
+  document.getElementById('rv-annual').textContent = totalRev.toLocaleString();
+  document.getElementById('rv-net').textContent = net.toLocaleString();
+  document.getElementById('rv-village').textContent = village.toLocaleString();
+  document.getElementById('rv-20y').textContent = net20.toLocaleString();
+  document.getElementById('rv-result').style.display = '';
+
+  const max = totalRev;
+  document.getElementById('rv-bar-smp').style.width = Math.round(smpRev/max*100) + '%';
+  document.getElementById('rv-bar-rec').style.width = Math.round(recRev/max*100) + '%';
+  document.getElementById('rv-bar-cost').style.width = Math.round(cost/max*100) + '%';
+  document.getElementById('rv-bar-smp-v').textContent = smpRev.toLocaleString() + '만원';
+  document.getElementById('rv-bar-rec-v').textContent = recRev.toLocaleString() + '만원';
+  document.getElementById('rv-bar-cost-v').textContent = cost.toLocaleString() + '만원';
+}
+
+async function genRevenueReport() {
+  const kw = document.getElementById('rv-kw').value;
+  const annual = document.getElementById('rv-annual').textContent;
+  const net = document.getElementById('rv-net').textContent;
+  const village = document.getElementById('rv-village').textContent;
+  const y20 = document.getElementById('rv-20y').textContent;
+  const vname = selectedVid ? (villages.find(v=>v.id===selectedVid)||{}).name || '' : '';
+  const prompt = `다음 수익성 데이터를 바탕으로 마을 주민 설명회용 수익성 리포트를 작성해주세요.
+마을명: ${vname || 'OO마을'}
+설치 용량: ${kw}kW
+연간 총수익: ${annual}만원
+연간 순수익: ${net}만원
+마을귀속: ${village}만원/년
+20년 누적순익: ${y20}만원
+
+주민이 이해하기 쉬운 언어로, 생생한 사례와 구체적 금액을 들어서 설명해주세요.`;
+  await callAI([{role:'user',content:prompt}], 'rv-report', null, SYSTEM, 1500);
+  document.getElementById('rv-rpt-actions').style.display = 'flex';
+}
+
+// ══════════════════════════════════════
+// 준비도 체크
+// ══════════════════════════════════════
+const readinessItems = [
+  {id:'rd-1', label:'마을총회 의결 완료', step:'STEP2', points:10},
+  {id:'rd-2', label:'주민 70% 이상 동의 서명', step:'STEP2', points:10},
+  {id:'rd-3', label:'협동조합 등기 완료', step:'STEP3', points:10},
+  {id:'rd-4', label:'정관에 재생에너지사업 명시', step:'STEP3', points:8},
+  {id:'rd-5', label:'부지 확보 (토지대장 확인)', step:'STEP4', points:8},
+  {id:'rd-6', label:'계통연계 검토의견서 수령', step:'STEP4', points:7},
+  {id:'rd-7', label:'자부담 15% 이상 확보', step:'STEP4', points:7},
+  {id:'rd-8', label:'저탄소모듈(655kgCO₂/kW↓) 확인', step:'STEP5', points:8},
+  {id:'rd-9', label:'KS인증 인버터 확인', step:'STEP5', points:5},
+  {id:'rd-10', label:'이격거리 조례 확인 완료', step:'STEP4', points:5},
+  {id:'rd-11', label:'지자체 인허가 사전 검토 완료', step:'STEP4', points:6},
+  {id:'rd-12', label:'사업계획서 초안 작성', step:'STEP3', points:5},
+  {id:'rd-13', label:'관리자 채용 계획 수립', step:'STEP5', points:4},
+  {id:'rd-14', label:'지자체 부지 제공 협의', step:'STEP4', points:5},
+  {id:'rd-15', label:'인구감소지역 해당 확인', step:'STEP2', points:3},
+];
+
+function renderReadiness() {
+  const container = document.getElementById('readiness-checks');
+  if (!container || container.children.length > 0) return;
+  const stepColors = {STEP2:'var(--gr)',STEP3:'var(--ac)',STEP4:'var(--org)',STEP5:'var(--pu)'};
+  container.innerHTML = readinessItems.map(item => `
+    <div class="chk-item" id="chki-${item.id}" onclick="toggleChk('${item.id}')">
+      <div class="chk-box" id="chkb-${item.id}"></div>
+      <div class="chk-text">
+        ${item.label}
+        <span style="font-size:10px;color:${stepColors[item.step]||'var(--mu)'};margin-left:5px;font-weight:700">${item.step}</span>
+        <span style="font-size:10px;color:var(--mu);margin-left:4px">${item.points}점 관련</span>
+      </div>
+    </div>`).join('');
+}
+
+function toggleChk(id) {
+  const item = document.getElementById('chki-' + id);
+  const box = document.getElementById('chkb-' + id);
+  if (item.classList.contains('done')) {
+    item.classList.remove('done');
+    box.textContent = '';
+  } else {
+    item.classList.add('done');
+    box.textContent = '✓';
+    box.style.fontSize = '11px';
+  }
+}
+
+function resetReadiness() {
+  readinessItems.forEach(item => {
+    const el = document.getElementById('chki-' + item.id);
+    const box = document.getElementById('chkb-' + item.id);
+    if (el) el.classList.remove('done');
+    if (box) box.textContent = '';
+  });
+  document.getElementById('rd-result').innerHTML = '<div class="ib blue"><span>👆</span><div>왼쪽에서 현황을 체크하고 진단을 실행하세요.</div></div>';
+}
+
+async function runReadiness() {
+  const btn = document.getElementById('rd-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span> 진단 중...';
+
+  const done = readinessItems.filter(item => document.getElementById('chki-'+item.id)?.classList.contains('done'));
+  const undone = readinessItems.filter(item => !document.getElementById('chki-'+item.id)?.classList.contains('done'));
+  const score = done.reduce((a,b) => a+b.points, 0);
+  const total = readinessItems.reduce((a,b) => a+b.points, 0);
+  const pct = Math.round(score/total*100);
+  const vname = document.getElementById('rd-name').value || 'OO마을';
+
+  const resultDiv = document.getElementById('rd-result');
+  resultDiv.innerHTML = `
+    <div class="kpi-grid" style="grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">
+      <div class="kpi"><div class="kpi-n" style="color:${pct>=70?'var(--gr)':'var(--warn)'}">${pct}%</div><div class="kpi-l">준비 완성도</div></div>
+      <div class="kpi"><div class="kpi-n">${done.length}<span style="font-size:14px;font-weight:400">/${readinessItems.length}</span></div><div class="kpi-l">완료 항목</div></div>
+      <div class="kpi"><div class="kpi-n" style="color:var(--sun)">${undone.length}</div><div class="kpi-l">미완료 항목</div></div>
+    </div>
+    <div style="margin-bottom:14px">
+      <div class="bar-item"><div class="bar-hd"><span class="bar-lbl">준비 완성도</span><span class="bar-val">${pct}%</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${pct>=70?'var(--gr)':'var(--warn)'}"><span class="bar-pct">${pct}%</span></div></div></div>
+    </div>
+    <div class="ib ${pct>=80?'green':pct>=60?'sun':'warn'}" style="margin-bottom:12px"><span>${pct>=80?'✅':pct>=60?'⚠️':'🔴'}</span><div><strong>${pct>=80?'신청 가능':pct>=60?'보완 필요':'주요 요건 미충족'}</strong> — ${vname} 준비도 ${pct}%<br>AI 상세 분석 생성 중...</div></div>
+    <div id="rd-ai-text" class="rb" style="min-height:80px"></div>`;
+
+  const prompt = `${vname} 마을의 햇빛소득마을 공모 준비 현황입니다.
+
+완료 항목(${done.length}개): ${done.map(d=>d.label).join(', ')}
+미완료 항목(${undone.length}개): ${undone.map(d=>d.label).join(', ')}
+준비 완성도: ${pct}%
+
+1. 종합 판정 및 1차 마감(5월 31일) 신청 가능 여부
+2. 가장 시급한 보완 사항 3가지 (구체적 액션 포함)
+3. 잘 준비된 강점
+4. 주의해야 할 리스크`;
+
+  await callAI([{role:'user',content:prompt}], 'rd-ai-text', null, SYSTEM, 1500);
+  btn.disabled = false; btn.innerHTML = '🔍 AI 준비도 진단';
+}
+
+// ══════════════════════════════════════
+// AI 챗봇
+// ══════════════════════════════════════
+function sendChip(btn) {
+  document.getElementById('chat-input').value = btn.textContent;
+  sendChat();
+}
+
+function chatKey(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); sendChat(); }
+}
+
+function chatResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+function clearChat() {
+  chatHistory = [];
+  const area = document.getElementById('chat-area');
+  area.innerHTML = '<div class="ib sun" style="margin:0"><span>☀</span><div><strong>2026 공고문 전체를 학습한 AI 컨설턴트입니다.</strong><br>서류 작성, 법령 해석, 현장 상황 등 무엇이든 물어보세요.</div></div>';
+}
+
+function addChatMsg(role, text) {
+  const area = document.getElementById('chat-area');
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  const time = new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+  div.innerHTML = `<div class="msg-av">${role==='ai'?'☀':'나'}</div><div><div class="msg-bbl">${role==='ai'?text.replace(/\n/g,'<br>'):text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')}</div><div style="font-size:10px;color:var(--mu);margin-top:3px;${role==='user'?'text-align:right':''}">${time}</div></div>`;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+}
+
+function addTyping() {
+  const area = document.getElementById('chat-area');
+  const div = document.createElement('div');
+  div.className = 'msg ai'; div.id = 'typing-msg';
+  div.innerHTML = '<div class="msg-av">☀</div><div class="msg-bbl"><div class="typing-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>';
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+}
+
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const sendBtn = document.getElementById('chat-send-btn');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = ''; input.style.height = 'auto';
+  sendBtn.disabled = true;
+  document.getElementById('chat-chips').style.display = 'none';
+  addChatMsg('user', text);
+  chatHistory.push({role:'user', content:text});
+  addTyping();
+  try {
+    const reply = await callAIOnce(chatHistory, SYSTEM, 1500);
+    document.getElementById('typing-msg')?.remove();
+    addChatMsg('ai', reply);
+    chatHistory.push({role:'assistant', content:reply});
+    if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+  } catch(e) {
+    document.getElementById('typing-msg')?.remove();
+    addChatMsg('ai', '⚠️ 오류: ' + e.message);
+  }
+  sendBtn.disabled = false;
+}
+
+// ══════════════════════════════════════
+// 유틸
+// ══════════════════════════════════════
+function cpEl(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent).then(() => alert('복사됐습니다!'));
+}
+
+function dlTxt(id, filename) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([el.textContent], {type:'text/plain;charset=utf-8'}));
+  a.download = filename || 'document.txt';
+  a.click();
+}
+
+function printDoc(id) {
+  const content = document.getElementById(id || 'doc-result').textContent;
+  const w = window.open('','_blank','width=900,height=700');
+  w.document.write(`<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet"><style>body{font-family:'Noto Sans KR',sans-serif;padding:36px;font-size:14px;line-height:2;color:#222}@page{margin:20mm}@media print{.np{display:none}}</style></head><body><div class="np"><button onclick="window.print()" style="margin-bottom:16px;background:#0F2B5B;color:#fff;border:none;padding:8px 18px;border-radius:7px;cursor:pointer">🖨 인쇄</button></div><pre style="white-space:pre-wrap;font-family:inherit">${content.replace(/</g,'&lt;')}</pre><sc`+`ript>window.onload=function(){}<\/sc`+`ript></body></html>`);
+  w.document.close();
+}
+
+function openManual() {
+  alert('메뉴얼북 파일(햇빛소득마을_완전판_메뉴얼북.html)을 브라우저에서 열어주세요.\n\n이 업무도우미와 메뉴얼북을 함께 사용하시면 더욱 편리합니다.');
+}
+
+// ══════════════════════════════════════
+// 초기화
+// ══════════════════════════════════════
+document.addEventListener('DOMContentLoaded', function() {
+  renderDash();
+  selectDoc('minutes');
+  selectReview('land');
+  selectLaw('setback');
+  renderReadiness();
+  // 모달 외부 클릭 닫기
+  document.getElementById('modal-ov').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+});
+
+</script>
+</body>
+</html>

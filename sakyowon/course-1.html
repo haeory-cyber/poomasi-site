@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>연대지능과 사회혁신 — AI 활용 활동가 양성과정 1기 | 사교원</title>
+<meta name="description" content="사회혁신교육원 사회적협동조합(사교원) 주최. 사회연대경제 진영 활동가가 AI를 자기 현장의 문제해결 도구로 익히는 8회 양성과정.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%234a6741'/><text x='16' y='22' text-anchor='middle' font-size='14' fill='%23f7f3ee'>社</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #f4f7f2;
+    --bg-main: #ffffff;
+    --bg-card: #f8faf6;
+    --bg-accent: #eef3ec;
+    --text-primary: #1e2b1c;
+    --text-secondary: #3d5238;
+    --text-muted: #6e8469;
+    --accent-green: #4a6741;
+    --accent-green-light: #5d7f54;
+    --accent-gold: #7a8f3e;
+    --accent-earth: #6b5c3e;
+    --border-subtle: rgba(60, 80, 50, 0.1);
+    --border-medium: rgba(60, 80, 50, 0.2);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.1);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 16px;
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+    --space-3xl: 64px;
+    --space-4xl: 96px;
+    --max-width: 1100px;
+    --font-serif: Georgia, 'Noto Serif KR', serif;
+    --font-body: 'Pretendard Variable', 'Pretendard', -apple-system, sans-serif;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.35;
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+  }
+  a { color: var(--accent-green); }
+
+  .container { max-width: var(--max-width); margin: 0 auto; padding: 0 var(--space-lg); }
+  section { padding: var(--space-3xl) 0; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(244, 247, 242, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .nav-inner {
+    max-width: var(--max-width); margin: 0 auto;
+    padding: var(--space-md) var(--space-lg);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-logo {
+    font-family: var(--font-serif); font-size: 17px; font-weight: 700;
+    color: var(--text-primary); text-decoration: none; letter-spacing: -0.02em;
+  }
+  .nav-links { display: flex; gap: var(--space-lg); list-style: none; }
+  .nav-links a {
+    color: var(--text-secondary); text-decoration: none;
+    font-size: 14px; font-weight: 500; padding: var(--space-sm) var(--space-xs);
+  }
+  .nav-links a:hover { color: var(--text-primary); }
+
+  /* HERO */
+  .hero {
+    padding-top: 140px;
+    padding-bottom: var(--space-3xl);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: -20%; right: -10%;
+    width: 600px; height: 600px;
+    background: radial-gradient(ellipse, rgba(74, 103, 65, 0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-label {
+    display: inline-block;
+    font-size: 13px; font-weight: 600;
+    color: var(--accent-green);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: var(--space-md);
+  }
+  .hero h1 {
+    font-size: clamp(32px, 5vw, 52px);
+    color: var(--text-primary);
+    margin-bottom: var(--space-md);
+  }
+  .hero-subtitle {
+    font-size: clamp(17px, 2vw, 22px);
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-bottom: var(--space-xl);
+  }
+  .hero-rule {
+    border: none; border-top: 1px solid var(--border-medium);
+    width: 80px; margin: var(--space-xl) 0;
+  }
+  .hero-desc {
+    font-size: 17px;
+    color: var(--text-secondary);
+    max-width: 720px;
+    line-height: 1.8;
+  }
+
+  /* SECTION TITLE */
+  .section-label {
+    display: block;
+    font-size: 12px; font-weight: 700;
+    color: var(--accent-green);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: var(--space-sm);
+  }
+  .section-title {
+    font-size: clamp(26px, 3.5vw, 36px);
+    color: var(--text-primary);
+    margin-bottom: var(--space-xl);
+  }
+
+  /* OVERVIEW TABLE */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-md);
+  }
+  .overview-card {
+    background: var(--bg-main);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-sm);
+  }
+  .overview-card dt {
+    font-size: 12px; font-weight: 700;
+    color: var(--accent-green);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: var(--space-xs);
+  }
+  .overview-card dd {
+    font-size: 16px;
+    color: var(--text-primary);
+    line-height: 1.5;
+  }
+
+  /* PURPOSE BOX */
+  .purpose-box {
+    background: var(--bg-accent);
+    border-left: 4px solid var(--accent-green);
+    padding: var(--space-xl);
+    border-radius: var(--radius-md);
+    font-size: 17px;
+    color: var(--text-secondary);
+    line-height: 1.85;
+  }
+
+  /* CURRICULUM */
+  .curriculum-list {
+    display: flex; flex-direction: column;
+    gap: var(--space-md);
+  }
+  .session {
+    background: var(--bg-main);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--space-xl);
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .session:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  .session-head {
+    display: flex; align-items: baseline;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-md);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .session-num {
+    font-family: var(--font-serif);
+    font-size: 28px; font-weight: 700;
+    color: var(--accent-green);
+    flex-shrink: 0;
+  }
+  .session-title {
+    font-size: 20px; font-weight: 700;
+    color: var(--text-primary);
+    font-family: var(--font-serif);
+    flex: 1;
+    min-width: 200px;
+  }
+  .session-tool {
+    font-size: 13px;
+    color: var(--text-muted);
+    background: var(--bg-accent);
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+  }
+  .session-body ul {
+    list-style: none;
+    padding: 0;
+  }
+  .session-body li {
+    position: relative;
+    padding-left: var(--space-lg);
+    margin-bottom: var(--space-sm);
+    color: var(--text-secondary);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  .session-body li::before {
+    content: '•';
+    position: absolute; left: var(--space-sm);
+    color: var(--accent-green);
+    font-weight: 700;
+  }
+  .session-result {
+    margin-top: var(--space-md);
+    padding-top: var(--space-md);
+    border-top: 1px dashed var(--border-subtle);
+    font-size: 14px;
+    color: var(--accent-earth);
+  }
+  .session-result strong {
+    color: var(--accent-green);
+    font-weight: 700;
+    margin-right: var(--space-sm);
+  }
+
+  /* OUTCOME */
+  .outcome-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-lg);
+  }
+  .outcome-card {
+    background: var(--bg-main);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--space-xl);
+    box-shadow: var(--shadow-sm);
+  }
+  .outcome-num {
+    font-family: var(--font-serif);
+    font-size: 14px;
+    color: var(--accent-green);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    margin-bottom: var(--space-sm);
+  }
+  .outcome-title {
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--space-sm);
+    font-family: var(--font-serif);
+  }
+  .outcome-desc {
+    color: var(--text-secondary);
+    font-size: 15px;
+    line-height: 1.75;
+  }
+
+  /* OPERATION + METRICS LIST */
+  .plain-list {
+    list-style: none;
+    padding: 0;
+    display: flex; flex-direction: column;
+    gap: var(--space-sm);
+  }
+  .plain-list li {
+    position: relative;
+    padding-left: var(--space-lg);
+    color: var(--text-secondary);
+    font-size: 16px;
+    line-height: 1.8;
+  }
+  .plain-list li::before {
+    content: '—';
+    position: absolute; left: 0;
+    color: var(--accent-green);
+    font-weight: 700;
+  }
+
+  /* CTA */
+  .cta {
+    background: var(--accent-green);
+    color: var(--bg-deep);
+    text-align: center;
+    padding: var(--space-3xl) var(--space-lg);
+    border-radius: var(--radius-lg);
+    margin-top: var(--space-2xl);
+  }
+  .cta h2 {
+    color: var(--bg-deep);
+    font-size: clamp(22px, 3vw, 28px);
+    margin-bottom: var(--space-md);
+  }
+  .cta p {
+    color: rgba(244, 247, 242, 0.85);
+    font-size: 16px;
+    margin-bottom: var(--space-xl);
+  }
+  .cta-btn {
+    display: inline-block;
+    background: var(--bg-deep);
+    color: var(--accent-green);
+    padding: var(--space-md) var(--space-2xl);
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform 0.2s ease;
+  }
+  .cta-btn:hover { transform: translateY(-2px); }
+
+  /* FOOTER */
+  footer {
+    background: var(--text-primary);
+    color: var(--bg-deep);
+    padding: var(--space-2xl) 0;
+    margin-top: var(--space-3xl);
+  }
+  .footer-inner {
+    max-width: var(--max-width); margin: 0 auto;
+    padding: 0 var(--space-lg);
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: var(--space-md);
+  }
+  .footer-name {
+    font-family: var(--font-serif);
+    font-size: 16px; font-weight: 700;
+  }
+  .footer-copy {
+    font-size: 13px;
+    opacity: 0.7;
+  }
+
+  @media (max-width: 720px) {
+    .nav-links { display: none; }
+    .hero { padding-top: 110px; }
+    section { padding: var(--space-2xl) 0; }
+    .session-head { flex-direction: column; align-items: flex-start; }
+    .footer-inner { flex-direction: column; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav aria-label="주요 내비게이션">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">사회혁신교육원</a>
+    <ul class="nav-links">
+      <li><a href="/#about">소개</a></li>
+      <li><a href="/#business">사업</a></li>
+      <li><a href="/#org">조직</a></li>
+      <li><a href="/#contact">문의</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <span class="hero-label">사교원 교육과정 · 2026</span>
+    <h1>연대지능과 사회혁신<br>— AI 활용 활동가 양성과정 1기</h1>
+    <p class="hero-subtitle">사회연대경제 진영 활동가의 현장 문제해결 도구화</p>
+    <hr class="hero-rule">
+    <p class="hero-desc">
+      챗으로만 AI를 쓰는 활동가가 자기 현장의 문제를 직접 코드와 데이터로 풀 수 있도록,
+      AI 하네스부터 데이터 주권·자동화까지 8회에 걸쳐 함께 익히는 양성과정입니다.
+      사회혁신교육원 사회적협동조합(사교원) 주최, 줌(Zoom) 온라인.
+    </p>
+  </div>
+</section>
+
+<!-- OVERVIEW -->
+<section id="overview">
+  <div class="container">
+    <span class="section-label">Overview</span>
+    <h2 class="section-title">사업 개요</h2>
+    <dl class="overview-grid">
+      <div class="overview-card"><dt>주최</dt><dd>사회혁신교육원 사회적협동조합 (사교원)</dd></div>
+      <div class="overview-card"><dt>강사</dt><dd>김성훈</dd></div>
+      <div class="overview-card"><dt>방식</dt><dd>줌(Zoom) 온라인</dd></div>
+      <div class="overview-card"><dt>대상</dt><dd>사교원 관련 활동가</dd></div>
+      <div class="overview-card"><dt>정원</dt><dd>7~8명</dd></div>
+      <div class="overview-card"><dt>회당 시간</dt><dd>2시간</dd></div>
+      <div class="overview-card"><dt>총 회차</dt><dd>8회 (주 1회 × 8주, 총 2개월)</dd></div>
+      <div class="overview-card"><dt>일정</dt><dd>추후 공지</dd></div>
+    </dl>
+  </div>
+</section>
+
+<!-- PURPOSE -->
+<section id="purpose" style="background: var(--bg-main); border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle);">
+  <div class="container">
+    <span class="section-label">Purpose</span>
+    <h2 class="section-title">목적과 목표</h2>
+    <div class="purpose-box">
+      사회연대경제 진영의 활동가들에게 AI를 활용한 연대지능의 철학과 담론을 이해하고,
+      자기 현장에서의 문제해결 역량을 키우며,
+      교육훈련 과정을 통한 활동가 양성과 연대를 꾀합니다.
+    </div>
+  </div>
+</section>
+
+<!-- CURRICULUM -->
+<section id="curriculum">
+  <div class="container">
+    <span class="section-label">Curriculum</span>
+    <h2 class="section-title">8회 커리큘럼</h2>
+    <div class="curriculum-list">
+
+      <article class="session">
+        <header class="session-head">
+          <span class="session-num">01</span>
+          <h3 class="session-title">오리엔테이션 + AI와 시대읽기</h3>
+          <span class="session-tool">담론 강의</span>
+        </header>
+        <div class="session-body">
+          <ul>
+            <li>30분 — OT 자기소개 + AI 활용 현황 공유</li>
+            <li>30분 — 담론 강의: 연대지능의 의미, 사회혁신운동의 기회와 가능성, 도메인특화 AI 만들기</li>
+            <li>30분 — 이 과정에 거는 기대와 목표 나누기</li>
+            <li>30분 — 과정 안내 + 7회 자동화 주제 사전 숙제</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="session">
+        <header class="session-head">
+          <span class="session-num">02</span>
+          <h3 class="session-title">AI 하네스란 무엇인가</h3>
+          <span class="session-tool">Claude Code + CLAUDE.md</span>
+        </header>
+        <div class="session-body">
+          <ul>
+            <li>45분 강의 — 챗과의 결정적 차이, 바이브코딩, AI 에이전트 엔지니어링</li>
+            <li>60분 실습 — Claude Code 설치 → 헬로월드 → CLAUDE.md 만들기</li>
+            <li>15분 전체 공유 — 오늘 가장 놀란 지점, 1인 1마디</li>
+          </ul>
+          <p class="session-result"><strong>결과물</strong>자기 PC에서 Claude Code 작동 + 첫 CLAUDE.md</p>
+        </div>
+      </article>
+
+      <article class="session">
+        <header class="session-head">
+          <span class="session-num">03</span>
+          <h3 class="session-title">코딩·실행 및 안정망 인프라</h3>
+          <span class="session-tool">VSCode + Git + GitHub</span>
+        </header>
+        <div class="session-body">
+          <ul>
+            <li>30분 강의 — 코딩·실행·안정망이 왜 활동가에게 필요한가</li>
+            <li>75분 실습 — VSCode + Git 초기화 + GitHub push</li>
+            <li>15분 전체 공유 — 첫 commit 메시지</li>
+          </ul>
+          <p class="session-result"><strong>결과물</strong>자기 GitHub 레포 1개</p>
+        </div>
+      </article>
+
+      <article class="session">
+        <header class="session-head">
+          <span class="session-num">04</span>
+          <h3 class="session-title">AI와 함께 지식 백과사전 만들기</h3>
+          <span class="session-tool">Obsidian + Quartz + CF Pages</span>
+        </header>
+        <div class="session-body">
+          <ul>
+            <li>30분 강의 — 옵시디언이 왜 지식백과·도메인AI 먹이 자산인가</li>
+            <li>75분 실습 — Obsidian vault → Quartz 변환 → Cloudflare Pages 배포</li>
+            <li>15분 전체 공유 — 자기 위키 URL 채팅창 공개</li>
+          </ul>
+          <p class="session-result"><strong>결과물</strong>자기 위키 URL</p>
+        </div>
+      </article>
+
+      <article class="session">
+        <header class="session-head">
+          <span class="session-num">05</span>
+          <h3 class="session-title">인프라 2부 — 데이터 주권</h3>
+          <span class="session-tool">Supabase</span>
+        </header>
+        <div class="session-body">
+          <ul>
+            <li>30분 강의 — “데이터를 어디에 두는가”, 데이터 주권</li>
+            <li>75분 실습 — Supabase 프로젝트 · 첫 테이블 · AI에게 쿼리 시키기</li>
+            <li>15분 전체 공유 — 내 현장에 필요한 테이블 1개씩</li>
+          </ul>
+          <p class="session-result"><strong>결과물</strong>자기 DB 테이블 1개</p>
+        </div>
+      </article>
+
+      <article class="session">
+        <header class="session-head">
+          <span class="session-num">06</span>
+          <h3 class="session-title">웹사이트 만들기</h3>
+          <span class="session-tool">운동의 얼굴</span>
+        </header>
+        <div class="session-body">
+          <ul>
+            <li>15분 강의 — 왜 사회연대경제는 광고 없는 자기 사이트가 필요한가</li>
+            <li>90분 실습 — AI와 한 페이지 사이트 + CF Pages 배포</li>
+            <li>15분 — 전체 1분 시연</li>
+          </ul>
+          <p class="session-result"><strong>결과물</strong>자기 사이트 URL</p>
+        </div>
+      </article>
+
+      <article class="session">
+        <header class="session-head">
+          <span class="session-num">07</span>
+          <h3 class="session-title">자동화 프로그램 만들기</h3>
+          <span class="session-tool">내 현장 문제 1개</span>
+        </header>
+        <div class="session-body">
+          <ul>
+            <li>15분 강의 — 현장 문제를 코드로 푸는 방법론: 잘게 쪼개기</li>
+            <li>90분 실습 — 사전 정한 주제로 자기 자동화 (막힌 사람 화면 공유 + 전체 풀이)</li>
+            <li>15분 — 진행 공유 + 미완료자 숙제</li>
+          </ul>
+          <p class="session-result"><strong>결과물</strong>작동하는 자동화 1개</p>
+        </div>
+      </article>
+
+      <article class="session">
+        <header class="session-head">
+          <span class="session-num">08</span>
+          <h3 class="session-title">시연 + 회고 + 연대와 협동의 제안</h3>
+          <span class="session-tool">매듭</span>
+        </header>
+        <div class="session-body">
+          <ul>
+            <li>40분 시연 — 1인 5분, 자기 자산 자랑</li>
+            <li>20분 회고 — 8회 전후 변화, 1인 2분</li>
+            <li>45분 연대·협동 제안 세션 — 강사 제안 10분 / 각자 3분씩 25분 / 합의 10분</li>
+            <li>15분 담론 회귀 — “도구를 만지면서 우리는 무엇이 되었는가”</li>
+          </ul>
+          <p class="session-result"><strong>결과물</strong>후속 모임 합의</p>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- OUTCOME -->
+<section id="outcome" style="background: var(--bg-main); border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle);">
+  <div class="container">
+    <span class="section-label">Outcome</span>
+    <h2 class="section-title">기대효과</h2>
+    <div class="outcome-grid">
+      <article class="outcome-card">
+        <div class="outcome-num">01</div>
+        <h3 class="outcome-title">담론적 환류</h3>
+        <p class="outcome-desc">활동가가 AI를 단순 도구를 넘어 연대지능의 철학으로 이해. 사회혁신운동의 새 무기로 위치 잡기.</p>
+      </article>
+      <article class="outcome-card">
+        <div class="outcome-num">02</div>
+        <h3 class="outcome-title">현장 도구화</h3>
+        <p class="outcome-desc">수료생 각자가 GitHub 레포·위키·DB·웹사이트·자동화 5종을 자기 현장 자산으로 보유.</p>
+      </article>
+      <article class="outcome-card">
+        <div class="outcome-num">03</div>
+        <h3 class="outcome-title">연대와 협동</h3>
+        <p class="outcome-desc">1기 수료생이 후속 모임과 소속 단체 전파를 통해 사회연대경제 진영 내 AI 활동가 연대망 확장.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- OPERATION -->
+<section id="operation">
+  <div class="container">
+    <span class="section-label">Operation</span>
+    <h2 class="section-title">운영 방식</h2>
+    <ul class="plain-list">
+      <li>모든 회차 녹화 → 2기 교재 + 결석자 보충</li>
+      <li>회차 사이 텔레그램 단톡 운영 (설치·에러 24시간 내 답)</li>
+      <li>1회 끝에 7회 자동화 주제 사전 숙제 부여</li>
+      <li>수료 1개월 후 후속 모임 1회</li>
+    </ul>
+
+    <div class="cta">
+      <h2>참여 문의</h2>
+      <p>일정 확정과 신청 접수는 사교원 메인 페이지 문의로 안내드립니다.</p>
+      <a href="/#contact" class="cta-btn">사교원 문의하기</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-name">사회혁신교육원 사회적협동조합</div>
+    <div class="footer-copy">&copy; 2026 사회혁신교육원 사회적협동조합</div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -2,6 +2,7 @@
 *.py
 !scripts/*.py
 !djco/server.py
+!sakyowon/server.py
 !infra/*.py
 __pycache__/
 *.pyc

@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>사회혁신교육원 사회적협동조합</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%234a6741'/><text x='16' y='22' text-anchor='middle' font-size='14' fill='%23f7f3ee'>社</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+  /* ── CSS CUSTOM PROPERTIES ── */
+  :root {
+    --bg-deep: #f4f7f2;
+    --bg-main: #ffffff;
+    --bg-card: #f8faf6;
+    --bg-accent: #eef3ec;
+    --text-primary: #1e2b1c;
+    --text-secondary: #3d5238;
+    --text-muted: #6e8469;
+    --accent-green: #4a6741;
+    --accent-green-light: #5d7f54;
+    --accent-gold: #7a8f3e;
+    --accent-earth: #6b5c3e;
+    --border-subtle: rgba(60, 80, 50, 0.1);
+    --border-medium: rgba(60, 80, 50, 0.2);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.1);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 16px;
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+    --space-3xl: 64px;
+    --space-4xl: 96px;
+    --max-width: 1200px;
+    --font-serif: Georgia, 'Noto Serif KR', serif;
+    --font-body: 'Pretendard Variable', 'Pretendard', -apple-system, sans-serif;
+  }
+
+  /* ── RESET ── */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ── NOISE TEXTURE ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.35;
+  }
+
+  /* ── SKIP LINK ── */
+  .skip-link {
+    position: absolute;
+    top: -100%;
+    left: var(--space-md);
+    background: var(--accent-green);
+    color: var(--bg-deep);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    z-index: 2000;
+    text-decoration: none;
+  }
+  .skip-link:focus {
+    top: var(--space-md);
+    outline: 3px solid var(--accent-gold);
+    outline-offset: 2px;
+  }
+
+  /* ── TYPOGRAPHY ── */
+  h1, h2, h3, h4 {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+  }
+
+  /* ── LAYOUT ── */
+  .container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
+  }
+
+  section {
+    padding: var(--space-4xl) 0;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(244, 247, 242, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-subtle);
+    transition: transform 0.3s ease-out;
+  }
+  nav.nav-hidden {
+    transform: translateY(-100%);
+  }
+  .nav-inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--space-md) var(--space-lg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .nav-logo {
+    font-family: var(--font-serif);
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-decoration: none;
+    letter-spacing: -0.02em;
+  }
+  .nav-logo:focus-visible {
+    outline: 3px solid var(--accent-gold);
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+  .nav-links {
+    display: flex;
+    gap: var(--space-lg);
+    list-style: none;
+  }
+  .nav-links a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    padding: var(--space-sm) var(--space-xs);
+    transition: color 0.2s ease;
+    position: relative;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 1.5px;
+    background: var(--accent-green);
+    transition: width 0.25s ease, left 0.25s ease;
+  }
+  .nav-links a:hover,
+  .nav-links a:focus-visible {
+    color: var(--text-primary);
+  }
+  .nav-links a:hover::after,
+  .nav-links a:focus-visible::after {
+    width: 100%;
+    left: 0;
+  }
+  .nav-links a:focus-visible {
+    outline: 2px solid var(--accent-gold);
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+
+  /* Mobile nav toggle */
+  .nav-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--space-sm);
+    min-width: 44px;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+  }
+  .nav-toggle svg {
+    width: 24px;
+    height: 24px;
+    stroke: var(--text-primary);
+    stroke-width: 2;
+    fill: none;
+  }
+  .nav-toggle:focus-visible {
+    outline: 3px solid var(--accent-gold);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    right: -10%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(ellipse, rgba(74, 103, 65, 0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-content {
+    position: relative;
+  }
+  .hero-label {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent-green);
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--accent-green);
+  }
+  .hero h1 {
+    font-size: clamp(28px, 5.5vw, 52px);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--space-xl);
+    max-width: 720px;
+  }
+  .hero-slogan {
+    font-family: var(--font-serif);
+    font-size: clamp(18px, 2.8vw, 26px);
+    font-weight: 400;
+    color: var(--accent-green-light);
+    font-style: italic;
+    margin-bottom: var(--space-3xl);
+    max-width: 560px;
+    line-height: 1.5;
+  }
+  .hero-rule {
+    width: 60px;
+    height: 2px;
+    background: var(--accent-green);
+    border: none;
+    margin-bottom: var(--space-xl);
+  }
+  .hero-desc {
+    font-size: 16px;
+    color: var(--text-secondary);
+    max-width: 520px;
+    line-height: 1.8;
+  }
+  .hero-scroll {
+    position: absolute;
+    bottom: var(--space-2xl);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    color: var(--text-muted);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-decoration: none;
+    min-width: 44px;
+    min-height: 44px;
+    padding: var(--space-sm);
+  }
+  .hero-scroll:focus-visible {
+    outline: 2px solid var(--accent-gold);
+    outline-offset: 4px;
+    border-radius: var(--radius-sm);
+  }
+  .hero-scroll svg {
+    width: 20px;
+    height: 20px;
+    stroke: var(--text-muted);
+    animation: scrollBounce 2s ease-in-out infinite;
+  }
+  @keyframes scrollBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(6px); }
+  }
+
+  /* ── SECTION HEADERS ── */
+  .section-label {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent-green);
+    margin-bottom: var(--space-md);
+  }
+  .section-title {
+    font-size: clamp(22px, 3.5vw, 36px);
+    margin-bottom: var(--space-2xl);
+    color: var(--text-primary);
+  }
+  .section-divider {
+    width: 40px;
+    height: 2px;
+    background: var(--border-medium);
+    border: none;
+    margin-bottom: var(--space-2xl);
+  }
+
+  /* ── ABOUT ── */
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3xl);
+    align-items: start;
+  }
+  .about-text {
+    font-size: 17px;
+    color: var(--text-secondary);
+    line-height: 1.9;
+    margin-bottom: var(--space-md);
+  }
+  .about-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-lg);
+    padding-top: var(--space-lg);
+  }
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+  }
+  .stat-number {
+    font-family: var(--font-serif);
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--accent-green);
+    line-height: 1.2;
+  }
+  .stat-label {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: var(--space-xs);
+  }
+
+  /* ── BUSINESS ── */
+  .business {
+    background: var(--bg-main);
+    border-top: 1px solid var(--border-subtle);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .business-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-lg);
+  }
+  .biz-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--space-xl);
+    transition: border-color 0.25s ease, transform 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .biz-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--accent-green);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+  .biz-card:hover::before {
+    transform: scaleX(1);
+  }
+  .biz-card:hover {
+    border-color: var(--border-medium);
+    transform: translateY(-2px);
+  }
+  .biz-type {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-green);
+    background: rgba(74, 103, 65, 0.1);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--space-md);
+  }
+  .biz-title {
+    font-family: var(--font-serif);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--space-md);
+    line-height: 1.4;
+  }
+  .biz-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+  }
+  .biz-items {
+    list-style: none;
+    margin-top: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+  .biz-items li {
+    font-size: 13px;
+    color: var(--text-secondary);
+    padding-left: var(--space-md);
+    position: relative;
+    line-height: 1.6;
+  }
+  .biz-items li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 9px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent-green);
+  }
+
+  /* ── PROJECTS ── */
+  .projects-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .project-item {
+    display: grid;
+    grid-template-columns: 220px 1fr auto;
+    gap: var(--space-lg);
+    align-items: center;
+    padding: var(--space-lg) 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .project-item:first-child {
+    border-top: 1px solid var(--border-subtle);
+  }
+  .project-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .project-detail {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+  .project-meta {
+    text-align: right;
+    white-space: nowrap;
+  }
+  .project-period {
+    font-size: 13px;
+    color: var(--text-muted);
+    display: block;
+  }
+  .project-budget {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent-green);
+    display: block;
+    margin-top: 2px;
+  }
+  .project-status {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-top: 4px;
+  }
+  .project-status.ongoing {
+    background: rgba(74, 103, 65, 0.12);
+    color: var(--accent-green);
+  }
+  .project-status.selected {
+    background: rgba(122, 143, 62, 0.12);
+    color: var(--accent-gold);
+  }
+  .project-status.done {
+    background: rgba(110, 132, 105, 0.1);
+    color: var(--text-muted);
+  }
+
+  /* ── ORGANIZATION ── */
+  .org {
+    background: var(--bg-main);
+    border-top: 1px solid var(--border-subtle);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .org-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3xl);
+    align-items: start;
+  }
+  .org-group {
+    margin-bottom: var(--space-2xl);
+  }
+  .org-group:last-child {
+    margin-bottom: 0;
+  }
+  .org-group-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent-green);
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .org-member {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-sm);
+    padding: var(--space-sm) 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .org-member:last-child {
+    border-bottom: none;
+  }
+  .org-member-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .org-member-role {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .org-affiliate {
+    font-size: 15px;
+    color: var(--text-secondary);
+    padding: var(--space-sm) 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .org-affiliate:last-child {
+    border-bottom: none;
+  }
+
+  /* ── CONTACT ── */
+  .contact-form {
+    max-width: 560px;
+  }
+  .contact-form label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-sm);
+  }
+  .field-required {
+    font-size: 12px;
+    color: #b83a2a;
+    font-weight: 400;
+  }
+  .contact-form input[type="text"],
+  .contact-form select,
+  .contact-form textarea {
+    width: 100%;
+    background: var(--bg-card);
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 15px;
+    font-family: var(--font-body);
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.2s ease;
+    margin-bottom: var(--space-lg);
+  }
+  .contact-form input[type="text"]:focus,
+  .contact-form select:focus,
+  .contact-form textarea:focus {
+    border-color: var(--accent-green);
+  }
+  .contact-form textarea {
+    resize: vertical;
+    min-height: 140px;
+    line-height: 1.7;
+  }
+  .contact-form select {
+    cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236e8469' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+  }
+  .contact-submit {
+    display: inline-block;
+    background: var(--accent-green);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 12px 32px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .contact-submit:hover {
+    background: var(--accent-green-light);
+  }
+  .contact-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .contact-msg {
+    margin-top: var(--space-md);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .contact-msg.ok {
+    color: var(--accent-green);
+  }
+  .contact-msg.err {
+    color: #b83a2a;
+  }
+  .contact-done {
+    display: none;
+    text-align: center;
+    padding: var(--space-2xl) 0;
+  }
+  .contact-done h3 {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    color: var(--accent-green);
+    margin-bottom: var(--space-md);
+  }
+  .contact-done p {
+    font-size: 15px;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-xl);
+  }
+  .contact-again {
+    background: transparent;
+    border: 1.5px solid var(--accent-green);
+    color: var(--accent-green);
+    border-radius: var(--radius-sm);
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .contact-again:hover {
+    background: var(--accent-green);
+    color: #ffffff;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: var(--space-2xl) 0;
+    border-top: 1px solid var(--border-subtle);
+    background: var(--bg-deep);
+  }
+  .footer-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer-name {
+    font-family: var(--font-serif);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--space-xs);
+  }
+  .footer-location {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .footer-copy {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+    .hero-scroll svg {
+      animation: none;
+    }
+    html { scroll-behavior: auto; }
+    .biz-card, .biz-card::before {
+      transition: none;
+    }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1024px) {
+    .about-grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-2xl);
+    }
+    .business-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .org-grid {
+      grid-template-columns: 1fr;
+    }
+    .project-item {
+      grid-template-columns: 1fr auto;
+      grid-template-rows: auto auto;
+    }
+    .project-detail {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .nav-links {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: rgba(244, 247, 242, 0.97);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      flex-direction: column;
+      padding: var(--space-lg);
+      gap: var(--space-md);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .nav-links.open {
+      display: flex;
+    }
+    .nav-links a {
+      font-size: 16px;
+      padding: var(--space-sm) 0;
+    }
+    .nav-toggle {
+      display: flex;
+    }
+
+    .business-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .project-item {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto;
+    }
+    .project-meta {
+      text-align: left;
+    }
+
+    .footer-inner {
+      flex-direction: column;
+      text-align: center;
+      gap: var(--space-md);
+    }
+
+    section {
+      padding: var(--space-3xl) 0;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .container {
+      padding: 0 var(--space-md);
+    }
+    .about-stats {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-sm);
+    }
+    .stat-card {
+      padding: var(--space-md);
+    }
+    .stat-number {
+      font-size: 22px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">본문으로 건너뛰기</a>
+
+<!-- NAV -->
+<nav aria-label="주요 내비게이션">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo" aria-label="사회혁신교육원 사회적협동조합 홈">사회혁신교육원</a>
+    <button class="nav-toggle" aria-label="메뉴 열기/닫기" aria-expanded="false" aria-controls="nav-menu">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <ul class="nav-links" id="nav-menu" role="list">
+      <li><a href="#about">소개</a></li>
+      <li><a href="#business">사업</a></li>
+      <li><a href="#org">조직</a></li>
+      <li><a href="#contact">문의</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<main id="main">
+<section class="hero">
+  <div class="container hero-content">
+    <span class="hero-label reveal">사교원 — 사회혁신교육원 사회적협동조합</span>
+    <h1 class="reveal reveal-delay-1">사회혁신교육원<br>사회적협동조합</h1>
+    <p class="hero-slogan reveal reveal-delay-2">지역에서 혁신을, 현장에서 배운다</p>
+    <hr class="hero-rule reveal reveal-delay-2">
+    <p class="hero-desc reveal reveal-delay-3">교육 컨설팅과 어촌신활력증진사업을 통해 지역 현장의 변화를 이끄는 사회혁신 전문조직입니다. 광주·전남·전북을 거점으로 농어촌 지역사회의 지속가능한 발전을 함께 만들어 갑니다.</p>
+  </div>
+  <a href="#about" class="hero-scroll" aria-label="아래로 스크롤">
+    <span>SCROLL</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
+  </a>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div>
+        <span class="section-label reveal">About</span>
+        <h2 class="section-title reveal">법인 소개</h2>
+        <hr class="section-divider reveal">
+        <p class="about-text reveal">사회혁신교육원 사회적협동조합은 지역의 변화를 현장에서 이끌어 내는 교육·컨설팅 전문 사회적협동조합입니다.</p>
+        <p class="about-text reveal">교육 컨설팅, 어촌신활력증진사업 앵커조직 운영, 사업개발 등 3개 분야에서 지역사회 혁신을 실현하고 있습니다. 광주광역시, 전라남도, 전북특별자치도를 사업권역으로 삼아 현장 밀착형 활동을 펼칩니다.</p>
+        <p class="about-text reveal">연계법인 주식회사 마을항해와 함께 관광·에너지·AI 등 신사업 분야로 지속적으로 영역을 확장하고 있습니다.</p>
+      </div>
+      <div class="about-stats reveal">
+        <div class="stat-card">
+          <div class="stat-number">11명</div>
+          <div class="stat-label">총 고용인력</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">2개 지역</div>
+          <div class="stat-label">어촌신활력사업 앵커</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">13억</div>
+          <div class="stat-label">2025 매출</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">14명</div>
+          <div class="stat-label">조합원</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BUSINESS -->
+<section id="business" class="business">
+  <div class="container">
+    <span class="section-label reveal">Business</span>
+    <h2 class="section-title reveal">주요 사업</h2>
+    <hr class="section-divider reveal">
+
+    <div class="business-grid">
+      <!-- 교육 컨설팅 -->
+      <article class="biz-card reveal">
+        <span class="biz-type">교육 컨설팅</span>
+        <h3 class="biz-title">지역 현장 교육 컨설팅</h3>
+        <p class="biz-desc">공공기관·지자체·사회적경제 조직의 교육 설계와 운영을 전담합니다.</p>
+        <ul class="biz-items">
+          <li>장수활력센터</li>
+          <li>해남사회적공동체지원센터</li>
+          <li>인천대 트라이버시티</li>
+          <li>완도군 주민참여교육</li>
+          <li>안성농업기술센터 신활력플러스 아카데미</li>
+        </ul>
+      </article>
+
+      <!-- 어촌신활력증진사업 -->
+      <article class="biz-card reveal reveal-delay-1">
+        <span class="biz-type">어촌신활력증진사업</span>
+        <h3 class="biz-title">어촌 앵커조직 위탁 운영</h3>
+        <p class="biz-desc">망남(고흥)과 양양 후진항 2개 지역에서 앵커조직을 위탁 운영합니다. 각 지역 5명+앵커 직원, 7명씩 총 14명 규모로 마을학교·건강실·주민주도 유통체계 등 SW 사업을 추진합니다.</p>
+        <ul class="biz-items">
+          <li>망남 어촌신활력증진사업 (고흥)</li>
+          <li>양양 후진항 어촌신활력증진사업</li>
+        </ul>
+      </article>
+
+      <!-- 사업개발 -->
+      <article class="biz-card reveal reveal-delay-2">
+        <span class="biz-type">사업개발</span>
+        <h3 class="biz-title">신사업 개발 및 컨설팅</h3>
+        <p class="biz-desc">B2B/B2C 신사업 발굴과 햇빛소득마을 3000개소 컨설팅, 관광·에너지·AI 분야로 사업 영역을 확장합니다.</p>
+        <ul class="biz-items">
+          <li>햇빛소득마을 3000개소 컨설팅</li>
+          <li>관광·에너지·AI 분야 신사업</li>
+          <li>연계법인 주식회사 마을항해 설립·운영</li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="container">
+    <span class="section-label reveal">Projects</span>
+    <h2 class="section-title reveal">세부 사업 현황</h2>
+    <hr class="section-divider reveal">
+
+    <div class="projects-list">
+      <div class="project-item reveal">
+        <div class="project-name"><a href="/course-1.html" style="color: inherit; text-decoration: none; border-bottom: 1px solid var(--accent-green);">연대지능과 사회혁신 — AI 활용 활동가 양성과정 1기</a></div>
+        <div class="project-detail">사회연대경제 진영 활동가가 AI를 자기 현장 도구로 익히는 8회 양성과정. 줌 온라인, 회당 2시간 × 주 1회 × 8주, 정원 7~8명.</div>
+        <div class="project-meta">
+          <span class="project-period">2026 (일정 추후 공지)</span>
+          <span class="project-status selected">신규 개설</span>
+        </div>
+      </div>
+
+      <div class="project-item reveal">
+        <div class="project-name">망남어촌신활력증진사업</div>
+        <div class="project-detail">고흥군 망남 어촌 앵커조직 위탁 운영. 마을학교·건강실·주민주도 유통체계 등 SW 사업 3가지 추진.</div>
+        <div class="project-meta">
+          <span class="project-period">진행중</span>
+          <span class="project-status ongoing">진행중</span>
+        </div>
+      </div>
+
+      <div class="project-item reveal">
+        <div class="project-name">양양 후진항 어촌신활력증진사업</div>
+        <div class="project-detail">2026년 2월 선정. 양양 후진항 어촌 앵커조직 운영 착수.</div>
+        <div class="project-meta">
+          <span class="project-period">2026.02~</span>
+          <span class="project-status selected">신규 선정</span>
+        </div>
+      </div>
+
+      <div class="project-item reveal">
+        <div class="project-name">장수활력센터</div>
+        <div class="project-detail">장수군 지역활력센터 교육 컨설팅 운영.</div>
+        <div class="project-meta">
+          <span class="project-period">24.06 ~ 25.02</span>
+          <span class="project-budget">2천만원</span>
+          <span class="project-status done">완료</span>
+        </div>
+      </div>
+
+      <div class="project-item reveal">
+        <div class="project-name">해남사회적공동체지원센터</div>
+        <div class="project-detail">해남군 사회적공동체지원센터 위탁 운영 및 교육 컨설팅.</div>
+        <div class="project-meta">
+          <span class="project-period">24.01 ~ 25.12</span>
+          <span class="project-budget">11억</span>
+          <span class="project-status done">완료</span>
+        </div>
+      </div>
+
+      <div class="project-item reveal">
+        <div class="project-name">인천대 트라이버시티</div>
+        <div class="project-detail">인천대학교 트라이버시티 사업 교육과정 설계 및 운영.</div>
+        <div class="project-meta">
+          <span class="project-period">25.03 ~ 25.08</span>
+          <span class="project-budget">2천만원</span>
+          <span class="project-status done">완료</span>
+        </div>
+      </div>
+
+      <div class="project-item reveal">
+        <div class="project-name">완도군 주민참여교육</div>
+        <div class="project-detail">완도군 주민참여 역량강화 교육과정 기획·운영.</div>
+        <div class="project-meta">
+          <span class="project-period">25.04 ~ 25.06</span>
+          <span class="project-budget">1,400만원</span>
+          <span class="project-status done">완료</span>
+        </div>
+      </div>
+
+      <div class="project-item reveal">
+        <div class="project-name">안성농업기술센터 신활력플러스 아카데미</div>
+        <div class="project-detail">안성시 농업기술센터 신활력플러스사업 교육 아카데미 운영.</div>
+        <div class="project-meta">
+          <span class="project-period">25.06 ~ 26.03</span>
+          <span class="project-budget">약 1억</span>
+          <span class="project-status ongoing">진행중</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ORGANIZATION -->
+<section id="org" class="org">
+  <div class="container">
+    <span class="section-label reveal">Organization</span>
+    <h2 class="section-title reveal">조직 구성</h2>
+    <hr class="section-divider reveal">
+
+    <div class="org-grid">
+      <div class="reveal">
+        <div class="org-group">
+          <div class="org-group-title">대표</div>
+          <div class="org-member">
+            <span class="org-member-name">김일영</span>
+            <span class="org-member-role">이사장</span>
+          </div>
+        </div>
+
+        <div class="org-group">
+          <div class="org-group-title">상근직원</div>
+          <div class="org-member">
+            <span class="org-member-name">김민수</span>
+            <span class="org-member-role">실장</span>
+          </div>
+          <div class="org-member">
+            <span class="org-member-name">조영윤</span>
+            <span class="org-member-role">직원</span>
+          </div>
+          <div class="org-member">
+            <span class="org-member-name">김지희</span>
+            <span class="org-member-role">직원</span>
+          </div>
+        </div>
+
+        <div class="org-group">
+          <div class="org-group-title">이사회</div>
+          <div class="org-member">
+            <span class="org-member-name">김승호</span>
+            <span class="org-member-role">이사</span>
+          </div>
+          <div class="org-member">
+            <span class="org-member-name">이남표</span>
+            <span class="org-member-role">이사</span>
+          </div>
+          <div class="org-member">
+            <span class="org-member-name">안종기</span>
+            <span class="org-member-role">이사</span>
+          </div>
+          <div class="org-member">
+            <span class="org-member-name">김영구</span>
+            <span class="org-member-role">이사</span>
+          </div>
+          <div class="org-member">
+            <span class="org-member-name">김태현</span>
+            <span class="org-member-role">이사</span>
+          </div>
+          <div class="org-member">
+            <span class="org-member-name">최순례</span>
+            <span class="org-member-role">감사</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal reveal-delay-1">
+        <div class="org-group">
+          <div class="org-group-title">연계법인</div>
+          <div class="org-affiliate">주식회사 마을항해</div>
+        </div>
+
+        <div class="org-group">
+          <div class="org-group-title">조합원 법인</div>
+          <div class="org-affiliate">사회적경제연구원사회적협동조합</div>
+          <div class="org-affiliate">품앗이소비자생활협동조합</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="container">
+    <span class="section-label reveal">Contact</span>
+    <h2 class="section-title reveal">문의하기</h2>
+    <hr class="section-divider reveal">
+
+    <div class="contact-form reveal" id="contact-form">
+      <label for="inq-name">이름</label>
+      <input type="text" id="inq-name" placeholder="이름을 입력해주세요">
+
+      <label for="inq-category">문의 유형</label>
+      <select id="inq-category">
+        <option value="">선택해주세요</option>
+        <option value="교육컨설팅">교육컨설팅</option>
+        <option value="사업협력">사업협력</option>
+        <option value="조합원가입">조합원가입</option>
+        <option value="기타">기타</option>
+      </select>
+
+      <label for="inq-content">내용 <span class="field-required">*필수</span></label>
+      <textarea id="inq-content" placeholder="문의하실 내용을 자유롭게 적어주세요"></textarea>
+
+      <button class="contact-submit" id="inq-submit" type="button">문의 보내기</button>
+      <div class="contact-msg" id="inq-msg"></div>
+    </div>
+
+    <div class="contact-done" id="contact-done">
+      <h3>문의가 접수되었습니다</h3>
+      <p>검토 후 연락드리겠습니다. 감사합니다.</p>
+      <button class="contact-again" id="inq-again" type="button">다른 문의 남기기</button>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-name">사회혁신교육원 사회적협동조합</div>
+        <div class="footer-location">광주광역시 &middot; 전라남도 &middot; 전북특별자치도</div>
+      </div>
+      <div class="footer-copy">&copy; 2026 사회혁신교육원 사회적협동조합</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function() {
+  'use strict';
+
+  // ── Scroll reveal ──
+  var reveals = document.querySelectorAll('.reveal');
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+  reveals.forEach(function(el) { observer.observe(el); });
+
+  // ── Nav hide on scroll ──
+  var nav = document.querySelector('nav');
+  var lastScroll = 0;
+  var ticking = false;
+
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        var currentScroll = window.pageYOffset;
+        if (currentScroll > 80 && currentScroll > lastScroll) {
+          nav.classList.add('nav-hidden');
+        } else {
+          nav.classList.remove('nav-hidden');
+        }
+        lastScroll = currentScroll;
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  // ── Mobile nav toggle ──
+  var toggle = document.querySelector('.nav-toggle');
+  var navMenu = document.getElementById('nav-menu');
+
+  toggle.addEventListener('click', function() {
+    var isOpen = navMenu.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  });
+
+  navMenu.querySelectorAll('a').forEach(function(link) {
+    link.addEventListener('click', function() {
+      navMenu.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+    });
+  });
+})();
+</script>
+
+<script>
+(function() {
+  'use strict';
+
+  var submitBtn = document.getElementById('inq-submit');
+  var msgEl = document.getElementById('inq-msg');
+  var formEl = document.getElementById('contact-form');
+  var doneEl = document.getElementById('contact-done');
+  var againBtn = document.getElementById('inq-again');
+
+  submitBtn.addEventListener('click', function() {
+    var name = document.getElementById('inq-name').value.trim();
+    var category = document.getElementById('inq-category').value;
+    var content = document.getElementById('inq-content').value.trim();
+
+    msgEl.textContent = '';
+    msgEl.className = 'contact-msg';
+
+    if (!content) {
+      msgEl.className = 'contact-msg err';
+      msgEl.textContent = '내용을 입력해주세요.';
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = '보내는 중...';
+
+    var body = { content: content, category: category || '기타' };
+    if (name) { body.name = name; }
+
+    fetch('/api/inquiries', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    })
+    .then(function(res) {
+      if (!res.ok) { throw new Error('HTTP ' + res.status); }
+      formEl.style.display = 'none';
+      doneEl.style.display = 'block';
+    })
+    .catch(function() {
+      msgEl.className = 'contact-msg err';
+      msgEl.textContent = '전송에 실패했습니다. 잠시 후 다시 시도해주세요.';
+    })
+    .finally(function() {
+      submitBtn.disabled = false;
+      submitBtn.textContent = '문의 보내기';
+    });
+  });
+
+  againBtn.addEventListener('click', function() {
+    document.getElementById('inq-name').value = '';
+    document.getElementById('inq-category').value = '';
+    document.getElementById('inq-content').value = '';
+    msgEl.textContent = '';
+    doneEl.style.display = 'none';
+    formEl.style.display = 'block';
+  });
+})();
+</script>
+
+<script src="https://seed.poomasi.org/poomai-widget.js"></script>
+</body>
+</html>
