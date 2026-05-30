@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>시민재생에너지 AI — 시민이 에너지의 주인이 되도록</title>
+<meta name="description" content="시민·농민·마을이 재생에너지의 주인이 되도록, 현장 데이터와 공동체 지식을 자기화한 도메인특화 AI. 시민재생에너지 AI의 정의·비전·미션·전략.">
+<meta property="og:title" content="시민재생에너지 AI">
+<meta property="og:description" content="시민이 에너지의 소비자가 아니라 생산자이자 주권자가 되는 사회를 위한 도메인특화 AI">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://energy.poomasi.org/">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='9' fill='%23d99016'/><g stroke='%23d99016' stroke-width='2.4' stroke-linecap='round'><line x1='16' y1='2' x2='16' y2='6'/><line x1='16' y1='26' x2='16' y2='30'/><line x1='2' y1='16' x2='6' y2='16'/><line x1='26' y1='16' x2='30' y2='16'/><line x1='6' y1='6' x2='9' y2='9'/><line x1='23' y1='23' x2='26' y2='26'/><line x1='26' y1='6' x2='23' y2='9'/><line x1='9' y1='23' x2='6' y2='26'/></g></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+  /* ── CSS CUSTOM PROPERTIES ── */
+  :root {
+    --bg-deep: #faf6ee;
+    --bg-main: #ffffff;
+    --bg-card: #fcf9f2;
+    --bg-accent: #f4ecdc;
+    --text-primary: #211a0f;
+    --text-secondary: #4a4030;
+    --text-muted: #897b60;
+    --accent-solar: #d99016;       /* 햇빛 골드 — 주 색 */
+    --accent-solar-deep: #a96a08;  /* 텍스트 대비용 */
+    --accent-solar-soft: #f0c06a;
+    --accent-green: #4a6741;        /* 농지·영농형 — sakyowon 연결 */
+    --accent-green-deep: #38502f;
+    --accent-earth: #8a6d3b;
+    --border-subtle: rgba(120, 90, 40, 0.13);
+    --border-medium: rgba(120, 90, 40, 0.24);
+    --shadow-sm: 0 1px 3px rgba(60,40,10,0.07);
+    --shadow-md: 0 6px 20px rgba(60,40,10,0.10);
+    --shadow-lg: 0 14px 44px rgba(60,40,10,0.14);
+    --radius-sm: 4px;
+    --radius-md: 10px;
+    --radius-lg: 18px;
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+    --space-3xl: 64px;
+    --space-4xl: 96px;
+    --max-width: 1180px;
+    --font-serif: 'Noto Serif KR', Georgia, serif;
+    --font-body: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  /* ── RESET ── */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ── NOISE TEXTURE ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  /* ── SKIP LINK ── */
+  .skip-link {
+    position: absolute;
+    top: -100%;
+    left: var(--space-md);
+    background: var(--accent-green);
+    color: #fff;
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    z-index: 2000;
+    text-decoration: none;
+  }
+  .skip-link:focus {
+    top: var(--space-md);
+    outline: 3px solid var(--accent-solar);
+    outline-offset: 2px;
+  }
+
+  /* ── TYPOGRAPHY ── */
+  h1, h2, h3, h4 {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    line-height: 1.32;
+    letter-spacing: -0.02em;
+  }
+
+  /* ── LAYOUT ── */
+  .container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
+  }
+  section { padding: var(--space-4xl) 0; }
+
+  .section-label {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent-solar-deep);
+    margin-bottom: var(--space-md);
+  }
+  .section-title {
+    font-size: clamp(1.7rem, 4vw, 2.5rem);
+    margin-bottom: var(--space-lg);
+    color: var(--text-primary);
+  }
+  .section-lead {
+    font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+    color: var(--text-secondary);
+    max-width: 46ch;
+    line-height: 1.75;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(250, 246, 238, 0.9);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .nav-inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+  .nav-brand .mark {
+    width: 26px; height: 26px;
+    flex-shrink: 0;
+  }
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xl);
+    list-style: none;
+  }
+  .nav-links a {
+    position: relative;
+    font-size: 0.94rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-decoration: none;
+    padding: var(--space-xs) 0;
+    transition: color 0.2s ease;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    left: 0; bottom: -2px;
+    width: 0; height: 2px;
+    background: var(--accent-solar);
+    transition: width 0.25s ease;
+  }
+  .nav-links a:hover,
+  .nav-links a:focus-visible { color: var(--accent-solar-deep); }
+  .nav-links a:hover::after,
+  .nav-links a:focus-visible::after { width: 100%; }
+  .nav-links a:focus-visible {
+    outline: 2px solid var(--accent-solar);
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+  .nav-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--space-sm);
+    color: var(--text-primary);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    padding-top: 64px;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(60% 50% at 78% 12%, rgba(217,144,22,0.30), transparent 70%),
+      radial-gradient(50% 55% at 8% 88%, rgba(74,103,65,0.18), transparent 72%),
+      radial-gradient(80% 60% at 50% 120%, rgba(240,192,106,0.22), transparent 70%);
+    z-index: 0;
+  }
+  /* 햇살 광선 */
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: -20%; right: -5%;
+    width: 60vw; height: 60vw;
+    max-width: 720px; max-height: 720px;
+    background: radial-gradient(circle, rgba(217,144,22,0.16) 0%, transparent 60%);
+    z-index: 0;
+    pointer-events: none;
+  }
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 820px;
+  }
+  .hero-label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent-solar-deep);
+    background: rgba(217,144,22,0.10);
+    border: 1px solid rgba(217,144,22,0.28);
+    padding: 6px 14px;
+    border-radius: 100px;
+    margin-bottom: var(--space-lg);
+  }
+  .hero-label .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent-solar);
+    box-shadow: 0 0 0 3px rgba(217,144,22,0.22);
+  }
+  .hero h1 {
+    font-size: clamp(2.1rem, 6.2vw, 4rem);
+    line-height: 1.18;
+    margin-bottom: var(--space-lg);
+    color: var(--text-primary);
+  }
+  .hero h1 .accent { color: var(--accent-solar-deep); }
+  .hero-rule {
+    width: 64px; height: 3px;
+    border: none;
+    background: var(--accent-solar);
+    margin: var(--space-lg) 0;
+  }
+  .hero-desc {
+    font-size: clamp(1.1rem, 2.4vw, 1.4rem);
+    color: var(--text-secondary);
+    max-width: 40ch;
+    line-height: 1.6;
+    font-family: var(--font-serif);
+    font-weight: 500;
+  }
+  .hero-sub {
+    margin-top: var(--space-lg);
+    font-size: 1.02rem;
+    color: var(--text-muted);
+    max-width: 52ch;
+  }
+  .hero-scroll {
+    position: absolute;
+    bottom: var(--space-2xl);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    color: var(--accent-solar-deep);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    text-decoration: none;
+    opacity: 0.75;
+  }
+  .hero-scroll:focus-visible {
+    outline: 2px solid var(--accent-solar);
+    outline-offset: 4px;
+    border-radius: var(--radius-sm);
+  }
+  .hero-scroll svg { animation: bob 2.2s ease-in-out infinite; }
+  @keyframes bob {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(6px); }
+  }
+
+  /* ── DEFINE (정의) ── */
+  .define { background: var(--bg-main); }
+  .define-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3xl);
+    align-items: start;
+  }
+  .define-statement {
+    font-family: var(--font-serif);
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    line-height: 1.5;
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+  .define-statement b {
+    color: var(--accent-solar-deep);
+    font-weight: 700;
+  }
+  .define-points { display: grid; gap: var(--space-lg); }
+  .define-point {
+    display: flex;
+    gap: var(--space-md);
+    align-items: flex-start;
+  }
+  .define-point .ico {
+    flex-shrink: 0;
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: var(--bg-accent);
+    display: grid;
+    place-items: center;
+    color: var(--accent-green-deep);
+  }
+  .define-point h3 {
+    font-size: 1.08rem;
+    margin-bottom: 2px;
+    font-family: var(--font-body);
+    font-weight: 700;
+  }
+  .define-point p { color: var(--text-secondary); font-size: 0.97rem; }
+
+  /* ── VISION (비전) ── */
+  .vision {
+    position: relative;
+    background:
+      linear-gradient(135deg, var(--accent-green-deep), #2c3f25);
+    color: #f4ecdc;
+    overflow: hidden;
+  }
+  .vision::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(55% 60% at 85% 10%, rgba(217,144,22,0.28), transparent 65%),
+      radial-gradient(45% 50% at 10% 95%, rgba(240,192,106,0.14), transparent 70%);
+    pointer-events: none;
+  }
+  .vision .container { position: relative; z-index: 1; }
+  .vision .section-label { color: var(--accent-solar-soft); }
+  .vision-quote {
+    font-family: var(--font-serif);
+    font-size: clamp(1.6rem, 4.4vw, 2.8rem);
+    line-height: 1.4;
+    font-weight: 700;
+    max-width: 20ch;
+    margin-bottom: var(--space-2xl);
+    color: #fdf6e8;
+  }
+  .vision-quote .accent { color: var(--accent-solar-soft); }
+  .vision-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-xl);
+    list-style: none;
+  }
+  .vision-list li {
+    border-top: 2px solid rgba(240,192,106,0.4);
+    padding-top: var(--space-md);
+    color: #e6ddca;
+    font-size: 1rem;
+    line-height: 1.65;
+  }
+  .vision-list li b { color: #fdf6e8; font-weight: 700; }
+
+  /* ── MISSION (미션) ── */
+  .mission { background: var(--bg-deep); }
+  .mission-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-xl);
+    margin-top: var(--space-2xl);
+  }
+  .mcard {
+    background: var(--bg-main);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2xl) var(--space-xl);
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  }
+  .mcard:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: rgba(217,144,22,0.4);
+  }
+  .mcard .num {
+    font-family: var(--font-serif);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--accent-solar-deep);
+    letter-spacing: 0.1em;
+  }
+  .mcard .ico {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(217,144,22,0.16), rgba(217,144,22,0.05));
+    display: grid;
+    place-items: center;
+    color: var(--accent-solar-deep);
+    margin: var(--space-md) 0;
+  }
+  .mcard h3 { font-size: 1.25rem; margin-bottom: var(--space-sm); }
+  .mcard p { color: var(--text-secondary); font-size: 0.98rem; }
+
+  /* ── ARCHITECTURE (구조) ── */
+  .arch { background: var(--bg-main); }
+  .arch-head { text-align: center; max-width: 60ch; margin: 0 auto var(--space-3xl); }
+  .arch-head .section-lead { margin: 0 auto; }
+  .arch-diagram {
+    max-width: 880px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+  .arch-hub {
+    background: linear-gradient(135deg, var(--accent-green-deep), #2c3f25);
+    color: #fdf6e8;
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl) var(--space-2xl);
+    text-align: center;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    z-index: 2;
+    max-width: 460px;
+  }
+  .arch-hub .tag {
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-solar-soft);
+    font-weight: 700;
+  }
+  .arch-hub h3 { font-size: 1.5rem; color: #fdf6e8; margin: 4px 0 6px; }
+  .arch-hub p { font-size: 0.92rem; color: #d9cfb8; }
+  .arch-connector {
+    width: 2px; height: 38px;
+    background: linear-gradient(var(--accent-solar), rgba(217,144,22,0.2));
+    position: relative;
+  }
+  .arch-connector::after {
+    content: '데이터가 수렴';
+    position: absolute;
+    left: 12px; top: 50%;
+    transform: translateY(-50%);
+    white-space: nowrap;
+    font-size: 0.74rem;
+    color: var(--accent-solar-deep);
+    font-weight: 600;
+  }
+  .arch-domains {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-md);
+    width: 100%;
+  }
+  .dom {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    text-align: center;
+  }
+  .dom.active {
+    border-color: var(--accent-solar);
+    background: rgba(217,144,22,0.07);
+    box-shadow: var(--shadow-sm);
+  }
+  .dom .dom-name { font-weight: 700; font-size: 1.02rem; color: var(--text-primary); }
+  .dom .dom-sub { font-size: 0.82rem; color: var(--text-muted); margin-top: 2px; }
+  .dom.active .dom-name { color: var(--accent-solar-deep); }
+  .arch-caption {
+    text-align: center;
+    margin-top: var(--space-xl);
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+  }
+  .arch-caption b { color: var(--accent-green-deep); }
+
+  /* ── STRATEGY (전략) ── */
+  .strategy { background: var(--bg-deep); }
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-xl);
+    margin-top: var(--space-2xl);
+    counter-reset: step;
+  }
+  .step {
+    position: relative;
+    background: var(--bg-main);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2xl) var(--space-xl) var(--space-xl);
+  }
+  .step.now {
+    border-color: var(--accent-solar);
+    box-shadow: 0 0 0 1px var(--accent-solar), var(--shadow-md);
+  }
+  .step .phase {
+    position: absolute;
+    top: calc(-1 * var(--space-md));
+    left: var(--space-xl);
+    background: var(--accent-solar);
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 4px 12px;
+    border-radius: 100px;
+  }
+  .step.upcoming .phase { background: var(--accent-green); }
+  .step h3 { font-size: 1.2rem; margin: var(--space-sm) 0; }
+  .step p { color: var(--text-secondary); font-size: 0.96rem; }
+  .step .when {
+    display: inline-block;
+    margin-top: var(--space-md);
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+  .step.now .when { color: var(--accent-solar-deep); }
+
+  /* ── PRINCIPLES (원칙) ── */
+  .principles { background: var(--bg-main); }
+  .prin-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-xl);
+    margin-top: var(--space-2xl);
+  }
+  .prin {
+    display: flex;
+    gap: var(--space-md);
+    padding: var(--space-lg);
+    border-left: 3px solid var(--accent-solar);
+    background: var(--bg-card);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  }
+  .prin h3 { font-size: 1.05rem; margin-bottom: 4px; font-family: var(--font-body); font-weight: 700; }
+  .prin p { color: var(--text-secondary); font-size: 0.95rem; }
+
+  /* ── DATA SOVEREIGNTY (closing) ── */
+  .closing {
+    background: linear-gradient(135deg, #2c3f25, var(--accent-green-deep));
+    color: #f4ecdc;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .closing::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(50% 70% at 50% 0%, rgba(217,144,22,0.26), transparent 65%);
+  }
+  .closing .container { position: relative; z-index: 1; max-width: 760px; }
+  .closing .section-label { color: var(--accent-solar-soft); }
+  .closing h2 {
+    font-size: clamp(1.6rem, 4vw, 2.6rem);
+    color: #fdf6e8;
+    margin-bottom: var(--space-lg);
+    line-height: 1.4;
+  }
+  .closing h2 .accent { color: var(--accent-solar-soft); }
+  .closing p { color: #e6ddca; font-size: 1.08rem; max-width: 56ch; margin: 0 auto var(--space-xl); }
+  .closing-links { display: flex; gap: var(--space-md); justify-content: center; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 26px;
+    border-radius: 100px;
+    font-weight: 600;
+    font-size: 0.98rem;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    min-height: 44px;
+  }
+  .btn-primary {
+    background: var(--accent-solar);
+    color: #2a1c04;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(217,144,22,0.4); }
+  .btn-ghost {
+    background: rgba(255,255,255,0.08);
+    color: #fdf6e8;
+    border: 1px solid rgba(240,192,106,0.4);
+  }
+  .btn-ghost:hover { background: rgba(255,255,255,0.16); transform: translateY(-2px); }
+  .btn:focus-visible { outline: 3px solid var(--accent-solar-soft); outline-offset: 3px; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: #1b1409;
+    color: #b8a786;
+    padding: var(--space-3xl) 0 var(--space-2xl);
+    font-size: 0.92rem;
+  }
+  .footer-grid {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-2xl);
+    padding-bottom: var(--space-2xl);
+    border-bottom: 1px solid rgba(184,167,134,0.18);
+  }
+  .footer-brand { max-width: 38ch; }
+  .footer-brand .fb-title {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: #f4ecdc;
+    margin-bottom: var(--space-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+  .footer-brand p { line-height: 1.6; }
+  .footer-nav { display: flex; gap: var(--space-3xl); flex-wrap: wrap; }
+  .footer-col h4 {
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #d9cfb8;
+    margin-bottom: var(--space-md);
+    font-family: var(--font-body);
+  }
+  .footer-col a {
+    display: block;
+    color: #b8a786;
+    text-decoration: none;
+    padding: 5px 0;
+    transition: color 0.2s ease;
+  }
+  .footer-col a:hover, .footer-col a:focus-visible { color: var(--accent-solar-soft); }
+  .footer-bottom {
+    padding-top: var(--space-xl);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    color: #897b60;
+    font-size: 0.85rem;
+  }
+
+  /* ── REVEAL ANIMATION ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.in { opacity: 1; transform: none; }
+  .reveal-d2 { transition-delay: 0.12s; }
+  .reveal-d3 { transition-delay: 0.24s; }
+  .reveal-d4 { transition-delay: 0.36s; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 920px) {
+    .define-grid { grid-template-columns: 1fr; gap: var(--space-2xl); }
+    .vision-list, .mission-grid, .arch-domains, .steps, .prin-grid { grid-template-columns: 1fr; }
+    .arch-domains { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .vision-list { gap: var(--space-lg); }
+  }
+  @media (max-width: 680px) {
+    section { padding: var(--space-3xl) 0; }
+    .nav-links {
+      position: fixed;
+      top: 64px; left: 0; right: 0;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0;
+      background: rgba(250,246,238,0.98);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: var(--space-sm) var(--space-lg) var(--space-lg);
+      transform: translateY(-120%);
+      transition: transform 0.3s ease;
+      box-shadow: var(--shadow-md);
+    }
+    .nav-links.open { transform: translateY(0); }
+    .nav-links a { padding: var(--space-md) 0; width: 100%; font-size: 1.05rem; }
+    .nav-toggle { display: block; }
+    .arch-domains { grid-template-columns: 1fr; }
+    .arch-connector::after { position: static; display: block; transform: none; text-align: center; margin-top: 4px; }
+    .footer-grid { flex-direction: column; gap: var(--space-xl); }
+    .footer-nav { gap: var(--space-xl); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+    .reveal { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">본문으로 건너뛰기</a>
+
+<nav aria-label="주요 내비게이션">
+  <div class="nav-inner">
+    <a href="#main" class="nav-brand" aria-label="시민재생에너지 AI 홈">
+      <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
+        <circle cx="16" cy="16" r="8" fill="#d99016"/>
+        <g stroke="#d99016" stroke-width="2.4" stroke-linecap="round">
+          <line x1="16" y1="2" x2="16" y2="6"/><line x1="16" y1="26" x2="16" y2="30"/>
+          <line x1="2" y1="16" x2="6" y2="16"/><line x1="26" y1="16" x2="30" y2="16"/>
+          <line x1="6.3" y1="6.3" x2="9" y2="9"/><line x1="23" y1="23" x2="25.7" y2="25.7"/>
+          <line x1="25.7" y1="6.3" x2="23" y2="9"/><line x1="9" y1="23" x2="6.3" y2="25.7"/>
+        </g>
+      </svg>
+      시민재생에너지 AI
+    </a>
+    <button class="nav-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="nav-menu">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <ul class="nav-links" id="nav-menu" role="list">
+      <li><a href="#define">정의</a></li>
+      <li><a href="#vision">비전</a></li>
+      <li><a href="#mission">미션</a></li>
+      <li><a href="#architecture">구조</a></li>
+      <li><a href="#strategy">전략</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main id="main">
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container hero-content">
+    <span class="hero-label reveal"><span class="dot"></span>시민재생에너지 AI</span>
+    <h1 class="reveal reveal-d2">시민이 에너지의<br><span class="accent">주인</span>이 되도록.</h1>
+    <hr class="hero-rule reveal reveal-d2">
+    <p class="hero-desc reveal reveal-d3">시민·농민·마을이 가진 현장의 데이터와 공동체의 지식을 자기화한, 도메인특화 AI입니다.</p>
+    <p class="hero-sub reveal reveal-d4">빅테크의 인공지능을 빌려 쓰는 자동화가 아니라, 현장에서만 나오는 데이터로 스스로 배우는 인공지능. 사회연대경제의 27년 경험 위에서 함께 만들어 갑니다.</p>
+  </div>
+  <a href="#define" class="hero-scroll" aria-label="아래로 스크롤하여 더 알아보기">
+    <span>알아보기</span>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
+  </a>
+</section>
+
+<!-- DEFINE -->
+<section id="define" class="define">
+  <div class="container define-grid">
+    <div>
+      <span class="section-label reveal">무엇인가</span>
+      <p class="define-statement reveal reveal-d2">시민재생에너지 AI는, 시민·농민·마을이 재생에너지의 <b>주인</b>이 되도록, 그들만이 가진 현장 데이터와 공동체 지식을 <b>자기화한 도메인특화 AI</b>입니다.</p>
+    </div>
+    <div class="define-points">
+      <div class="define-point reveal reveal-d2">
+        <span class="ico" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6m0 0 3-3m-3 3L9 5"/><rect x="4" y="9" width="16" height="11" rx="2"/><path d="M9 13h6m-6 3h4"/></svg>
+        </span>
+        <div>
+          <h3>빌려 쓰지 않습니다</h3>
+          <p>빅테크 API를 호출하는 자동화가 아니라, 현장에서만 나오는 데이터로 스스로 학습한 AI입니다.</p>
+        </div>
+      </div>
+      <div class="define-point reveal reveal-d3">
+        <span class="ico" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="3"/><circle cx="17" cy="17" r="3"/><path d="M10 7h4a3 3 0 0 1 3 3v4M7 10v4a3 3 0 0 0 3 3h0"/></svg>
+        </span>
+        <div>
+          <h3>두 축을 잇습니다</h3>
+          <p>발전을 예측·최적화하는 물리축과, 시민의 합의·자생·매개를 돕는 운동축을 함께 잇습니다.</p>
+        </div>
+      </div>
+      <div class="define-point reveal reveal-d4">
+        <span class="ico" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 4.5-3.2 7.8-8 9-4.8-1.2-8-4.5-8-9V7z"/><path d="M9.5 12l1.8 1.8L15 10"/></svg>
+        </span>
+        <div>
+          <h3>데이터 주권 위에 섭니다</h3>
+          <p>데이터가 중앙·기업이 아니라 지역과 시민의 것이 되는 구조 위에서 작동합니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VISION -->
+<section id="vision" class="vision">
+  <div class="container">
+    <span class="section-label reveal">만들려는 세계</span>
+    <p class="vision-quote reveal reveal-d2">시민이 에너지의 소비자가 아니라, <span class="accent">생산자이자 주권자</span>가 되는 사회.</p>
+    <ul class="vision-list" role="list">
+      <li class="reveal reveal-d2">재생에너지가 나눠 갖는 불로소득이 아니라, 공동체의 <b>자생적 생산활동</b>으로 뿌리내리는 전환.</li>
+      <li class="reveal reveal-d3">정부 지원에 기대 잠깐 피었다 지는 게 아니라, <b>지원 없이도 스스로 서는</b> 시민의 힘.</li>
+      <li class="reveal reveal-d4">토지·노동·화폐에 더해진 네 번째 자리, <b>데이터를 시민의 것으로</b> 되돌리는 한 갈래.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- MISSION -->
+<section id="mission" class="mission">
+  <div class="container">
+    <span class="section-label reveal">하는 일</span>
+    <h2 class="section-title reveal reveal-d2">세 가지 미션</h2>
+    <div class="mission-grid">
+      <article class="mcard reveal reveal-d2">
+        <span class="num">MISSION 01</span>
+        <span class="ico" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21v-6a9 9 0 0 1 18 0v6"/><path d="M3 21h18"/><circle cx="12" cy="9" r="2"/></svg>
+        </span>
+        <h3>자생모델 설계</h3>
+        <p>정부 지원에 의존하지 않고도 시민재생에너지가 스스로 설 수 있는 사업·거버넌스 모델을, 데이터와 AI로 설계하고 확산합니다.</p>
+      </article>
+      <article class="mcard reveal reveal-d3">
+        <span class="num">MISSION 02</span>
+        <span class="ico" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10h8M8 14h5"/><path d="M21 12a8 8 0 0 1-8 8H7l-4 3v-6a8 8 0 0 1 8-13h2a8 8 0 0 1 8 8z"/></svg>
+        </span>
+        <h3>판단·합의의 매개</h3>
+        <p>시민·농민·마을이 스스로 판단하고 합의하고 운영하도록 AI가 통역하고 매개합니다. 대신 결정하지 않습니다.</p>
+      </article>
+      <article class="mcard reveal reveal-d4">
+        <span class="num">MISSION 03</span>
+        <span class="ico" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 3 8l9 5 9-5-9-5z"/><path d="M3 13l9 5 9-5M3 18l9 5 9-5"/></svg>
+        </span>
+        <h3>공동자산화</h3>
+        <p>흩어진 담론·공개데이터·현장경험을 모아, 누구나 쓸 수 있는 공동의 지식자산으로 만듭니다.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section id="architecture" class="arch">
+  <div class="container">
+    <div class="arch-head">
+      <span class="section-label reveal">구조</span>
+      <h2 class="section-title reveal reveal-d2">수렴은 하나로, 발전은 여럿으로</h2>
+      <p class="section-lead reveal reveal-d2">각 영역에 깊이 특화된 AI가 현장의 데이터를 모아, 하나의 연대지능 AI로 흘러듭니다. 현장은 분산되고, 지능은 수렴합니다.</p>
+    </div>
+    <div class="arch-diagram reveal reveal-d2">
+      <div class="arch-hub">
+        <span class="tag">최종 수렴</span>
+        <h3>품아이 — 연대지능 AI</h3>
+        <p>Solidarity Intelligence</p>
+      </div>
+      <div class="arch-connector" aria-hidden="true"></div>
+      <div class="arch-domains">
+        <div class="dom">
+          <div class="dom-name">로컬푸드 AI</div>
+          <div class="dom-sub">먹거리</div>
+        </div>
+        <div class="dom active">
+          <div class="dom-name">시민재생에너지 AI</div>
+          <div class="dom-sub">에너지</div>
+        </div>
+        <div class="dom">
+          <div class="dom-name">돌봄 AI</div>
+          <div class="dom-sub">…그리고 더</div>
+        </div>
+      </div>
+      <p class="arch-caption reveal reveal-d3">넓게 가면 빅테크의 래퍼로 끝납니다. <b>깊이 특화하되, 데이터로 연결</b>합니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- STRATEGY -->
+<section id="strategy" class="strategy">
+  <div class="container">
+    <span class="section-label reveal">어떻게</span>
+    <h2 class="section-title reveal reveal-d2">단계적으로 — 지금은 학습기입니다</h2>
+    <p class="section-lead reveal reveal-d2">서두르지 않습니다. 현황을 모으고 대안을 명료히 하는 1단계에서 출발합니다.</p>
+    <div class="steps">
+      <div class="step now reveal reveal-d2">
+        <span class="phase">지금</span>
+        <h3>학습 · 수집</h3>
+        <p>담론·사례·공개데이터를 모아 분석하고, 현황을 지도화하며, 대안을 명료하게 합니다.</p>
+        <span class="when">2026 —</span>
+      </div>
+      <div class="step upcoming reveal reveal-d3">
+        <span class="phase">다음</span>
+        <h3>실증</h3>
+        <p>이미 진행 중인 햇빛소득마을 태양광을 무대로, 운동축의 데이터를 1차로 수집합니다.</p>
+        <span class="when">현장 데이터가 나오는 곳부터</span>
+      </div>
+      <div class="step upcoming reveal reveal-d4">
+        <span class="phase">확산</span>
+        <h3>번역 · 확산</h3>
+        <p>검증된 원리를 영농형·풍력 등 시민재생에너지 전반으로 번역하고 확산합니다.</p>
+        <span class="when">영농형은 2027 이후</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRINCIPLES -->
+<section class="principles">
+  <div class="container">
+    <span class="section-label reveal">전략 원칙</span>
+    <h2 class="section-title reveal reveal-d2">네 가지 원칙</h2>
+    <div class="prin-grid">
+      <div class="prin reveal reveal-d2">
+        <div>
+          <h3>운동축에 집중</h3>
+          <p>예측·최적화 같은 물리축은 오픈소스를 차용하고, 자원은 아무도 따라올 수 없는 운동축(자생·합의·매개)에 둡니다.</p>
+        </div>
+      </div>
+      <div class="prin reveal reveal-d2">
+        <div>
+          <h3>자생 우선</h3>
+          <p>정부 지원은 마중물일 뿐. 모든 모델의 끝은 "지원 없이도 서는" 것이며, 우리 일 자체도 지원금에 의존하지 않습니다.</p>
+        </div>
+      </div>
+      <div class="prin reveal reveal-d3">
+        <div>
+          <h3>국한하지 않기</h3>
+          <p>햇빛소득·영농형 태양광에서 시작하되, 풍력 등 시민재생에너지 전반으로 엽니다.</p>
+        </div>
+      </div>
+      <div class="prin reveal reveal-d3">
+        <div>
+          <h3>데이터 주권</h3>
+          <p>모든 데이터는 동의·익명화·공동소유의 원칙 위에서만 모이고 쓰입니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CLOSING -->
+<section class="closing">
+  <div class="container">
+    <span class="section-label">함께</span>
+    <h2>에너지의 전환은 기술이 아니라,<br><span class="accent">사람과 사람 사이</span>에서 일어납니다.</h2>
+    <p>시민재생에너지 AI는 품앗이생협과 사회연대경제 동지들이 함께 만들어 가는 기획입니다. 같이 묻고, 같이 짓고 싶은 분을 기다립니다.</p>
+    <div class="closing-links">
+      <a href="https://poomasi.org" class="btn btn-primary">
+        품앗이생협 누리집
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg>
+      </a>
+      <a href="https://wiki.poomasi.org" class="btn btn-ghost">
+        위키에서 더 읽기
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="fb-title">
+          <svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true">
+            <circle cx="16" cy="16" r="8" fill="#d99016"/>
+            <g stroke="#d99016" stroke-width="2.4" stroke-linecap="round">
+              <line x1="16" y1="2" x2="16" y2="6"/><line x1="16" y1="26" x2="16" y2="30"/>
+              <line x1="2" y1="16" x2="6" y2="16"/><line x1="26" y1="16" x2="30" y2="16"/>
+            </g>
+          </svg>
+          시민재생에너지 AI
+        </div>
+        <p>시민·농민·마을이 에너지의 주인이 되도록. 사회연대경제의 경험 위에서 만들어 가는 도메인특화 AI 기획입니다.</p>
+      </div>
+      <nav class="footer-nav" aria-label="푸터 내비게이션">
+        <div class="footer-col">
+          <h4>둘러보기</h4>
+          <a href="#define">정의</a>
+          <a href="#vision">비전</a>
+          <a href="#mission">미션</a>
+          <a href="#architecture">구조</a>
+          <a href="#strategy">전략</a>
+        </div>
+        <div class="footer-col">
+          <h4>함께하는 곳</h4>
+          <a href="https://poomasi.org">품앗이소비자생활협동조합</a>
+          <a href="https://wiki.poomasi.org">품앗이 위키</a>
+          <a href="https://foodnet.poomasi.org">전국로컬푸드네트워크</a>
+        </div>
+      </nav>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 시민재생에너지 AI · poomasi.org</span>
+      <span>시민이 에너지의 주인이 되도록</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  // 모바일 메뉴 토글
+  var toggle = document.querySelector('.nav-toggle');
+  var menu = document.getElementById('nav-menu');
+  if (toggle && menu) {
+    toggle.addEventListener('click', function () {
+      var open = menu.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      toggle.setAttribute('aria-label', open ? '메뉴 닫기' : '메뉴 열기');
+    });
+    menu.addEventListener('click', function (e) {
+      if (e.target.tagName === 'A') {
+        menu.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  // 스크롤 진입 애니메이션
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var els = document.querySelectorAll('.reveal');
+  if (reduce || !('IntersectionObserver' in window)) {
+    els.forEach(function (el) { el.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+    els.forEach(function (el) { io.observe(el); });
+  }
+})();
+</script>
+
+<script src="https://seed.poomasi.org/poomai-widget.js"></script>
+</body>
+</html>

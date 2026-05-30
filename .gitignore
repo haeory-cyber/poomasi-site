@@ -3,6 +3,7 @@
 !scripts/*.py
 !djco/server.py
 !sakyowon/server.py
+!energy/server.py
 !infra/*.py
 __pycache__/
 *.pyc
