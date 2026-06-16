@@ -789,6 +789,7 @@
       <button class="tab-btn"       onclick="switchTab('event', event)">이벤트등록</button>
       <button class="tab-btn"       onclick="switchTab('attend', event)">출퇴근부</button>
       <button class="tab-btn"       onclick="switchTab('groupbuy', event)">공동구매</button>
+      <button class="tab-btn"       onclick="switchTab('settlement', event)">일일결산</button>
     </nav>
   </div>
 
@@ -1334,6 +1335,73 @@
     </div>
   </section>
 
+  <!-- ══ TAB: 일일결산 ══ -->
+  <section class="tab-content" id="tab-settlement">
+    <div class="sec-header">
+      <div>
+        <div class="sec-label">DAILY SETTLEMENT</div>
+        <div class="sec-title">일일 결산 현황</div>
+      </div>
+      <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+        <select id="settle-store-filter" onchange="loadSettlementRecords()" style="padding:0.4rem 0.6rem;background:var(--surface);color:var(--cream);border:1px solid var(--border);border-radius:4px;font-size:0.8rem;">
+          <option value="">전체 매장</option>
+          <option value="지족점">지족점</option>
+          <option value="관저점">관저점</option>
+        </select>
+        <input type="date" id="settle-date-from" onchange="loadSettlementRecords()" style="padding:0.4rem 0.6rem;background:var(--surface);color:var(--cream);border:1px solid var(--border);border-radius:4px;font-size:0.8rem;">
+        <span style="color:var(--dust);font-size:0.8rem;">~</span>
+        <input type="date" id="settle-date-to" onchange="loadSettlementRecords()" style="padding:0.4rem 0.6rem;background:var(--surface);color:var(--cream);border:1px solid var(--border);border-radius:4px;font-size:0.8rem;">
+      </div>
+    </div>
+
+    <!-- 빠른 선택 -->
+    <div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.8rem;">
+      <button class="btn-sm" onclick="setSettleRange('today')">오늘</button>
+      <button class="btn-sm" onclick="setSettleRange('week')">최근 7일</button>
+      <button class="btn-sm" onclick="setSettleRange('month')">이번 달</button>
+      <button class="btn-sm" onclick="setSettleRange('lastMonth')">지난 달</button>
+    </div>
+
+    <!-- 결산 기록 테이블 -->
+    <div class="card">
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>결산 기록 <span id="settle-records-count" style="color:var(--dust);font-weight:400;font-size:0.78rem;"></span></span>
+        <button class="btn-sm" onclick="downloadSettlementRecords()">↓ 엑셀</button>
+      </div>
+      <div style="overflow-x:auto;margin-top:0.5rem;">
+        <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border);color:var(--dust);text-align:left;">
+              <th style="padding:0.5rem 0.4rem;">날짜</th>
+              <th style="padding:0.5rem 0.4rem;">매장</th>
+              <th style="padding:0.5rem 0.4rem;">작성자</th>
+              <th style="padding:0.5rem 0.4rem;text-align:right;">포스현금</th>
+              <th style="padding:0.5rem 0.4rem;text-align:right;">기타현금</th>
+              <th style="padding:0.5rem 0.4rem;text-align:right;">순수현금</th>
+              <th style="padding:0.5rem 0.4rem;text-align:right;">실물현금</th>
+              <th style="padding:0.5rem 0.4rem;text-align:right;">과부족</th>
+              <th style="padding:0.5rem 0.4rem;text-align:right;">준비금잔액</th>
+            </tr>
+          </thead>
+          <tbody id="settle-tbody">
+            <tr><td colspan="9" class="loading-row">로딩 중…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 상세 펼침 영역 -->
+    <div id="settle-detail-panel" style="display:none;margin-top:1rem;">
+      <div class="card" style="border-color:rgba(196,128,58,0.3);">
+        <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+          <span id="settle-detail-title">상세 내역</span>
+          <button class="btn-sm" onclick="closeSettleDetail()">닫기</button>
+        </div>
+        <div id="settle-detail-body" style="margin-top:0.8rem;"></div>
+      </div>
+    </div>
+  </section>
+
 </div>
 
 <div class="tag-print-sheet" id="tag-print-sheet"></div>
@@ -1389,7 +1457,7 @@ sb.auth.getSession().then(({ data: { session } }) => {
 });
 
 // ── 탭 전환 ──────────────────────────────────────────────
-const TAB_IDS = { suppliers: 'tab-suppliers', tags: 'tab-tags', sms: 'tab-sms', event: 'tab-event', attend: 'tab-attend', groupbuy: 'tab-groupbuy' };
+const TAB_IDS = { suppliers: 'tab-suppliers', tags: 'tab-tags', sms: 'tab-sms', event: 'tab-event', attend: 'tab-attend', groupbuy: 'tab-groupbuy', settlement: 'tab-settlement' };
 
 function adjustContentPadding() {
   const nav = document.querySelector('.sticky-nav');
@@ -1415,6 +1483,7 @@ function onTabLoad(key) {
   if (key === 'suppliers') { if (typeof loadUnifiedOrders === 'function') loadUnifiedOrders(); }
   if (key === 'tags') { if (!_tagTabInited) { initTagTab(); _tagTabInited = true; } }
   if (key === 'groupbuy') loadGroupBuys();
+  if (key === 'settlement') loadSettlementRecords();
 }
 
 // ── 공동구매 ──────────────────────────────────────────────
@@ -3894,6 +3963,178 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(function() { clearInterval(_hashCheck); }, 10000);
   }
 });
+
+// ── 일일결산 탭 (사무국 조회) ─────────────────────────────
+let settlementCache = [];
+
+function setSettleRange(range) {
+  const now = new Date();
+  const toStr = ymdLocal(now);
+  let fromStr;
+  if (range === 'today') { fromStr = toStr; }
+  else if (range === 'week') {
+    const f = new Date(now); f.setDate(f.getDate() - 6); fromStr = ymdLocal(f);
+  } else if (range === 'month') {
+    fromStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-01';
+  } else if (range === 'lastMonth') {
+    const lm = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    fromStr = ymdLocal(lm);
+    const lme = new Date(now.getFullYear(), now.getMonth(), 0);
+    document.getElementById('settle-date-to').value = ymdLocal(lme);
+    document.getElementById('settle-date-from').value = fromStr;
+    loadSettlementRecords(); return;
+  }
+  document.getElementById('settle-date-from').value = fromStr;
+  document.getElementById('settle-date-to').value = toStr;
+  loadSettlementRecords();
+}
+
+async function loadSettlementRecords() {
+  // 기본 날짜 설정 (처음 로드 시)
+  const fromEl = document.getElementById('settle-date-from');
+  const toEl = document.getElementById('settle-date-to');
+  if (!fromEl.value) {
+    const now = new Date();
+    toEl.value = ymdLocal(now);
+    const f = new Date(now); f.setDate(f.getDate() - 29);
+    fromEl.value = ymdLocal(f);
+  }
+  const store = document.getElementById('settle-store-filter').value;
+  const fromDate = fromEl.value;
+  const toDate = toEl.value;
+  const tbody = document.getElementById('settle-tbody');
+  tbody.innerHTML = '<tr><td colspan="9" class="loading-row">로딩 중…</td></tr>';
+  settlementCache = [];
+
+  let q = sb.from('daily_settlement').select('*').order('date', { ascending: false });
+  if (store) q = q.eq('store', store);
+  if (fromDate) q = q.gte('date', fromDate);
+  if (toDate) {
+    const [y, m, d] = toDate.split('-').map(Number);
+    const after = new Date(y, m - 1, d + 1);
+    q = q.lt('date', ymdLocal(after));
+  }
+  q = q.limit(500);
+  const { data, error } = await q;
+  const countEl = document.getElementById('settle-records-count');
+
+  if (error || !data) {
+    tbody.innerHTML = '<tr><td colspan="9" style="padding:0.8rem;color:var(--dust);">조회 실패' + (error ? ': ' + error.message : '') + '</td></tr>';
+    countEl.textContent = '';
+    return;
+  }
+  settlementCache = data;
+  countEl.textContent = '· ' + fromDate + ' ~ ' + toDate + ' · ' + data.length + '건';
+  if (data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" style="padding:0.8rem;color:var(--dust);">기록 없음</td></tr>';
+    return;
+  }
+  const fmt = v => (v != null ? Number(v).toLocaleString('ko-KR') : '-');
+  tbody.innerHTML = data.map((r, idx) => {
+    const diffVal = r.diff != null ? Number(r.diff) : 0;
+    const diffColor = diffVal === 0 ? '#4ade80' : '#f87171';
+    const diffTxt = diffVal === 0 ? '0' : (diffVal > 0 ? '+' + fmt(diffVal) : fmt(diffVal));
+    return '<tr style="border-bottom:1px solid var(--border);cursor:pointer;" onclick="toggleSettleDetail(' + idx + ')">' +
+      '<td style="padding:0.5rem 0.4rem;">' + (r.date || '-') + '</td>' +
+      '<td style="padding:0.5rem 0.4rem;">' + (r.store || '-') + '</td>' +
+      '<td style="padding:0.5rem 0.4rem;">' + (r.author || '-') + '</td>' +
+      '<td style="padding:0.5rem 0.4rem;text-align:right;">' + fmt(r.pos_cash_total) + '</td>' +
+      '<td style="padding:0.5rem 0.4rem;text-align:right;">' + fmt(r.etc_cash) + '</td>' +
+      '<td style="padding:0.5rem 0.4rem;text-align:right;color:var(--amber);">' + fmt(r.net_cash) + '</td>' +
+      '<td style="padding:0.5rem 0.4rem;text-align:right;">' + fmt(r.counted_cash) + '</td>' +
+      '<td style="padding:0.5rem 0.4rem;text-align:right;color:' + diffColor + ';font-weight:600;">' + diffTxt + '</td>' +
+      '<td style="padding:0.5rem 0.4rem;text-align:right;">' + fmt(r.reserve_balance) + '</td></tr>';
+  }).join('');
+}
+
+function toggleSettleDetail(idx) {
+  const r = settlementCache[idx];
+  if (!r) return;
+  const panel = document.getElementById('settle-detail-panel');
+  const title = document.getElementById('settle-detail-title');
+  const body = document.getElementById('settle-detail-body');
+  title.textContent = r.date + ' ' + r.store + ' — ' + (r.author || '') + ' 상세 내역';
+  const fmt = v => (v != null ? Number(v).toLocaleString('ko-KR') : '0');
+  const ed = r.etc_detail || {};
+  const dn = r.denom || {};
+  const etcItems = [
+    ['열린부뚜막', ed.yeollin], ['조합원(기타)', ed.member],
+    ['온누리(지류)', ed.onnuri_paper], ['온누리(전자)', ed.onnuri_e],
+    ['카카오', ed.kakao], ['한밭페이(지권)', ed.hanbat_paper], ['한밭페이(전자)', ed.hanbat_e],
+    ['잇다(소소한연구소)', ed.itda], ['노은누리유치원', ed.noeun],
+    ['계좌이체', ed.transfer]
+  ];
+  if (ed.other_label && ed.other_amt) etcItems.push([ed.other_label, ed.other_amt]);
+  if (ed.other2_label && ed.other2_amt) etcItems.push([ed.other2_label, ed.other2_amt]);
+  const etcHtml = etcItems.filter(([,v]) => v).map(([label, val]) =>
+    '<div style="display:flex;justify-content:space-between;padding:0.25rem 0;border-bottom:1px solid var(--border);">' +
+    '<span style="color:var(--dust);">' + label + '</span>' +
+    '<span>' + fmt(val) + '원</span></div>'
+  ).join('') || '<div style="color:var(--dust);font-size:0.82rem;">항목 없음</div>';
+
+  const denomLabels = {d10:'10원',d50:'50원',d100:'100원',d500:'500원',d1000:'1,000원',d5000:'5,000원',d10000:'10,000원',d50000:'50,000원'};
+  const denomHtml = Object.entries(denomLabels).filter(([k]) => dn[k]).map(([k, label]) =>
+    '<div style="display:flex;justify-content:space-between;padding:0.25rem 0;border-bottom:1px solid var(--border);">' +
+    '<span style="color:var(--dust);">' + label + ' × ' + fmt(dn[k]) + '장</span>' +
+    '<span>' + fmt(Number(dn[k]) * parseInt(label.replace(/,/g,''))) + '원</span></div>'
+  ).join('') || '<div style="color:var(--dust);font-size:0.82rem;">입력 없음</div>';
+
+  body.innerHTML =
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">' +
+      '<div>' +
+        '<div style="font-size:0.72rem;color:var(--amber);letter-spacing:0.08em;margin-bottom:0.5rem;">기타현금 항목별</div>' +
+        etcHtml +
+      '</div>' +
+      '<div>' +
+        '<div style="font-size:0.72rem;color:var(--amber);letter-spacing:0.08em;margin-bottom:0.5rem;">권종별</div>' +
+        denomHtml +
+      '</div>' +
+    '</div>' +
+    '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.5rem;font-size:0.82rem;">' +
+      '<div style="background:var(--surface);padding:0.6rem 0.8rem;border-radius:6px;"><div style="color:var(--dust);font-size:0.72rem;">포스현금매출</div><div style="font-weight:600;">' + fmt(r.pos_cash_total) + '원</div></div>' +
+      '<div style="background:var(--surface);padding:0.6rem 0.8rem;border-radius:6px;"><div style="color:var(--dust);font-size:0.72rem;">기타현금매출</div><div style="font-weight:600;">' + fmt(r.etc_cash) + '원</div></div>' +
+      '<div style="background:var(--surface);padding:0.6rem 0.8rem;border-radius:6px;"><div style="color:var(--dust);font-size:0.72rem;">손실/손익금</div><div style="font-weight:600;">' + fmt(r.loss_gain) + '원</div></div>' +
+      '<div style="background:rgba(196,128,58,0.12);padding:0.6rem 0.8rem;border-radius:6px;border:1px solid rgba(196,128,58,0.3);"><div style="color:var(--dust);font-size:0.72rem;">순수현금매출</div><div style="font-weight:700;color:var(--amber);">' + fmt(r.net_cash) + '원</div></div>' +
+      '<div style="background:var(--surface);padding:0.6rem 0.8rem;border-radius:6px;"><div style="color:var(--dust);font-size:0.72rem;">실물현금합계</div><div style="font-weight:600;">' + fmt(r.counted_cash) + '원</div></div>' +
+      '<div style="background:var(--surface);padding:0.6rem 0.8rem;border-radius:6px;"><div style="color:var(--dust);font-size:0.72rem;">준비금 계</div><div style="font-weight:600;">' + fmt(r.reserve_total) + '원</div></div>' +
+      '<div style="background:var(--surface);padding:0.6rem 0.8rem;border-radius:6px;"><div style="color:var(--dust);font-size:0.72rem;">지출내역</div><div style="font-weight:600;">' + fmt(r.reserve_spent) + '원</div></div>' +
+      '<div style="background:var(--surface);padding:0.6rem 0.8rem;border-radius:6px;"><div style="color:var(--dust);font-size:0.72rem;">준비금 잔액</div><div style="font-weight:600;">' + fmt(r.reserve_balance) + '원</div></div>' +
+    '</div>' +
+    (r.notes ? '<div style="margin-top:0.8rem;padding:0.6rem 0.8rem;background:var(--surface);border-radius:6px;font-size:0.85rem;"><span style="color:var(--dust);">기타사항: </span>' + r.notes + '</div>' : '');
+
+  panel.style.display = 'block';
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function closeSettleDetail() {
+  document.getElementById('settle-detail-panel').style.display = 'none';
+}
+
+function downloadSettlementRecords() {
+  if (!settlementCache.length) { toast('내려받을 기록이 없습니다'); return; }
+  const fromDate = document.getElementById('settle-date-from').value;
+  const toDate = document.getElementById('settle-date-to').value;
+  const header = ['날짜', '매장', '작성자', '포스현금매출', '기타현금매출', '순실/손익금', '순수현금매출', '실물현금합계', '준비금계', '지출내역', '준비금잔액', '과부족', '기타사항'];
+  const rows = settlementCache.map(r => [
+    r.date || '', r.store || '', r.author || '',
+    r.pos_cash_total || 0, r.etc_cash || 0, r.loss_gain || 0, r.net_cash || 0,
+    r.counted_cash || 0, r.reserve_total || 0, r.reserve_spent || 0, r.reserve_balance || 0,
+    r.diff || 0, r.notes || ''
+  ]);
+  const escape = v => '"' + String(v).replace(/"/g, '""') + '"';
+  const csv = '﻿' + [header, ...rows].map(row => row.map(escape).join(',')).join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '일일결산_' + fromDate + '_' + toDate + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+// ── /일일결산 탭 ─────────────────────────────────────────
+
 </script>
 <script src="https://seed.poomasi.org/poomai-widget.js?v=20260410a"></script>
 </body>
