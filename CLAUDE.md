@@ -44,6 +44,7 @@ python3 ~/poomasi/ai_bridge.py record_result staging-ready "work.html 발주탭 
 
 ## 공지사항
 
+- 2026-06-16: **매장 일일 마감결산 앱 배포** — `seed/closing.html`(직원용 입력, 모바일·매장PC) + `seed/closing-view.html?store=X&date=Y`(저장된 결산서 조회·인쇄) + `seed/store.html` 「일일결산」 사무국 탭 + Supabase `daily_settlement` 테이블. seed 변경이라 배포는 `bash infra/deploy-seed.sh`. 🔴비즈니스 룰: 순수현금=포스현금−기타현금−손익금 / 손익금=택배요금·잔돈기부 등 포스 출금(수동) / 준비금 항상 50만원 고정 / 검산=(실물현금−50만)−순수현금. 직원용 페이지는 로그인 없이 anon 저장(출퇴근앱과 동일).
 - 2026-04-08: **매장 가격태그 QR 404 복구 — Cloudflare Page Rule로 해결** — `poomasi.org/tags.html*` → `https://seed.poomasi.org/tags.html$1` (301, 쿼리 `$1` 보존). Page Rules 슬롯 2/3 사용. 코드/배포 0건, DNS 0건, 대시보드 설정만. 배경: 4/7 seed 완전 분리 때 root `tags.html` 삭제로 매장 QR이 죽음. **진단 3회 헛다리(`_redirects` 부활 2회+매장 재인쇄 제안)로 후니님 신뢰 철회 사건.** origin=GitHub Pages라 `_redirects` 미지원 사실 미확인이 원인. 상세: `~/_shared_ai/lessons/errors/20260408_tags_qr_404_진단헛다리_page_rule.md`.
 - 2026-03-26: **웹 지미 개통** — jimmy.poomasi.org에서 폰으로 지미와 실시간 채팅. annual_report.html AI섹션 10번 카드 추가, notices.json 공지 추가.
 - 2026-03-21: **배포 원칙 확정** — 지미가 최종 게이트. 후니님 지시 → poomasi-site-git에서 git pull → 백업 → 수정 → diff → "배포해" 승인 → commit → push. poomasi-site/ 폴더 사용 금지. **origin 호스팅 = GitHub Pages** (앞단 Cloudflare CDN proxied). ⚠️ **`_redirects` / `netlify.toml` 미지원** — URL 구조 긴급 수정은 Cloudflare 대시보드 Page Rules로. (2026-04-08 정정: 이전에 "Cloudflare Pages 자동 반영"으로 잘못 기재되어 매장 tags.html 404 사고 3회 헛다리의 원인이 되었음. 상세: `lessons/errors/20260408_tags_qr_404_진단헛다리_page_rule.md`)
