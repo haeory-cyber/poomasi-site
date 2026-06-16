@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>일일 결산서 (조회) — 품앗이생협</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700;900&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --earth:#0f0b07; --soil:#1e1510; --bark:#2d1f14; --amber:#c4803a; --amber-light:#e8a55a;
+  --green:#3d5c35; --cream:#f2ead8; --dust:#b8a88a; --red:#b83a2a; --white:#faf7f0;
+  --surface:rgba(45,31,20,0.8); --border:rgba(184,168,138,0.2);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--earth); color:var(--cream); font-family:'Noto Sans KR',sans-serif; min-height:100vh; padding-bottom:4rem; }
+.page-header { background:var(--soil); border-bottom:1px solid rgba(196,128,58,0.25); padding:1rem 1.25rem; position:sticky; top:0; z-index:100; }
+.page-header::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(to right,var(--amber),#5a8a4e); }
+.header-row { display:flex; align-items:center; justify-content:space-between; gap:0.75rem; }
+.header-brand { font-size:0.7rem; letter-spacing:0.25em; color:var(--amber); font-family:'Noto Serif KR',serif; }
+.header-title { font-family:'Noto Serif KR',serif; font-size:1.25rem; font-weight:700; color:var(--white); }
+.container { max-width:680px; margin:0 auto; padding:1.25rem 1rem; }
+.card { background:rgba(30,21,16,0.9); border:1px solid var(--border); border-radius:10px; padding:1.1rem 1rem; margin-bottom:1rem; }
+.card-title { font-size:0.95rem; font-weight:600; color:var(--white); margin-bottom:0.9rem; padding-bottom:0.55rem; border-bottom:1px solid var(--border); }
+table.kv { width:100%; border-collapse:collapse; font-size:0.86rem; }
+table.kv td { padding:0.35rem 0.5rem; }
+table.kv td.k { color:var(--dust); }
+table.kv td.v { text-align:right; }
+table.kv tr { border-bottom:1px solid var(--border); }
+.row-hi { background:rgba(196,128,58,0.07); }
+.row-hi td.k { color:var(--amber); font-weight:600; }
+.row-hi td.v { color:var(--amber); font-weight:700; }
+.sub td.k { color:var(--dust); padding-left:1.3rem; font-size:0.82rem; }
+.diff-ok { color:#4ade80 !important; font-weight:700; }
+.diff-fail { color:#f87171 !important; font-weight:700; }
+.note { font-size:0.75rem; color:var(--dust); margin-top:0.6rem; line-height:1.5; }
+.empty { text-align:center; color:var(--dust); padding:3rem 1rem; }
+.empty a { color:var(--amber); }
+.actions { margin-top:0.5rem; display:flex; gap:0.5rem; }
+.btn { flex:1; padding:0.7rem 1rem; border-radius:8px; font-size:0.88rem; font-family:'Noto Sans KR',sans-serif; cursor:pointer; border:1px solid rgba(184,168,138,0.4); background:transparent; color:var(--dust); transition:all 0.15s; text-decoration:none; text-align:center; }
+.btn:hover { border-color:var(--amber); color:var(--amber); }
+.btn-edit { background:linear-gradient(135deg,var(--amber),#a06828); border:none; color:#0f0b07; font-weight:700; }
+@media print {
+  body { background:#fff; color:#000; }
+  .page-header, .actions { display:none !important; }
+  .card { border:1px solid #ccc; background:#fff; }
+  .card-title { color:#000; }
+  table.kv td.k, .sub td.k { color:#555; }
+  .row-hi { background:#f4ead8; }
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="header-row">
+    <div>
+      <div class="header-brand">POOMASI</div>
+      <div class="header-title">일일 결산서 (조회)</div>
+    </div>
+    <div style="font-size:0.78rem;color:var(--dust);" id="header-sub"></div>
+  </div>
+</div>
+
+<div class="container" id="root">
+  <div class="empty">불러오는 중…</div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRuaXZoY3BqcmhrbWVrY2ZxZ2RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NTc5MjMsImV4cCI6MjA4NzIzMzkyM30.yJ0_4Sg78p7oY89q7go3ab26PCPHnk1Q4ObZJIZEULA';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const ETC_LABELS = {
+  yeollin:'열린부뚜막', member:'조합원(기타)', onnuri_paper:'온누리(지류)', onnuri_e:'온누리(전자)',
+  kakao:'카카오', hanbat_paper:'한밭페이(지권)', hanbat_e:'한밭페이(전자)',
+  itda:'잇다(소소한연구소)', noeun:'노은누리유치원', deopshop:'더샵돌봄센터', transfer:'계좌이체'
+};
+const ETC_ORDER = ['yeollin','member','onnuri_paper','onnuri_e','kakao','hanbat_paper','hanbat_e','itda','noeun','deopshop','transfer'];
+const DENOMS = [
+  {key:'d50000',label:'50,000원',val:50000},{key:'d10000',label:'10,000원',val:10000},
+  {key:'d5000',label:'5,000원',val:5000},{key:'d1000',label:'1,000원',val:1000},
+  {key:'d500',label:'500원',val:500},{key:'d100',label:'100원',val:100},
+  {key:'d50',label:'50원',val:50},{key:'d10',label:'10원',val:10}
+];
+const fmt = n => Number(n||0).toLocaleString('ko-KR') + '원';
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function render(r) {
+  const ed = r.etc_detail || {};
+  const dn = r.denom || {};
+
+  // 기타현금 항목 행
+  let etcRows = '';
+  ETC_ORDER.forEach(k => { if (ed[k]) etcRows += `<tr class="sub"><td class="k">${ETC_LABELS[k]}</td><td class="v">${fmt(ed[k])}</td></tr>`; });
+  if (ed.other_label && ed.other_amt) etcRows += `<tr class="sub"><td class="k">${esc(ed.other_label)}</td><td class="v">${fmt(ed.other_amt)}</td></tr>`;
+  if (ed.other2_label && ed.other2_amt) etcRows += `<tr class="sub"><td class="k">${esc(ed.other2_label)}</td><td class="v">${fmt(ed.other2_amt)}</td></tr>`;
+
+  // 권종 행
+  let denomRows = '';
+  DENOMS.forEach(d => { if (dn[d.key]) denomRows += `<tr class="sub"><td class="k">${d.label} × ${dn[d.key]}장</td><td class="v">${fmt(dn[d.key]*d.val)}</td></tr>`; });
+
+  const diffCls = r.diff === 0 ? 'diff-ok' : 'diff-fail';
+  const diffTxt = r.diff === 0 ? '일치 (0원)' : (r.diff > 0 ? '+' : '') + fmt(r.diff);
+
+  document.getElementById('header-sub').textContent = r.store + ' · ' + r.date;
+
+  document.getElementById('root').innerHTML = `
+    <div class="card">
+      <div class="card-title">기본 정보</div>
+      <table class="kv">
+        <tr><td class="k">매장</td><td class="v">${esc(r.store)}</td></tr>
+        <tr><td class="k">결산 날짜</td><td class="v">${esc(r.date)}</td></tr>
+        <tr><td class="k">작성자</td><td class="v">${esc(r.author)||'-'}</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">1. 현금 매출 현황 (POS)</div>
+      <table class="kv">
+        <tr><td class="k">포스현금매출 총액</td><td class="v">${fmt(r.pos_cash_total)}</td></tr>
+        <tr><td class="k">기타현금매출</td><td class="v">${fmt(r.etc_cash)}</td></tr>
+        <tr><td class="k">손실/손익금 (택배·잔돈기부 등 출금)</td><td class="v">${fmt(r.loss_gain)}</td></tr>
+        <tr class="row-hi"><td class="k">순수 현금매출</td><td class="v">${fmt(r.net_cash)}</td></tr>
+      </table>
+      <p class="note">※ 순수 현금매출은 통장에 입금해야 할 금액입니다.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">2. 기타현금매출 항목별</div>
+      <table class="kv">
+        ${etcRows || '<tr class="sub"><td class="k" colspan="2" style="color:var(--dust);">항목 없음</td></tr>'}
+        <tr class="row-hi"><td class="k">기타현금 합계</td><td class="v">${fmt(r.etc_cash)}</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">3. 권종 카운트 (검산)</div>
+      <table class="kv">
+        ${denomRows || '<tr class="sub"><td class="k" colspan="2" style="color:var(--dust);">권종 미입력</td></tr>'}
+        <tr class="row-hi"><td class="k">실물현금 합계</td><td class="v">${fmt(r.counted_cash)}</td></tr>
+        <tr><td class="k">과부족 (실물−준비금)−순수현금</td><td class="v ${diffCls}">${diffTxt}</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">4. 준비금 현황</div>
+      <table class="kv">
+        <tr><td class="k">준비금 계</td><td class="v">${fmt(r.reserve_total)}</td></tr>
+        <tr><td class="k">지출내역</td><td class="v">${fmt(r.reserve_spent)}</td></tr>
+        <tr><td class="k">준비금 잔액</td><td class="v">${fmt(r.reserve_balance)}</td></tr>
+      </table>
+    </div>
+
+    ${r.notes ? `<div class="card"><div class="card-title">5. 기타사항</div><div style="font-size:0.86rem;line-height:1.6;white-space:pre-wrap;">${esc(r.notes)}</div></div>` : ''}
+
+    <div style="font-size:0.72rem;color:var(--dust);text-align:right;margin:0.2rem 0.2rem 0.8rem;">
+      저장: ${r.updated_at ? new Date(r.updated_at).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}) : '-'}
+    </div>
+
+    <div class="actions">
+      <a class="btn btn-edit" href="closing.html?store=${encodeURIComponent(r.store)}&date=${r.date}">수정하기</a>
+      <button class="btn" onclick="window.print()">인쇄</button>
+    </div>
+  `;
+}
+
+function renderEmpty(store, date, msg) {
+  document.getElementById('header-sub').textContent = (store||'') + (date?(' · '+date):'');
+  document.getElementById('root').innerHTML = `<div class="empty">
+    ${esc(msg)}<br><br>
+    ${store && date ? `<a href="closing.html?store=${encodeURIComponent(store)}&date=${date}">→ ${esc(store)} ${esc(date)} 결산 입력하기</a>` : `<a href="closing.html">→ 결산 입력 페이지로</a>`}
+  </div>`;
+}
+
+async function load() {
+  const p = new URLSearchParams(location.search);
+  const store = p.get('store');
+  const date = p.get('date');
+  if (!store || !date) { renderEmpty(store, date, '매장과 날짜가 지정되지 않았습니다.'); return; }
+
+  const { data, error } = await sb.from('daily_settlement')
+    .select('*').eq('store', store).eq('date', date).maybeSingle();
+
+  if (error) { renderEmpty(store, date, '조회 오류: ' + error.message); return; }
+  if (!data) { renderEmpty(store, date, `${store} ${date} 결산 기록이 없습니다.`); return; }
+  render(data);
+}
+
+load();
+</script>
+</body>
+</html>

@@ -401,9 +401,9 @@ select.form-input {
       </div>
     </div>
     <div class="form-row">
-      <span class="label">손실/손익금 <span style="font-size:0.68rem;color:var(--dust);">(시재 과부족·자동)</span></span>
+      <span class="label">손실/손익금 <span style="font-size:0.68rem;color:var(--dust);">(택배요금·잔돈기부 등 나간 돈)</span></span>
       <div class="input-wrap">
-        <input type="text" id="loss_gain" class="form-input" readonly placeholder="권종 입력 시 자동">
+        <input type="text" id="loss_gain" class="form-input" placeholder="0" inputmode="numeric" oninput="onNumInput(this)" onchange="recalc()">
       </div>
     </div>
     <div class="form-row" style="background:rgba(196,128,58,0.07);border-radius:6px;padding:0.5rem 0.6rem;margin-top:0.2rem;">
@@ -469,6 +469,10 @@ select.form-input {
       <div class="etc-item">
         <span class="etc-label">노은누리유치원</span>
         <input type="text" id="etc_noeun" class="form-input" placeholder="0" inputmode="numeric" oninput="onNumInput(this)" onchange="recalcEtc()">
+      </div>
+      <div class="etc-item">
+        <span class="etc-label">더샵돌봄센터</span>
+        <input type="text" id="etc_deopshop" class="form-input" placeholder="0" inputmode="numeric" oninput="onNumInput(this)" onchange="recalcEtc()">
       </div>
     </div>
 
@@ -611,6 +615,9 @@ function init() {
     '</div>'
   ).join('');
 
+  // 준비금은 항상 50만원 (기본값)
+  document.getElementById('reserve_total').value = formatNum(500000);
+
   recalc();
 }
 
@@ -651,7 +658,7 @@ function onNumInputSigned(el) {
 }
 
 // ── 기타현금 합산 ─────────────────────────────────────────
-const ETC_FIELDS = ['yeollin','member','onnuri_paper','onnuri_e','kakao','hanbat_paper','hanbat_e','itda','noeun','transfer'];
+const ETC_FIELDS = ['yeollin','member','onnuri_paper','onnuri_e','kakao','hanbat_paper','hanbat_e','itda','noeun','deopshop','transfer'];
 
 function recalcEtc() {
   let sum = 0;
@@ -682,7 +689,8 @@ function recalcDenom() {
 function recalc() {
   const pos = parseNum(document.getElementById('pos_cash_total').value);
   const etc = parseNum(document.getElementById('etc_cash_display').value);
-  const net = pos - etc;
+  const lg  = parseNum(document.getElementById('loss_gain').value);
+  const net = pos - etc - lg;
   document.getElementById('net_cash_display').value = formatNum(net);
 
   const rTotal = parseNum(document.getElementById('reserve_total').value);
@@ -699,9 +707,6 @@ function recalc() {
 
   // 과부족: (실물현금 − 준비금) − 순수현금매출
   const diff = (counted - rTotal) - net;
-  // 손실/손익금 칸 = 시재 과부족 (권종 입력 시에만 자동 기입)
-  const lgEl = document.getElementById('loss_gain');
-  if (lgEl) lgEl.value = (counted > 0) ? ((diff > 0 ? '+' : '') + formatNum(diff)) : '';
   const diffBox = document.getElementById('diff-box');
   const diffVal = document.getElementById('diff-value');
   const diffFormula = document.getElementById('diff-formula');
@@ -729,7 +734,8 @@ async function saveSettlement() {
 
   const pos = parseNum(document.getElementById('pos_cash_total').value);
   const etc = parseNum(document.getElementById('etc_cash_display').value);
-  const net = pos - etc;
+  const lg  = parseNum(document.getElementById('loss_gain').value);
+  const net = pos - etc - lg;
 
   const etc_detail = {};
   ETC_FIELDS.forEach(k => {
@@ -758,7 +764,6 @@ async function saveSettlement() {
   const rSpent = parseNum(document.getElementById('reserve_spent').value);
   const rBal   = rTotal - rSpent;
   const diff   = (counted - rTotal) - net;
-  const lg     = (counted > 0) ? diff : 0;
   const notes  = document.getElementById('notes').value.trim();
 
   const payload = {
@@ -816,6 +821,7 @@ function showPreview(r) {
     ['한밭페이(전자)', r.etc_detail.hanbat_e],
     ['잇다(소소한연구소)', r.etc_detail.itda],
     ['노은누리유치원', r.etc_detail.noeun],
+    ['더샵돌봄센터', r.etc_detail.deopshop],
     ['계좌이체', r.etc_detail.transfer],
   ];
   if (r.etc_detail.other_label) etcItems.push([r.etc_detail.other_label, r.etc_detail.other_amt]);
@@ -824,7 +830,12 @@ function showPreview(r) {
     '<tr><td style="padding:0.25rem 0.5rem;color:var(--dust);">' + label + '</td><td style="padding:0.25rem 0.5rem;text-align:right;">' + fmt(val) + '</td></tr>'
   ).join('');
 
+  const viewUrl = location.origin + '/closing-view.html?store=' + encodeURIComponent(r.store) + '&date=' + r.date;
   body.innerHTML =
+    '<div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.9rem;padding:0.6rem 0.7rem;background:rgba(196,128,58,0.08);border:1px solid rgba(196,128,58,0.25);border-radius:6px;">' +
+      '<a href="' + viewUrl + '" target="_blank" style="flex:1;color:var(--amber);font-size:0.82rem;text-decoration:none;">🔗 결과 페이지 보기</a>' +
+      '<button onclick="copyViewLink(\'' + viewUrl + '\')" style="padding:0.35rem 0.7rem;background:var(--amber);border:none;border-radius:5px;color:#0f0b07;font-size:0.78rem;font-weight:600;cursor:pointer;white-space:nowrap;">링크 복사</button>' +
+    '</div>' +
     '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;">' +
       '<tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem 0.5rem;color:var(--dust);">매장</td><td style="padding:0.35rem 0.5rem;font-weight:600;">' + r.store + '</td>' +
       '<td style="padding:0.35rem 0.5rem;color:var(--dust);">날짜</td><td style="padding:0.35rem 0.5rem;">' + r.date + '</td></tr>' +
@@ -849,6 +860,11 @@ function showPreview(r) {
 // ── 인쇄 ─────────────────────────────────────────────────
 function printSettlement() {
   window.print();
+}
+
+function copyViewLink(url) {
+  if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => toast('링크 복사됨')).catch(() => toast(url));
+  else toast(url);
 }
 
 // ── 토스트 ────────────────────────────────────────────────
