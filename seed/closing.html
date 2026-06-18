@@ -199,27 +199,42 @@ select.form-input {
 .denom-unit {
   font-size: 0.78rem;
   color: var(--amber);
-  min-width: 52px;
+  min-width: 42px;
   font-weight: 600;
 }
 .denom-input {
   width: 100%;
-  padding: 0.3rem 0.4rem;
+  min-width: 0;
+  padding: 0.55rem 0.3rem;
   background: transparent;
   border: none;
   border-bottom: 1px solid var(--border);
   color: var(--cream);
-  font-size: 0.85rem;
+  font-size: 1.1rem;
+  font-weight: 600;
   text-align: right;
   outline: none;
   font-family: 'Noto Sans KR', sans-serif;
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+  appearance: none;
 }
+.denom-input::-webkit-outer-spin-button,
+.denom-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .denom-result {
-  font-size: 0.72rem;
+  font-size: 0.66rem;
   color: var(--dust);
-  min-width: 60px;
+  min-width: 46px;
   text-align: right;
 }
+.cashbox-label {
+  font-size: 0.82rem;
+  color: var(--amber-light);
+  font-weight: 600;
+  margin: 0.85rem 0 0.5rem;
+  letter-spacing: 0.03em;
+}
+.cashbox-label:first-of-type { margin-top: 0.2rem; }
 
 /* ── 검산 박스 ── */
 .diff-box {
@@ -336,7 +351,7 @@ select.form-input {
 
 @media (max-width: 480px) {
   .etc-grid { grid-template-columns: 1fr; }
-  .denom-grid { grid-template-columns: repeat(2, 1fr); }
+  .denom-grid { grid-template-columns: 1fr; }
   .form-row .input-wrap { max-width: 100%; }
 }
 </style>
@@ -388,10 +403,21 @@ select.form-input {
     <div class="section-label">SECTION 1</div>
     <div class="section-title">현금 매출 현황 (POS)</div>
     <div class="form-row">
-      <span class="label">포스현금매출 총액</span>
+      <span class="label">현금 <span style="font-size:0.68rem;color:var(--dust);">(포스기 '현금')</span></span>
       <div class="input-wrap">
-        <input type="text" id="pos_cash_total" class="form-input" placeholder="0" inputmode="numeric"
-          oninput="onNumInput(this)" onchange="recalc()">
+        <input type="text" id="pos_cash" class="form-input" placeholder="0" inputmode="numeric" oninput="onNumInput(this)" onchange="recalc()">
+      </div>
+    </div>
+    <div class="form-row">
+      <span class="label">현금영수증 <span style="font-size:0.68rem;color:var(--dust);">(포스기 '현금영수증')</span></span>
+      <div class="input-wrap">
+        <input type="text" id="pos_cash_receipt" class="form-input" placeholder="0" inputmode="numeric" oninput="onNumInput(this)" onchange="recalc()">
+      </div>
+    </div>
+    <div class="form-row">
+      <span class="label">포스현금매출 총액 <span style="font-size:0.68rem;color:var(--dust);">(현금+현금영수증 자동)</span></span>
+      <div class="input-wrap">
+        <input type="text" id="pos_cash_total" class="form-input" readonly placeholder="자동 계산">
       </div>
     </div>
     <div class="form-row">
@@ -501,21 +527,34 @@ select.form-input {
     </div>
   </div>
 
-  <!-- ─ 3. 권종 카운트 ─ -->
+  <!-- ─ 3. 준비금 돈통 검산 ─ -->
   <div class="section-card">
     <div class="section-label">SECTION 3</div>
-    <div class="section-title">권종 카운트 (검산용)</div>
-    <div class="denom-grid" id="denom-grid">
-      <!-- JS로 렌더링 -->
+    <div class="section-title">준비금 돈통 검산</div>
+    <p class="note-text" style="margin-top:0;margin-bottom:0.5rem;">※ 포스현금돈통 + 보관돈통 = 준비금 50만원이어야 정상입니다.</p>
+
+    <div class="cashbox-label">포스현금돈통</div>
+    <div class="denom-grid" id="denom-grid-pos"><!-- JS 렌더 --></div>
+    <div class="etc-total-row">
+      <span class="label">포스돈통 소계</span>
+      <span class="value" id="pos_subtotal">0원</span>
     </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.75rem;padding:0.6rem 0.8rem;background:rgba(196,128,58,0.08);border:1px solid rgba(196,128,58,0.2);border-radius:6px;">
-      <span style="font-size:0.85rem;color:var(--dust);">실물현금 합계</span>
-      <span style="font-size:1rem;font-weight:700;color:var(--amber);" id="counted_cash_display">0원</span>
+
+    <div class="cashbox-label">보관돈통</div>
+    <div class="denom-grid" id="denom-grid-store"><!-- JS 렌더 --></div>
+    <div class="etc-total-row">
+      <span class="label">보관돈통 소계</span>
+      <span class="value" id="store_subtotal">0원</span>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.75rem;padding:0.6rem 0.8rem;background:rgba(196,128,58,0.08);border:1px solid rgba(196,128,58,0.3);border-radius:6px;">
+      <span style="font-size:0.9rem;color:var(--amber);font-weight:600;">준비금 계 (실측)</span>
+      <span style="font-size:1.05rem;font-weight:700;color:var(--amber);" id="reserve_counted_display">0원</span>
     </div>
 
     <!-- 검산 박스 -->
     <div class="diff-box" id="diff-box">
-      <div class="diff-label" id="diff-formula">검산: (실물현금 − 준비금) − 순수현금매출</div>
+      <div class="diff-label" id="diff-formula">검산: (포스 + 보관) − 준비금 50만원</div>
       <div class="diff-value" id="diff-value">—</div>
     </div>
   </div>
@@ -525,13 +564,13 @@ select.form-input {
     <div class="section-label">SECTION 4</div>
     <div class="section-title">준비금 현황</div>
     <div class="form-row">
-      <span class="label">준비금 계</span>
+      <span class="label">준비금 계 <span style="font-size:0.68rem;color:var(--dust);">(두 돈통 합 자동)</span></span>
       <div class="input-wrap">
-        <input type="text" id="reserve_total" class="form-input" placeholder="0" inputmode="numeric" oninput="onNumInput(this)" onchange="recalc()">
+        <input type="text" id="reserve_total" class="form-input" readonly placeholder="자동 계산">
       </div>
     </div>
     <div class="form-row">
-      <span class="label">지출내역</span>
+      <span class="label">지출내역 <span style="font-size:0.68rem;color:var(--dust);">(준비금에서 나간 돈, 없으면 0)</span></span>
       <div class="input-wrap">
         <input type="text" id="reserve_spent" class="form-input" placeholder="0" inputmode="numeric" oninput="onNumInput(this)" onchange="recalc()">
       </div>
@@ -597,6 +636,9 @@ const DENOMS = [
   { key: 'd10',    label: '10원',     val: 10    },
 ];
 
+// ── 준비금 기준 ───────────────────────────────────────────
+const RESERVE_BASE = 500000; // 포스현금돈통 + 보관돈통 = 50만원
+
 // ── 초기화 ────────────────────────────────────────────────
 function init() {
   // 오늘 날짜 설정 (KST)
@@ -604,21 +646,23 @@ function init() {
   document.getElementById('settle-date').value = today;
   document.getElementById('header-date').textContent = today + ' (' + ['일','월','화','수','목','금','토'][new Date(today + 'T00:00:00').getDay()] + ')';
 
-  // 권종 그리드 렌더링
-  const grid = document.getElementById('denom-grid');
-  grid.innerHTML = DENOMS.map(d =>
-    '<div class="denom-item">' +
-      '<span class="denom-unit">' + d.label + '</span>' +
-      '<input type="number" id="denom_' + d.key + '" class="denom-input" placeholder="0" min="0" step="1"' +
-      ' oninput="recalcDenom()" onchange="recalcDenom()">' +
-      '<span class="denom-result" id="denom_result_' + d.key + '">—</span>' +
-    '</div>'
-  ).join('');
-
-  // 준비금은 항상 50만원 (기본값)
-  document.getElementById('reserve_total').value = formatNum(500000);
+  // 두 돈통 권종 그리드 렌더링
+  renderDenomGrid('denom-grid-pos', 'pos');
+  renderDenomGrid('denom-grid-store', 'store');
 
   recalc();
+}
+
+// 권종 그리드 렌더 (돈통별: box = 'pos' | 'store')
+function renderDenomGrid(containerId, box) {
+  document.getElementById(containerId).innerHTML = DENOMS.map(d =>
+    '<div class="denom-item">' +
+      '<span class="denom-unit">' + d.label + '</span>' +
+      '<input type="text" inputmode="numeric" id="denom_' + box + '_' + d.key + '" class="denom-input" placeholder="0"' +
+      ' oninput="recalcDenom()" onchange="recalcDenom()">' +
+      '<span class="denom-result" id="denom_result_' + box + '_' + d.key + '">—</span>' +
+    '</div>'
+  ).join('');
 }
 
 // ── 숫자 입력 포맷 (콤마) ────────────────────────────────
@@ -672,54 +716,67 @@ function recalcEtc() {
   recalc();
 }
 
-// ── 권종 합산 ────────────────────────────────────────────
-function recalcDenom() {
+// ── 권종 합산 (돈통별) ───────────────────────────────────
+function boxTotal(box) {
   let total = 0;
   DENOMS.forEach(d => {
-    const cnt = parseInt(document.getElementById('denom_' + d.key).value) || 0;
+    const cnt = parseInt(document.getElementById('denom_' + box + '_' + d.key).value) || 0;
     const amt = cnt * d.val;
-    document.getElementById('denom_result_' + d.key).textContent = cnt > 0 ? formatNum(amt) + '원' : '—';
+    document.getElementById('denom_result_' + box + '_' + d.key).textContent = cnt > 0 ? formatNum(amt) + '원' : '—';
     total += amt;
   });
-  document.getElementById('counted_cash_display').textContent = formatNum(total) + '원';
+  return total;
+}
+
+function recalcDenom() {
+  document.getElementById('pos_subtotal').textContent   = formatNum(boxTotal('pos'))   + '원';
+  document.getElementById('store_subtotal').textContent = formatNum(boxTotal('store')) + '원';
   recalc();
 }
 
 // ── 전체 재계산 ──────────────────────────────────────────
 function recalc() {
-  const pos = parseNum(document.getElementById('pos_cash_total').value);
+  // 매출 (SECTION 1): 포스현금매출 총액 = 현금 + 현금영수증
+  const posCash = parseNum(document.getElementById('pos_cash').value);
+  const posReceipt = parseNum(document.getElementById('pos_cash_receipt').value);
+  const pos = posCash + posReceipt;
+  document.getElementById('pos_cash_total').value = formatNum(pos);
   const etc = parseNum(document.getElementById('etc_cash_display').value);
   const lg  = parseNum(document.getElementById('loss_gain').value);
   const net = pos - etc - lg;
   document.getElementById('net_cash_display').value = formatNum(net);
 
-  const rTotal = parseNum(document.getElementById('reserve_total').value);
-  const rSpent = parseNum(document.getElementById('reserve_spent').value);
-  const rBal   = rTotal - rSpent;
-  document.getElementById('reserve_balance_display').value = formatNum(rBal);
-
-  // 실물현금
-  let counted = 0;
+  // 준비금 = 포스현금돈통 + 보관돈통
+  let posTotal = 0, storeTotal = 0;
   DENOMS.forEach(d => {
-    counted += (parseInt(document.getElementById('denom_' + d.key) ? document.getElementById('denom_' + d.key).value : 0) || 0) * d.val;
+    const ep = document.getElementById('denom_pos_' + d.key);
+    const es = document.getElementById('denom_store_' + d.key);
+    posTotal   += (ep ? parseInt(ep.value) || 0 : 0) * d.val;
+    storeTotal += (es ? parseInt(es.value) || 0 : 0) * d.val;
   });
-  document.getElementById('counted_cash_display').textContent = formatNum(counted) + '원';
+  const reserveCounted = posTotal + storeTotal;
+  document.getElementById('reserve_counted_display').textContent = formatNum(reserveCounted) + '원';
+  document.getElementById('reserve_total').value = formatNum(reserveCounted);
 
-  // 과부족: (실물현금 − 준비금) − 순수현금매출
-  const diff = (counted - rTotal) - net;
+  // 준비금 잔액 = 준비금 계 − 지출
+  const rSpent = parseNum(document.getElementById('reserve_spent').value);
+  document.getElementById('reserve_balance_display').value = formatNum(reserveCounted - rSpent);
+
+  // 준비금 검산: (포스 + 보관) − 50만
+  const diff = reserveCounted - RESERVE_BASE;
   const diffBox = document.getElementById('diff-box');
   const diffVal = document.getElementById('diff-value');
   const diffFormula = document.getElementById('diff-formula');
-  diffFormula.textContent = '검산: (' + formatNum(counted) + ' − ' + formatNum(rTotal) + ') − ' + formatNum(net);
-  if (counted === 0 && net === 0) {
+  diffFormula.textContent = '검산: (포스 ' + formatNum(posTotal) + ' + 보관 ' + formatNum(storeTotal) + ') − 준비금 ' + formatNum(RESERVE_BASE);
+  if (reserveCounted === 0) {
     diffBox.className = 'diff-box';
     diffVal.textContent = '—';
   } else if (diff === 0) {
     diffBox.className = 'diff-box ok';
-    diffVal.textContent = '일치 (차액 0원)';
+    diffVal.textContent = '✅ 준비금 일치 (0원)';
   } else {
     diffBox.className = 'diff-box fail';
-    diffVal.textContent = '과부족 ' + (diff > 0 ? '+' : '') + formatNum(diff) + '원';
+    diffVal.textContent = '⚠️ 과부족 ' + (diff > 0 ? '+' : '') + formatNum(diff) + '원 — 오계산·누락 확인';
   }
 }
 
@@ -732,7 +789,9 @@ async function saveSettlement() {
   if (!store) { toast('매장을 선택하세요'); return; }
   if (!date)  { toast('날짜를 입력하세요'); return; }
 
-  const pos = parseNum(document.getElementById('pos_cash_total').value);
+  const posCash = parseNum(document.getElementById('pos_cash').value);
+  const posReceipt = parseNum(document.getElementById('pos_cash_receipt').value);
+  const pos = posCash + posReceipt;
   const etc = parseNum(document.getElementById('etc_cash_display').value);
   const lg  = parseNum(document.getElementById('loss_gain').value);
   const net = pos - etc - lg;
@@ -749,33 +808,35 @@ async function saveSettlement() {
   if (ol && oa) { etc_detail.other_label = ol; etc_detail.other_amt = oa; }
   if (ol2 && oa2) { etc_detail.other2_label = ol2; etc_detail.other2_amt = oa2; }
 
-  const denom = {};
+  const denomPos = {}, denomStore = {};
+  let posTotal = 0, storeTotal = 0;
   DENOMS.forEach(d => {
-    const v = parseInt(document.getElementById('denom_' + d.key).value) || 0;
-    if (v) denom[d.key] = v;
+    const vp = parseInt(document.getElementById('denom_pos_' + d.key).value) || 0;
+    const vs = parseInt(document.getElementById('denom_store_' + d.key).value) || 0;
+    if (vp) denomPos[d.key] = vp;
+    if (vs) denomStore[d.key] = vs;
+    posTotal   += vp * d.val;
+    storeTotal += vs * d.val;
   });
+  const reserveCounted = posTotal + storeTotal;
 
-  let counted = 0;
-  DENOMS.forEach(d => {
-    counted += (parseInt(document.getElementById('denom_' + d.key).value) || 0) * d.val;
-  });
-
-  const rTotal = parseNum(document.getElementById('reserve_total').value);
   const rSpent = parseNum(document.getElementById('reserve_spent').value);
-  const rBal   = rTotal - rSpent;
-  const diff   = (counted - rTotal) - net;
+  const rBal   = reserveCounted - rSpent;
+  const diff   = reserveCounted - RESERVE_BASE;  // 준비금 과부족
   const notes  = document.getElementById('notes').value.trim();
 
   const payload = {
     store, date, author,
+    pos_cash: posCash,
+    pos_cash_receipt: posReceipt,
     pos_cash_total: pos,
     etc_cash: etc,
     loss_gain: lg,
     net_cash: net,
     etc_detail,
-    denom,
-    counted_cash: counted,
-    reserve_total: rTotal,
+    denom: { pos: denomPos, store: denomStore },
+    counted_cash: reserveCounted,
+    reserve_total: reserveCounted,
     reserve_spent: rSpent,
     reserve_balance: rBal,
     diff,
@@ -811,6 +872,13 @@ function showPreview(r) {
   const fmt = v => formatNum(v) + '원';
   const diffColor = r.diff === 0 ? '#4ade80' : '#f87171';
 
+  // 두 돈통 소계 (하위호환: 구 평면 denom은 포스돈통으로 간주)
+  const _dn = r.denom || {};
+  const _dpos = _dn.pos || _dn;
+  const _dstore = _dn.store || {};
+  let posTotal = 0, storeTotal = 0;
+  DENOMS.forEach(d => { posTotal += (_dpos[d.key] || 0) * d.val; storeTotal += (_dstore[d.key] || 0) * d.val; });
+
   const etcItems = [
     ['열린부뚜막', r.etc_detail.yeollin],
     ['조합원(기타)', r.etc_detail.member],
@@ -840,16 +908,19 @@ function showPreview(r) {
       '<tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem 0.5rem;color:var(--dust);">매장</td><td style="padding:0.35rem 0.5rem;font-weight:600;">' + r.store + '</td>' +
       '<td style="padding:0.35rem 0.5rem;color:var(--dust);">날짜</td><td style="padding:0.35rem 0.5rem;">' + r.date + '</td></tr>' +
       '<tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem 0.5rem;color:var(--dust);">작성자</td><td style="padding:0.35rem 0.5rem;" colspan="3">' + (r.author || '-') + '</td></tr>' +
+      (r.pos_cash != null || r.pos_cash_receipt != null ? '<tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem 0.5rem;color:var(--dust);padding-left:1.2rem;">· 현금</td><td style="padding:0.35rem 0.5rem;text-align:right;" colspan="3">' + fmt(r.pos_cash) + '</td></tr>' +
+      '<tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem 0.5rem;color:var(--dust);padding-left:1.2rem;">· 현금영수증</td><td style="padding:0.35rem 0.5rem;text-align:right;" colspan="3">' + fmt(r.pos_cash_receipt) + '</td></tr>' : '') +
       '<tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem 0.5rem;color:var(--dust);">포스현금매출 총액</td><td style="padding:0.35rem 0.5rem;text-align:right;" colspan="3">' + fmt(r.pos_cash_total) + '</td></tr>' +
       '<tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem 0.5rem;color:var(--dust);">기타현금매출</td><td style="padding:0.35rem 0.5rem;text-align:right;" colspan="3">' + fmt(r.etc_cash) + '</td></tr>' +
       etcHtml +
       '<tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem 0.5rem;color:var(--dust);">손실/손익금</td><td style="padding:0.35rem 0.5rem;text-align:right;" colspan="3">' + fmt(r.loss_gain) + '</td></tr>' +
       '<tr style="border-bottom:2px solid rgba(196,128,58,0.4);background:rgba(196,128,58,0.06);"><td style="padding:0.35rem 0.5rem;color:var(--amber);font-weight:600;">순수 현금매출</td><td style="padding:0.35rem 0.5rem;text-align:right;font-weight:700;color:var(--amber);" colspan="3">' + fmt(r.net_cash) + '</td></tr>' +
-      '<tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem 0.5rem;color:var(--dust);">실물현금 합계</td><td style="padding:0.35rem 0.5rem;text-align:right;" colspan="3">' + fmt(r.counted_cash) + '</td></tr>' +
-      '<tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem 0.5rem;color:var(--dust);">준비금 계</td><td style="padding:0.35rem 0.5rem;text-align:right;" colspan="3">' + fmt(r.reserve_total) + '</td></tr>' +
-      '<tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem 0.5rem;color:var(--dust);">지출내역</td><td style="padding:0.35rem 0.5rem;text-align:right;" colspan="3">' + fmt(r.reserve_spent) + '</td></tr>' +
-      '<tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem 0.5rem;color:var(--dust);">준비금 잔액</td><td style="padding:0.35rem 0.5rem;text-align:right;" colspan="3">' + fmt(r.reserve_balance) + '</td></tr>' +
-      '<tr style="border-bottom:2px solid ' + diffColor + ';background:' + (r.diff === 0 ? 'rgba(74,222,128,0.07)' : 'rgba(248,113,113,0.07)') + ';"><td style="padding:0.35rem 0.5rem;color:' + diffColor + ';font-weight:600;">과부족</td><td style="padding:0.35rem 0.5rem;text-align:right;font-weight:700;color:' + diffColor + ';" colspan="3">' + (r.diff === 0 ? '일치 (0원)' : (r.diff > 0 ? '+' : '') + fmt(r.diff)) + '</td></tr>' +
+      '<tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem 0.5rem;color:var(--dust);">포스현금돈통</td><td style="padding:0.35rem 0.5rem;text-align:right;" colspan="3">' + fmt(posTotal) + '</td></tr>' +
+      '<tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem 0.5rem;color:var(--dust);">보관돈통</td><td style="padding:0.35rem 0.5rem;text-align:right;" colspan="3">' + fmt(storeTotal) + '</td></tr>' +
+      '<tr style="border-bottom:1px solid var(--border);background:rgba(196,128,58,0.06);"><td style="padding:0.35rem 0.5rem;color:var(--amber);font-weight:600;">준비금 계 (실측)</td><td style="padding:0.35rem 0.5rem;text-align:right;font-weight:700;color:var(--amber);" colspan="3">' + fmt(r.reserve_total) + '</td></tr>' +
+      (r.reserve_spent ? '<tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem 0.5rem;color:var(--dust);">지출내역</td><td style="padding:0.35rem 0.5rem;text-align:right;" colspan="3">' + fmt(r.reserve_spent) + '</td></tr>' +
+      '<tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem 0.5rem;color:var(--dust);">준비금 잔액</td><td style="padding:0.35rem 0.5rem;text-align:right;" colspan="3">' + fmt(r.reserve_balance) + '</td></tr>' : '') +
+      '<tr style="border-bottom:2px solid ' + diffColor + ';background:' + (r.diff === 0 ? 'rgba(74,222,128,0.07)' : 'rgba(248,113,113,0.07)') + ';"><td style="padding:0.35rem 0.5rem;color:' + diffColor + ';font-weight:600;">준비금 과부족</td><td style="padding:0.35rem 0.5rem;text-align:right;font-weight:700;color:' + diffColor + ';" colspan="3">' + (r.diff === 0 ? '일치 (0원)' : (r.diff > 0 ? '+' : '') + fmt(r.diff) + ' — 오계산·누락 확인') + '</td></tr>' +
       (r.notes ? '<tr><td style="padding:0.35rem 0.5rem;color:var(--dust);">기타사항</td><td style="padding:0.35rem 0.5rem;" colspan="3">' + r.notes + '</td></tr>' : '') +
     '</table>';
 
@@ -889,7 +960,12 @@ async function loadExisting(store, date) {
   if (!data) return;
 
   document.getElementById('author').value = data.author || '';
-  document.getElementById('pos_cash_total').value = data.pos_cash_total ? formatNum(data.pos_cash_total) : '';
+  if (data.pos_cash != null || data.pos_cash_receipt != null) {
+    document.getElementById('pos_cash').value = data.pos_cash ? formatNum(data.pos_cash) : '';
+    document.getElementById('pos_cash_receipt').value = data.pos_cash_receipt ? formatNum(data.pos_cash_receipt) : '';
+  } else {
+    document.getElementById('pos_cash').value = data.pos_cash_total ? formatNum(data.pos_cash_total) : '';
+  }
   document.getElementById('loss_gain').value = data.loss_gain ? formatNum(data.loss_gain) : '';
   document.getElementById('notes').value = data.notes || '';
 
@@ -903,11 +979,14 @@ async function loadExisting(store, date) {
   if (ed.other2_amt)   { document.getElementById('etc_other2_amt').value = formatNum(ed.other2_amt); }
 
   const dn = data.denom || {};
+  // 하위호환: 구 평면 denom({d50000:n})은 포스돈통으로 로드
+  const dpos = dn.pos || dn;
+  const dstore = dn.store || {};
   DENOMS.forEach(d => {
-    if (dn[d.key]) document.getElementById('denom_' + d.key).value = dn[d.key];
+    if (dpos[d.key])   document.getElementById('denom_pos_' + d.key).value   = dpos[d.key];
+    if (dstore[d.key]) document.getElementById('denom_store_' + d.key).value = dstore[d.key];
   });
 
-  document.getElementById('reserve_total').value = data.reserve_total ? formatNum(data.reserve_total) : '';
   document.getElementById('reserve_spent').value = data.reserve_spent ? formatNum(data.reserve_spent) : '';
 
   recalcEtc();

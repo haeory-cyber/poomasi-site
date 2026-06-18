@@ -97,9 +97,15 @@ function render(r) {
   if (ed.other_label && ed.other_amt) etcRows += `<tr class="sub"><td class="k">${esc(ed.other_label)}</td><td class="v">${fmt(ed.other_amt)}</td></tr>`;
   if (ed.other2_label && ed.other2_amt) etcRows += `<tr class="sub"><td class="k">${esc(ed.other2_label)}</td><td class="v">${fmt(ed.other2_amt)}</td></tr>`;
 
-  // 권종 행
-  let denomRows = '';
-  DENOMS.forEach(d => { if (dn[d.key]) denomRows += `<tr class="sub"><td class="k">${d.label} × ${dn[d.key]}장</td><td class="v">${fmt(dn[d.key]*d.val)}</td></tr>`; });
+  // 두 돈통 권종 (하위호환: 구 평면 denom은 포스돈통으로 간주)
+  const dpos = dn.pos || dn;
+  const dstore = dn.store || {};
+  let posTotal = 0, storeTotal = 0, posRows = '', storeRows = '';
+  DENOMS.forEach(d => {
+    if (dpos[d.key])   { posRows   += `<tr class="sub"><td class="k">${d.label} × ${dpos[d.key]}장</td><td class="v">${fmt(dpos[d.key]*d.val)}</td></tr>`;   posTotal   += dpos[d.key]*d.val; }
+    if (dstore[d.key]) { storeRows += `<tr class="sub"><td class="k">${d.label} × ${dstore[d.key]}장</td><td class="v">${fmt(dstore[d.key]*d.val)}</td></tr>`; storeTotal += dstore[d.key]*d.val; }
+  });
+  const reserveCounted = posTotal + storeTotal;
 
   const diffCls = r.diff === 0 ? 'diff-ok' : 'diff-fail';
   const diffTxt = r.diff === 0 ? '일치 (0원)' : (r.diff > 0 ? '+' : '') + fmt(r.diff);
@@ -119,6 +125,7 @@ function render(r) {
     <div class="card">
       <div class="card-title">1. 현금 매출 현황 (POS)</div>
       <table class="kv">
+        ${(r.pos_cash != null || r.pos_cash_receipt != null) ? `<tr class="sub"><td class="k">· 현금</td><td class="v">${fmt(r.pos_cash)}</td></tr><tr class="sub"><td class="k">· 현금영수증</td><td class="v">${fmt(r.pos_cash_receipt)}</td></tr>` : ''}
         <tr><td class="k">포스현금매출 총액</td><td class="v">${fmt(r.pos_cash_total)}</td></tr>
         <tr><td class="k">기타현금매출</td><td class="v">${fmt(r.etc_cash)}</td></tr>
         <tr><td class="k">손실/손익금 (택배·잔돈기부 등 출금)</td><td class="v">${fmt(r.loss_gain)}</td></tr>
@@ -136,20 +143,23 @@ function render(r) {
     </div>
 
     <div class="card">
-      <div class="card-title">3. 권종 카운트 (검산)</div>
+      <div class="card-title">3. 준비금 돈통 검산</div>
       <table class="kv">
-        ${denomRows || '<tr class="sub"><td class="k" colspan="2" style="color:var(--dust);">권종 미입력</td></tr>'}
-        <tr class="row-hi"><td class="k">실물현금 합계</td><td class="v">${fmt(r.counted_cash)}</td></tr>
-        <tr><td class="k">과부족 (실물−준비금)−순수현금</td><td class="v ${diffCls}">${diffTxt}</td></tr>
+        <tr class="row-hi"><td class="k">포스현금돈통</td><td class="v">${fmt(posTotal)}</td></tr>
+        ${posRows}
+        <tr class="row-hi"><td class="k">보관돈통</td><td class="v">${fmt(storeTotal)}</td></tr>
+        ${storeRows}
+        <tr class="row-hi"><td class="k">준비금 계 (실측)</td><td class="v">${fmt(reserveCounted)}</td></tr>
+        <tr><td class="k">검산 (− 준비금 50만)</td><td class="v ${diffCls}">${diffTxt}</td></tr>
       </table>
+      <p class="note">※ 포스현금돈통 + 보관돈통 = 준비금 50만원이어야 정상입니다.</p>
     </div>
 
     <div class="card">
       <div class="card-title">4. 준비금 현황</div>
       <table class="kv">
-        <tr><td class="k">준비금 계</td><td class="v">${fmt(r.reserve_total)}</td></tr>
-        <tr><td class="k">지출내역</td><td class="v">${fmt(r.reserve_spent)}</td></tr>
-        <tr><td class="k">준비금 잔액</td><td class="v">${fmt(r.reserve_balance)}</td></tr>
+        <tr><td class="k">준비금 계 (두 돈통 합)</td><td class="v">${fmt(r.reserve_total)}</td></tr>
+        ${r.reserve_spent ? `<tr><td class="k">지출내역</td><td class="v">${fmt(r.reserve_spent)}</td></tr><tr><td class="k">준비금 잔액</td><td class="v">${fmt(r.reserve_balance)}</td></tr>` : ''}
       </table>
     </div>
 
