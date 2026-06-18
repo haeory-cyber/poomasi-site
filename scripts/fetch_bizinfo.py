@@ -1,19 +1,24 @@
 """
 fetch_bizinfo.py — 기업마당 공고 수집 → Supabase bizinfo_grants 저장
 실행: python fetch_bizinfo.py
-조건: 중앙부처 + 대전 대상 공고만 저장
+조건: 키워드 필터(BIZINFO_KEYWORDS)만 적용 — 전국 전 지자체 수집
+      (work.html은 프론트엔드에서 다시 중앙부처+대전 필터링)
 """
 
 import os
 import sys
+import re
 import datetime
 import urllib.request
 import xml.etree.ElementTree as ET
 import requests
+from dotenv import load_dotenv
+
+load_dotenv(os.path.join(os.path.dirname(__file__), '../../.env'))
 
 SUPABASE_URL = os.environ['SUPABASE_URL']
 SUPABASE_KEY = os.environ['SUPABASE_KEY']
-BIZINFO_KEY  = os.environ['BIZINFO_KEY']
+BIZINFO_KEY  = os.environ.get('BIZINFO_KEY') or os.environ['BIZINFO_API_KEY']
 
 BIZINFO_KEYWORDS = [
     '협동조합', '사회적경제', '소셜벤처', '로컬푸드', '탄소중립',
@@ -41,23 +46,20 @@ EXCLUDE_REGIONS = [
 ]
 
 
-def is_relevant_region(author: str) -> bool:
-    """중앙부처 또는 대전만 허용. title의 [지역] 태그도 확인."""
-    if '대전' in author:
-        return True
-    return not any(k in author for k in EXCLUDE_REGIONS)
+def parse_end_date(reqst_begin_end_de: str) -> str | None:
+    """'YYYY-MM-DD ~ YYYY-MM-DD' 형식에서 마감일(뒷 날짜) 추출."""
+    if not reqst_begin_end_de:
+        return None
+    m = re.search(r'(\d{4}-\d{2}-\d{2})\s*$', reqst_begin_end_de)
+    return m.group(1) if m else None
 
 
-def is_relevant_title(title: str) -> bool:
-    """title의 [지역] 태그 기준으로 타지역 공고 제외."""
-    import re
-    m = re.match(r'^\[(.+?)\]', title)
-    if not m:
-        return True  # 태그 없으면 중앙부처 공고
-    tag = m.group(1)
-    if '대전' in tag:
-        return True
-    return not any(k in tag for k in EXCLUDE_REGIONS)
+def parse_posted_date(creat_pnttm: str) -> str | None:
+    """'YYYY-MM-DD HH:MM:SS' 형식에서 날짜 부분만 추출."""
+    if not creat_pnttm:
+        return None
+    m = re.match(r'(\d{4}-\d{2}-\d{2})', creat_pnttm)
+    return m.group(1) if m else None
 
 
 def fix_link(url: str) -> str:
@@ -68,7 +70,7 @@ def fix_link(url: str) -> str:
     return 'https://www.bizinfo.go.kr' + url
 
 
-def fetch_announcements(num: int = 30) -> list:
+def fetch_announcements(num: int = 100) -> list:
     url = (
         'https://www.bizinfo.go.kr/uss/rss/bizinfoApi.do'
         f'?crtfcKey={BIZINFO_KEY}&numOfRows=100&pageNo=1'
@@ -93,17 +95,16 @@ def fetch_announcements(num: int = 30) -> list:
         author = txt('author')
         title = txt('title')
 
-        if not is_relevant_region(author) or not is_relevant_title(title):
-            continue
-
+        # 지역 필터 해제: 키워드 필터만 적용 (전국 전 지자체 수집)
         if not any(kw in title for kw in BIZINFO_KEYWORDS):
             continue
 
         result.append({
-            'title':    title,
-            'link':     fix_link(txt('pblancUrl')),
-            'author':   author,
-            'end_date': txt('reqstEndDe') or None,
+            'title':       title,
+            'link':        fix_link(txt('pblancUrl')),
+            'author':      author,
+            'end_date':    parse_end_date(txt('reqstBeginEndDe')),
+            'posted_date': parse_posted_date(txt('creatPnttm')),
         })
         if len(result) >= num:
             break
@@ -119,11 +120,12 @@ def save_to_supabase(announcements: list) -> None:
     today = datetime.date.today().isoformat()
     rows  = [
         {
-            'title':      a['title'],
-            'link':       a['link'] or None,
-            'author':     a['author'] or None,
-            'end_date':   a['end_date'],
-            'fetched_at': today,
+            'title':       a['title'],
+            'link':        a['link'] or None,
+            'author':      a['author'] or None,
+            'end_date':    a['end_date'],
+            'posted_date': a.get('posted_date'),
+            'fetched_at':  today,
         }
         for a in announcements
     ]
