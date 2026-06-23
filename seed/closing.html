@@ -294,6 +294,33 @@ select.form-input {
 }
 .print-btn:hover { border-color: var(--amber); color: var(--amber); }
 
+/* ── 권종 입력 경고 ── */
+.denom-warn {
+  margin-top: 0.4rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid #f87171;
+  background: rgba(248,113,113,0.1);
+  border-radius: 6px;
+  color: #f87171;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+.denom-warn b { color: #fca5a5; }
+
+/* ── 불러오기 버튼 ── */
+.load-btn {
+  padding: 0.4rem 0.8rem;
+  background: transparent;
+  border: 1px solid rgba(184,168,138,0.4);
+  border-radius: 6px;
+  color: var(--dust);
+  font-size: 0.8rem;
+  font-family: 'Noto Sans KR', sans-serif;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.load-btn:hover { border-color: var(--amber); color: var(--amber); }
+
 /* ── 토스트 ── */
 #toast {
   position: fixed;
@@ -394,6 +421,12 @@ select.form-input {
       <span class="label">작성자</span>
       <div class="input-wrap">
         <input type="text" id="author" class="form-input text-left" placeholder="이름 입력">
+      </div>
+    </div>
+    <div class="form-row">
+      <span class="label">저장분 수정 <span style="font-size:0.68rem;color:var(--dust);">(매장·날짜 선택 후)</span></span>
+      <div class="input-wrap">
+        <button type="button" class="load-btn" onclick="loadForEdit()">저장된 결산 불러오기</button>
       </div>
     </div>
   </div>
@@ -531,6 +564,7 @@ select.form-input {
   <div class="section-card">
     <div class="section-label">SECTION 3</div>
     <div class="section-title">준비금 돈통 검산</div>
+    <p class="note-text" style="margin-top:0;margin-bottom:0.35rem;color:var(--amber-light);font-weight:600;">※ 각 칸에는 <b style="color:var(--amber);">금액이 아니라 장수(갯수)</b>를 입력하세요. 예) 5만원권 3장 → 3 (50000 아님)</p>
     <p class="note-text" style="margin-top:0;margin-bottom:0.5rem;">※ 포스현금돈통 + 보관돈통 = 준비금 50만원이어야 정상입니다.</p>
 
     <div class="cashbox-label">포스현금돈통</div>
@@ -539,6 +573,7 @@ select.form-input {
       <span class="label">포스돈통 소계</span>
       <span class="value" id="pos_subtotal">0원</span>
     </div>
+    <div class="denom-warn" id="warn-pos" style="display:none;">⚠️ 포스돈통 금액이 비정상적으로 큽니다. 각 칸에 <b>금액이 아니라 장수(갯수)</b>를 입력했는지 확인하세요 — 예) 5만원권 3장 → <b>3</b> (50000 아님)</div>
 
     <div class="cashbox-label">보관돈통</div>
     <div class="denom-grid" id="denom-grid-store"><!-- JS 렌더 --></div>
@@ -546,6 +581,7 @@ select.form-input {
       <span class="label">보관돈통 소계</span>
       <span class="value" id="store_subtotal">0원</span>
     </div>
+    <div class="denom-warn" id="warn-store" style="display:none;">⚠️ 보관돈통 금액이 비정상적으로 큽니다. 각 칸에 <b>금액이 아니라 장수(갯수)</b>를 입력했는지 확인하세요 — 예) 5만원권 3장 → <b>3</b> (50000 아님)</div>
 
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.75rem;padding:0.6rem 0.8rem;background:rgba(196,128,58,0.08);border:1px solid rgba(196,128,58,0.3);border-radius:6px;">
       <span style="font-size:0.9rem;color:var(--amber);font-weight:600;">준비금 계 (실측)</span>
@@ -638,6 +674,7 @@ const DENOMS = [
 
 // ── 준비금 기준 ───────────────────────────────────────────
 const RESERVE_BASE = 500000; // 포스현금돈통 + 보관돈통 = 50만원
+const DENOM_WARN_CAP = 1000000; // 한 돈통이 이 금액 초과 시 입력 의심(장수 대신 금액 입력?) — 정상 준비금 50만의 2배
 
 // ── 초기화 ────────────────────────────────────────────────
 function init() {
@@ -658,7 +695,7 @@ function renderDenomGrid(containerId, box) {
   document.getElementById(containerId).innerHTML = DENOMS.map(d =>
     '<div class="denom-item">' +
       '<span class="denom-unit">' + d.label + '</span>' +
-      '<input type="text" inputmode="numeric" id="denom_' + box + '_' + d.key + '" class="denom-input" placeholder="0"' +
+      '<input type="text" inputmode="numeric" id="denom_' + box + '_' + d.key + '" class="denom-input" placeholder="장수"' +
       ' oninput="recalcDenom()" onchange="recalcDenom()">' +
       '<span class="denom-result" id="denom_result_' + box + '_' + d.key + '">—</span>' +
     '</div>'
@@ -729,8 +766,11 @@ function boxTotal(box) {
 }
 
 function recalcDenom() {
-  document.getElementById('pos_subtotal').textContent   = formatNum(boxTotal('pos'))   + '원';
-  document.getElementById('store_subtotal').textContent = formatNum(boxTotal('store')) + '원';
+  const posT = boxTotal('pos'), storeT = boxTotal('store');
+  document.getElementById('pos_subtotal').textContent   = formatNum(posT)   + '원';
+  document.getElementById('store_subtotal').textContent = formatNum(storeT) + '원';
+  document.getElementById('warn-pos').style.display   = posT   > DENOM_WARN_CAP ? 'block' : 'none';
+  document.getElementById('warn-store').style.display = storeT > DENOM_WARN_CAP ? 'block' : 'none';
   recalc();
 }
 
@@ -819,6 +859,12 @@ async function saveSettlement() {
     storeTotal += vs * d.val;
   });
   const reserveCounted = posTotal + storeTotal;
+
+  if (posTotal > DENOM_WARN_CAP || storeTotal > DENOM_WARN_CAP) {
+    if (!confirm('돈통 금액이 비정상적으로 큽니다 (' + formatNum(Math.max(posTotal, storeTotal)) + '원).\n권종칸에 \'장수(갯수)\' 대신 \'금액\'을 입력하지 않았는지 확인하세요.\n예) 5만원권 3장 → 3 (50000 아님)\n\n그래도 저장하시겠습니까?')) {
+      return;
+    }
+  }
 
   const rSpent = parseNum(document.getElementById('reserve_spent').value);
   const rBal   = reserveCounted - rSpent;
@@ -948,6 +994,15 @@ function toast(msg, duration) {
   _toastTimer = setTimeout(() => el.classList.remove('show'), duration || 2500);
 }
 
+// ── 저장분 불러오기 (수정용) ─────────────────────────────
+function loadForEdit() {
+  const store = document.getElementById('store').value;
+  const date  = document.getElementById('settle-date').value;
+  if (!store) { toast('매장을 선택하세요'); return; }
+  if (!date)  { toast('날짜를 입력하세요'); return; }
+  loadExisting(store, date);
+}
+
 // ── 기존 데이터 로드 (URL 파라미터로 조회 가능) ──────────
 async function loadExisting(store, date) {
   if (!store || !date) return;
@@ -957,7 +1012,7 @@ async function loadExisting(store, date) {
     .eq('store', store)
     .eq('date', date)
     .maybeSingle();
-  if (!data) return;
+  if (!data) { toast('저장된 결산이 없습니다 — 새로 작성하세요'); return; }
 
   document.getElementById('author').value = data.author || '';
   if (data.pos_cash != null || data.pos_cash_receipt != null) {
