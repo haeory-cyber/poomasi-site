@@ -70,7 +70,14 @@ table.kv tr { border-bottom:1px solid var(--border); }
 <script>
 const SUPABASE_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRuaXZoY3BqcmhrbWVrY2ZxZ2RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NTc5MjMsImV4cCI6MjA4NzIzMzkyM30.yJ0_4Sg78p7oY89q7go3ab26PCPHnk1Q4ObZJIZEULA';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// 지연 초기화: supabase CDN 로드 실패 시 조용한 백지 대신 안내(2026-06-28)
+let _sb = null;
+function getSb() {
+  if (_sb) return _sb;
+  if (typeof supabase === 'undefined') return null;  // CDN 미로딩
+  _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  return _sb;
+}
 
 const ETC_LABELS = {
   yeollin:'열린부뚜막', member:'조합원(기타)', onnuri_paper:'온누리(지류)', onnuri_e:'온누리(전자)',
@@ -189,6 +196,9 @@ async function load() {
   const store = p.get('store');
   const date = p.get('date');
   if (!store || !date) { renderEmpty(store, date, '매장과 날짜가 지정되지 않았습니다.'); return; }
+
+  const sb = getSb();
+  if (!sb) { renderEmpty(store, date, '네트워크 확인 — 조회 모듈 로드 실패. 새로고침 해주세요.'); return; }
 
   const { data, error } = await sb.from('daily_settlement')
     .select('*').eq('store', store).eq('date', date).maybeSingle();

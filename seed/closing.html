@@ -651,7 +651,14 @@ select.form-input {
 // ── Supabase ──────────────────────────────────────────────
 const SUPABASE_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRuaXZoY3BqcmhrbWVrY2ZxZ2RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NTc5MjMsImV4cCI6MjA4NzIzMzkyM30.yJ0_4Sg78p7oY89q7go3ab26PCPHnk1Q4ObZJIZEULA';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// 지연 초기화: supabase CDN 로드 실패가 자동계산까지 죽이지 않도록 분리(2026-06-28)
+let _sb = null;
+function getSb() {
+  if (_sb) return _sb;
+  if (typeof supabase === 'undefined') return null;  // CDN 미로딩
+  _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  return _sb;
+}
 
 // ── 날짜 유틸 ─────────────────────────────────────────────
 function todayKST() {
@@ -894,6 +901,12 @@ async function saveSettlement() {
   btn.disabled = true;
   btn.textContent = '저장 중…';
 
+  const sb = getSb();
+  if (!sb) {
+    btn.disabled = false; btn.textContent = '저장';
+    toast('네트워크 확인 — 저장 모듈 로드 실패. 자동계산·인쇄는 정상입니다');
+    return;
+  }
   const { data, error } = await sb
     .from('daily_settlement')
     .upsert(payload, { on_conflict: 'store,date' })
