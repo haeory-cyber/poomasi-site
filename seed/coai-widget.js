@@ -377,6 +377,9 @@
     .coai-login-cancel { background: #e3e6ea; color: #333; }
     .coai-login-msg { font-size: 12px; color: #666; }
     .coai-login-msg.bad { color: #c0392b; }
+    .coai-signup-hint { font-size: 12px; color: #777; margin-top: 8px; text-align: center; }
+    .coai-signup-link { color: #2f7d4f; font-weight: 600; text-decoration: none; white-space: nowrap; }
+    .coai-signup-link:hover { text-decoration: underline; }
     .coai-comment-bar { margin: 2px 8px 10px; }
     .coai-comment-open {
       background: none; border: 1px dashed #b9c0c8; color: #6b7480; border-radius: 8px;
@@ -708,7 +711,9 @@
       '<div class="coai-login-row">' +
       '<button type="button" class="coai-login-go">로그인</button>' +
       '<button type="button" class="coai-login-cancel">취소</button></div>' +
-      '<div class="coai-login-msg"></div>';
+      '<div class="coai-login-msg"></div>' +
+      '<div class="coai-signup-hint">아직 트레이너가 아니신가요? ' +
+      '<a class="coai-signup-link" href="https://join.poomasi.org/?from=coai" target="_blank" rel="noopener">코아이 트레이너로 가입하기 →</a></div>';
     messagesEl.parentNode.insertBefore(f, messagesEl);
     var msg = f.querySelector('.coai-login-msg');
     f.querySelector('.coai-login-go').addEventListener('click', function () {
