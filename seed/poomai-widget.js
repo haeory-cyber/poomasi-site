@@ -499,6 +499,7 @@
   const _thisScript = document.currentScript;
   const _isFullscreen = _thisScript && _thisScript.getAttribute('data-mode') === 'fullscreen';
   const _targetSelector = _thisScript && _thisScript.getAttribute('data-target');
+  const _persona = (_thisScript && _thisScript.getAttribute('data-persona')) || '';  // 'coai' 등. 미지정=품아이(회귀 0)
   const _targetEl = _targetSelector ? document.querySelector(_targetSelector) : null;
 
   // ── DOM 생성 ──
@@ -1024,14 +1025,16 @@
         headers['Authorization'] = 'Bearer ' + token;
       }
 
+      var _body = {
+        query: query,
+        history: history.slice(0, -1), // 현재 메시지 제외한 이전 히스토리
+        page_context: window.location.pathname
+      };
+      if (_persona) _body.persona = _persona;
       var response = await fetch(API_CHAT, {
         method: 'POST',
         headers: headers,
-        body: JSON.stringify({
-          query: query,
-          history: history.slice(0, -1), // 현재 메시지 제외한 이전 히스토리
-          page_context: window.location.pathname
-        })
+        body: JSON.stringify(_body)
       });
 
       hideTyping();
@@ -1172,6 +1175,11 @@
 
     textarea.focus();
     scrollToBottom();
+  }
+
+  // 코아이 랜딩의 [data-chat] CTA가 위젯을 직접 열도록 전역 노출 (coai 전용)
+  if (_persona === 'coai') {
+    window.__coaiWidgetOpen = openPanel;
   }
 
   function closePanel() {

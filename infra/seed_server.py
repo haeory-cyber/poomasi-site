@@ -92,11 +92,12 @@ def _extract_email(request: Request) -> str:
 
 # ── Engine 초기화 ─────────────────────────────────────
 engine = None
+coai_engine = None  # 코아이(주민운동 RAG + EXAONE), persona=coai 전용
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global engine
+    global engine, coai_engine
     try:
         # rag 패키지 절대 임포트 (from rag.fuzzy_utils import ...) 지원을 위해 부모 dir도 추가
         sys.path.insert(0, os.path.dirname(RAG_DIR))
@@ -107,6 +108,15 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"[seed] RAGEngine 초기화 실패: {e}")
         engine = None
+    # 코아이 엔진 — engine의 임베더 재사용. 실패해도 품아이 경로 무영향.
+    if engine is not None:
+        try:
+            from coai_engine import CoaiEngine
+            coai_engine = CoaiEngine(engine.embed_model)
+            print(f"[seed] CoaiEngine 초기화 완료")
+        except Exception as e:
+            print(f"[seed] CoaiEngine 초기화 실패 (코아이만 비활성): {e}")
+            coai_engine = None
     if _cli_bridge_load_error:
         print(f"[seed] CLI 브릿지 로드 실패 (Gemini 폴백): {_cli_bridge_load_error}")
     elif _cli_bridge:
@@ -179,6 +189,26 @@ async def chat(request: Request):
             status_code=400,
             content={"error": "질문을 입력해주세요."},
         )
+
+    # ── 코아이 분기 (persona=coai) ─ 주민운동 RAG + EXAONE 전용 경로 ──
+    # 품아이(persona 미지정)는 이 블록을 건너뛰어 기존 동작 100% 유지(회귀 0).
+    if body.get("persona") == "coai":
+        if coai_engine is None:
+            return JSONResponse(
+                status_code=503,
+                content={"error": "코아이가 준비되지 않았습니다."},
+            )
+        try:
+            answer, refs = await coai_engine.generate(
+                query, top_k=body.get("top_k", 5), history=body.get("history", [])
+            )
+            return {"answer": answer, "refs": refs, "via": "coai"}
+        except Exception as e:
+            print(f"[seed] 코아이 오류: {e}")
+            return JSONResponse(
+                status_code=500,
+                content={"error": "코아이 응답 생성 중 오류가 발생했습니다."},
+            )
 
     history = body.get("history", [])
     page_context = body.get("page_context", "")
