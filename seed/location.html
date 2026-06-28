@@ -27,16 +27,16 @@ body {
   <p class="err" id="err"></p>
 </div>
 <script>
-const tg = window.Telegram.WebApp;
-tg.ready();
-tg.expand();
+// telegram-web-app.js 로드 실패 또는 텔레그램 밖에서 열린 경우 가드(2026-06-28)
+const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
+if (tg) { tg.ready(); tg.expand(); }
 
 function sendResult(lat, lng, acc) {
   const data = JSON.stringify({ lat: lat, lng: lng, acc: Math.round(acc || 0) });
   document.getElementById('icon').textContent = '✅';
   document.getElementById('icon').style.animation = 'none';
   document.getElementById('msg').textContent = '위치 확인 완료';
-  tg.sendData(data);
+  if (tg) tg.sendData(data);
 }
 
 function showError(title, detail) {
@@ -47,7 +47,7 @@ function showError(title, detail) {
 }
 
 // 1순위: 텔레그램 LocationManager API
-if (tg.LocationManager) {
+if (tg && tg.LocationManager) {
   tg.LocationManager.init(function() {
     if (!tg.LocationManager.isLocationAvailable) {
       showError('위치 서비스를 켜주세요', '설정 > 위치 > 사용');

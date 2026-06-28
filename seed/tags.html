@@ -742,7 +742,12 @@
 // ── Supabase Auth ────────────────────────────────────────
 const SB_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
 const SB_KEY = ['sb_publi','shable_SKtfO63ApOP3DyJKu_2ypw_JK4dsdUG'].join('');
-const sb = supabase.createClient(SB_URL, SB_KEY);
+// CDN 로드 실패 시 조용한 ReferenceError로 페이지 전체가 죽지 않도록 가드(2026-06-28)
+if (typeof supabase === 'undefined') {
+  document.addEventListener('DOMContentLoaded', () =>
+    alert('네트워크 또는 차단으로 페이지 모듈 로드에 실패했습니다.\n새로고침하거나 네트워크 연결을 확인해 주세요.'));
+}
+const sb = (typeof supabase !== 'undefined') ? supabase.createClient(SB_URL, SB_KEY) : null;
 
 async function doLogin() {
   const email = document.getElementById('email').value.trim();
@@ -874,7 +879,7 @@ async function doSignup() {
 }
 
 // 세션 복원
-sb.auth.getSession().then(({ data: { session } }) => {
+sb && sb.auth.getSession().then(({ data: { session } }) => {
   if (session) showApp(session.user);
 });
 </script>

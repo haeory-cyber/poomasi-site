@@ -272,7 +272,12 @@
 <script>
 const SUPABASE_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRuaXZoY3BqcmhrbWVrY2ZxZ2RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NTc5MjMsImV4cCI6MjA4NzIzMzkyM30.yJ0_4Sg78p7oY89q7go3ab26PCPHnk1Q4ObZJIZEULA';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// CDN 로드 실패 시 조용한 ReferenceError로 페이지 전체가 죽지 않도록 가드(2026-06-28)
+if (typeof supabase === 'undefined') {
+  document.addEventListener('DOMContentLoaded', () =>
+    alert('네트워크 또는 차단으로 페이지 모듈 로드에 실패했습니다.\n새로고침하거나 네트워크 연결을 확인해 주세요.'));
+}
+const sb = (typeof supabase !== 'undefined') ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
 let selectedCat = '';
 
