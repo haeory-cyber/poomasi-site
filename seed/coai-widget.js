@@ -602,8 +602,10 @@
       addRefs(data.refs);
       history.push({ role: 'assistant', content: answer });
       saveHistory();
-      if (trainer.isTrainer && aiDiv) {
-        attachCommentUI(aiDiv, query, answer, data.refs || []);
+      if (aiDiv) {
+        // 메타는 항상 저장 → 로그인 전 답변도 로그인 시 소급(backfill) 가능
+        aiDiv._coaiMeta = { question: query, answer: answer, refs: data.refs || [] };
+        if (trainer.isTrainer) attachCommentUI(aiDiv, query, answer, data.refs || []);
       }
     } catch (err) {
       hideTyping();
@@ -635,6 +637,19 @@
       trainer.isTrainer = false;
     }
     updateTrainerBadge();
+    backfillCommentUI();   // 로그인 직후 이미 떠 있는 답변에도 코멘트 소급
+  }
+
+  // 화면의 모든 AI 답변(메타 보유)에 코멘트 UI 소급 부착
+  function backfillCommentUI() {
+    if (!trainer.isTrainer) return;
+    var divs = messagesEl.querySelectorAll('.coai-msg-ai');
+    for (var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      if (d._coaiMeta && !d._coaiCommented) {
+        attachCommentUI(d, d._coaiMeta.question, d._coaiMeta.answer, d._coaiMeta.refs);
+      }
+    }
   }
 
   async function doLogin(email, password, msgEl) {
@@ -666,6 +681,11 @@
   function doLogout() {
     trainer = { token: null, name: null, isTrainer: false };
     localStorage.removeItem(TOKEN_KEY);
+    // 코멘트 UI 제거 + 플래그 리셋 (재로그인 시 backfill로 복원)
+    var bars = messagesEl.querySelectorAll('.coai-comment-bar');
+    for (var i = 0; i < bars.length; i++) bars[i].remove();
+    var divs = messagesEl.querySelectorAll('.coai-msg-ai');
+    for (var j = 0; j < divs.length; j++) divs[j]._coaiCommented = false;
     updateTrainerBadge();
   }
 
@@ -727,6 +747,8 @@
   var COMMENT_TAGS = ['오류', '부족', '톤·위험'];
 
   function attachCommentUI(aiDiv, question, aiAnswer, refs) {
+    if (aiDiv._coaiCommented) return;   // 중복 부착 방지
+    aiDiv._coaiCommented = true;
     var bar = document.createElement('div');
     bar.className = 'coai-comment-bar';
     var openBtn = document.createElement('button');
@@ -734,7 +756,12 @@
     openBtn.className = 'coai-comment-open';
     openBtn.textContent = '✏️ 코멘트';
     bar.appendChild(openBtn);
-    messagesEl.appendChild(bar);
+    // 답변(+참고) 그룹 바로 뒤에 삽입 — 신규는 맨끝, 소급은 각 답변 밑에 정확히
+    var anchor = aiDiv;
+    if (anchor.nextSibling && anchor.nextSibling.classList &&
+        anchor.nextSibling.classList.contains('coai-refs')) anchor = anchor.nextSibling;
+    if (anchor.nextSibling) messagesEl.insertBefore(bar, anchor.nextSibling);
+    else messagesEl.appendChild(bar);
     openBtn.addEventListener('click', function () {
       if (bar.querySelector('.coai-comment-form')) return;
       openBtn.style.display = 'none';
