@@ -16,8 +16,12 @@
   var _apiBase = (window.location.hostname === 'seed.poomasi.org')
     ? '' : 'https://seed.poomasi.org';
   const API_CHAT = _apiBase + '/api/chat';
+  const API_LOGIN = _apiBase + '/api/auth/login';
+  const API_ME = _apiBase + '/api/coai/me';
+  const API_FEEDBACK = _apiBase + '/api/coai/feedback';
   const HISTORY_KEY = 'coai_history';
   const STATE_KEY = 'coai_open';
+  const TOKEN_KEY = 'coai_trainer_token';
   const PERSONA = 'coai';
 
   // ── 상태 ──
@@ -25,6 +29,8 @@
   let isOpen = sessionStorage.getItem(STATE_KEY) === 'true';
   let isLoading = false;
   let welcomeSent = false;
+  // 트레이너 환류: 로그인한 트레이너만 코멘트 가능
+  let trainer = { token: localStorage.getItem(TOKEN_KEY) || null, name: null, isTrainer: false };
 
   // sessionStorage에서 히스토리 복원
   try {
@@ -348,6 +354,51 @@
       box-shadow: 0 8px 40px rgba(0,0,0,0.5) !important;
     }
     #coai-chat-main #coai-messages { flex: 1; min-height: 300px; }
+
+    /* ── 트레이너 환류 UI ── */
+    #coai-trainer-badge {
+      background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 12px; padding: 3px 10px; font-size: 11px; cursor: pointer;
+      margin-left: auto; margin-right: 8px; white-space: nowrap;
+    }
+    #coai-trainer-badge.on { background: rgba(80,200,120,0.35); border-color: rgba(80,200,120,0.6); }
+    .coai-login-form {
+      background: #f6f7f9; border: 1px solid #dfe3e8; border-radius: 10px;
+      padding: 12px; margin: 8px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .coai-login-title { font-weight: 700; font-size: 13px; color: #333; }
+    .coai-login-form input {
+      border: 1px solid #cfd4da; border-radius: 8px; padding: 8px 10px; font-size: 13px; width: 100%; box-sizing: border-box;
+    }
+    .coai-login-row { display: flex; gap: 8px; }
+    .coai-login-go, .coai-login-cancel {
+      flex: 1; border: none; border-radius: 8px; padding: 8px; font-size: 13px; cursor: pointer;
+    }
+    .coai-login-go { background: #2f7d4f; color: #fff; }
+    .coai-login-cancel { background: #e3e6ea; color: #333; }
+    .coai-login-msg { font-size: 12px; color: #666; }
+    .coai-login-msg.bad { color: #c0392b; }
+    .coai-comment-bar { margin: 2px 8px 10px; }
+    .coai-comment-open {
+      background: none; border: 1px dashed #b9c0c8; color: #6b7480; border-radius: 8px;
+      padding: 4px 10px; font-size: 12px; cursor: pointer;
+    }
+    .coai-comment-form {
+      background: #f6f7f9; border: 1px solid #dfe3e8; border-radius: 10px; padding: 10px;
+      display: flex; flex-direction: column; gap: 8px; margin-top: 6px;
+    }
+    .coai-tag-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .coai-tag { font-size: 12px; color: #444; cursor: pointer; }
+    .coai-ideal {
+      border: 1px solid #cfd4da; border-radius: 8px; padding: 8px; font-size: 13px;
+      min-height: 64px; resize: vertical; width: 100%; box-sizing: border-box; font-family: inherit;
+    }
+    .coai-comment-row { display: flex; gap: 8px; align-items: center; }
+    .coai-comment-send { background: #2f7d4f; color: #fff; border: none; border-radius: 8px; padding: 7px 14px; font-size: 13px; cursor: pointer; }
+    .coai-comment-cancel { background: #e3e6ea; color: #333; border: none; border-radius: 8px; padding: 7px 12px; font-size: 13px; cursor: pointer; }
+    .coai-comment-msg { font-size: 12px; color: #666; }
+    .coai-comment-msg.bad { color: #c0392b; }
+    .coai-comment-done { font-size: 12px; color: #2f7d4f; font-weight: 600; }
   `;
   document.head.appendChild(STYLE);
 
@@ -443,6 +494,7 @@
     }
     messagesEl.appendChild(div);
     scrollToBottom();
+    return div;
   }
 
   // ── 참고자료 표시 (주민운동 출처 grounding) ──
@@ -544,10 +596,13 @@
 
       var data = await response.json();
       var answer = data.answer || '응답을 받지 못했습니다.';
-      addMessage('assistant', answer);
+      var aiDiv = addMessage('assistant', answer);
       addRefs(data.refs);
       history.push({ role: 'assistant', content: answer });
       saveHistory();
+      if (trainer.isTrainer && aiDiv) {
+        attachCommentUI(aiDiv, query, answer, data.refs || []);
+      }
     } catch (err) {
       hideTyping();
       addErrorMessage('연결이 불안정합니다. 다시 시도해주세요.');
@@ -558,6 +613,184 @@
       sendBtn.disabled = false;
       textarea.focus();
     }
+  }
+
+  // ── 트레이너 인증 ──
+  async function checkTrainer() {
+    if (!trainer.token) {
+      trainer.isTrainer = false; trainer.name = null; updateTrainerBadge(); return;
+    }
+    try {
+      var r = await fetch(API_ME, { headers: { 'Authorization': 'Bearer ' + trainer.token } });
+      if (r.ok) {
+        var d = await r.json();
+        trainer.isTrainer = !!d.is_trainer;
+        trainer.name = d.name || null;
+      } else {
+        trainer.isTrainer = false;
+      }
+    } catch (_) {
+      trainer.isTrainer = false;
+    }
+    updateTrainerBadge();
+  }
+
+  async function doLogin(email, password, msgEl) {
+    if (!email || !password) {
+      if (msgEl) { msgEl.textContent = '이메일과 비밀번호를 입력하세요.'; msgEl.className = 'coai-login-msg bad'; }
+      return;
+    }
+    if (msgEl) { msgEl.textContent = '로그인 중...'; msgEl.className = 'coai-login-msg'; }
+    try {
+      var r = await fetch(API_LOGIN, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, password: password })
+      });
+      var d = await r.json();
+      if (!r.ok || !d.access_token) throw new Error(d.error || '로그인 실패');
+      trainer.token = d.access_token;
+      localStorage.setItem(TOKEN_KEY, trainer.token);
+      await checkTrainer();
+      if (!trainer.isTrainer) {
+        if (msgEl) { msgEl.textContent = '로그인됐지만 트레이너 권한이 없습니다.'; msgEl.className = 'coai-login-msg bad'; }
+        return;
+      }
+      hideLoginForm();
+    } catch (e) {
+      if (msgEl) { msgEl.textContent = '실패: ' + e.message; msgEl.className = 'coai-login-msg bad'; }
+    }
+  }
+
+  function doLogout() {
+    trainer = { token: null, name: null, isTrainer: false };
+    localStorage.removeItem(TOKEN_KEY);
+    updateTrainerBadge();
+  }
+
+  function updateTrainerBadge() {
+    var hdr = document.getElementById('coai-header');
+    if (!hdr) return;
+    var badge = document.getElementById('coai-trainer-badge');
+    if (!badge) {
+      badge = document.createElement('button');
+      badge.id = 'coai-trainer-badge';
+      badge.type = 'button';
+      badge.className = 'coai-trainer-badge';
+      var closeB = document.getElementById('coai-close-btn');
+      if (closeB) hdr.insertBefore(badge, closeB); else hdr.appendChild(badge);
+      badge.addEventListener('click', function () {
+        if (trainer.isTrainer) {
+          if (confirm('트레이너 로그아웃할까요?')) doLogout();
+        } else {
+          toggleLoginForm();
+        }
+      });
+    }
+    badge.textContent = trainer.isTrainer ? ('✓ ' + (trainer.name || '트레이너')) : '🔑 트레이너';
+    badge.classList.toggle('on', trainer.isTrainer);
+  }
+
+  function toggleLoginForm() {
+    if (document.getElementById('coai-login-form')) { hideLoginForm(); return; }
+    showLoginForm();
+  }
+  function hideLoginForm() {
+    var f = document.getElementById('coai-login-form');
+    if (f) f.remove();
+  }
+  function showLoginForm() {
+    var f = document.createElement('div');
+    f.id = 'coai-login-form';
+    f.className = 'coai-login-form';
+    f.innerHTML =
+      '<div class="coai-login-title">트레이너 로그인</div>' +
+      '<input type="email" class="coai-login-email" placeholder="이메일" autocomplete="username">' +
+      '<input type="password" class="coai-login-pw" placeholder="비밀번호" autocomplete="current-password">' +
+      '<div class="coai-login-row">' +
+      '<button type="button" class="coai-login-go">로그인</button>' +
+      '<button type="button" class="coai-login-cancel">취소</button></div>' +
+      '<div class="coai-login-msg"></div>';
+    messagesEl.parentNode.insertBefore(f, messagesEl);
+    var msg = f.querySelector('.coai-login-msg');
+    f.querySelector('.coai-login-go').addEventListener('click', function () {
+      doLogin(f.querySelector('.coai-login-email').value.trim(),
+              f.querySelector('.coai-login-pw').value, msg);
+    });
+    f.querySelector('.coai-login-cancel').addEventListener('click', hideLoginForm);
+  }
+
+  // ── 트레이너 코멘트(환류) ──
+  var COMMENT_TAGS = ['오류', '부족', '톤·위험'];
+
+  function attachCommentUI(aiDiv, question, aiAnswer, refs) {
+    var bar = document.createElement('div');
+    bar.className = 'coai-comment-bar';
+    var openBtn = document.createElement('button');
+    openBtn.type = 'button';
+    openBtn.className = 'coai-comment-open';
+    openBtn.textContent = '✏️ 코멘트';
+    bar.appendChild(openBtn);
+    messagesEl.appendChild(bar);
+    openBtn.addEventListener('click', function () {
+      if (bar.querySelector('.coai-comment-form')) return;
+      openBtn.style.display = 'none';
+      bar.appendChild(buildCommentForm(openBtn, question, aiAnswer, refs));
+      scrollToBottom();
+    });
+    scrollToBottom();
+  }
+
+  function buildCommentForm(openBtn, question, aiAnswer, refs) {
+    var form = document.createElement('div');
+    form.className = 'coai-comment-form';
+    var tagsHtml = COMMENT_TAGS.map(function (t) {
+      return '<label class="coai-tag"><input type="checkbox" value="' + t + '"> ' + t + '</label>';
+    }).join('');
+    form.innerHTML =
+      '<div class="coai-tag-row">' + tagsHtml + '</div>' +
+      '<textarea class="coai-ideal" placeholder="이렇게 답했어야 합니다 (모범답안 — 권장)"></textarea>' +
+      '<div class="coai-comment-row">' +
+      '<button type="button" class="coai-comment-send">검토 요청</button>' +
+      '<button type="button" class="coai-comment-cancel">취소</button>' +
+      '<span class="coai-comment-msg"></span></div>';
+    var sendB = form.querySelector('.coai-comment-send');
+    var msg = form.querySelector('.coai-comment-msg');
+    form.querySelector('.coai-comment-cancel').addEventListener('click', function () {
+      form.remove(); openBtn.style.display = '';
+    });
+    sendB.addEventListener('click', function () {
+      var tags = Array.prototype.slice
+        .call(form.querySelectorAll('.coai-tag input:checked'))
+        .map(function (c) { return c.value; });
+      var ideal = form.querySelector('.coai-ideal').value.trim();
+      if (!tags.length && !ideal) {
+        msg.textContent = '태그나 모범답안 중 하나는 입력하세요.'; msg.className = 'coai-comment-msg bad'; return;
+      }
+      sendB.disabled = true; msg.textContent = '전송 중...'; msg.className = 'coai-comment-msg';
+      submitFeedback(question, aiAnswer, refs, tags, ideal).then(function () {
+        form.innerHTML = '<div class="coai-comment-done">검토 대기 등록됨 — 고맙습니다.</div>';
+      }).catch(function (e) {
+        msg.textContent = '실패: ' + e.message; msg.className = 'coai-comment-msg bad'; sendB.disabled = false;
+      });
+    });
+    return form;
+  }
+
+  async function submitFeedback(question, aiAnswer, refs, tags, ideal) {
+    var r = await fetch(API_FEEDBACK, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + (trainer.token || '')
+      },
+      body: JSON.stringify({
+        question: question, ai_answer: aiAnswer, refs: refs, tags: tags, ideal_answer: ideal
+      })
+    });
+    var d = {};
+    try { d = await r.json(); } catch (_) {}
+    if (!r.ok) throw new Error(d.error || ('HTTP ' + r.status));
+    return d;
   }
 
   // ── 패널 열기/닫기 ──
@@ -637,4 +870,8 @@
   } else if (isOpen) {
     openPanel();
   }
+
+  // ── 트레이너 배지/인증 초기화 (토큰 있으면 검증) ──
+  updateTrainerBadge();
+  checkTrainer();
 })();

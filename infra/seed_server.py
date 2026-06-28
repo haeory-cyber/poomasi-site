@@ -44,6 +44,8 @@ RAG_DIR = "/home/haeory/poomasi/rag"
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")  # anon key
 SUPABASE_JWT_SECRET = os.environ.get("SUPABASE_JWT_SECRET", "")
+SUPABASE_DB_URL = os.environ.get("SUPABASE_DB_URL", "")  # 코아이 환류 테이블 직접 접근(psycopg2)
+COAI_FEEDBACK_JSONL = "/home/haeory/poomasi/finetune/coai_feedback_candidates.jsonl"
 
 # ── Rate Limiting (in-memory) ─────────────────────────
 _rate_store: dict[str, list[float]] = defaultdict(list)
@@ -88,6 +90,92 @@ def _extract_email(request: Request) -> str:
     if auth.startswith("Bearer "):
         return verify_token(auth[7:])
     return ""
+
+
+# ── 코아이 트레이너 환류 ───────────────────────────────
+# JWT_SECRET이 없어 verify_token이 무력하므로, access_token을
+# Supabase /auth/v1/user 로 직접 검증해 email을 얻는다.
+async def _coai_email_from_token(request: Request) -> str:
+    auth = request.headers.get("authorization", "")
+    if not auth.startswith("Bearer ") or not SUPABASE_URL or not SUPABASE_KEY:
+        return ""
+    token = auth[7:]
+    try:
+        async with httpx.AsyncClient(timeout=8.0) as client:
+            r = await client.get(
+                f"{SUPABASE_URL}/auth/v1/user",
+                headers={"apikey": SUPABASE_KEY, "Authorization": f"Bearer {token}"},
+            )
+            if r.status_code == 200:
+                return (r.json() or {}).get("email", "") or ""
+    except httpx.HTTPError:
+        pass
+    return ""
+
+
+def _coai_db():
+    import psycopg2
+    return psycopg2.connect(SUPABASE_DB_URL)
+
+
+def coai_is_trainer(email: str):
+    """(is_trainer, name). 화이트리스트 active 행이 있으면 트레이너."""
+    if not email or not SUPABASE_DB_URL:
+        return (False, None)
+    conn = _coai_db()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "select name from coai_trainers where email=%s and active=true", (email,)
+        )
+        row = cur.fetchone()
+        cur.close()
+        return (True, row[0]) if row else (False, None)
+    finally:
+        conn.close()
+
+
+def coai_insert_feedback(row: dict) -> int:
+    import json as _json
+    conn = _coai_db()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "insert into coai_feedback "
+            "(question, ai_answer, refs, tags, ideal_answer, trainer_email, trainer_name) "
+            "values (%s,%s,%s,%s,%s,%s,%s) returning id",
+            (
+                row.get("question", ""),
+                row.get("ai_answer"),
+                _json.dumps(row.get("refs", []), ensure_ascii=False),
+                row.get("tags", []),
+                row.get("ideal_answer"),
+                row.get("trainer_email", ""),
+                row.get("trainer_name"),
+            ),
+        )
+        new_id = cur.fetchone()[0]
+        conn.commit()
+        cur.close()
+        return new_id
+    finally:
+        conn.close()
+
+
+def coai_upsert_override(feedback_id, question, ideal_answer, meta):
+    """승인된 모범답안을 coai_overrides 컬렉션에 즉시 반영(임베더 보유 프로세스에서만)."""
+    if coai_engine is None:
+        raise RuntimeError("coai_engine 미초기화")
+    col = coai_engine._overrides_collection()
+    emb = coai_engine._embed(question)
+    md = {"ideal_answer": ideal_answer}
+    md.update({k: v for k, v in (meta or {}).items() if v is not None})
+    col.upsert(
+        ids=[f"fb_{feedback_id}"],
+        embeddings=[emb],
+        documents=[question],
+        metadatas=[md],
+    )
 
 
 # ── Engine 초기화 ─────────────────────────────────────
@@ -152,6 +240,61 @@ async def health():
         "engine": engine is not None,
         "timestamp": time.time(),
     }
+
+
+# ── 코아이 트레이너 환류 API ───────────────────────────
+@app.get("/api/coai/me")
+async def coai_me(request: Request):
+    email = await _coai_email_from_token(request)
+    ok, name = coai_is_trainer(email)
+    return {"is_trainer": ok, "name": name}
+
+
+@app.post("/api/coai/feedback")
+async def coai_feedback(request: Request):
+    email = await _coai_email_from_token(request)
+    ok, name = coai_is_trainer(email)
+    if not ok:
+        return JSONResponse(status_code=403, content={"error": "트레이너만 코멘트할 수 있어요."})
+    try:
+        b = await request.json()
+    except Exception:
+        return JSONResponse(status_code=400, content={"error": "잘못된 요청 형식입니다."})
+    question = (b.get("question") or "").strip()
+    if not question:
+        return JSONResponse(status_code=400, content={"error": "질문이 비어 있습니다."})
+    try:
+        new_id = coai_insert_feedback({
+            "question": question,
+            "ai_answer": b.get("ai_answer"),
+            "refs": b.get("refs", []),
+            "tags": b.get("tags", []),
+            "ideal_answer": (b.get("ideal_answer") or None),
+            "trainer_email": email,
+            "trainer_name": name,
+        })
+    except Exception as e:
+        print(f"[seed] coai feedback insert 오류: {e}")
+        return JSONResponse(status_code=500, content={"error": "코멘트 저장에 실패했습니다."})
+    return {"ok": True, "id": new_id}
+
+
+@app.post("/internal/coai/override")
+async def coai_override(request: Request):
+    # admin_server(localhost)만 호출. 외부 차단.
+    host = request.client.host if request.client else ""
+    if host not in ("127.0.0.1", "::1", "localhost"):
+        return JSONResponse(status_code=403, content={"error": "localhost only"})
+    try:
+        b = await request.json()
+        coai_upsert_override(
+            b["feedback_id"], b["question"], b["ideal_answer"],
+            {"trainer": b.get("trainer"), "approved_at": b.get("approved_at")},
+        )
+    except Exception as e:
+        print(f"[seed] coai override 오류: {e}")
+        return JSONResponse(status_code=500, content={"error": str(e)})
+    return {"ok": True}
 
 
 @app.post("/api/chat")
