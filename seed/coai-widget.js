@@ -89,6 +89,7 @@
       flex-direction: column;
       width: 380px;
       height: 520px;
+      max-height: calc(100vh - 120px);
       background: #0f0b07;
       border: 1px solid rgba(196, 128, 58, 0.3);
       border-radius: 12px;
@@ -240,10 +241,8 @@
       padding: 8px 16px 4px;
       background: #1e1510;
       border-top: 1px solid rgba(196, 128, 58, 0.12);
-      overflow-x: auto;
+      flex-wrap: wrap;
       flex-shrink: 0;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
     }
     #coai-quick-btns::-webkit-scrollbar { display: none; }
     .coai-quick-btn {
