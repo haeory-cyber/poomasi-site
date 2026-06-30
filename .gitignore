@@ -24,8 +24,12 @@ key_box/
 
 # 백업
 *.bak_*
+*.bak2_*
 seed/.snapshots/
 infra/.snapshots/
+
+# graphify 산출물 (seed_server 내부구조·키목록·로컬경로 노출 — 배포 금지)
+mindvault-out/
 
 # 기타
 *.txt
@@ -36,6 +40,8 @@ infra/.snapshots/
 *.yml
 *.yaml
 !.github/workflows/*.yml
+# Jekyll 빌드 설정 — server-side 파일 발행 차단용 (추적 필수)
+!_config.yml
 Thumbs.db
 .DS_Store
 .claude/

@@ -1,0 +1,23 @@
+# poomasi.org (GitHub Pages / Jekyll) 빌드 설정
+#
+# 목적: 서버 소스코드·내부 문서가 _site(발행물)에 복사되어 공개 다운로드되는 것을 차단.
+#   - GitHub Pages는 Jekyll로 빌드되며, exclude된 경로는 발행물에 포함되지 않는다.
+#   - exclude는 "발행"만 막는다 → 로컬 git 체크아웃에는 파일이 그대로 남으므로
+#     infra/deploy-seed.sh 등 로컬 참조 경로는 영향받지 않는다(라이브=git working tree 모델 유지).
+#   - djco/·energy/·sakyowon/ 은 served HTML과 server.py가 한 폴더에 섞여 있어
+#     디렉터리 통째가 아니라 server.py만 개별 제외한다.
+#
+# 검증(2026-06-30): 적용 전 infra/seed_server.py·CLAUDE.md 등 HTTP 200 → 적용 후 404 기대.
+#   .env.example·functions/_middleware.js 는 닷·언더스코어 접두라 Jekyll이 이미 자동 제외(404).
+
+exclude:
+  - infra/              # seed.poomasi.org 인프라 코드 전체 (seed_server.py, deploy-seed.sh, systemd/)
+  - scripts/            # 수집/관리 server-side 스크립트 (.py, .sh)
+  - functions/          # Cloudflare Pages 전용 — GitHub Pages에선 미실행(dead code)
+  - djco/server.py
+  - energy/server.py
+  - sakyowon/server.py
+  - sakyowon/CLAUDE.md  # 서브사이트 내부 AI 지시문
+  - CLAUDE.md           # 루트 내부 AI 지시문 (공지·배포규칙 등 내부 정보)
+  - BACKUP_LOG.md       # 내부 백업 로그
+  - HOMEPAGE_CHANGELOG.md  # 내부 변경 이력
