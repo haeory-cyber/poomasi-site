@@ -102,25 +102,18 @@ async function renderGraph(container) {
 
   if (isMobile) fg.cooldownTicks(60).warmupTicks(20)
 
-  // 컨트롤
-  //  - 모바일: OrbitControls 내장 핀치 줌 사용(enableZoom). 한 손가락은 회전 끄고(enableRotate=false)
-  //            캔버스 touch-action:pan-y(CSS)로 페이지 스크롤되게 함. 두 손가락 핀치 = 그래프 크기 조절.
-  //  - 데스크톱: OrbitControls 휠 줌은 끄고(페이지 스크롤 막지 못함) 아래 커스텀 휠 핸들러로 처리. 드래그 회전 유지.
+  // 컨트롤: OrbitControls 휠 줌은 끄고(페이지 스크롤 막지 못함) 아래 커스텀 휠로 처리 + 자동회전 + 드래그회전
   try {
     const c = fg.controls()
     if (c) {
-      c.enableZoom = isMobile
-      c.enableRotate = !isMobile
+      c.enableZoom = false
       c.enablePan = false
       c.autoRotate = true
       c.autoRotateSpeed = 0.55
-      // OrbitControls가 인라인으로 touch-action:none을 박음 → 모바일 한 손가락 페이지 스크롤이 막힘.
-      // pan-y로 되돌려: 한 손가락=세로 스크롤(브라우저), 두 손가락=핀치 줌(OrbitControls dolly).
-      if (isMobile && c.domElement) c.domElement.style.touchAction = "pan-y"
     }
   } catch (_) {}
 
-  // 데스크톱 맨 휠 = 그래프 전체 크기 줌(페이지 스크롤 막음). +/- 버튼도 zoom() 공유.
+  // 맨 처음 방식: 그래프 위에서 맨 휠 = 전체 크기 줌(페이지 스크롤 막음). 아래 섹션 위에서는 정상 스크롤.
   const cam = fg.camera()
   const zoom = (dir) => {
     const p = cam.position
@@ -129,16 +122,14 @@ async function renderGraph(container) {
     const s = target / cur
     p.set(p.x * s, p.y * s, p.z * s)
   }
-  if (!isMobile) {
-    container.addEventListener(
-      "wheel",
-      (e) => {
-        e.preventDefault()
-        zoom(e.deltaY)
-      },
-      { passive: false },
-    )
-  }
+  container.addEventListener(
+    "wheel",
+    (e) => {
+      e.preventDefault()
+      zoom(e.deltaY)
+    },
+    { passive: false },
+  )
 
   // PC용 +/- 줌 버튼 (모바일은 CSS @media(pointer:coarse)에서 숨김)
   const ctrls = document.createElement("div")
@@ -155,48 +146,6 @@ async function renderGraph(container) {
 
   const onResize = () => fg.width(window.innerWidth).height(window.innerHeight)
   window.addEventListener("resize", onResize)
-
-  setupDebug(fg, container, isMobile)
-}
-
-// ?debug=1 일 때만: 폰에서 핀치/터치/카메라 상태를 화면에 라이브 표시(진단용)
-function setupDebug(fg, container, isMobile) {
-  if (!/[?&]debug=1/.test(location.search)) return
-  let c = null
-  try {
-    c = fg.controls()
-  } catch (_) {}
-  const cam = fg.camera()
-  const cnv = container.querySelector("canvas")
-  const box = document.createElement("div")
-  box.style.cssText =
-    "position:fixed;left:6px;top:6px;z-index:99999;background:rgba(0,0,0,.82);color:#5f6;" +
-    "font:11px/1.45 monospace;padding:7px 9px;border-radius:6px;white-space:pre;pointer-events:none;max-width:80vw"
-  document.body.appendChild(box)
-  let last = "-"
-  let nmax = 0
-  const log = (e, kind) => {
-    const n = e.touches ? e.touches.length : 0
-    if (n > nmax) nmax = n
-    last = kind + " n=" + n
-  }
-  window.addEventListener("touchstart", (e) => log(e, "start"), { passive: true })
-  window.addEventListener("touchmove", (e) => log(e, "move"), { passive: true })
-  window.addEventListener("touchend", (e) => log(e, "end"), { passive: true })
-  const tick = () => {
-    const p = cam.position
-    const d = Math.round(Math.hypot(p.x, p.y, p.z))
-    const ta = cnv ? getComputedStyle(cnv).touchAction : "?"
-    box.textContent =
-      "isMobile=" + isMobile + "  coarse=" + window.matchMedia("(pointer:coarse)").matches + "\n" +
-      "ctrls=" + !!c + " zoom=" + (c && c.enableZoom) + " rot=" + (c && c.enableRotate) + "\n" +
-      "canvas TA(computed)=" + ta + "\n" +
-      "canvas TA(inline)=" + (cnv ? cnv.style.touchAction || "(none set)" : "?") + "\n" +
-      "touch=" + last + "  maxFingers=" + nmax + "\n" +
-      "camDist=" + d + "  ← 핀치하면 이 숫자가 변해야 함"
-    requestAnimationFrame(tick)
-  }
-  tick()
 }
 
 function setupScrollCue() {
