@@ -155,6 +155,48 @@ async function renderGraph(container) {
 
   const onResize = () => fg.width(window.innerWidth).height(window.innerHeight)
   window.addEventListener("resize", onResize)
+
+  setupDebug(fg, container, isMobile)
+}
+
+// ?debug=1 일 때만: 폰에서 핀치/터치/카메라 상태를 화면에 라이브 표시(진단용)
+function setupDebug(fg, container, isMobile) {
+  if (!/[?&]debug=1/.test(location.search)) return
+  let c = null
+  try {
+    c = fg.controls()
+  } catch (_) {}
+  const cam = fg.camera()
+  const cnv = container.querySelector("canvas")
+  const box = document.createElement("div")
+  box.style.cssText =
+    "position:fixed;left:6px;top:6px;z-index:99999;background:rgba(0,0,0,.82);color:#5f6;" +
+    "font:11px/1.45 monospace;padding:7px 9px;border-radius:6px;white-space:pre;pointer-events:none;max-width:80vw"
+  document.body.appendChild(box)
+  let last = "-"
+  let nmax = 0
+  const log = (e, kind) => {
+    const n = e.touches ? e.touches.length : 0
+    if (n > nmax) nmax = n
+    last = kind + " n=" + n
+  }
+  window.addEventListener("touchstart", (e) => log(e, "start"), { passive: true })
+  window.addEventListener("touchmove", (e) => log(e, "move"), { passive: true })
+  window.addEventListener("touchend", (e) => log(e, "end"), { passive: true })
+  const tick = () => {
+    const p = cam.position
+    const d = Math.round(Math.hypot(p.x, p.y, p.z))
+    const ta = cnv ? getComputedStyle(cnv).touchAction : "?"
+    box.textContent =
+      "isMobile=" + isMobile + "  coarse=" + window.matchMedia("(pointer:coarse)").matches + "\n" +
+      "ctrls=" + !!c + " zoom=" + (c && c.enableZoom) + " rot=" + (c && c.enableRotate) + "\n" +
+      "canvas TA(computed)=" + ta + "\n" +
+      "canvas TA(inline)=" + (cnv ? cnv.style.touchAction || "(none set)" : "?") + "\n" +
+      "touch=" + last + "  maxFingers=" + nmax + "\n" +
+      "camDist=" + d + "  ← 핀치하면 이 숫자가 변해야 함"
+    requestAnimationFrame(tick)
+  }
+  tick()
 }
 
 function setupScrollCue() {
