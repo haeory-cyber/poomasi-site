@@ -102,18 +102,18 @@ async function renderGraph(container) {
 
   if (isMobile) fg.cooldownTicks(60).warmupTicks(20)
 
-  // 컨트롤: 휠 = 그래프 전체 크기 줌(맨 처음 방식) + 가벼운 자동회전 + 드래그회전
+  // 컨트롤: OrbitControls 휠 줌은 끄고(페이지 스크롤 막지 못함) 아래 커스텀 휠로 처리 + 자동회전 + 드래그회전
   try {
     const c = fg.controls()
     if (c) {
-      c.enableZoom = true
+      c.enableZoom = false
       c.enablePan = false
       c.autoRotate = true
       c.autoRotateSpeed = 0.55
     }
   } catch (_) {}
 
-  // 휠 줌은 OrbitControls(enableZoom)가 처리. zoom()은 +/- 버튼용으로 보존.
+  // 맨 처음 방식: 그래프 위에서 맨 휠 = 전체 크기 줌(페이지 스크롤 막음). 아래 섹션 위에서는 정상 스크롤.
   const cam = fg.camera()
   const zoom = (dir) => {
     const p = cam.position
@@ -122,6 +122,14 @@ async function renderGraph(container) {
     const s = target / cur
     p.set(p.x * s, p.y * s, p.z * s)
   }
+  container.addEventListener(
+    "wheel",
+    (e) => {
+      e.preventDefault()
+      zoom(e.deltaY)
+    },
+    { passive: false },
+  )
 
   // PC용 +/- 줌 버튼 (모바일은 CSS @media(pointer:coarse)에서 숨김)
   const ctrls = document.createElement("div")
