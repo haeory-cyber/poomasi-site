@@ -132,22 +132,26 @@ async function renderGraph(container) {
   )
 
   // 모바일: 두 손가락 핀치 = 그래프 전체 크기 줌. 한 손가락 스크롤은 그대로(페이지 스크롤).
-  //   히어로(그래프) 영역에서만 가로채고, 아래 본문에선 브라우저 기본 핀치줌(접근성) 유지.
-  let pinchPrev = null
+  //   히어로(그래프) 영역에서만 가로챔. CSS touch-action:pan-y로 브라우저 핀치줌을 끄고
+  //   Android=touch 이벤트 / iOS Safari=gesture 이벤트로 각각 처리(중복 방지 usingGesture).
   const inGraphArea = () => window.scrollY < window.innerHeight * 0.85
   const dist = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY)
+
+  // Android / 표준 touch 이벤트
+  let pinchPrev = null
+  let usingGesture = false
   window.addEventListener(
     "touchstart",
     (e) => {
-      pinchPrev = e.touches.length === 2 && inGraphArea() ? dist(e.touches) : null
+      pinchPrev = !usingGesture && e.touches.length === 2 && inGraphArea() ? dist(e.touches) : null
     },
     { passive: false },
   )
   window.addEventListener(
     "touchmove",
     (e) => {
-      if (e.touches.length !== 2 || pinchPrev === null) return
-      e.preventDefault() // 브라우저 페이지 핀치줌 방지
+      if (usingGesture || e.touches.length !== 2 || pinchPrev === null) return
+      e.preventDefault()
       const d = dist(e.touches)
       if (Math.abs(d - pinchPrev) > 1) {
         zoom(d > pinchPrev ? -1 : 1) // 벌리면 확대, 좁히면 축소
@@ -161,6 +165,36 @@ async function renderGraph(container) {
   }
   window.addEventListener("touchend", endPinch)
   window.addEventListener("touchcancel", endPinch)
+
+  // iOS Safari = gesture 이벤트 (e.scale)
+  let gesturePrev = null
+  window.addEventListener(
+    "gesturestart",
+    (e) => {
+      if (!inGraphArea()) return
+      e.preventDefault()
+      usingGesture = true
+      gesturePrev = e.scale
+    },
+    { passive: false },
+  )
+  window.addEventListener(
+    "gesturechange",
+    (e) => {
+      if (!usingGesture || gesturePrev === null) return
+      e.preventDefault()
+      if (Math.abs(e.scale - gesturePrev) > 0.01) {
+        zoom(e.scale > gesturePrev ? -1 : 1) // 벌리면 확대, 좁히면 축소
+        gesturePrev = e.scale
+      }
+    },
+    { passive: false },
+  )
+  const endGesture = () => {
+    usingGesture = false
+    gesturePrev = null
+  }
+  window.addEventListener("gestureend", endGesture)
 
   // PC용 +/- 줌 버튼 (모바일은 CSS @media(pointer:coarse)에서 숨김)
   const ctrls = document.createElement("div")
