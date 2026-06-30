@@ -131,6 +131,37 @@ async function renderGraph(container) {
     { passive: false },
   )
 
+  // 모바일: 두 손가락 핀치 = 그래프 전체 크기 줌. 한 손가락 스크롤은 그대로(페이지 스크롤).
+  //   히어로(그래프) 영역에서만 가로채고, 아래 본문에선 브라우저 기본 핀치줌(접근성) 유지.
+  let pinchPrev = null
+  const inGraphArea = () => window.scrollY < window.innerHeight * 0.85
+  const dist = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY)
+  window.addEventListener(
+    "touchstart",
+    (e) => {
+      pinchPrev = e.touches.length === 2 && inGraphArea() ? dist(e.touches) : null
+    },
+    { passive: false },
+  )
+  window.addEventListener(
+    "touchmove",
+    (e) => {
+      if (e.touches.length !== 2 || pinchPrev === null) return
+      e.preventDefault() // 브라우저 페이지 핀치줌 방지
+      const d = dist(e.touches)
+      if (Math.abs(d - pinchPrev) > 1) {
+        zoom(d > pinchPrev ? -1 : 1) // 벌리면 확대, 좁히면 축소
+        pinchPrev = d
+      }
+    },
+    { passive: false },
+  )
+  const endPinch = () => {
+    pinchPrev = null
+  }
+  window.addEventListener("touchend", endPinch)
+  window.addEventListener("touchcancel", endPinch)
+
   // PC용 +/- 줌 버튼 (모바일은 CSS @media(pointer:coarse)에서 숨김)
   const ctrls = document.createElement("div")
   ctrls.className = "si-graph-controls"
