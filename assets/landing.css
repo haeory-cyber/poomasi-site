@@ -5,4 +5,4 @@ body[data-slug=index] .left.sidebar,body[data-slug=index] .right.sidebar,body[da
 .solidarity-landing .si-graph-controls button:focus-visible{outline:2px solid #e0a85c;outline-offset:2px}
 .solidarity-landing .si-hero .si-scroll-cue{cursor:pointer;pointer-events:auto;background:transparent;border:0;padding:.4rem}
 .solidarity-landing .si-hero .si-scroll-cue:focus-visible{outline:2px solid #e0a85c;outline-offset:4px;border-radius:6px}
-@media(pointer:coarse){.solidarity-landing .si-graph{pointer-events:none}.solidarity-landing .si-graph-controls{display:none}.solidarity-landing{touch-action:pan-y}}
+@media(pointer:coarse){.solidarity-landing .si-graph{pointer-events:auto;touch-action:pan-y}.solidarity-landing .si-graph canvas{touch-action:pan-y}.solidarity-landing .si-graph-controls{display:none}}

@@ -102,18 +102,25 @@ async function renderGraph(container) {
 
   if (isMobile) fg.cooldownTicks(60).warmupTicks(20)
 
-  // 컨트롤: OrbitControls 휠 줌은 끄고(페이지 스크롤 막지 못함) 아래 커스텀 휠로 처리 + 자동회전 + 드래그회전
+  // 컨트롤
+  //  - 모바일: OrbitControls 내장 핀치 줌 사용(enableZoom). 한 손가락은 회전 끄고(enableRotate=false)
+  //            캔버스 touch-action:pan-y(CSS)로 페이지 스크롤되게 함. 두 손가락 핀치 = 그래프 크기 조절.
+  //  - 데스크톱: OrbitControls 휠 줌은 끄고(페이지 스크롤 막지 못함) 아래 커스텀 휠 핸들러로 처리. 드래그 회전 유지.
   try {
     const c = fg.controls()
     if (c) {
-      c.enableZoom = false
+      c.enableZoom = isMobile
+      c.enableRotate = !isMobile
       c.enablePan = false
       c.autoRotate = true
       c.autoRotateSpeed = 0.55
+      // OrbitControls가 인라인으로 touch-action:none을 박음 → 모바일 한 손가락 페이지 스크롤이 막힘.
+      // pan-y로 되돌려: 한 손가락=세로 스크롤(브라우저), 두 손가락=핀치 줌(OrbitControls dolly).
+      if (isMobile && c.domElement) c.domElement.style.touchAction = "pan-y"
     }
   } catch (_) {}
 
-  // 맨 처음 방식: 그래프 위에서 맨 휠 = 전체 크기 줌(페이지 스크롤 막음). 아래 섹션 위에서는 정상 스크롤.
+  // 데스크톱 맨 휠 = 그래프 전체 크기 줌(페이지 스크롤 막음). +/- 버튼도 zoom() 공유.
   const cam = fg.camera()
   const zoom = (dir) => {
     const p = cam.position
@@ -122,79 +129,16 @@ async function renderGraph(container) {
     const s = target / cur
     p.set(p.x * s, p.y * s, p.z * s)
   }
-  container.addEventListener(
-    "wheel",
-    (e) => {
-      e.preventDefault()
-      zoom(e.deltaY)
-    },
-    { passive: false },
-  )
-
-  // 모바일: 두 손가락 핀치 = 그래프 전체 크기 줌. 한 손가락 스크롤은 그대로(페이지 스크롤).
-  //   히어로(그래프) 영역에서만 가로챔. CSS touch-action:pan-y로 브라우저 핀치줌을 끄고
-  //   Android=touch 이벤트 / iOS Safari=gesture 이벤트로 각각 처리(중복 방지 usingGesture).
-  const inGraphArea = () => window.scrollY < window.innerHeight * 0.85
-  const dist = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY)
-
-  // Android / 표준 touch 이벤트
-  let pinchPrev = null
-  let usingGesture = false
-  window.addEventListener(
-    "touchstart",
-    (e) => {
-      pinchPrev = !usingGesture && e.touches.length === 2 && inGraphArea() ? dist(e.touches) : null
-    },
-    { passive: false },
-  )
-  window.addEventListener(
-    "touchmove",
-    (e) => {
-      if (usingGesture || e.touches.length !== 2 || pinchPrev === null) return
-      e.preventDefault()
-      const d = dist(e.touches)
-      if (Math.abs(d - pinchPrev) > 1) {
-        zoom(d > pinchPrev ? -1 : 1) // 벌리면 확대, 좁히면 축소
-        pinchPrev = d
-      }
-    },
-    { passive: false },
-  )
-  const endPinch = () => {
-    pinchPrev = null
+  if (!isMobile) {
+    container.addEventListener(
+      "wheel",
+      (e) => {
+        e.preventDefault()
+        zoom(e.deltaY)
+      },
+      { passive: false },
+    )
   }
-  window.addEventListener("touchend", endPinch)
-  window.addEventListener("touchcancel", endPinch)
-
-  // iOS Safari = gesture 이벤트 (e.scale)
-  let gesturePrev = null
-  window.addEventListener(
-    "gesturestart",
-    (e) => {
-      if (!inGraphArea()) return
-      e.preventDefault()
-      usingGesture = true
-      gesturePrev = e.scale
-    },
-    { passive: false },
-  )
-  window.addEventListener(
-    "gesturechange",
-    (e) => {
-      if (!usingGesture || gesturePrev === null) return
-      e.preventDefault()
-      if (Math.abs(e.scale - gesturePrev) > 0.01) {
-        zoom(e.scale > gesturePrev ? -1 : 1) // 벌리면 확대, 좁히면 축소
-        gesturePrev = e.scale
-      }
-    },
-    { passive: false },
-  )
-  const endGesture = () => {
-    usingGesture = false
-    gesturePrev = null
-  }
-  window.addEventListener("gestureend", endGesture)
 
   // PC용 +/- 줌 버튼 (모바일은 CSS @media(pointer:coarse)에서 숨김)
   const ctrls = document.createElement("div")
