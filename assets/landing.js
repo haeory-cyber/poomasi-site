@@ -1,6 +1,6 @@
 // 연대지능 랜딩 — poomasi.org standalone (poomasi-notes SolidarityLanding 이식)
 //  1) 풀스크린 3D 지식그래프 (컬렉션별 색 / external 포털 노드)
-//  2) 휠 = 페이지 스크롤, Ctrl(⌘)+휠 = 그래프 줌, 가만두면 자동회전
+//  2) 휠 = 그래프 전체 크기 줌(OrbitControls), 가만두면 자동회전. 아래 섹션은 히어로의 '아래로' 버튼/스크롤 화살표로 이동
 //  3) IntersectionObserver 스크롤 리빌 (prefers-reduced-motion 존중)
 //  4) 우하단 품아이 위챗 버블
 // ForceGraph3D 는 index.html 의 UMD <script> 가 전역으로 제공.
@@ -102,18 +102,18 @@ async function renderGraph(container) {
 
   if (isMobile) fg.cooldownTicks(60).warmupTicks(20)
 
-  // 컨트롤: 휠줌끄기(페이지 스크롤 통과) + 가벼운 자동회전 + 드래그회전
+  // 컨트롤: 휠 = 그래프 전체 크기 줌(맨 처음 방식) + 가벼운 자동회전 + 드래그회전
   try {
     const c = fg.controls()
     if (c) {
-      c.enableZoom = false
+      c.enableZoom = true
       c.enablePan = false
       c.autoRotate = true
       c.autoRotateSpeed = 0.55
     }
   } catch (_) {}
 
-  // Ctrl(⌘)+휠 = 그래프 줌 (맨 휠은 페이지 스크롤로 통과)
+  // 휠 줌은 OrbitControls(enableZoom)가 처리. zoom()은 +/- 버튼용으로 보존.
   const cam = fg.camera()
   const zoom = (dir) => {
     const p = cam.position
@@ -122,21 +122,12 @@ async function renderGraph(container) {
     const s = target / cur
     p.set(p.x * s, p.y * s, p.z * s)
   }
-  container.addEventListener(
-    "wheel",
-    (e) => {
-      if (!(e.ctrlKey || e.metaKey)) return
-      e.preventDefault()
-      zoom(e.deltaY)
-    },
-    { passive: false },
-  )
 
   // PC용 +/- 줌 버튼 (모바일은 CSS @media(pointer:coarse)에서 숨김)
   const ctrls = document.createElement("div")
   ctrls.className = "si-graph-controls"
   ctrls.innerHTML =
-    '<button type="button" data-zoom="in" aria-label="그래프 확대" title="그래프 확대 (Ctrl+휠도 가능)">+</button>' +
+    '<button type="button" data-zoom="in" aria-label="그래프 확대" title="그래프 확대 (마우스 휠도 가능)">+</button>' +
     '<button type="button" data-zoom="out" aria-label="그래프 축소" title="그래프 축소">−</button>'
   ctrls.addEventListener("click", (e) => {
     const t = e.target.closest("button[data-zoom]")
@@ -164,6 +155,9 @@ function setupScrollCue() {
       go()
     }
   })
+  // 히어로 '아래로' 버튼도 부드럽게 스크롤 (휠 줌으로 페이지가 안 내려가므로)
+  const down = document.querySelector(".solidarity-landing .si-hero-join[data-scroll-down]")
+  if (down) down.addEventListener("click", (e) => { e.preventDefault(); go() })
 }
 
 function setupReveal() {
