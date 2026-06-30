@@ -115,22 +115,55 @@ async function renderGraph(container) {
 
   // Ctrl(⌘)+휠 = 그래프 줌 (맨 휠은 페이지 스크롤로 통과)
   const cam = fg.camera()
+  const zoom = (dir) => {
+    const p = cam.position
+    const cur = Math.hypot(p.x, p.y, p.z) || 1
+    const target = Math.max(40, Math.min(4000, cur * (dir > 0 ? 1.18 : 0.85)))
+    const s = target / cur
+    p.set(p.x * s, p.y * s, p.z * s)
+  }
   container.addEventListener(
     "wheel",
     (e) => {
       if (!(e.ctrlKey || e.metaKey)) return
       e.preventDefault()
-      const p = cam.position
-      const cur = Math.hypot(p.x, p.y, p.z) || 1
-      const target = Math.max(40, Math.min(4000, cur * (e.deltaY > 0 ? 1.12 : 0.89)))
-      const s = target / cur
-      p.set(p.x * s, p.y * s, p.z * s)
+      zoom(e.deltaY)
     },
     { passive: false },
   )
 
+  // PC용 +/- 줌 버튼 (모바일은 CSS @media(pointer:coarse)에서 숨김)
+  const ctrls = document.createElement("div")
+  ctrls.className = "si-graph-controls"
+  ctrls.innerHTML =
+    '<button type="button" data-zoom="in" aria-label="그래프 확대" title="그래프 확대 (Ctrl+휠도 가능)">+</button>' +
+    '<button type="button" data-zoom="out" aria-label="그래프 축소" title="그래프 축소">−</button>'
+  ctrls.addEventListener("click", (e) => {
+    const t = e.target.closest("button[data-zoom]")
+    if (!t) return
+    zoom(t.dataset.zoom === "in" ? -1 : 1)
+  })
+  document.body.appendChild(ctrls)
+
   const onResize = () => fg.width(window.innerWidth).height(window.innerHeight)
   window.addEventListener("resize", onResize)
+}
+
+function setupScrollCue() {
+  const cue = document.querySelector(".solidarity-landing .si-scroll-cue")
+  const main = document.getElementById("si-main")
+  if (!cue || !main) return
+  cue.setAttribute("role", "button")
+  cue.setAttribute("tabindex", "0")
+  cue.setAttribute("aria-label", "다음 섹션으로 이동")
+  const go = () => main.scrollIntoView({ behavior: "smooth", block: "start" })
+  cue.addEventListener("click", go)
+  cue.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault()
+      go()
+    }
+  })
 }
 
 function setupReveal() {
@@ -168,6 +201,7 @@ function init() {
   const container = document.querySelector(".si-graph[data-si-graph]")
   if (container && typeof ForceGraph3D !== "undefined") renderGraph(container)
   setupReveal()
+  setupScrollCue()
   injectPoomaiWidget()
 }
 
