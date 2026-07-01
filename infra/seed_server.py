@@ -113,6 +113,41 @@ async def _coai_email_from_token(request: Request) -> str:
     return ""
 
 
+# ── 로이(Roy) 멀티테넌트 스코프 ───────────────────────
+# app_metadata.roy 클레임을 실은 계정만 자기 org/store 스코프로 조회.
+# JWT_SECRET이 비어 verify_token이 무력한 배포이므로 /auth/v1/user 로 직접 검증
+# (코아이 경로와 동일 패턴). 클레임 없는 사용자는 None → 기존 동작 유지(회귀 0).
+async def _roy_context(request: Request):
+    """반환:
+      None                            → 로이 계정 아님(통과, 회귀 0)
+      {"error": ...}                  → 로이 계정이나 org 스코프 없음(fail-closed 차단)
+      {"email","org_id","store_id"}   → 유효 스코프
+    """
+    auth = request.headers.get("authorization", "")
+    if not auth.startswith("Bearer ") or not SUPABASE_URL or not SUPABASE_KEY:
+        return None
+    token = auth[7:]
+    try:
+        async with httpx.AsyncClient(timeout=8.0) as client:
+            r = await client.get(
+                f"{SUPABASE_URL}/auth/v1/user",
+                headers={"apikey": SUPABASE_KEY, "Authorization": f"Bearer {token}"},
+            )
+            if r.status_code != 200:
+                return None
+            u = r.json() or {}
+    except httpx.HTTPError:
+        return None
+    am = u.get("app_metadata") or {}
+    if not am.get("roy"):
+        return None
+    org_id = am.get("org_id")
+    if not org_id:
+        # 로이 클레임인데 스코프가 없다 → 전역 유출 방지(fail-closed)
+        return {"error": "로이 계정에 조합(org) 스코프가 없습니다. 관리자에게 문의하세요."}
+    return {"email": u.get("email", ""), "org_id": org_id, "store_id": am.get("store_id")}
+
+
 def _coai_db():
     import psycopg2
     return psycopg2.connect(SUPABASE_DB_URL)
@@ -388,6 +423,36 @@ async def chat(request: Request):
         hint = page_hints.get(page_context, "")
         if hint:
             query = f"[현재 페이지: {hint}] {query}"
+
+    # ── 로이 분기 (멀티테넌트 스코프) — app_metadata.roy 클레임 보유 계정 ──
+    # 클레임이 있으면 반드시 자기 org/store 스코프로만 조회(CLI 브릿지·전역 우회 없이).
+    # 클레임 없는 일반 사용자는 roy_ctx=None → 아래로 통과, 기존 동작 100% 유지(회귀 0).
+    roy_ctx = await _roy_context(request)
+    if roy_ctx is not None:
+        if roy_ctx.get("error"):
+            return JSONResponse(status_code=403, content={"error": roy_ctx["error"]})
+        scope = {"org_id": roy_ctx["org_id"], "store_id": roy_ctx["store_id"]}
+        try:
+            answer, refs = engine.generate(
+                query, top_k=top_k, history=history,
+                user_email=roy_ctx["email"], scope=scope,
+            )
+            action = getattr(engine, "_last_action", None)
+            if action is not None:
+                try:
+                    engine._last_action = None
+                except Exception:
+                    pass
+            resp = {"answer": answer, "refs": refs, "via": "roy", "scope": scope}
+            if action:
+                resp["action"] = action
+            return resp
+        except Exception as e:
+            print(f"[seed] 로이 오류: {e}")
+            return JSONResponse(
+                status_code=500,
+                content={"error": "로이 응답 생성 중 오류가 발생했습니다."},
+            )
 
     # ── CLI 브릿지 분기 (로그인 + 화이트리스트 유저) ──────
     # POOMAI_CLI_BRIDGE=off 이면 이 블록 전체 스킵 → Gemini 폴백
