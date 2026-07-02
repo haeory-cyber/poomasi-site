@@ -1,0 +1,528 @@
+/* ============================================================
+   연대지능 랜딩 — 한지·낮 (Hanji Daylight)
+   poomasi.org 리디자인 프리뷰 · 2026-07-02
+   팔레트: 한지 #f5efe2 / 먹 #26221b / 감 #b3641f / 쑥 #4a5d43
+   원칙: 카피 불변 · 자체호스팅(외부 에셋 없음) · AA 대비
+   ============================================================ */
+
+:root {
+  --hanji: #f5efe2;          /* 바탕 한지 */
+  --hanji-deep: #ede4d0;     /* 그늘진 한지 */
+  --hanji-card: #faf5ea;     /* 카드(밝은 종이) */
+  --meok: #26221b;           /* 본문 먹 */
+  --meok-deep: #1a1611;      /* 제목 진먹 */
+  --meok-faint: #6b6353;     /* 옅은 먹(보조 텍스트) — hanji 위 대비 4.9:1 */
+  --gam: #b3641f;            /* 감빛(악센트) */
+  --gam-deep: #96500f;       /* 진한 감(텍스트용 대비 확보) */
+  --ssuk: #4a5d43;           /* 쑥빛(보조) */
+  --line: rgba(38, 34, 27, 0.14);   /* 먹 괘선 */
+  --serif: "Noto Serif KR", serif;
+  --sans: "Noto Sans KR", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  margin: 0;
+  font-family: var(--sans);
+  font-weight: 400;
+  color: var(--meok);
+  background: var(--hanji);
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  line-height: 1.75;
+}
+
+/* 종이 결 — SVG 노이즈(데이터 URI, 외부요청 없음). 화면 전체에 아주 옅게. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;               /* 최상단이지만 클릭 통과 */
+  pointer-events: none;
+  opacity: 0.5;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='7'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.55 0 0 0 0 0.50 0 0 0 0 0.42 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23p)'/%3E%3C/svg%3E");
+}
+
+.si-skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  padding: 0.6rem 1rem;
+  background: var(--meok-deep);
+  color: var(--hanji);
+  text-decoration: none;
+}
+.si-skip:focus { left: 1rem; top: 1rem; }
+
+/* ---------- 레이어 구조 ----------
+   z0  .si-graph        : 수묵 성좌(3D 그래프, 고정 배경)
+   z5  .si-touch-layer  : 모바일 핀치 터치막 (JS가 coarse 포인터에서 생성)
+   z10 .si-hero / .si-sections
+   z30 그래프 줌 버튼
+   z60 종이 결
+------------------------------------ */
+
+.solidarity-landing .si-graph {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse at 50% 38%, #f8f3e8 0%, var(--hanji) 55%, var(--hanji-deep) 100%);
+  pointer-events: auto;
+}
+.solidarity-landing .si-graph canvas { display: block; }
+
+/* 모바일 핀치용 투명 터치막 — landing-hanji.js 가 생성.
+   pan-y: 한손가락 세로 스크롤은 브라우저 네이티브,
+   두손가락은 JS로 들어옴(cancelable) → 그래프 줌. */
+.si-touch-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  background: transparent;
+  touch-action: pan-y;
+  display: none;
+}
+@media (pointer: coarse) {
+  .solidarity-landing .si-graph { pointer-events: none; }
+  .si-touch-layer { display: block; }
+}
+
+/* ---------- 그래프 줌 버튼 (모바일에서도 노출 = 핀치 백업) ---------- */
+.si-graph-controls {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.si-graph-controls button {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--meok);
+  background: rgba(250, 245, 234, 0.82);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(38, 34, 27, 0.12);
+  backdrop-filter: blur(4px);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.si-graph-controls button:hover {
+  border-color: var(--gam);
+  background: rgba(179, 100, 31, 0.12);
+}
+.si-graph-controls button:focus-visible {
+  outline: 2px solid var(--gam-deep);
+  outline-offset: 2px;
+}
+
+/* ---------- 히어로 — 한지 위 먹 대자 ---------- */
+.solidarity-landing .si-hero {
+  position: relative;
+  z-index: 10;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem 1.5rem;
+  pointer-events: none;
+}
+
+/* 글자 영역 뒤에서만 그래프가 옅어지도록: 한지색 radial 성좌 페이드 */
+.solidarity-landing .si-hero .si-hero-inner {
+  position: relative;
+  max-width: 42rem;
+  padding: 3.5rem 3rem;
+  background: radial-gradient(
+    ellipse 62% 58% at 50% 50%,
+    rgba(245, 239, 226, 0.94) 0%,
+    rgba(245, 239, 226, 0.78) 55%,
+    rgba(245, 239, 226, 0) 100%
+  );
+}
+
+.solidarity-landing .si-hero h1 {
+  font-family: var(--serif);
+  font-weight: 900;
+  font-size: clamp(3.2rem, 11vw, 7.5rem);
+  line-height: 1.04;
+  margin: 0 0 1.4rem;
+  letter-spacing: 0.04em;
+  color: var(--meok-deep);
+}
+
+/* 부제 위 감빛 짧은 괘선 */
+.solidarity-landing .si-hero .si-hero-sub {
+  position: relative;
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(1.05rem, 3.2vw, 1.4rem);
+  color: var(--meok);
+  margin: 0 auto 2.6rem;
+  max-width: 34rem;
+  padding-top: 1.4rem;
+}
+.solidarity-landing .si-hero .si-hero-sub::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3.5rem;
+  height: 3px;
+  background: var(--gam);
+}
+
+.solidarity-landing .si-hero .si-hero-join {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+  color: var(--meok);
+  text-decoration: none;
+  border: 1px solid rgba(38, 34, 27, 0.3);
+  border-radius: 999px;
+  background: rgba(250, 245, 234, 0.75);
+  backdrop-filter: blur(4px);
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+.solidarity-landing .si-hero .si-hero-join:hover {
+  border-color: var(--gam);
+  background: rgba(179, 100, 31, 0.1);
+  transform: translateY(-1px);
+}
+.solidarity-landing .si-hero .si-hero-join:focus-visible {
+  outline: 2px solid var(--gam-deep);
+  outline-offset: 3px;
+}
+.solidarity-landing .si-hero .si-hero-join svg { width: 1em; height: 1em; }
+
+.solidarity-landing .si-hero .si-scroll-cue {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: auto;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  padding: 0.4rem;
+  color: var(--meok-faint);
+  opacity: 0.85;
+}
+.solidarity-landing .si-hero .si-scroll-cue:focus-visible {
+  outline: 2px solid var(--gam-deep);
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+.solidarity-landing .si-hero .si-scroll-cue svg {
+  width: 1.6rem;
+  height: 1.6rem;
+  animation: si-bob 2s ease-in-out infinite;
+}
+@keyframes si-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .solidarity-landing .si-hero .si-scroll-cue svg { animation: none; }
+}
+
+/* ---------- 본문 — 두루마리 리듬 ---------- */
+.solidarity-landing .si-sections {
+  position: relative;
+  z-index: 10;
+  background: var(--hanji);
+  /* 히어로와의 경계: 옅은 먹 번짐 */
+  box-shadow: 0 -1px 0 var(--line), 0 -18px 30px -22px rgba(38, 34, 27, 0.25);
+}
+
+.solidarity-landing .si-section {
+  padding: 6.5rem 1.5rem;
+}
+.solidarity-landing .si-section + .si-section {
+  border-top: 1px solid var(--line);
+}
+
+.solidarity-landing .si-section-inner {
+  position: relative;
+  max-width: 46rem;
+  margin: 0 auto;
+}
+
+/* 장 번호 — 一二三四五, 왼쪽 여백에 옅은 먹 */
+.solidarity-landing .si-section-inner::before {
+  content: "";
+  position: absolute;
+  top: -0.6rem;
+  left: -5.5rem;
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 2.2rem;
+  line-height: 1;
+  color: rgba(38, 34, 27, 0.18);
+}
+.solidarity-landing .si-section:nth-of-type(1) .si-section-inner::before { content: "一"; }
+.solidarity-landing .si-section:nth-of-type(2) .si-section-inner::before { content: "二"; }
+.solidarity-landing .si-section:nth-of-type(3) .si-section-inner::before { content: "三"; }
+.solidarity-landing .si-section:nth-of-type(4) .si-section-inner::before { content: "四"; }
+.solidarity-landing .si-section:nth-of-type(5) .si-section-inner::before { content: "五"; }
+@media (max-width: 1100px) {
+  .solidarity-landing .si-section-inner::before {
+    position: static;
+    display: block;
+    font-size: 1.5rem;
+    margin-bottom: 0.8rem;
+  }
+}
+
+.solidarity-landing .si-section h2 {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: clamp(1.7rem, 4.5vw, 2.4rem);
+  color: var(--meok-deep);
+  margin: 0 0 0.4rem;
+  letter-spacing: 0.02em;
+}
+/* 제목 아래 감빛 괘선 */
+.solidarity-landing .si-section h2::after {
+  content: "";
+  display: block;
+  width: 2.6rem;
+  height: 3px;
+  margin-top: 0.9rem;
+  background: var(--gam);
+}
+
+.solidarity-landing .si-section p {
+  font-size: 1.08rem;
+  margin: 1.6rem 0 0;
+  color: var(--meok);
+}
+
+/* 리스트 → 한지 카드 */
+.solidarity-landing .si-list {
+  list-style: none;
+  margin: 2rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+.solidarity-landing .si-list li {
+  position: relative;
+  background: var(--hanji-card);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 1.3rem 1.4rem 1.3rem 1.7rem;
+  font-size: 1.02rem;
+  line-height: 1.7;
+  box-shadow: 0 1px 3px rgba(38, 34, 27, 0.06);
+}
+/* 카드 왼쪽 감빛 실괘선 */
+.solidarity-landing .si-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 1.1rem;
+  bottom: 1.1rem;
+  width: 3px;
+  background: linear-gradient(to bottom, var(--gam), rgba(179, 100, 31, 0.25));
+}
+.solidarity-landing .si-list li b {
+  display: block;
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 1.12rem;
+  color: var(--meok-deep);
+  margin-bottom: 0.35rem;
+}
+/* 마지막 홀수 카드는 두 칸 폭 */
+.solidarity-landing .si-list li:last-child:nth-child(odd) { grid-column: 1 / -1; }
+@media (max-width: 720px) {
+  .solidarity-landing .si-list { grid-template-columns: 1fr; }
+  .solidarity-landing .si-list li:last-child:nth-child(odd) { grid-column: auto; }
+}
+
+.solidarity-landing .si-note {
+  font-size: 0.95rem;
+  color: var(--meok-faint);
+  margin-top: 1.6rem;
+}
+
+/* ---------- 합류 CTA ---------- */
+.solidarity-landing .si-cta-section { text-align: center; }
+.solidarity-landing .si-cta-section h2::after { margin-left: auto; margin-right: auto; }
+
+.solidarity-landing .si-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 2.2rem;
+  min-height: 52px;
+  padding: 0.9rem 2.2rem;
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: #faf5ea;
+  background: var(--gam-deep);
+  text-decoration: none;
+  /* 도장(印) 느낌 — 비대칭 모서리 하나 */
+  border-radius: 3px 16px 3px 3px;
+  box-shadow: 0 2px 10px rgba(150, 80, 15, 0.3);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.solidarity-landing .si-cta-btn:hover {
+  background: var(--gam);
+  transform: translateY(-2px);
+}
+.solidarity-landing .si-cta-btn:focus-visible {
+  outline: 3px solid var(--meok-deep);
+  outline-offset: 3px;
+}
+.solidarity-landing .si-cta-btn svg { width: 1.1em; height: 1.1em; }
+
+/* ---------- 생태계 ---------- */
+.solidarity-landing .si-ecosystem .si-section-inner { max-width: 62rem; }
+
+.solidarity-landing .si-eco-group { margin-top: 2.8rem; }
+.solidarity-landing .si-eco-group:first-of-type { margin-top: 2.2rem; }
+
+.solidarity-landing .si-eco-group-title {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.14em;
+  color: var(--meok-faint);
+  margin: 0 0 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+/* 그룹 제목 앞 먹점 */
+.solidarity-landing .si-eco-group-title::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--meok-faint);
+}
+
+.solidarity-landing .si-eco-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.9rem;
+}
+
+.solidarity-landing .si-eco-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  min-height: 64px;
+  padding: 1rem 1.2rem;
+  background: var(--hanji-card);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  text-decoration: none;
+  color: var(--meok);
+  box-shadow: 0 1px 3px rgba(38, 34, 27, 0.06);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.solidarity-landing .si-eco-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 18px -8px rgba(38, 34, 27, 0.3);
+  border-color: rgba(38, 34, 27, 0.3);
+}
+.solidarity-landing .si-eco-card:focus-visible {
+  outline: 2px solid var(--gam-deep);
+  outline-offset: 2px;
+}
+.solidarity-landing .si-eco-card-title {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.45;
+}
+.solidarity-landing .si-eco-card-arrow {
+  flex: none;
+  color: var(--gam-deep);
+  opacity: 0.55;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.solidarity-landing .si-eco-card:hover .si-eco-card-arrow {
+  opacity: 1;
+  transform: translateX(3px);
+}
+.solidarity-landing .si-eco-card-arrow svg { width: 1.1rem; height: 1.1rem; display: block; }
+
+/* 그룹별 색온도 — 먹점·괘선만 바꿔 은은하게 */
+.solidarity-landing .si-eco-group:nth-of-type(1) .si-eco-group-title::before { background: var(--gam); }
+.solidarity-landing .si-eco-group:nth-of-type(2) .si-eco-group-title::before { background: var(--ssuk); }
+.solidarity-landing .si-eco-group:nth-of-type(2) .si-eco-card { background: #f6f3e6; }
+.solidarity-landing .si-eco-group:nth-of-type(3) .si-eco-group-title::before { background: #46586b; }
+.solidarity-landing .si-eco-group:nth-of-type(3) .si-eco-card { background: #f7f2e8; }
+.solidarity-landing .si-eco-group:nth-of-type(4) .si-eco-group-title::before { background: #9c4a3a; }
+.solidarity-landing .si-eco-group:nth-of-type(5) .si-eco-group-title::before { background: var(--meok-deep); }
+
+/* ---------- 스크롤 리빌 ---------- */
+.solidarity-landing .si-reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.solidarity-landing .si-reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .solidarity-landing .si-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ---------- 디버그 오버레이 (?debug=1) ---------- */
+.si-debug {
+  position: fixed;
+  left: 0.6rem;
+  bottom: 0.6rem;
+  z-index: 90;
+  padding: 0.5rem 0.7rem;
+  font: 12px/1.5 monospace;
+  color: #faf5ea;
+  background: rgba(26, 22, 17, 0.85);
+  border-radius: 6px;
+  pointer-events: none;
+  white-space: pre;
+}
+
+/* ---------- 모바일 ---------- */
+@media (max-width: 768px) {
+  .solidarity-landing .si-hero { padding: 1.5rem 1rem; }
+  .solidarity-landing .si-hero .si-hero-inner { padding: 2.5rem 1.2rem; }
+  .solidarity-landing .si-section { padding: 4.5rem 1.25rem; }
+  .solidarity-landing .si-ecosystem .si-eco-grid { grid-template-columns: 1fr; }
+}
