@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>알뜰 농산물 알림 신청 — 품앗이 로컬푸드 지족점</title>
+<meta name="description" content="품앗이 로컬푸드 지족점의 임박·못난이·과잉 알뜰 농산물 알림을 신청하세요.">
+<link rel="stylesheet" href="/foodplan/foodplan.css?v=20260703b">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .wrap { max-width: 480px; margin: 0 auto; padding: 0 16px 40px; }
+  .hero {
+    background: linear-gradient(160deg, var(--green-800), var(--green-900));
+    color: #fff; padding: 30px 22px 32px; border-radius: 0 0 var(--r-lg) var(--r-lg);
+    position: relative; overflow: hidden;
+  }
+  .hero::after {
+    content: ""; position: absolute; right: -30px; top: -30px; width: 170px; height: 170px;
+    background: radial-gradient(circle, rgba(165,214,167,.22), transparent 70%); pointer-events: none;
+  }
+  .hero .store { font-size: 13px; font-weight: 600; opacity: .85; letter-spacing: .02em; }
+  .hero h1 { font-size: 24px; margin: 6px 0 0; line-height: 1.3; }
+
+  .intro { margin-top: 20px; padding: 18px; font-size: 14.5px; line-height: 1.75; color: var(--ink-2); }
+  .intro b { color: var(--green-800); }
+  .intro .points { margin: 12px 0 0; padding: 0; list-style: none; }
+  .intro .points li { display: flex; gap: 8px; align-items: flex-start; margin-top: 8px; }
+  .intro .points svg { width: 18px; height: 18px; color: var(--green-700); flex: none; margin-top: 2px; }
+
+  .form-card { margin-top: 16px; padding: 20px; }
+  .consent-block { margin-top: 4px; padding: 14px; background: var(--surface-2); border-radius: var(--r-sm); }
+  .optout { margin-top: 22px; font-size: 12.5px; color: var(--ink-3); text-align: center; line-height: 1.7; }
+
+  /* 완료 화면 */
+  .done { text-align: center; padding: 34px 22px; margin-top: 16px; }
+  .done .ic { width: 64px; height: 64px; margin: 0 auto 16px; color: var(--green-700); }
+  .done h2 { font-size: 22px; margin-bottom: 10px; }
+  .done p { color: var(--ink-2); font-size: 15px; line-height: 1.7; margin: 0 0 8px; }
+  .done .channel { display: inline-flex; gap: 6px; align-items: center; margin-top: 6px; padding: 8px 14px; background: var(--green-100); border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--green-800); }
+</style>
+</head>
+<body>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<header class="hero">
+  <div class="store">품앗이 로컬푸드 지족점</div>
+  <h1>알뜰 농산물 알림 신청</h1>
+</header>
+
+<main class="wrap">
+  <!-- 신청 화면 -->
+  <div id="signup-view">
+    <section class="card intro">
+      <p>매장에서 <b>임박·못난이·과잉 출하 농산물</b>을 할인가로 안내해 드립니다. 신청하시면 아래 알림을 받아보실 수 있습니다.</p>
+      <ul class="points">
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>평일 오전, 당일 등록된 알뜰 농산물 소식</span>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>매장 정가보다 저렴한 신선 로컬 농산물</span>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>알림을 보고 매장 픽업으로 예약</span>
+        </li>
+      </ul>
+    </section>
+
+    <form id="join-form" class="card form-card" novalidate>
+      <label class="field">
+        <span>이름<span class="req" aria-hidden="true">*</span></span>
+        <input class="input" id="name" type="text" autocomplete="name" required>
+        <span class="field-error" id="err-name">이름을 입력해 주세요.</span>
+      </label>
+      <label class="field">
+        <span>전화번호<span class="req" aria-hidden="true">*</span></span>
+        <input class="input" id="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="010-0000-0000" required>
+        <span class="field-error" id="err-phone">연락 가능한 전화번호를 입력해 주세요.</span>
+      </label>
+
+      <div class="consent-block">
+        <label class="check-row">
+          <input type="checkbox" id="agree-privacy">
+          <span><b>[필수] 개인정보 수집·이용 동의</b><br>수집 항목: 이름·전화번호 / 목적: 예약 접수 및 알림 / 보유 기간: 시범사업 종료 후 1개월까지</span>
+        </label>
+        <label class="check-row">
+          <input type="checkbox" id="agree-trial">
+          <span><b>[필수] 푸드플랜 실증 시범 참여 동의</b><br>알뜰 농산물 알림 수신 및 시범사업 참여에 동의합니다.</span>
+        </label>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block" id="submit" style="margin-top:18px;">알림 신청하기</button>
+    </form>
+
+    <p class="optout">
+      수신을 원치 않으시면 언제든 매장(042-824-0131)으로 연락 주시면 철회해 드립니다.
+    </p>
+  </div>
+
+  <!-- 완료 화면 -->
+  <div id="done-view" style="display:none;">
+    <section class="card done">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12l2.5 2.5L16 9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <h2>신청이 완료되었습니다</h2>
+      <p><span id="done-name"></span>님, 감사합니다.<br>알뜰 농산물 소식이 준비되면 알려드리겠습니다.</p>
+      <div class="channel">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 4h16v12H8l-4 4V4z" stroke-linejoin="round"/></svg>
+        알림은 카카오톡 또는 문자로 발송됩니다
+      </div>
+      <a class="btn btn-ghost btn-block" href="/foodplan/today" style="margin-top:22px;">오늘의 알뜰 농산물 보기</a>
+    </section>
+    <p class="optout">
+      수신을 원치 않으시면 언제든 매장(042-824-0131)으로 연락 주시면 철회해 드립니다.
+    </p>
+  </div>
+</main>
+
+<script>
+// ── Supabase (store.html 패턴: anon JWT) ─────────────
+const SUPABASE_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRuaXZoY3BqcmhrbWVrY2ZxZ2RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NTc5MjMsImV4cCI6MjA4NzIzMzkyM30.yJ0_4Sg78p7oY89q7go3ab26PCPHnk1Q4ObZJIZEULA';
+if (typeof supabase === 'undefined') {
+  document.addEventListener('DOMContentLoaded', () => toast('네트워크 문제로 페이지를 불러오지 못했습니다. 새로고침해 주세요.', 'err'));
+}
+const sb = (typeof supabase !== 'undefined') ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } }) : null;
+
+function toast(msg, kind) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'show ' + (kind || '');
+  clearTimeout(t._h); t._h = setTimeout(() => t.className = '', 4000);
+}
+function clearErrors() {
+  ['name','phone'].forEach(k => document.getElementById('err-' + k).classList.remove('show'));
+  document.getElementById('name').classList.remove('error');
+  document.getElementById('phone').classList.remove('error');
+}
+
+document.getElementById('join-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  clearErrors();
+  const name = document.getElementById('name').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const privacy = document.getElementById('agree-privacy').checked;
+  const trial = document.getElementById('agree-trial').checked;
+
+  let bad = false;
+  if (!name) { document.getElementById('err-name').classList.add('show'); document.getElementById('name').classList.add('error'); bad = true; }
+  if (!phone || phone.replace(/\D/g,'').length < 9) { document.getElementById('err-phone').classList.add('show'); document.getElementById('phone').classList.add('error'); bad = true; }
+  if (!privacy || !trial) { toast('필수 동의 항목에 모두 체크해 주세요.', 'err'); bad = true; }
+  if (bad) return;
+  if (!sb) { toast('네트워크 문제로 신청할 수 없습니다.', 'err'); return; }
+
+  const btn = document.getElementById('submit');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> 신청 중…';
+
+  // anon INSERT — returning minimal (SELECT RLS 함정 회피).
+  // 활성 전화번호 unique 인덱스 위반(23505) = 이미 신청됨.
+  const { error } = await sb.from('foodplan_consents')
+    .insert({ name, phone, channel: 'join_qr' }, { returning: 'minimal' });
+
+  if (error) {
+    const code = error.code || '';
+    const msg = error.message || '';
+    if (code === '23505' || /duplicate|unique/i.test(msg)) {
+      toast('이미 신청되어 있습니다. 알림을 받아보실 수 있어요.', 'ok');
+      // 이미 신청된 경우도 완료 화면으로 안내
+      showDone(name);
+    } else {
+      toast('신청 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.', 'err');
+      btn.disabled = false; btn.textContent = '알림 신청하기';
+    }
+    return;
+  }
+  showDone(name);
+});
+
+function showDone(name) {
+  document.getElementById('done-name').textContent = name;
+  document.getElementById('signup-view').style.display = 'none';
+  document.getElementById('done-view').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>

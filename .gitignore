@@ -46,3 +46,6 @@ Thumbs.db
 .DS_Store
 .claude/
 cloudflared*
+
+# 로컬 QA 스크린샷 (배포 제외)
+qa_artifacts/

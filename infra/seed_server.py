@@ -904,6 +904,14 @@ async def widget_js():
         headers={"Cache-Control": "no-cache, must-revalidate"},
     )
 
+# ── 푸드플랜 실증 API (include. 임포트 실패해도 서버 기동 무영향) ──
+try:
+    sys.path.insert(0, os.path.dirname(__file__))
+    from foodplan_api import router as _foodplan_router
+    app.include_router(_foodplan_router)
+except Exception as _fp_e:
+    print(f"[seed] foodplan_api 미로드(무시): {_fp_e}")
+
 # ── 정적 파일 (API 라우트보다 뒤에 마운트) ─────────────
 app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
 

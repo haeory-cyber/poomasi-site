@@ -1,0 +1,198 @@
+/* foodplan.css — 푸드플랜 실증 코어 루프 공용 스타일
+   딥그린 톤(기존 데모 #1B5E20 계승), 매장 직원 큐 + 회원 예약 공용.
+   순수 CSS. 웹폰트 CDN 미사용(자체호스팅 원칙) — system 한글 스택. */
+
+:root {
+  --green-900: #14421a;
+  --green-800: #1b5e20;
+  --green-700: #2e7d32;
+  --green-600: #388e3c;
+  --green-100: #e8f2e9;
+  --green-050: #f2f8f3;
+  --leaf: #7cb342;
+  --leaf-soft: #a5d6a7;
+
+  --amber: #f0a500;      /* 임박 1일 */
+  --orange: #ef6c00;     /* 임박 2일 */
+  --red: #c62828;        /* 임박 3일+ */
+  --plum: #6a4c93;       /* 못난이 */
+  --teal: #00796b;       /* 과잉 */
+
+  --ink: #1a1a1a;
+  --ink-2: #4a4a4a;
+  --ink-3: #757575;
+  --line: #e4e4dc;
+  --line-2: #d0d0c6;
+  --cream: #fafaf5;
+  --surface: #ffffff;
+  --surface-2: #f6f6f0;
+
+  --danger: #c62828;
+  --danger-bg: #fdecea;
+  --ok: #2e7d32;
+
+  --r-sm: 8px;
+  --r: 12px;
+  --r-lg: 18px;
+  --shadow-1: 0 1px 2px rgba(20,66,26,.06), 0 2px 8px rgba(20,66,26,.05);
+  --shadow-2: 0 4px 16px rgba(20,66,26,.10);
+  --shadow-pop: 0 12px 40px rgba(20,66,26,.18);
+
+  --font: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+          "Malgun Gothic", "맑은 고딕", "Noto Sans KR", system-ui, sans-serif;
+
+  --z-nav: 40;
+  --z-modal: 100;
+  --z-toast: 1000;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--cream);
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+h1, h2, h3 { margin: 0; font-weight: 700; letter-spacing: -0.02em; }
+button { font-family: inherit; }
+:focus-visible { outline: 3px solid var(--leaf); outline-offset: 2px; border-radius: 4px; }
+
+/* ── 버튼 ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 48px; padding: 0 20px;
+  border: none; border-radius: var(--r-sm);
+  font-size: 16px; font-weight: 600; cursor: pointer;
+  transition: transform .12s ease-out, background .15s, box-shadow .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: scale(.97); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn-primary { background: var(--green-800); color: #fff; }
+.btn-primary:not(:disabled):hover { background: var(--green-700); }
+.btn-ghost { background: var(--surface); color: var(--green-800); border: 1.5px solid var(--line-2); }
+.btn-ghost:not(:disabled):hover { border-color: var(--green-700); background: var(--green-050); }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-danger:not(:disabled):hover { background: #a51f1f; }
+.btn-sm { min-height: 40px; padding: 0 14px; font-size: 15px; }
+.btn-block { width: 100%; }
+
+/* ── 배지 (상태·source) ── */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 999px;
+  font-size: 12.5px; font-weight: 700; letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.badge .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.badge-imminent-1 { background: #fff5e0; color: #a06a00; }
+.badge-imminent-2 { background: #fde9d6; color: var(--orange); }
+.badge-imminent-3 { background: var(--danger-bg); color: var(--red); }
+.badge-ugly { background: #efe9f6; color: var(--plum); }
+.badge-surplus { background: #e0f2f0; color: var(--teal); }
+.badge-status {
+  background: var(--green-100); color: var(--green-800);
+}
+.badge-muted { background: var(--surface-2); color: var(--ink-3); }
+
+/* ── 카드 ── */
+.card {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r); box-shadow: var(--shadow-1);
+}
+
+/* ── 폼 컨트롤 ── */
+label.field { display: block; margin-bottom: 14px; }
+label.field > span { display: block; font-size: 14px; font-weight: 600; color: var(--ink-2); margin-bottom: 6px; }
+label.field .req { color: var(--danger); margin-left: 2px; }
+.input, .select, textarea.input {
+  width: 100%; min-height: 48px; padding: 11px 14px;
+  border: 1.5px solid var(--line-2); border-radius: var(--r-sm);
+  font-size: 16px; font-family: inherit; color: var(--ink);
+  background: var(--surface); transition: border-color .15s, box-shadow .15s;
+}
+.input:focus, .select:focus, textarea.input:focus {
+  outline: none; border-color: var(--green-700);
+  box-shadow: 0 0 0 3px rgba(46,125,50,.14);
+}
+.input.error { border-color: var(--danger); }
+/* 명시도: label.field > span (0,1,1)을 이기도록 .field > span.field-error (0,2,1)로 매칭.
+   안 그러면 라벨 span 규칙(display:block)이 에러 숨김을 눌러 에러가 상시 노출됨. */
+.field-error, .field > span.field-error { display: none; margin-top: 5px; font-size: 13px; color: var(--danger); }
+.field-error.show, .field > span.field-error.show { display: block; }
+
+/* 라디오 칩 (시간대·source 선택) */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  position: relative; display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; padding: 0 16px; border-radius: 999px;
+  border: 1.5px solid var(--line-2); background: var(--surface);
+  font-size: 15px; font-weight: 600; color: var(--ink-2); cursor: pointer;
+  transition: all .12s;
+}
+.chip input { position: absolute; opacity: 0; pointer-events: none; }
+.chip:has(input:checked) { background: var(--green-800); color: #fff; border-color: var(--green-800); }
+.chip:has(input:focus-visible) { outline: 3px solid var(--leaf); outline-offset: 2px; }
+
+/* 체크박스 (동의) */
+.check-row { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; cursor: pointer; }
+.check-row input[type=checkbox] { width: 22px; height: 22px; margin: 1px 0 0; accent-color: var(--green-800); flex: none; cursor: pointer; }
+.check-row span { font-size: 14px; color: var(--ink-2); line-height: 1.5; }
+
+/* 할인율 슬라이더 */
+.slider-row { display: flex; align-items: center; gap: 14px; }
+input[type=range] { flex: 1; accent-color: var(--green-700); height: 44px; }
+.slider-val { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 18px; color: var(--green-800); min-width: 52px; text-align: right; }
+
+/* ── 토스트 ── */
+#toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px);
+  z-index: var(--z-toast); max-width: 90vw;
+  padding: 13px 20px; border-radius: var(--r-sm);
+  background: var(--ink); color: #fff; font-size: 15px; font-weight: 500;
+  box-shadow: var(--shadow-pop); opacity: 0; pointer-events: none;
+  transition: opacity .25s, transform .25s;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#toast.err { background: var(--danger); }
+#toast.ok { background: var(--green-800); }
+
+/* ── 모달 ── */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: var(--z-modal);
+  background: rgba(20,30,20,.5); display: none;
+  align-items: flex-end; justify-content: center; padding: 0;
+}
+.modal-backdrop.show { display: flex; }
+.modal {
+  background: var(--surface); width: 100%; max-width: 560px;
+  border-radius: var(--r-lg) var(--r-lg) 0 0; padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+  max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-pop);
+  animation: sheet-up .25s ease-out;
+}
+@keyframes sheet-up { from { transform: translateY(24px); opacity: .6; } to { transform: none; opacity: 1; } }
+
+/* ── 스켈레톤 / 스피너 ── */
+.spinner {
+  width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,.4);
+  border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.skeleton { background: linear-gradient(90deg, var(--surface-2) 25%, #eee 37%, var(--surface-2) 63%); background-size: 400% 100%; animation: shimmer 1.3s infinite; border-radius: var(--r-sm); }
+@keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+
+/* 빈 상태 */
+.empty { text-align: center; padding: 44px 20px; color: var(--ink-3); }
+.empty svg { width: 44px; height: 44px; margin-bottom: 12px; opacity: .5; }
+.empty p { margin: 0; font-size: 15px; }
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}

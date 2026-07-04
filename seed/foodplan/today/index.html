@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>오늘의 알뜰 농산물 — 품앗이 로컬푸드 지족점</title>
+<meta name="description" content="품앗이 로컬푸드 지족점의 오늘 알뜰 농산물을 예약하세요.">
+<link rel="stylesheet" href="/foodplan/foodplan.css?v=20260703b">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .wrap { max-width: 560px; margin: 0 auto; padding: 0 16px 40px; }
+  .hero {
+    background: linear-gradient(160deg, var(--green-800), var(--green-900));
+    color: #fff; padding: 28px 20px 30px; border-radius: 0 0 var(--r-lg) var(--r-lg);
+    position: relative; overflow: hidden;
+  }
+  .hero::after {
+    content: ""; position: absolute; right: -30px; top: -30px; width: 160px; height: 160px;
+    background: radial-gradient(circle, rgba(165,214,167,.25), transparent 70%); pointer-events: none;
+  }
+  .hero .store { font-size: 13px; font-weight: 600; opacity: .85; letter-spacing: .02em; }
+  .hero h1 { font-size: 26px; margin: 6px 0 8px; line-height: 1.25; }
+  .hero p { margin: 0; font-size: 14.5px; opacity: .9; }
+  .list { margin-top: 20px; display: flex; flex-direction: column; gap: 14px; }
+  .item {
+    display: flex; gap: 14px; padding: 16px; align-items: flex-start;
+  }
+  .item .body { flex: 1; min-width: 0; }
+  .item .row1 { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
+  .item h3 { font-size: 17px; }
+  .item .cat { font-size: 13px; color: var(--ink-3); }
+  .item .reason { font-size: 13.5px; color: var(--ink-2); margin: 4px 0 10px; }
+  .item .price { display: flex; align-items: baseline; gap: 8px; }
+  .item .price .orig { text-decoration: line-through; color: var(--ink-3); font-size: 14px; font-variant-numeric: tabular-nums; }
+  .item .price .disc { font-size: 20px; font-weight: 800; color: var(--green-800); font-variant-numeric: tabular-nums; }
+  .item .price .off { font-size: 13px; font-weight: 700; color: var(--red); }
+  .item .qty { font-size: 13px; color: var(--ink-3); margin-top: 3px; font-variant-numeric: tabular-nums; }
+  .item .reserve-btn { margin-top: 12px; }
+  .item.sold { opacity: .55; }
+  .note { margin-top: 26px; font-size: 12.5px; color: var(--ink-3); text-align: center; line-height: 1.7; }
+
+  /* 예약 완료 */
+  .done-card { text-align: center; padding: 30px 22px; }
+  .done-card .ic { width: 62px; height: 62px; margin: 0 auto 14px; color: var(--green-700); }
+  .done-card h2 { font-size: 21px; margin-bottom: 8px; }
+  .done-info { text-align: left; background: var(--green-050); border-radius: var(--r); padding: 16px; margin-top: 18px; font-size: 14.5px; line-height: 1.8; }
+  .done-info dt { font-weight: 700; color: var(--green-800); }
+  .done-info dd { margin: 0 0 10px; color: var(--ink-2); }
+</style>
+</head>
+<body>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<header class="hero">
+  <div class="store">품앗이 로컬푸드 지족점</div>
+  <h1>오늘의 알뜰 농산물</h1>
+  <p>신선한 로컬 농산물을 합리적인 가격에 예약하세요.</p>
+</header>
+
+<main class="wrap">
+  <div id="list" class="list" aria-live="polite">
+    <div class="card item"><div class="skeleton" style="width:100%;height:96px"></div></div>
+    <div class="card item"><div class="skeleton" style="width:100%;height:96px"></div></div>
+  </div>
+  <p class="note">
+    표시 가격은 매장 정가 대비 할인가입니다. 수량 한정으로 예약 순 마감됩니다.<br>
+    수령은 매장 픽업만 가능합니다.
+  </p>
+</main>
+
+<!-- 예약 모달 -->
+<div class="modal-backdrop" id="reserve-backdrop" role="dialog" aria-modal="true" aria-labelledby="rv-title">
+  <div class="modal">
+    <h2 id="rv-title" style="font-size:20px;margin-bottom:4px;">예약하기</h2>
+    <p id="rv-item" style="font-size:14.5px;color:var(--ink-2);margin:0 0 18px;"></p>
+
+    <form id="reserve-form" novalidate>
+      <label class="field">
+        <span>이름<span class="req" aria-hidden="true">*</span></span>
+        <input class="input" id="rv-name" type="text" autocomplete="name" required>
+        <span class="field-error" id="err-name">이름을 입력해 주세요.</span>
+      </label>
+      <label class="field">
+        <span>전화번호<span class="req" aria-hidden="true">*</span></span>
+        <input class="input" id="rv-phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="010-0000-0000" required>
+        <span class="field-error" id="err-phone">연락 가능한 전화번호를 입력해 주세요.</span>
+      </label>
+
+      <div class="field">
+        <span style="display:block;font-size:14px;font-weight:600;color:var(--ink-2);margin-bottom:8px;">픽업 시간대<span class="req" aria-hidden="true">*</span></span>
+        <div class="chips" id="rv-slots" role="radiogroup" aria-label="픽업 시간대">
+          <label class="chip"><input type="radio" name="slot" value="10-12">오전 10–12시</label>
+          <label class="chip"><input type="radio" name="slot" value="12-15">낮 12–15시</label>
+          <label class="chip"><input type="radio" name="slot" value="15-18">오후 15–18시</label>
+          <label class="chip"><input type="radio" name="slot" value="18-20">저녁 18–20시</label>
+        </div>
+        <span class="field-error" id="err-slot">픽업 시간대를 선택해 주세요.</span>
+      </div>
+
+      <!-- 첫 예약 시에만 노출 -->
+      <div id="consent-block" style="display:none;margin-top:6px;padding:14px;background:var(--surface-2);border-radius:var(--r-sm);">
+        <label class="check-row">
+          <input type="checkbox" id="agree-privacy">
+          <span><b>[필수] 개인정보 수집·이용 동의</b><br>수집 항목: 이름·전화번호 / 목적: 예약 접수 및 알림 / 보유 기간: 시범사업 종료 후 1개월까지</span>
+        </label>
+        <label class="check-row">
+          <input type="checkbox" id="agree-trial">
+          <span><b>[필수] 푸드플랜 실증 시범 참여 동의</b><br>알뜰 농산물 알림 수신 및 시범사업 참여에 동의합니다.</span>
+        </label>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block" id="rv-submit" style="margin-top:18px;">예약하기</button>
+      <button type="button" class="btn btn-ghost btn-block" id="rv-cancel" style="margin-top:10px;">닫기</button>
+    </form>
+  </div>
+</div>
+
+<!-- 예약 완료 화면 -->
+<div class="modal-backdrop" id="done-backdrop" role="dialog" aria-modal="true" aria-labelledby="done-title">
+  <div class="modal">
+    <div class="done-card">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12l2.5 2.5L16 9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <h2 id="done-title">예약이 접수되었습니다</h2>
+      <p style="color:var(--ink-2);font-size:14.5px;margin:0;"><span id="done-name"></span>님, 아래 안내에 따라 방문해 주세요.</p>
+      <dl class="done-info">
+        <dt>수령 방법</dt><dd>매장 픽업 · <span id="done-slot"></span></dd>
+        <dt>장소</dt><dd>품앗이 로컬푸드 지족점<br>대전 유성구 지족로364번길 40</dd>
+        <dt>영업시간 / 문의</dt><dd>매장 영업시간 내 방문 · 042-824-0131</dd>
+      </dl>
+      <p style="font-size:12.5px;color:var(--ink-3);margin-top:14px;">방문이 어려우시면 매장으로 연락 주세요.</p>
+      <button type="button" class="btn btn-primary btn-block" id="done-close" style="margin-top:18px;">확인</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Supabase (store.html 패턴: anon JWT) ─────────────
+const SUPABASE_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRuaXZoY3BqcmhrbWVrY2ZxZ2RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NTc5MjMsImV4cCI6MjA4NzIzMzkyM30.yJ0_4Sg78p7oY89q7go3ab26PCPHnk1Q4ObZJIZEULA';
+if (typeof supabase === 'undefined') {
+  document.addEventListener('DOMContentLoaded', () => toast('네트워크 문제로 페이지를 불러오지 못했습니다. 새로고침해 주세요.', 'err'));
+}
+const sb = (typeof supabase !== 'undefined') ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } }) : null;
+const CONSENT_KEY = 'foodplan_consented_v1';
+
+function toast(msg, kind) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'show ' + (kind || '');
+  clearTimeout(t._h); t._h = setTimeout(() => t.className = '', 3800);
+}
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function won(n) { return (Number(n) || 0).toLocaleString('ko-KR'); }
+
+const SOURCE_BADGE = {
+  imminent: (days) => {
+    const d = Number(days) || 1;
+    const lv = d >= 3 ? 3 : d;
+    return `<span class="badge badge-imminent-${lv}"><span class="dot"></span>임박 ${d >= 3 ? '3일+' : d + '일'}</span>`;
+  },
+  ugly: () => `<span class="badge badge-ugly"><span class="dot"></span>못난이</span>`,
+  surplus: () => `<span class="badge badge-surplus"><span class="dot"></span>과잉출하</span>`,
+};
+const SLOT_LABEL = { '10-12':'오전 10–12시','12-15':'낮 12–15시','15-18':'오후 15–18시','18-20':'저녁 18–20시' };
+
+// ── 상품 목록 로드 (공개 뷰 anon SELECT) ─────────────
+async function loadItems() {
+  const list = document.getElementById('list');
+  if (!sb) return;
+  const { data, error } = await sb
+    .from('foodplan_public_items')
+    .select('id,source,item_name,category,weight_kg,qty,unit,base_price,discount_rate,days_elapsed,reason,status')
+    .order('discount_rate', { ascending: false });
+
+  if (error) { list.innerHTML = `<div class="empty"><p>상품을 불러오지 못했습니다.</p></div>`; return; }
+  if (!data || !data.length) {
+    list.innerHTML = `<div class="empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 9l1-4h16l1 4M4 9h16v10a1 1 0 01-1 1H5a1 1 0 01-1-1V9z" stroke-linejoin="round"/></svg>
+      <p>오늘 등록된 알뜰 농산물이 아직 없습니다.<br>잠시 후 다시 확인해 주세요.</p></div>`;
+    return;
+  }
+  list.innerHTML = data.map(renderItem).join('');
+}
+
+function renderItem(it) {
+  const badge = (SOURCE_BADGE[it.source] || (() => ''))(it.days_elapsed);
+  const disc = Number(it.discount_rate) || 0;
+  const orig = Number(it.base_price) || 0;
+  const final = Math.round(orig * (100 - disc) / 100);
+  const sold = it.status === 'reserved';
+  const qtyTxt = (it.qty != null ? `수량 ${it.qty}${esc(it.unit || '개')}` : '') + (it.weight_kg ? ` · ${it.weight_kg}kg` : '');
+  return `<article class="card item${sold ? ' sold' : ''}">
+    <div class="body">
+      <div class="row1">${badge}<span class="cat">${esc(it.category || '')}</span></div>
+      <h3>${esc(it.item_name || '농산물')}</h3>
+      ${it.reason ? `<p class="reason">${esc(it.reason)}</p>` : ''}
+      <div class="price">
+        ${orig ? `<span class="orig">${won(orig)}원</span>` : ''}
+        <span class="disc">${won(final)}원</span>
+        ${disc ? `<span class="off">${disc}%↓</span>` : ''}
+      </div>
+      ${qtyTxt ? `<div class="qty">${qtyTxt}</div>` : ''}
+      ${sold
+        ? `<button class="btn btn-ghost btn-sm reserve-btn" disabled>예약 마감</button>`
+        : `<button class="btn btn-primary btn-sm reserve-btn" data-id="${it.id}" data-name="${esc(it.item_name || '농산물')}" data-price="${final}">예약하기</button>`}
+    </div>
+  </article>`;
+}
+
+// ── 예약 모달 ────────────────────────────────────────
+let currentItem = null;
+const rvBackdrop = document.getElementById('reserve-backdrop');
+const doneBackdrop = document.getElementById('done-backdrop');
+
+document.getElementById('list').addEventListener('click', (e) => {
+  const btn = e.target.closest('.reserve-btn[data-id]');
+  if (!btn) return;
+  currentItem = { id: btn.dataset.id, name: btn.dataset.name, price: btn.dataset.price };
+  openReserve();
+});
+
+function openReserve() {
+  document.getElementById('rv-item').textContent = `${currentItem.name} · ${won(currentItem.price)}원`;
+  document.getElementById('reserve-form').reset();
+  clearErrors();
+  const consented = localStorage.getItem(CONSENT_KEY) === '1';
+  document.getElementById('consent-block').style.display = consented ? 'none' : 'block';
+  rvBackdrop.classList.add('show');
+  setTimeout(() => document.getElementById('rv-name').focus(), 60);
+}
+function closeReserve() { rvBackdrop.classList.remove('show'); }
+document.getElementById('rv-cancel').addEventListener('click', closeReserve);
+rvBackdrop.addEventListener('click', (e) => { if (e.target === rvBackdrop) closeReserve(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeReserve(); doneBackdrop.classList.remove('show'); } });
+
+function clearErrors() {
+  ['name','phone','slot'].forEach(k => document.getElementById('err-' + k).classList.remove('show'));
+  document.getElementById('rv-name').classList.remove('error');
+  document.getElementById('rv-phone').classList.remove('error');
+}
+
+document.getElementById('reserve-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  clearErrors();
+  const name = document.getElementById('rv-name').value.trim();
+  const phone = document.getElementById('rv-phone').value.trim();
+  const slot = (document.querySelector('input[name=slot]:checked') || {}).value;
+  const consented = localStorage.getItem(CONSENT_KEY) === '1';
+
+  let bad = false;
+  if (!name) { document.getElementById('err-name').classList.add('show'); document.getElementById('rv-name').classList.add('error'); bad = true; }
+  if (!phone || phone.replace(/\D/g,'').length < 9) { document.getElementById('err-phone').classList.add('show'); document.getElementById('rv-phone').classList.add('error'); bad = true; }
+  if (!slot) { document.getElementById('err-slot').classList.add('show'); bad = true; }
+  if (!consented) {
+    if (!document.getElementById('agree-privacy').checked || !document.getElementById('agree-trial').checked) {
+      toast('필수 동의 항목에 체크해 주세요.', 'err'); bad = true;
+    }
+  }
+  if (bad) return;
+
+  const btn = document.getElementById('rv-submit');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> 접수 중…';
+
+  try {
+    // 첫 예약이면 동의 먼저 기록 (anon INSERT — return=minimal, RLS 함정 회피)
+    if (!consented) {
+      const { error: cErr } = await sb.from('foodplan_consents')
+        .insert({ name, phone, channel: 'web' }, { returning: 'minimal' });
+      if (cErr) throw cErr;
+      localStorage.setItem(CONSENT_KEY, '1');
+    }
+    // 예약 INSERT (anon — return=minimal. 트리거가 items → reserved 전이)
+    const { error: rErr } = await sb.from('foodplan_reservations')
+      .insert({ item_id: currentItem.id, member_name: name, phone, qty: 1, type: 'pickup', slot }, { returning: 'minimal' });
+    if (rErr) throw rErr;
+
+    closeReserve();
+    showDone(name, slot);
+    loadItems();
+  } catch (err) {
+    const msg = (err && err.message) ? err.message : '';
+    // 트리거 EXCEPTION(이미 예약됨 등)
+    if (/예약할 수 없는 상태|check/i.test(msg)) toast('방금 다른 분이 예약을 마쳤습니다. 다른 상품을 선택해 주세요.', 'err');
+    else toast('예약 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.', 'err');
+    btn.disabled = false; btn.textContent = '예약하기';
+  }
+});
+
+function showDone(name, slot) {
+  document.getElementById('done-name').textContent = name;
+  document.getElementById('done-slot').textContent = SLOT_LABEL[slot] || slot;
+  doneBackdrop.classList.add('show');
+}
+document.getElementById('done-close').addEventListener('click', () => doneBackdrop.classList.remove('show'));
+
+loadItems();
+</script>
+</body>
+</html>

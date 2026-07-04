@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>푸드플랜 작업 큐 — 품앗이 로컬푸드 지족점</title>
+<link rel="stylesheet" href="/foodplan/foodplan.css?v=20260703b">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .topbar {
+    position: sticky; top: 0; z-index: var(--z-nav);
+    background: var(--green-800); color: #fff;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px calc(12px + env(safe-area-inset-top)); padding-top: 12px;
+    box-shadow: var(--shadow-1);
+  }
+  .topbar .brand { font-size: 16px; font-weight: 700; letter-spacing: -.02em; }
+  .topbar .brand small { display:block; font-size: 11.5px; font-weight: 500; opacity: .8; letter-spacing: 0; }
+  .topbar .right { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .topbar .email { opacity: .85; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .topbar button { background: rgba(255,255,255,.15); color: #fff; border: none; border-radius: var(--r-sm); padding: 7px 12px; font-size: 13px; font-weight: 600; cursor: pointer; }
+
+  .wrap { max-width: 720px; margin: 0 auto; padding: 16px 16px 100px; }
+
+  /* 로그인 */
+  #login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  #login-screen .box { width: 100%; max-width: 380px; padding: 30px 24px; }
+  #login-screen h1 { font-size: 22px; text-align: center; margin-bottom: 4px; color: var(--green-800); }
+  #login-screen .sub { text-align: center; color: var(--ink-3); font-size: 14px; margin-bottom: 24px; }
+
+  /* 섹션 */
+  .section { margin-top: 26px; }
+  .section-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .section-head h2 { font-size: 17px; color: var(--green-900); }
+  .section-head .count { font-size: 13px; font-weight: 700; color: #fff; background: var(--green-700); border-radius: 999px; padding: 1px 9px; font-variant-numeric: tabular-nums; }
+  .section-head .count.zero { background: var(--line-2); color: var(--ink-3); }
+
+  .queue { display: flex; flex-direction: column; gap: 12px; }
+  .qcard { padding: 15px 16px; }
+  .qcard .row1 { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
+  .qcard h3 { font-size: 16px; }
+  .qcard .meta { font-size: 13px; color: var(--ink-3); margin-top: 3px; font-variant-numeric: tabular-nums; }
+  .qcard .farmer { font-size: 13px; color: var(--ink-2); margin-top: 2px; }
+  .qcard .actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+
+  .add-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+    min-height: 52px; border: 1.5px dashed var(--line-2); background: var(--surface);
+    border-radius: var(--r); color: var(--green-800); font-size: 15px; font-weight: 600; cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  .add-btn:hover { border-color: var(--green-700); background: var(--green-050); }
+
+  /* 요약바 */
+  .summary {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: var(--z-nav);
+    background: var(--surface); border-top: 1px solid var(--line);
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    display: flex; justify-content: space-around; gap: 4px;
+    box-shadow: 0 -2px 12px rgba(20,66,26,.06);
+  }
+  .summary .cell { text-align: center; flex: 1; }
+  .summary .cell .n { display: block; font-size: 17px; font-weight: 800; color: var(--green-800); font-variant-numeric: tabular-nums; line-height: 1.2; }
+  .summary .cell .l { font-size: 11px; color: var(--ink-3); }
+
+  /* 농가 검색 결과 */
+  .farmer-results { border: 1px solid var(--line); border-radius: var(--r-sm); margin-top: 6px; max-height: 180px; overflow-y: auto; }
+  .farmer-results button { display: block; width: 100%; text-align: left; padding: 10px 12px; background: none; border: none; border-bottom: 1px solid var(--line); font-size: 14px; cursor: pointer; }
+  .farmer-results button:hover { background: var(--green-050); }
+  .farmer-results button:last-child { border-bottom: none; }
+  .farmer-picked { display: inline-flex; align-items: center; gap: 8px; margin-top: 6px; padding: 6px 12px; background: var(--green-100); border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--green-800); }
+  .farmer-picked button { background: none; border: none; color: var(--green-800); cursor: pointer; font-size: 16px; line-height: 1; padding: 0 2px; }
+
+  .pickup-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+  .pickup-item:last-child { border-bottom: none; }
+  .pickup-item .info { font-size: 14px; }
+  .pickup-item .info b { font-size: 15px; }
+  .pickup-item .info span { color: var(--ink-3); font-size: 13px; }
+
+  .modal h2 { font-size: 20px; margin-bottom: 16px; }
+  .preview-box { background: var(--surface-2); border-radius: var(--r-sm); padding: 14px; font-size: 13.5px; white-space: pre-wrap; line-height: 1.6; color: var(--ink-2); max-height: 260px; overflow-y: auto; }
+  .send-disabled-note { display: flex; gap: 8px; align-items: flex-start; margin-top: 12px; padding: 10px 12px; background: #fff8e6; border: 1px solid #f0d98a; border-radius: var(--r-sm); font-size: 13px; color: #7a5a00; }
+</style>
+</head>
+<body>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<!-- 로그인 게이트 -->
+<div id="login-screen">
+  <div class="card box">
+    <h1>푸드플랜 작업 큐</h1>
+    <p class="sub">품앗이 로컬푸드 지족점 · 직원 로그인</p>
+    <form id="login-form" novalidate>
+      <label class="field">
+        <span>이메일</span>
+        <input class="input" id="email" type="email" autocomplete="username" required>
+      </label>
+      <label class="field">
+        <span>비밀번호</span>
+        <input class="input" id="password" type="password" autocomplete="current-password" required>
+      </label>
+      <div class="field-error" id="login-error" style="margin-bottom:12px;"></div>
+      <button class="btn btn-primary btn-block" id="login-btn" type="submit">로그인</button>
+    </form>
+  </div>
+</div>
+
+<!-- 앱 -->
+<div id="app" style="display:none;">
+  <header class="topbar">
+    <div class="brand">푸드플랜 작업 큐<small>품앗이 로컬푸드 지족점</small></div>
+    <div class="right">
+      <span class="email" id="user-email"></span>
+      <button id="logout-btn" type="button">로그아웃</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- 1. 접수 대기 -->
+    <section class="section">
+      <div class="section-head">
+        <h2>접수 대기</h2><span class="count" id="cnt-pending">0</span>
+      </div>
+      <div class="queue" id="q-pending"></div>
+    </section>
+
+    <!-- 수동 등록 -->
+    <button class="add-btn" id="add-item-btn" style="margin-top:16px;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>
+      품목 직접 등록 / 농가 접수 대행
+    </button>
+
+    <!-- 2. 등록됨 (알림 발송) -->
+    <section class="section">
+      <div class="section-head">
+        <h2>등록됨 · 알림 대기</h2><span class="count" id="cnt-registered">0</span>
+      </div>
+      <div class="queue" id="q-registered"></div>
+    </section>
+
+    <!-- 3. 예약됨 (집품) -->
+    <section class="section">
+      <div class="section-head">
+        <h2>예약됨 · 집품/픽업</h2><span class="count" id="cnt-reserved">0</span>
+      </div>
+      <div class="queue" id="q-reserved"></div>
+    </section>
+
+    <!-- 4. 마감 처리 (미판매 폐기) -->
+    <section class="section">
+      <div class="section-head">
+        <h2>마감 처리</h2><span class="count" id="cnt-closing">0</span>
+      </div>
+      <p style="font-size:13px;color:var(--ink-3);margin:0 0 10px;">미판매 처리(만료)된 품목의 폐기를 확정합니다. 등록·알림 품목은 위 목록의 "미판매 폐기"로 바로 처리할 수 있습니다. 폐기 중량은 절감·CO₂ 지표의 근거이므로 반드시 입력해 주세요.</p>
+      <div class="queue" id="q-closing"></div>
+    </section>
+  </main>
+
+  <!-- 하단 숫자 요약 -->
+  <div class="summary" id="summary">
+    <div class="cell"><span class="n" id="s-registered">0</span><span class="l">등록</span></div>
+    <div class="cell"><span class="n" id="s-notified">0</span><span class="l">알림</span></div>
+    <div class="cell"><span class="n" id="s-reserved">0</span><span class="l">예약</span></div>
+    <div class="cell"><span class="n" id="s-pickup">0</span><span class="l">픽업</span></div>
+    <div class="cell"><span class="n" id="s-disposed">0</span><span class="l">폐기kg</span></div>
+  </div>
+</div>
+
+<!-- 등록/확인 모달 -->
+<div class="modal-backdrop" id="reg-backdrop" role="dialog" aria-modal="true" aria-labelledby="reg-title">
+  <div class="modal">
+    <h2 id="reg-title">품목 등록</h2>
+    <form id="reg-form" novalidate>
+      <div class="field">
+        <span style="display:block;font-size:14px;font-weight:600;color:var(--ink-2);margin-bottom:8px;">구분<span class="req">*</span></span>
+        <div class="chips" role="radiogroup" aria-label="구분">
+          <label class="chip"><input type="radio" name="source" value="imminent" checked>임박</label>
+          <label class="chip"><input type="radio" name="source" value="ugly">못난이</label>
+          <label class="chip"><input type="radio" name="source" value="surplus">과잉출하</label>
+        </div>
+      </div>
+      <label class="field"><span>품목명<span class="req">*</span></span><input class="input" id="reg-name" type="text" required></label>
+      <label class="field"><span>카테고리</span>
+        <select class="select" id="reg-category">
+          <option value="야채">야채</option><option value="과일">과일</option>
+          <option value="정육">정육</option><option value="수산">수산</option><option value="기타">기타</option>
+        </select>
+      </label>
+      <div style="display:flex;gap:12px;">
+        <label class="field" style="flex:1;"><span>중량(kg)</span><input class="input" id="reg-weight" type="number" inputmode="decimal" step="0.1" min="0"></label>
+        <label class="field" style="flex:1;"><span>수량</span><input class="input" id="reg-qty" type="number" inputmode="numeric" min="0"></label>
+      </div>
+      <label class="field"><span>정가(원)</span><input class="input" id="reg-price" type="number" inputmode="numeric" min="0"></label>
+
+      <div class="field">
+        <span>할인율</span>
+        <div class="slider-row">
+          <input type="range" id="reg-discount" min="10" max="50" step="5" value="30" aria-label="할인율">
+          <span class="slider-val"><span id="reg-discount-val">30</span>%</span>
+        </div>
+      </div>
+
+      <!-- 임박 단계 (source=imminent 일 때) -->
+      <label class="field" id="reg-days-field"><span>진열 경과일 (임박 단계)</span>
+        <select class="select" id="reg-days">
+          <option value="1">1일 (기본 할인 15%)</option>
+          <option value="2">2일 (기본 할인 30%)</option>
+          <option value="3">3일 이상 (기본 할인 50%)</option>
+        </select>
+      </label>
+
+      <!-- 농가 선택 (ugly/surplus) -->
+      <div class="field" id="reg-farmer-field" style="display:none;">
+        <span>농가<span class="req">*</span></span>
+        <input class="input" id="reg-farmer-search" type="text" placeholder="농가명 검색">
+        <div class="farmer-results" id="farmer-results" style="display:none;"></div>
+        <div id="farmer-picked-wrap"></div>
+      </div>
+
+      <label class="field"><span>사유 (못난이·과잉 등)</span><input class="input" id="reg-reason" type="text" placeholder="예: 외관 흠집 / 집중 출하"></label>
+      <label class="field"><span>출하일</span><input class="input" id="reg-ship" type="date"></label>
+
+      <button type="submit" class="btn btn-primary btn-block" id="reg-submit" style="margin-top:8px;">등록하기</button>
+      <button type="button" class="btn btn-ghost btn-block" id="reg-cancel" style="margin-top:10px;">닫기</button>
+    </form>
+  </div>
+</div>
+
+<!-- 알림 발송 미리보기 모달 -->
+<div class="modal-backdrop" id="notify-backdrop" role="dialog" aria-modal="true" aria-labelledby="notify-title">
+  <div class="modal">
+    <h2 id="notify-title">알림 발송 미리보기</h2>
+    <p style="font-size:14px;color:var(--ink-2);margin:0 0 8px;">대상 동의자: <b id="notify-recipients">–</b>명 · 품목 <b id="notify-items">–</b>건</p>
+    <div class="preview-box" id="notify-preview">불러오는 중…</div>
+    <div class="send-disabled-note">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="flex:none;margin-top:1px;"><path d="M12 9v4m0 4h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L14.7 3.9a2 2 0 00-3.4 0z" stroke-linejoin="round"/></svg>
+      <span>실제 발송은 관리자 승인 후 개통됩니다. 현재는 미리보기만 가능합니다.</span>
+    </div>
+    <button type="button" class="btn btn-primary btn-block" id="notify-send" style="margin-top:16px;" disabled>실발송 (승인 후 개통)</button>
+    <button type="button" class="btn btn-ghost btn-block" id="notify-close" style="margin-top:10px;">닫기</button>
+  </div>
+</div>
+
+<!-- 폐기 중량 입력 모달 -->
+<div class="modal-backdrop" id="dispose-backdrop" role="dialog" aria-modal="true" aria-labelledby="dispose-title">
+  <div class="modal">
+    <h2 id="dispose-title">폐기 처리</h2>
+    <p id="dispose-item" style="font-size:14.5px;color:var(--ink-2);margin:0 0 16px;"></p>
+    <label class="field"><span>폐기 중량 (kg)<span class="req">*</span></span>
+      <input class="input" id="dispose-weight" type="number" inputmode="decimal" step="0.1" min="0" placeholder="예: 2.5">
+      <span class="field-error" id="err-dispose">폐기 중량을 입력해 주세요.</span>
+    </label>
+    <button type="button" class="btn btn-danger btn-block" id="dispose-confirm">폐기 확정</button>
+    <button type="button" class="btn btn-ghost btn-block" id="dispose-cancel" style="margin-top:10px;">닫기</button>
+  </div>
+</div>
+
+<script>
+// ── 실발송 개통 플래그 (기본 false. 서버 FOODPLAN_SEND_ENABLED와 이중 안전) ──
+const SEND_ENABLED = false;
+
+// ── Supabase (store.html 패턴) ───────────────────────
+const SUPABASE_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRuaXZoY3BqcmhrbWVrY2ZxZ2RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NTc5MjMsImV4cCI6MjA4NzIzMzkyM30.yJ0_4Sg78p7oY89q7go3ab26PCPHnk1Q4ObZJIZEULA';
+if (typeof supabase === 'undefined') {
+  document.addEventListener('DOMContentLoaded', () => toast('네트워크 문제로 페이지 모듈을 불러오지 못했습니다.', 'err'));
+}
+const sb = (typeof supabase !== 'undefined') ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+
+function toast(msg, kind) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'show ' + (kind || '');
+  clearTimeout(t._h); t._h = setTimeout(() => t.className = '', 3800);
+}
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function won(n) { return (Number(n) || 0).toLocaleString('ko-KR'); }
+
+const DISCOUNT_DEFAULT = { 1: 15, 2: 30, 3: 50 };
+const SOURCE_BADGE = {
+  imminent: (d) => { const n = Number(d)||1; const lv = n>=3?3:n; return `<span class="badge badge-imminent-${lv}"><span class="dot"></span>임박 ${n>=3?'3일+':n+'일'}</span>`; },
+  ugly: () => `<span class="badge badge-ugly"><span class="dot"></span>못난이</span>`,
+  surplus: () => `<span class="badge badge-surplus"><span class="dot"></span>과잉</span>`,
+};
+const SLOT_LABEL = { '10-12':'오전 10–12시','12-15':'낮 12–15시','15-18':'오후 15–18시','18-20':'저녁 18–20시' };
+
+// ── 인증 ─────────────────────────────────────────────
+let accessToken = null;
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim();
+  const pw = document.getElementById('password').value;
+  const btn = document.getElementById('login-btn');
+  const err = document.getElementById('login-error');
+  err.classList.remove('show'); btn.disabled = true; btn.textContent = '로그인 중…';
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
+  if (error) {
+    err.textContent = '로그인 실패: 이메일/비밀번호를 확인해 주세요.'; err.classList.add('show');
+    btn.disabled = false; btn.textContent = '로그인'; return;
+  }
+  accessToken = data.session.access_token;
+  showApp(data.user);
+});
+function showApp(user) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('user-email').textContent = user.email;
+  loadAll();
+}
+document.getElementById('logout-btn').addEventListener('click', async () => {
+  await sb.auth.signOut(); location.reload();
+});
+sb && sb.auth.getSession().then(({ data: { session } }) => {
+  if (session) { accessToken = session.access_token; showApp(session.user); }
+});
+
+// ── 데이터 로드 ──────────────────────────────────────
+async function loadAll() {
+  if (!sb) return;
+  const { data, error } = await sb.from('foodplan_items')
+    .select('id,source,item_name,category,farmer_name,weight_kg,qty,unit,base_price,discount_rate,days_elapsed,reason,status,created_at')
+    .order('created_at', { ascending: false });
+  if (error) { toast('목록을 불러오지 못했습니다.', 'err'); return; }
+  render(data || []);
+  loadReserved();
+  loadSummary();
+}
+
+function render(items) {
+  const groups = { pending: [], registered: [], closing: [] };
+  for (const it of items) {
+    if (it.status === 'detected' || it.status === 'farm_reported') groups.pending.push(it);
+    else if (it.status === 'registered' || it.status === 'notified') groups.registered.push(it);
+    else if (it.status === 'expired') groups.closing.push(it);
+  }
+  fillQueue('q-pending', 'cnt-pending', groups.pending, renderPending, '접수 대기 중인 품목이 없습니다.');
+  fillQueue('q-registered', 'cnt-registered', groups.registered, renderRegistered, '등록된 품목이 없습니다.');
+  fillQueue('q-closing', 'cnt-closing', groups.closing, renderClosing, '마감 처리할 품목이 없습니다.');
+}
+
+function fillQueue(qid, cid, arr, fn, emptyMsg) {
+  const q = document.getElementById(qid);
+  const c = document.getElementById(cid);
+  c.textContent = arr.length; c.classList.toggle('zero', arr.length === 0);
+  q.innerHTML = arr.length ? arr.map(fn).join('') : `<div class="empty"><p>${emptyMsg}</p></div>`;
+}
+
+function metaLine(it) {
+  const p = [];
+  if (it.weight_kg) p.push(it.weight_kg + 'kg');
+  if (it.qty != null) p.push('수량 ' + it.qty + (it.unit || '개'));
+  if (it.base_price) p.push(won(it.base_price) + '원');
+  return p.join(' · ');
+}
+
+function renderPending(it) {
+  const badge = (SOURCE_BADGE[it.source]||(()=>''))(it.days_elapsed);
+  return `<article class="card qcard">
+    <div class="row1">${badge}<span class="cat" style="font-size:13px;color:var(--ink-3)">${esc(it.category||'')}</span></div>
+    <h3>${esc(it.item_name||'품목')}</h3>
+    <div class="meta">${metaLine(it)}</div>
+    ${it.farmer_name ? `<div class="farmer">농가: ${esc(it.farmer_name)}</div>` : ''}
+    <div class="actions">
+      <button class="btn btn-primary btn-sm" data-act="confirm" data-id="${it.id}" data-disc="${it.discount_rate||30}">확인·등록</button>
+      <button class="btn btn-ghost btn-sm" data-act="reject" data-id="${it.id}">반려</button>
+    </div>
+  </article>`;
+}
+function renderRegistered(it) {
+  const badge = (SOURCE_BADGE[it.source]||(()=>''))(it.days_elapsed);
+  const disc = Number(it.discount_rate)||0;
+  const notified = it.status === 'notified';
+  return `<article class="card qcard">
+    <div class="row1">${badge}<span class="badge ${notified?'badge-status':'badge-muted'}">${notified?'알림 발송됨':'알림 대기'}</span></div>
+    <h3>${esc(it.item_name||'품목')}</h3>
+    <div class="meta">${metaLine(it)} · 할인 ${disc}%</div>
+    <div class="actions">
+      <button class="btn btn-primary btn-sm" data-act="notify" data-id="${it.id}">알림 발송</button>
+      <button class="btn btn-ghost btn-sm" data-act="dispose" data-id="${it.id}" data-name="${esc(it.item_name||'품목')}" data-weight="${it.weight_kg||''}" data-status="${it.status}">미판매 폐기</button>
+    </div>
+  </article>`;
+}
+function renderClosing(it) {
+  return `<article class="card qcard">
+    <div class="row1"><span class="badge badge-muted">${esc(statusKo(it.status))}</span></div>
+    <h3>${esc(it.item_name||'품목')}</h3>
+    <div class="meta">${metaLine(it)}</div>
+    <div class="actions">
+      <button class="btn btn-danger btn-sm" data-act="dispose" data-id="${it.id}" data-name="${esc(it.item_name||'품목')}" data-weight="${it.weight_kg||''}" data-status="${it.status}">폐기</button>
+    </div>
+  </article>`;
+}
+function statusKo(s){ return ({registered:'등록됨',notified:'알림 발송',expired:'미판매'})[s]||s; }
+
+// ── 예약됨(집품) ─────────────────────────────────────
+async function loadReserved() {
+  const { data: items } = await sb.from('foodplan_items')
+    .select('id,item_name,status').eq('status','reserved');
+  const q = document.getElementById('q-reserved');
+  const c = document.getElementById('cnt-reserved');
+  if (!items || !items.length) {
+    c.textContent = 0; c.classList.add('zero');
+    q.innerHTML = `<div class="empty"><p>예약된 품목이 없습니다.</p></div>`; return;
+  }
+  const ids = items.map(i=>i.id);
+  const { data: resv } = await sb.from('foodplan_reservations')
+    .select('id,item_id,member_name,phone,slot,qty,status').in('item_id', ids).eq('status','requested');
+  const byItem = {}; (resv||[]).forEach(r => { (byItem[r.item_id] = byItem[r.item_id] || []).push(r); });
+
+  c.textContent = items.length; c.classList.remove('zero');
+  q.innerHTML = items.map(it => {
+    const rs = byItem[it.id] || [];
+    const rows = rs.map(r => `<div class="pickup-item">
+      <div class="info"><b>${esc(r.member_name||'')}</b> <span>${esc(SLOT_LABEL[r.slot]||r.slot||'')} · ${r.qty||1}개</span></div>
+      <button class="btn btn-primary btn-sm" data-act="pickup" data-id="${it.id}">픽업 완료</button>
+    </div>`).join('') || `<div class="pickup-item"><div class="info"><span>예약자 정보 없음</span></div><button class="btn btn-primary btn-sm" data-act="pickup" data-id="${it.id}">픽업 완료</button></div>`;
+    return `<article class="card"><div style="padding:12px 14px 6px;"><h3 style="font-size:16px;">${esc(it.item_name||'품목')}</h3></div>${rows}</article>`;
+  }).join('');
+}
+
+// ── 요약 (metrics 뷰) ────────────────────────────────
+async function loadSummary() {
+  // 상태 카운트는 items에서 직접 (당일 기준)
+  const today = new Date().toISOString().slice(0,10);
+  const { data } = await sb.from('foodplan_items').select('status,weight_kg,created_at,updated_at');
+  let reg=0, resv=0, pick=0, dispKg=0;
+  (data||[]).forEach(it => {
+    const cd = (it.created_at||'').slice(0,10);
+    const ud = (it.updated_at||'').slice(0,10);
+    if (cd === today && ['registered','notified','reserved','partially_reserved','picked_up','delivered','expired','disposed'].includes(it.status)) reg++;
+    if (['reserved','partially_reserved','picked_up','delivered'].includes(it.status) && cd===today) resv++;
+    if (it.status==='picked_up' && ud===today) pick++;
+    if (it.status==='disposed' && ud===today) dispKg += Number(it.weight_kg)||0;
+  });
+  // 알림 = 당일 notified로 '전이된' 이벤트 건수 (items status로 세면 이후 단계까지 중복 집계됨)
+  const { count: notif } = await sb.from('foodplan_events')
+    .select('id', { count: 'exact', head: true })
+    .eq('to_status', 'notified')
+    .gte('at', today + 'T00:00:00');
+  document.getElementById('s-registered').textContent = reg;
+  document.getElementById('s-notified').textContent = notif || 0;
+  document.getElementById('s-reserved').textContent = resv;
+  document.getElementById('s-pickup').textContent = pick;
+  document.getElementById('s-disposed').textContent = (Math.round(dispKg*10)/10);
+}
+
+// ── RPC 상태전이 (authenticated) ─────────────────────
+async function transition(itemId, toStatus, meta) {
+  const { error } = await sb.rpc('foodplan_transition', {
+    p_item_id: itemId, p_to_status: toStatus, p_actor: (document.getElementById('user-email').textContent||'staff'), p_meta: meta||{}
+  });
+  return error;
+}
+
+// ── 액션 위임 ────────────────────────────────────────
+document.getElementById('app').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-act]'); if (!btn) return;
+  const act = btn.dataset.act, id = btn.dataset.id;
+
+  if (act === 'confirm') { openConfirm(id, btn.dataset.disc); return; }
+  if (act === 'reject') {
+    btn.disabled = true;
+    const err = await transition(id, 'rejected', { by: 'staff' });
+    if (err) { toast('반려 처리에 실패했습니다.', 'err'); btn.disabled=false; } else { toast('반려 처리되었습니다.', 'ok'); loadAll(); }
+    return;
+  }
+  if (act === 'notify') { openNotify(id); return; }
+  if (act === 'pickup') {
+    btn.disabled = true;
+    const err = await transition(id, 'picked_up', { by: 'staff' });
+    if (err) { toast('픽업 처리에 실패했습니다.', 'err'); btn.disabled=false; } else { toast('픽업 완료 처리되었습니다.', 'ok'); loadAll(); }
+    return;
+  }
+  if (act === 'dispose') { openDispose(btn.dataset); return; }
+});
+
+// ── 확인·등록 (detected → registered) ────────────────
+let confirmId = null;
+function openConfirm(id, disc) {
+  // 접수 대기 카드의 "확인·등록"은 기본 할인율로 바로 registered 전이
+  confirmId = id;
+  doConfirm(disc);
+}
+async function doConfirm(disc) {
+  const err = await transition(confirmId, 'registered', { discount_rate: Number(disc)||30 });
+  if (err) { toast('등록에 실패했습니다.', 'err'); }
+  else { toast('등록되었습니다.', 'ok'); loadAll(); }
+}
+
+// ── 수동 등록 폼 ─────────────────────────────────────
+const regBackdrop = document.getElementById('reg-backdrop');
+let pickedFarmer = null;
+document.getElementById('add-item-btn').addEventListener('click', () => {
+  document.getElementById('reg-form').reset();
+  pickedFarmer = null; document.getElementById('farmer-picked-wrap').innerHTML='';
+  document.getElementById('farmer-results').style.display='none';
+  document.getElementById('reg-discount').value = 30; document.getElementById('reg-discount-val').textContent = 30;
+  updateSourceFields();
+  regBackdrop.classList.add('show');
+});
+document.getElementById('reg-cancel').addEventListener('click', ()=>regBackdrop.classList.remove('show'));
+regBackdrop.addEventListener('click', e=>{ if(e.target===regBackdrop) regBackdrop.classList.remove('show'); });
+
+document.getElementById('reg-discount').addEventListener('input', e => {
+  document.getElementById('reg-discount-val').textContent = e.target.value;
+});
+document.querySelectorAll('input[name=source]').forEach(r => r.addEventListener('change', updateSourceFields));
+document.getElementById('reg-days').addEventListener('change', e => {
+  const d = DISCOUNT_DEFAULT[e.target.value] || 30;
+  document.getElementById('reg-discount').value = d; document.getElementById('reg-discount-val').textContent = d;
+});
+function updateSourceFields() {
+  const src = (document.querySelector('input[name=source]:checked')||{}).value;
+  document.getElementById('reg-days-field').style.display = src==='imminent' ? 'block' : 'none';
+  document.getElementById('reg-farmer-field').style.display = (src==='ugly'||src==='surplus') ? 'block' : 'none';
+  // 할인율 하한: 못난이·과잉 30~50(스펙 §2), 임박은 15%(1일) 등 허용 위해 10 유지
+  const slider = document.getElementById('reg-discount');
+  const min = (src==='ugly'||src==='surplus') ? 30 : 10;
+  slider.min = min;
+  if (Number(slider.value) < min) { slider.value = min; document.getElementById('reg-discount-val').textContent = min; }
+}
+
+// 농가 검색 (authenticated — farmers_pos)
+let farmerTimer = null;
+document.getElementById('reg-farmer-search').addEventListener('input', e => {
+  clearTimeout(farmerTimer);
+  const q = e.target.value.trim();
+  const box = document.getElementById('farmer-results');
+  if (q.length < 1) { box.style.display='none'; return; }
+  farmerTimer = setTimeout(async () => {
+    const { data } = await sb.from('farmers_pos').select('farmer_no,farmer_name').ilike('farmer_name', '%'+q+'%').limit(8);
+    if (!data || !data.length) { box.innerHTML = '<button type="button" disabled style="color:var(--ink-3);white-space:normal;line-height:1.5">검색 결과가 없습니다. 계속되면 매장 관리자에게 계정 권한을 확인해 주세요.</button>'; box.style.display='block'; return; }
+    box.innerHTML = data.map(f => `<button type="button" data-no="${esc(f.farmer_no||'')}" data-name="${esc(f.farmer_name||'')}">${esc(f.farmer_name||'')} <span style="color:var(--ink-3)">${esc(f.farmer_no||'')}</span></button>`).join('');
+    box.style.display='block';
+  }, 250);
+});
+document.getElementById('farmer-results').addEventListener('click', e => {
+  const b = e.target.closest('button[data-no]'); if (!b) return;
+  pickedFarmer = { no: b.dataset.no, name: b.dataset.name };
+  document.getElementById('farmer-results').style.display='none';
+  document.getElementById('reg-farmer-search').value='';
+  document.getElementById('farmer-picked-wrap').innerHTML =
+    `<div class="farmer-picked">${esc(pickedFarmer.name)}<button type="button" id="farmer-clear" aria-label="농가 선택 취소">×</button></div>`;
+  document.getElementById('farmer-clear').addEventListener('click', ()=>{ pickedFarmer=null; document.getElementById('farmer-picked-wrap').innerHTML=''; });
+});
+
+document.getElementById('reg-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const src = (document.querySelector('input[name=source]:checked')||{}).value;
+  const name = document.getElementById('reg-name').value.trim();
+  if (!name) { toast('품목명을 입력해 주세요.', 'err'); return; }
+  if ((src==='ugly'||src==='surplus') && !pickedFarmer) { toast('농가를 선택해 주세요.', 'err'); return; }
+
+  const btn = document.getElementById('reg-submit');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> 등록 중…';
+  const row = {
+    source: src,
+    item_name: name,
+    category: document.getElementById('reg-category').value,
+    weight_kg: parseFloat(document.getElementById('reg-weight').value) || null,
+    qty: parseInt(document.getElementById('reg-qty').value) || null,
+    base_price: parseInt(document.getElementById('reg-price').value) || null,
+    discount_rate: parseInt(document.getElementById('reg-discount').value) || null,
+    days_elapsed: src==='imminent' ? parseInt(document.getElementById('reg-days').value) : null,
+    reason: document.getElementById('reg-reason').value.trim() || null,
+    ship_date: document.getElementById('reg-ship').value || null,
+    farmer_no: pickedFarmer ? pickedFarmer.no : null,
+    farmer_name: pickedFarmer ? pickedFarmer.name : null,
+    status: 'registered'  // 직원 직접 등록은 바로 registered
+  };
+  const { data, error } = await sb.from('foodplan_items').insert(row).select('id').single();
+  if (error) { toast('등록에 실패했습니다.', 'err'); btn.disabled=false; btn.textContent='등록하기'; return; }
+  // 등록 이벤트 기록(감사) — RPC는 상태전이용이므로 신규 등록은 이벤트만 별도 기록
+  await sb.from('foodplan_events').insert({ item_id: data.id, from_status: null, to_status: 'registered', actor: document.getElementById('user-email').textContent, meta: { via: 'manual_register' } });
+  btn.disabled=false; btn.textContent='등록하기';
+  regBackdrop.classList.remove('show');
+  toast('등록되었습니다.', 'ok'); loadAll();
+});
+
+// ── 알림 발송 (dry_run 미리보기) ─────────────────────
+const notifyBackdrop = document.getElementById('notify-backdrop');
+let notifyItemId = null;
+async function openNotify(id) {
+  notifyItemId = id;
+  document.getElementById('notify-preview').textContent = '불러오는 중…';
+  document.getElementById('notify-recipients').textContent = '–';
+  document.getElementById('notify-items').textContent = '–';
+  // 실발송 버튼은 SEND_ENABLED에 따라 (기본 비활성)
+  const sendBtn = document.getElementById('notify-send');
+  sendBtn.disabled = !SEND_ENABLED;
+  sendBtn.textContent = SEND_ENABLED ? '실발송' : '실발송 (승인 후 개통)';
+  notifyBackdrop.classList.add('show');
+  try {
+    const res = await fetch('/api/foodplan/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
+      body: JSON.stringify({ item_ids: [id], channel: 'sms', dry_run: true })
+    });
+    const j = await res.json();
+    if (!res.ok || !j.ok) { document.getElementById('notify-preview').textContent = '미리보기를 불러오지 못했습니다: ' + (j.error||res.status); return; }
+    document.getElementById('notify-recipients').textContent = j.recipient_count;
+    document.getElementById('notify-items').textContent = j.item_count;
+    document.getElementById('notify-preview').textContent = j.preview_text || '(문안 없음)';
+  } catch (err) {
+    document.getElementById('notify-preview').textContent = '네트워크 오류로 미리보기를 불러오지 못했습니다.';
+  }
+}
+document.getElementById('notify-close').addEventListener('click', ()=>notifyBackdrop.classList.remove('show'));
+notifyBackdrop.addEventListener('click', e=>{ if(e.target===notifyBackdrop) notifyBackdrop.classList.remove('show'); });
+document.getElementById('notify-send').addEventListener('click', async () => {
+  if (!SEND_ENABLED) { toast('실발송은 관리자 승인 후 개통됩니다.', 'err'); return; }
+  // 개통 후에만 도달. dry_run=false 실발송.
+  const btn = document.getElementById('notify-send');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> 발송 중…';
+  try {
+    const res = await fetch('/api/foodplan/notify', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+accessToken },
+      body: JSON.stringify({ item_ids:[notifyItemId], channel:'sms', dry_run:false })
+    });
+    const j = await res.json();
+    if (res.ok && j.ok) { toast(`발송 완료 (${j.sent}건)`, 'ok'); notifyBackdrop.classList.remove('show'); loadAll(); }
+    else toast('발송 실패: '+(j.error||res.status), 'err');
+  } catch(e){ toast('발송 중 오류가 발생했습니다.', 'err'); }
+  btn.disabled = false; btn.textContent = '실발송';
+});
+
+// ── 폐기 처리 (→ expired → disposed, 중량 필수) ──────
+const disposeBackdrop = document.getElementById('dispose-backdrop');
+let disposeData = null;
+function openDispose(ds) {
+  disposeData = { id: ds.id, status: ds.status };
+  document.getElementById('dispose-item').textContent = ds.name;
+  document.getElementById('dispose-weight').value = ds.weight || '';
+  document.getElementById('err-dispose').classList.remove('show');
+  disposeBackdrop.classList.add('show');
+}
+document.getElementById('dispose-cancel').addEventListener('click', ()=>disposeBackdrop.classList.remove('show'));
+disposeBackdrop.addEventListener('click', e=>{ if(e.target===disposeBackdrop) disposeBackdrop.classList.remove('show'); });
+document.getElementById('dispose-confirm').addEventListener('click', async () => {
+  const wStr = document.getElementById('dispose-weight').value;
+  const w = parseFloat(wStr);
+  if (!(w >= 0) || wStr === '') { document.getElementById('err-dispose').classList.add('show'); return; }
+  const btn = document.getElementById('dispose-confirm');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> 처리 중…';
+  // registered/notified → expired → disposed (2단 전이). expired면 1단.
+  let err = null;
+  if (disposeData.status === 'registered' || disposeData.status === 'notified') {
+    err = await transition(disposeData.id, 'expired', { by:'staff' });
+  }
+  if (!err) err = await transition(disposeData.id, 'disposed', { disposed_weight_kg: w });
+  // 폐기 중량을 items.weight_kg에 반영(지표 정확도) — 이미 있으면 유지, 다르면 업데이트
+  if (!err) await sb.from('foodplan_items').update({ weight_kg: w }).eq('id', disposeData.id);
+  btn.disabled = false; btn.textContent = '폐기 확정';
+  if (err) { toast('폐기 처리에 실패했습니다.', 'err'); }
+  else { toast('폐기 처리되었습니다.', 'ok'); disposeBackdrop.classList.remove('show'); loadAll(); }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-backdrop.show').forEach(m=>m.classList.remove('show'));
+});
+</script>
+</body>
+</html>
