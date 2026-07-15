@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>주민조직가 행동신조 — 대전주민운동교육원협동조합</title>
+<meta name="description" content="대전 주민조직가 기초과정 5기가 과정종합 워크숍에서 스스로 세운 다섯 조의 행동신조.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23a0846b'/><text x='16' y='22' text-anchor='middle' font-size='14' fill='%231a1410'>民</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+  /* ── TOKENS (djco 사이트 공통) ── */
+  :root {
+    --bg-deep: #f7f3ee;
+    --bg-card: #faf8f5;
+    --bg-accent: #f0ebe3;
+    --text-primary: #2c2418;
+    --text-secondary: #5c4f3c;
+    --text-muted: #8a7d6a;
+    --accent-warm: #7a5c3e;
+    --accent-gold: #a07840;
+    --border-subtle: rgba(90, 70, 40, 0.1);
+    --border-medium: rgba(90, 70, 40, 0.2);
+    --radius-sm: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+    --space-3xl: 64px;
+    --space-4xl: 96px;
+    --font-serif: 'Noto Serif KR', Georgia, serif;
+    --font-body: 'Pretendard Variable', 'Pretendard', -apple-system, sans-serif;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    /* 종이결: 흙빛 위에 아주 옅은 결 */
+    background-image:
+      radial-gradient(circle at 15% 12%, rgba(160, 120, 64, 0.05) 0%, transparent 42%),
+      radial-gradient(circle at 85% 88%, rgba(122, 92, 62, 0.045) 0%, transparent 46%);
+    background-attachment: fixed;
+  }
+
+  .skip-link {
+    position: absolute; left: -9999px;
+    background: var(--text-primary); color: var(--bg-deep);
+    padding: var(--space-md) var(--space-lg); z-index: 100;
+    text-decoration: none; border-radius: 0 0 var(--radius-sm) 0;
+  }
+  .skip-link:focus { left: 0; top: 0; }
+
+  :focus-visible {
+    outline: 3px solid var(--accent-gold);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* ── 상단 되돌아가기 ── */
+  .topbar {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: var(--space-lg) var(--space-lg) 0;
+  }
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    min-height: 44px;
+    padding: var(--space-sm) var(--space-sm) var(--space-sm) 0;
+    color: var(--text-muted);
+    font-size: 15px;
+    text-decoration: none;
+    transition: color 180ms ease-out;
+  }
+  .back-link:hover { color: var(--accent-warm); }
+  .back-link svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+  /* ── 현판 ── */
+  .plaque {
+    max-width: 900px;
+    margin: var(--space-xl) auto var(--space-4xl);
+    padding: 0 var(--space-lg);
+  }
+
+  .plaque-inner {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-top: 3px solid var(--accent-warm);
+    padding: var(--space-4xl) var(--space-2xl);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 12px 40px rgba(90, 70, 40, 0.06);
+  }
+
+  header.creed-head {
+    text-align: center;
+    padding-bottom: var(--space-2xl);
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: var(--space-3xl);
+  }
+
+  .eyebrow {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    color: var(--accent-warm);
+    text-transform: none;
+    margin-bottom: var(--space-lg);
+  }
+
+  h1 {
+    font-family: var(--font-serif);
+    font-size: clamp(30px, 6vw, 46px);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+    color: var(--text-primary);
+  }
+
+  .subtitle {
+    margin-top: var(--space-md);
+    font-size: 15px;
+    color: var(--text-muted);
+  }
+
+  /* ── 다섯 조 ── */
+  ol.creed {
+    list-style: none;
+    counter-reset: creed;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xl);
+  }
+
+  ol.creed li {
+    position: relative;
+    padding-left: var(--space-2xl);
+    border-left: 2px solid var(--border-medium);
+    /* 스태거 등장 */
+    opacity: 0;
+    transform: translateY(12px);
+    animation: rise 520ms ease-out forwards;
+  }
+  ol.creed li:nth-child(1) { animation-delay: 60ms; }
+  ol.creed li:nth-child(2) { animation-delay: 110ms; }
+  ol.creed li:nth-child(3) { animation-delay: 160ms; }
+  ol.creed li:nth-child(4) { animation-delay: 210ms; }
+  ol.creed li:nth-child(5) { animation-delay: 260ms; }
+
+  @keyframes rise {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .one {
+    display: block;
+    font-family: var(--font-serif);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent-gold);
+    letter-spacing: 0.06em;
+    margin-bottom: var(--space-sm);
+  }
+
+  .line {
+    font-family: var(--font-serif);
+    font-size: clamp(19px, 3.2vw, 27px);
+    font-weight: 600;
+    line-height: 1.65;
+    letter-spacing: -0.015em;
+    color: var(--text-primary);
+    /* 낱말이 어절 중간에서 끊기지 않도록 */
+    word-break: keep-all;
+  }
+  .line .role {
+    color: var(--text-secondary);
+    font-weight: 400;
+  }
+
+  /* ── 꼬리말 ── */
+  footer.creed-foot {
+    margin-top: var(--space-4xl);
+    padding-top: var(--space-2xl);
+    border-top: 1px solid var(--border-subtle);
+    text-align: center;
+  }
+  .origin {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    max-width: 52ch;
+    margin: 0 auto;
+    word-break: keep-all;
+  }
+  .org {
+    margin-top: var(--space-lg);
+    font-family: var(--font-serif);
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  /* ── 물음 ── */
+  /* 신조는 세운 것, 물음은 열어둔 것 — 세리프 대신 본문체로 낮춰 대비 */
+  .questions {
+    margin-top: var(--space-3xl);
+    padding: var(--space-3xl) var(--space-2xl);
+    background: var(--bg-accent);
+    border: 1px dashed var(--border-medium);
+  }
+
+  .q-head {
+    text-align: center;
+    margin-bottom: var(--space-2xl);
+  }
+  .q-head h2 {
+    font-family: var(--font-serif);
+    font-size: clamp(20px, 3.4vw, 26px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    word-break: keep-all;
+  }
+  .q-note {
+    margin-top: var(--space-sm);
+    font-size: 14px;
+    color: var(--text-muted);
+    word-break: keep-all;
+  }
+
+  ol.q-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    max-width: 62ch;
+    margin: 0 auto;
+  }
+  ol.q-list li {
+    display: flex;
+    gap: var(--space-md);
+    align-items: baseline;
+  }
+  .q-num {
+    flex-shrink: 0;
+    font-family: var(--font-serif);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent-warm);
+  }
+  .q-line {
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--text-secondary);
+    word-break: keep-all;
+  }
+
+  /* ── 인쇄: 게시용 A4 ── */
+  @media print {
+    body { background: #fff; background-image: none; }
+    .topbar { display: none; }
+    .plaque { margin: 0; padding: 0; }
+    .plaque-inner {
+      border: none; box-shadow: none;
+      border-top: 3px solid #7a5c3e;
+      padding: 24pt 0;
+    }
+    ol.creed li { opacity: 1; transform: none; animation: none; }
+    .line { font-size: 17pt; }
+    h1 { font-size: 26pt; }
+    /* 신조와 물음은 각각 한 장으로 */
+    .questions {
+      page-break-before: always;
+      background: none;
+      border: none;
+      border-top: 2px solid #7a5c3e;
+      padding: 24pt 0;
+      margin-top: 0;
+    }
+    .q-line { font-size: 12pt; }
+  }
+
+  /* ── 모바일 ── */
+  @media (max-width: 767px) {
+    .plaque-inner { padding: var(--space-2xl) var(--space-lg); }
+    ol.creed { gap: var(--space-xl); }
+    ol.creed li { padding-left: var(--space-lg); }
+    header.creed-head { margin-bottom: var(--space-2xl); }
+    .questions { padding: var(--space-2xl) var(--space-lg); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    ol.creed li {
+      opacity: 1;
+      transform: none;
+      animation: none;
+    }
+    .back-link { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">본문으로 건너뛰기</a>
+
+<div class="topbar">
+  <a href="/" class="back-link">
+    <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" focusable="false">
+      <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L9.06 10l3.71 3.71a.75.75 0 11-1.06 1.06l-4.25-4.25a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
+    </svg>
+    주민운동교육원 홈
+  </a>
+</div>
+
+<main id="main" class="plaque">
+  <div class="plaque-inner">
+
+    <header class="creed-head">
+      <p class="eyebrow">대전 주민조직가 기초과정 5기</p>
+      <h1>주민조직가 행동신조</h1>
+      <p class="subtitle">과정종합 워크숍 · 2026년 7월 15일</p>
+    </header>
+
+    <ol class="creed">
+      <li>
+        <span class="one">하나.</span>
+        <p class="line"><span class="role">나는 주민조직가로서</span> 주민을 있는 그대로 본다</p>
+      </li>
+      <li>
+        <span class="one">하나.</span>
+        <p class="line"><span class="role">나는 주민조직가로서</span> 주민이 주체임을 믿는다</p>
+      </li>
+      <li>
+        <span class="one">하나.</span>
+        <p class="line"><span class="role">나는 주민조직가로서</span> 주민의 장점을 찾아 강점으로 잇는다</p>
+      </li>
+      <li>
+        <span class="one">하나.</span>
+        <p class="line"><span class="role">나는 주민조직가로서</span> 주민과 만나 서로 배운다</p>
+      </li>
+      <li>
+        <span class="one">하나.</span>
+        <p class="line"><span class="role">나는 주민조직가로서</span> 주민의 변화 과정을 인내하며 지지한다</p>
+      </li>
+    </ol>
+
+    <footer class="creed-foot">
+      <p class="origin">
+        이 다섯 조는 기초과정 5기 훈련생들이 과정종합 워크숍에서
+        각자 적어 온 실천 활동과 원칙을 함께 추려 세운 것이다.
+      </p>
+      <p class="org">대전주민운동교육원협동조합</p>
+    </footer>
+
+  </div>
+
+  <section class="questions" aria-labelledby="q-head">
+    <header class="q-head">
+      <h2 id="q-head">대전 5기 주민조직가의 물음</h2>
+      <p class="q-note">신조가 딛고 선 자리에서, 아직 답하지 못한 것들</p>
+    </header>
+
+    <ol class="q-list">
+      <li>
+        <span class="q-num">하나.</span>
+        <p class="q-line">주민이 주체로 서는 데 걸리는 시간과, 자활 현장이 요구하는 당장의 자립 성과. 이 간극을 어떻게 좁힐 것인가?</p>
+      </li>
+      <li>
+        <span class="q-num">둘.</span>
+        <p class="q-line">주민과 주민지도자는 주민조직가인 나의 권한과 역할을 무엇이라 여기는가?</p>
+      </li>
+      <li>
+        <span class="q-num">셋.</span>
+        <p class="q-line">자활사업은 참여주민이 탈수급하고 자립하도록 돕는 사업인가, 지금의 자활 일자리 안에서 생활을 안정되게 이어가도록 받치는 사업인가?</p>
+      </li>
+      <li>
+        <span class="q-num">넷.</span>
+        <p class="q-line">나는 어느새 '도와주는 사람'의 자리에 선다. '주민 만나기'처럼 일상에서 몸으로 익히는 또 다른 실천은 무엇인가?</p>
+      </li>
+    </ol>
+  </section>
+</main>
+
+</body>
+</html>

@@ -72,6 +72,12 @@ def index():
     return send_from_directory(STATIC_DIR, "index.html")
 
 
+@app.route("/creed")
+@app.route("/creed/")
+def creed():
+    return send_from_directory(STATIC_DIR, "creed.html")
+
+
 @app.route("/<path:path>")
 def static_files(path):
     return send_from_directory(STATIC_DIR, path)
