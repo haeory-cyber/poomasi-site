@@ -6,7 +6,7 @@ from pathlib import Path
 
 import requests
 from dotenv import load_dotenv
-from flask import Flask, Response, jsonify, request, send_from_directory
+from flask import Flask, Response, abort, jsonify, request, send_from_directory
 
 # ── ENV ──
 _env_path = Path(__file__).resolve().parent.parent.parent / ".env"
@@ -29,9 +29,12 @@ HEADERS = {
     "Content-Type": "application/json",
 }
 
-STATIC_DIR = Path(__file__).resolve().parent
+# 2026-07-17: 화면(HTML)은 데카가 push하는 sakyowon-site 레포 체크아웃에서 서빙 (sakyowon-sync.timer가 1분 주기 git pull)
+STATIC_DIR = Path("/home/haeory/poomasi/sakyowon-site")
 
-app = Flask(__name__, static_folder=str(STATIC_DIR), static_url_path="")
+# static_folder=None 필수 — Flask 내장 정적 라우트가 생기면 아래 차단 라우트를 가로채
+# PRIVATE 레포 문서(우편함 md 등)가 그대로 노출된다 (2026-07-17 배달 검증에서 발견)
+app = Flask(__name__, static_folder=None)
 
 
 # ── HELPERS ──
@@ -53,6 +56,9 @@ def index():
 
 @app.route("/<path:path>")
 def static_files(path):
+    # PRIVATE 레포 내부 문서(우편함·기획 md·닷파일·스크립트) 웹 노출 차단
+    if path.endswith((".md", ".py", ".bak")) or path.startswith((".", "자동화기획/")) or "/." in path:
+        abort(404)
     return send_from_directory(STATIC_DIR, path)
 
 
