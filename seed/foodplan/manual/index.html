@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>직원 사용 매뉴얼 — 푸드플랜 작업 큐</title>
+<meta name="description" content="품앗이 로컬푸드 지족점 푸드플랜 작업 큐 직원 사용 매뉴얼.">
+<link rel="stylesheet" href="/foodplan/foodplan.css?v=20260703b">
+<style>
+  .topbar {
+    position: sticky; top: 0; z-index: var(--z-nav);
+    background: var(--green-800); color: #fff;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; box-shadow: var(--shadow-1);
+  }
+  .topbar .brand { font-size: 16px; font-weight: 700; letter-spacing: -.02em; }
+  .topbar .brand small { display:block; font-size: 11.5px; font-weight: 500; opacity: .8; letter-spacing: 0; }
+  .topbar a.to-app { background: rgba(255,255,255,.15); color: #fff; border-radius: var(--r-sm); padding: 7px 12px; font-size: 13px; font-weight: 600; text-decoration: none; }
+
+  .wrap { max-width: 720px; margin: 0 auto; padding: 20px 16px 80px; }
+
+  .lead { padding: 18px 18px; margin-bottom: 8px; }
+  .lead h1 { font-size: 21px; color: var(--green-900); margin-bottom: 8px; letter-spacing: -.02em; }
+  .lead p { margin: 0; font-size: 14.5px; color: var(--ink-2); }
+
+  /* 흐름 다이어그램 */
+  .flow { display: flex; align-items: stretch; gap: 6px; margin: 16px 0 4px; flex-wrap: wrap; }
+  .flow .node {
+    flex: 1; min-width: 88px; text-align: center; padding: 12px 6px;
+    background: var(--green-050); border: 1px solid var(--green-100); border-radius: var(--r-sm);
+  }
+  .flow .node .who { display: block; font-size: 11px; color: var(--green-700); font-weight: 700; margin-bottom: 3px; }
+  .flow .node .what { font-size: 13px; font-weight: 600; color: var(--ink); line-height: 1.35; }
+  .flow .arr { align-self: center; color: var(--leaf); font-weight: 800; font-size: 18px; }
+
+  /* 단계 카드 */
+  .step { margin-top: 18px; padding: 0; overflow: hidden; }
+  .step > .head {
+    display: flex; align-items: center; gap: 12px; padding: 15px 18px;
+    background: var(--surface-2); border-bottom: 1px solid var(--line);
+  }
+  .step > .head .num {
+    flex: none; width: 30px; height: 30px; border-radius: 50%;
+    background: var(--green-800); color: #fff; font-weight: 800; font-size: 15px;
+    display: flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums;
+  }
+  .step > .head h2 { font-size: 16.5px; color: var(--green-900); }
+  .step > .head .when { margin-left: auto; font-size: 12px; color: var(--ink-3); font-weight: 600; }
+  .step > .body { padding: 16px 18px; }
+  .step > .body p { margin: 0 0 10px; font-size: 14.5px; color: var(--ink-2); }
+  .step > .body p:last-child { margin-bottom: 0; }
+
+  ol.howto { margin: 0; padding-left: 0; list-style: none; counter-reset: h; }
+  ol.howto > li {
+    position: relative; padding: 9px 0 9px 30px; font-size: 14.5px; color: var(--ink);
+    border-bottom: 1px dashed var(--line); counter-increment: h;
+  }
+  ol.howto > li:last-child { border-bottom: none; }
+  ol.howto > li::before {
+    content: counter(h); position: absolute; left: 0; top: 9px;
+    width: 20px; height: 20px; border-radius: 50%; background: var(--green-100); color: var(--green-800);
+    font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center;
+  }
+  ol.howto b { color: var(--green-800); }
+
+  .btn-tag {
+    display: inline-flex; align-items: center; height: 26px; padding: 0 11px; border-radius: var(--r-sm);
+    font-size: 13px; font-weight: 700; vertical-align: middle; white-space: nowrap;
+  }
+  .btn-tag.primary { background: var(--green-800); color: #fff; }
+  .btn-tag.ghost { background: var(--surface); color: var(--green-800); border: 1.5px solid var(--line-2); }
+  .btn-tag.danger { background: var(--danger); color: #fff; }
+
+  .callout {
+    display: flex; gap: 10px; align-items: flex-start; margin-top: 12px;
+    padding: 12px 14px; border-radius: var(--r-sm); font-size: 13.5px; line-height: 1.55;
+  }
+  .callout svg { flex: none; width: 18px; height: 18px; margin-top: 1px; }
+  .callout.warn { background: #fff8e6; border: 1px solid #f0d98a; color: #7a5a00; }
+  .callout.warn svg { color: #b8860b; }
+  .callout.info { background: var(--green-050); border: 1px solid var(--green-100); color: var(--green-900); }
+  .callout.info svg { color: var(--green-700); }
+  .callout b { font-weight: 800; }
+
+  /* 할인율 표 */
+  table.disc { width: 100%; border-collapse: collapse; margin: 4px 0 2px; font-size: 14px; }
+  table.disc th, table.disc td { padding: 9px 10px; text-align: left; border-bottom: 1px solid var(--line); }
+  table.disc th { font-size: 12.5px; color: var(--ink-3); font-weight: 700; background: var(--surface-2); }
+  table.disc td b { font-size: 16px; color: var(--green-800); font-variant-numeric: tabular-nums; }
+  table.disc tr:last-child td { border-bottom: none; }
+
+  .section-title { font-size: 13px; font-weight: 800; color: var(--green-700); letter-spacing: .04em; margin: 34px 0 2px; text-transform: uppercase; }
+
+  /* FAQ */
+  .faq { margin-top: 10px; }
+  .faq details { border-bottom: 1px solid var(--line); }
+  .faq summary { padding: 14px 2px; font-size: 15px; font-weight: 600; color: var(--ink); cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 10px; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; color: var(--green-700); font-weight: 800; font-size: 20px; line-height: 1; }
+  .faq details[open] summary::after { content: "−"; }
+  .faq .a { padding: 0 2px 16px; font-size: 14px; color: var(--ink-2); line-height: 1.6; }
+
+  .foot { margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--ink-3); text-align: center; line-height: 1.7; }
+  .foot a { color: var(--green-700); }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">직원 사용 매뉴얼<small>푸드플랜 작업 큐 · 지족점</small></div>
+  <a class="to-app" href="/foodplan/">작업 큐 열기 →</a>
+</header>
+
+<main class="wrap">
+
+  <section class="card lead">
+    <h1>임박·못난이·과잉 농산물, 버리지 말고 회원에게</h1>
+    <p>매장에 오래 진열됐거나(임박), 모양이 못난이거나, 한꺼번에 많이 들어온(과잉) 농산물을 <b>할인가로 등록</b>하면, 알림을 신청한 회원에게 소식이 가고 회원이 <b>예약·픽업</b>합니다. 안 팔린 건 폐기 무게를 기록해 사업 성과(절감·탄소)로 남깁니다. 이 화면은 그 하루 흐름을 안내합니다.</p>
+  </section>
+
+  <div class="flow">
+    <div class="node"><span class="who">농가 / 매장</span><span class="what">할인 상품<br>등록</span></div>
+    <span class="arr">→</span>
+    <div class="node"><span class="who">직원 → 회원</span><span class="what">알림<br>발송</span></div>
+    <span class="arr">→</span>
+    <div class="node"><span class="who">회원</span><span class="what">예약</span></div>
+    <span class="arr">→</span>
+    <div class="node"><span class="who">직원</span><span class="what">집품·<br>픽업</span></div>
+    <span class="arr">→</span>
+    <div class="node"><span class="who">직원</span><span class="what">안 팔린 건<br>폐기 기록</span></div>
+  </div>
+
+  <!-- ── 준비: 로그인 ── -->
+  <div class="section-title">시작하기</div>
+  <article class="card step">
+    <div class="head"><span class="num">0</span><h2>로그인</h2></div>
+    <div class="body">
+      <ol class="howto">
+        <li>폰이나 매장 PC 브라우저에서 <b>seed.poomasi.org/foodplan/</b> 접속</li>
+        <li>매장 직원 <b>이메일·비밀번호</b>로 로그인 (마감결산·출퇴근앱과 같은 매장 계정)</li>
+        <li>한 번 로그인하면 로그아웃 전까지 유지됩니다</li>
+      </ol>
+      <div class="callout info">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01" stroke-linecap="round"/></svg>
+        <span>로그인이 안 되거나, 못난이·과잉 등록 때 <b>농가 검색이 안 나오면</b> 매장 관리자에게 계정 권한을 확인해 달라고 하세요.</span>
+      </div>
+    </div>
+  </article>
+
+  <!-- ── 화면 구성 ── -->
+  <article class="card step">
+    <div class="head"><span class="num">·</span><h2>화면은 이렇게 생겼습니다</h2></div>
+    <div class="body">
+      <p>작업 큐는 <b>위에서 아래로 4칸</b>이고, 화면 맨 아래에 오늘 숫자 요약바가 있습니다.</p>
+      <ol class="howto">
+        <li><b>접수 대기</b> — 자동 감지되거나 농가가 올린 품목. 내가 확인해서 등록/반려</li>
+        <li><b>등록됨 · 알림 대기</b> — 등록 끝난 품목. 회원에게 알림 보내기</li>
+        <li><b>예약됨 · 집품/픽업</b> — 회원이 예약한 품목. 챙겨두고 픽업 처리</li>
+        <li><b>마감 처리</b> — 안 팔린 품목 폐기(무게 입력)</li>
+      </ol>
+      <div class="callout info">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18" stroke-linecap="round"/></svg>
+        <span>맨 아래 요약바 숫자 <b>등록·알림·예약·픽업·폐기kg</b>은 <b>오늘 하루</b> 실적입니다.</span>
+      </div>
+    </div>
+  </article>
+
+  <!-- ── 하루 순서 ── -->
+  <div class="section-title">하루 작업 순서</div>
+
+  <article class="card step">
+    <div class="head"><span class="num">1</span><h2>상품 등록</h2><span class="when">아침 / 수시</span></div>
+    <div class="body">
+      <p><span class="btn-tag ghost">＋ 품목 직접 등록 / 농가 접수 대행</span> 버튼을 누르고 아래를 채웁니다.</p>
+      <ol class="howto">
+        <li>구분 선택 — <b>임박 · 못난이 · 과잉출하</b> 중 하나</li>
+        <li><b>임박</b>이면 → 진열 경과일을 고르면 할인율이 자동으로 정해집니다 (아래 표)</li>
+        <li><b>못난이·과잉</b>이면 → <b>농가를 검색해 선택</b>(필수), 할인율 30~50% 사이로 조절</li>
+        <li>품목명(필수)·중량(kg)·정가 입력 → <span class="btn-tag primary">등록하기</span></li>
+      </ol>
+
+      <table class="disc">
+        <tr><th>임박 진열 경과</th><th>기본 할인</th></tr>
+        <tr><td>1일</td><td><b>15%</b></td></tr>
+        <tr><td>2일</td><td><b>30%</b></td></tr>
+        <tr><td>3일 이상</td><td><b>50%</b></td></tr>
+      </table>
+      <div class="callout info">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20" stroke-linecap="round"/></svg>
+        <span><b>오래될수록 더 많이 깎습니다.</b> 슬라이더로 그날 상황에 맞게 조정할 수 있어요.</span>
+      </div>
+      <div class="callout info">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span><b>접수 대기</b> 칸에 품목이 이미 떠 있으면(자동 감지/농가 접수), <span class="btn-tag primary">확인·등록</span>을 누르면 바로 등록되고, 아니면 <span class="btn-tag ghost">반려</span>합니다.</span>
+      </div>
+    </div>
+  </article>
+
+  <article class="card step">
+    <div class="head"><span class="num">2</span><h2>회원에게 알림</h2><span class="when">등록 직후</span></div>
+    <div class="body">
+      <p><b>등록됨 · 알림 대기</b> 칸에서 품목의 <span class="btn-tag primary">알림 발송</span>을 누르면, 회원에게 나갈 <b>문구와 대상 인원</b> 미리보기가 뜹니다.</p>
+      <div class="callout warn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L14.7 3.9a2 2 0 00-3.4 0z" stroke-linejoin="round"/><path d="M12 9v4m0 4h.01" stroke-linecap="round"/></svg>
+        <span><b>지금은 미리보기만 됩니다.</b> 실제 문자·카톡 발송은 관리자 승인(카카오 채널 심사) 후 개통 예정이에요. 그전까지는 문구·대상 확인용으로만 쓰고, 회원 안내는 매장에서 직접 해 주세요.</span>
+      </div>
+    </div>
+  </article>
+
+  <article class="card step">
+    <div class="head"><span class="num">3</span><h2>예약 확인 · 집품 · 픽업</h2><span class="when">회원이 예약하면</span></div>
+    <div class="body">
+      <p>회원이 <b>오늘의 알뜰 농산물</b> 페이지에서 예약하면, <b>예약됨 · 집품/픽업</b> 칸에 <b>예약자 이름 · 픽업 시간대 · 수량</b>이 자동으로 뜹니다.</p>
+      <ol class="howto">
+        <li>예약된 상품을 미리 챙겨(집품) 픽업 시간대에 맞춰 준비</li>
+        <li>회원이 매장에 와서 받아가면 → <span class="btn-tag primary">픽업 완료</span></li>
+      </ol>
+      <div class="callout info">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7L9 18l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>수령은 <b>매장 픽업만</b> 됩니다(배송 없음). 픽업 시간대는 오전 10–12 / 낮 12–15 / 오후 15–18 / 저녁 18–20 네 구간입니다.</span>
+      </div>
+    </div>
+  </article>
+
+  <article class="card step">
+    <div class="head"><span class="num">4</span><h2>마감 · 폐기 기록</h2><span class="when">마감 때</span></div>
+    <div class="body">
+      <p>끝까지 안 팔린 품목은 폐기 처리합니다.</p>
+      <ol class="howto">
+        <li>등록·알림 칸의 품목은 그 자리에서 <span class="btn-tag ghost">미판매 폐기</span></li>
+        <li>이미 만료된 건 <b>마감 처리</b> 칸에서 <span class="btn-tag danger">폐기</span></li>
+        <li><b>폐기 무게(kg)를 입력</b>해야 확정됩니다 (필수)</li>
+      </ol>
+      <div class="callout warn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span><b>폐기 무게는 반드시 입력하세요.</b> 이 숫자가 곧 사업의 <b>음식물 절감량·탄소 저감</b> 성과 근거가 됩니다. 정확한 저울값이 없으면 눈대중이라도 적어 주세요.</span>
+      </div>
+    </div>
+  </article>
+
+  <!-- ── 회원 모으기 ── -->
+  <div class="section-title">회원 모으기</div>
+  <article class="card step">
+    <div class="head"><span class="num">♥</span><h2>알림 신청 회원이 많을수록 잘 팔립니다</h2></div>
+    <div class="body">
+      <p>알림을 신청한 회원이 있어야 등록한 상품이 팔립니다. 매장에 붙은 <b>QR 포스터</b>로 회원을 모으세요.</p>
+      <ol class="howto">
+        <li>회원이 QR을 찍으면 <b>알림 신청</b> 페이지(<b>/foodplan/join</b>)로 이동</li>
+        <li>이름·전화번호·동의만 하면 신청 완료 (중복 신청은 자동 차단)</li>
+        <li>계산대에서 "알뜰 농산물 알림 받으세요" 한마디가 큰 도움이 됩니다</li>
+      </ol>
+    </div>
+  </article>
+
+  <!-- ── FAQ ── -->
+  <div class="section-title">자주 묻는 것</div>
+  <div class="faq card" style="padding: 4px 16px;">
+    <details><summary>농가 검색이 안 떠요</summary><div class="a">못난이·과잉 등록은 농가를 지정해야 하고, 그러려면 계정에 매장 권한이 있어야 합니다. 검색해도 결과가 없으면 매장 관리자에게 계정 권한 확인을 요청하세요.</div></details>
+    <details><summary>할인율이 왜 못난이·과잉은 30%부터인가요?</summary><div class="a">사업 기준상 못난이·과잉은 최소 30% 할인으로 정해져 있습니다. 임박은 진열 일수에 따라 15%(1일)부터 시작합니다.</div></details>
+    <details><summary>알림 발송을 눌렀는데 문자가 안 가요</summary><div class="a">정상입니다. 실제 발송은 관리자 승인(카카오 채널 심사) 후 개통됩니다. 지금은 문구·대상 미리보기까지만 됩니다.</div></details>
+    <details><summary>폐기 무게를 꼭 넣어야 하나요?</summary><div class="a">네. 폐기 무게가 사업 성과(절감량·탄소 저감) 근거라 필수입니다. 저울값이 없으면 눈대중이라도 입력해 주세요.</div></details>
+    <details><summary>회원이 배송으로 받을 수 있나요?</summary><div class="a">아니요. 수령은 매장 픽업만 가능합니다.</div></details>
+  </div>
+
+  <div class="foot">
+    품앗이 로컬푸드 지족점 · 푸드플랜 효과 실증 사업<br>
+    문의 042-824-0131 · <a href="/foodplan/">작업 큐 열기</a>
+  </div>
+
+</main>
+</body>
+</html>
