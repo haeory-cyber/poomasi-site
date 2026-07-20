@@ -16,8 +16,9 @@
   --gam-deep: #96500f;       /* 진한 감(텍스트용 대비 확보) */
   --ssuk: #4a5d43;           /* 쑥빛(보조) */
   --line: rgba(38, 34, 27, 0.14);   /* 먹 괘선 */
-  --serif: "Noto Serif KR", serif;
-  --sans: "Noto Sans KR", sans-serif;
+  /* 라틴 우선 → 한글은 KR로 자동 폴백. 한국어 페이지는 라틴 폰트를 로드하지 않으므로 영향 없음 */
+  --serif: "Noto Serif", "Noto Serif KR", serif;
+  --sans: "Noto Sans", "Noto Sans KR", sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -525,4 +526,95 @@ body::after {
   .solidarity-landing .si-hero .si-hero-inner { padding: 2.5rem 1.2rem; }
   .solidarity-landing .si-section { padding: 4.5rem 1.25rem; }
   .solidarity-landing .si-ecosystem .si-eco-grid { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   다국어 (2026-07-20) — 영문판 /en/ 추가에 따른 배관
+   한국어 페이지에도 동일 클래스 사용. 기존 규칙 변경 없이 추가만.
+   ============================================================ */
+
+/* 언어 전환 — 우상단 고정.
+   ⚠ .si-graph-controls(줌 버튼, 42px 폭)가 right:1rem에 이미 있으므로
+   그 왼쪽으로 비켜서 배치한다. 겹치면 줌 버튼이 가려진다. */
+.solidarity-landing .si-lang {
+  position: fixed;
+  top: 1rem;
+  right: 4.6rem;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  padding: 0.4rem 0.85rem;
+  background: rgba(250, 245, 234, 0.82);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+}
+.solidarity-landing .si-lang a {
+  color: var(--meok-faint);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+.solidarity-landing .si-lang a:hover,
+.solidarity-landing .si-lang a:focus-visible {
+  color: var(--gam-deep);
+  border-bottom-color: var(--gam-deep);
+}
+.solidarity-landing .si-lang b {
+  color: var(--meok-deep);
+  font-weight: 500;
+}
+.solidarity-landing .si-lang span { color: var(--line); }
+
+/* 링크 대상 언어 표시 배지 — 영문 페이지에서 한국어 사이트로 나갈 때 */
+.solidarity-landing .si-lang-tag {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.05rem 0.45rem;
+  font-family: var(--sans);
+  font-size: 0.72em;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--meok-faint);
+  background: var(--hanji-deep);
+  border-radius: 999px;
+  vertical-align: 0.1em;
+}
+
+/* 꼬리말 */
+.solidarity-landing .si-foot {
+  padding-top: 2rem;
+  padding-bottom: 4rem;
+  border-top: 1px solid var(--line);
+}
+.solidarity-landing .si-foot .si-note { margin-top: 0; }
+.solidarity-landing .si-foot a { color: var(--gam-deep); }
+
+@media (max-width: 768px) {
+  .solidarity-landing .si-lang {
+    top: 0.65rem;
+    right: 4rem;
+    font-size: 0.8rem;
+    padding: 0.3rem 0.7rem;
+  }
+}
+
+/* 영문 히어로 — 한글 4글자("연대지능") 기준 대자 크기는 영어 장문 단어를 넘치게 한다.
+   "Intelligence" 한 단어가 컨테이너를 초과하면 단어 중간에서 끊긴다. 영문에서만 축소·비분절. */
+html[lang="en"] .solidarity-landing .si-hero h1 {
+  font-size: clamp(2.4rem, 7vw, 4.6rem);
+  letter-spacing: 0.01em;
+  line-height: 1.08;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+}
+html[lang="en"] .solidarity-landing .si-hero .si-hero-inner { max-width: 46rem; }
+html[lang="en"] .solidarity-landing .si-hero .si-hero-sub { max-width: 32rem; }
+
+@media (max-width: 480px) {
+  html[lang="en"] .solidarity-landing .si-hero .si-hero-inner { padding-left: 0.9rem; padding-right: 0.9rem; }
 }

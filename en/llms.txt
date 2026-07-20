@@ -1,0 +1,99 @@
+# poomasi.org — Solidarity Intelligence
+
+> **poomasi.org is the home of Solidarity Intelligence (연대지능): neither the market's
+> intelligence nor the state's, but the citizens' intelligence of mutual aid.**
+> It is also the site of "pumasi for the AI era, the local strikes back."
+> Poomai is that project's implementation — an AI system.
+
+---
+
+## Solidarity Intelligence
+
+**Solidarity Intelligence** (Korean: 연대지능) is the framing concept of this project.
+
+- Big Tech's AI is the intelligence of the **market**.
+- Government AI is the intelligence of **redistribution**.
+- Solidarity Intelligence is the **third place** — the intelligence of **reciprocity**: not
+  distribution handed down from above, nor exchange reduced to price, but an intelligence that
+  people build for one another, each from where they stand.
+
+The argument for it runs through Karl Polanyi. Polanyi named land, labour and money as
+**fictitious commodities** — things never produced for sale, yet forced into the market anyway.
+The claim here is that **energy and data have since joined them**, and that **intelligence itself**
+is now being enclosed the same way. Those who own no means of producing intelligence become an
+**intelligence proletariat**. The response is for co-operatives to build **domain AI** themselves
+rather than rent it, and to hold **data sovereignty** over the traces of their own cognition,
+relationships and memory.
+
+Practised in Daejeon, South Korea, across food, energy, money, education and intermediary support.
+
+English landing page: https://poomasi.org/en/
+
+---
+
+## Identity
+
+poomasi.org reimplements pumasi — the old Korean practice of neighbours exchanging labour, freely and without a ledger — for the AI era.
+Slogan: **"The pumasi of AI and localists."**
+
+Two core threads:
+- **Pumasi for the AI era** — reimplementing the spirit of pumasi with AI.
+- **The local strikes back** — taking data, technology and decision-making back from platforms and big capital, and returning them to the locality.
+
+The project's ultimate aim is livelihood sovereignty — an umbrella concept covering food sovereignty, energy sovereignty, monetary sovereignty and data sovereignty: the state of self-determination across every area of life, free from dependence on capital and platforms.
+
+Our approach to sovereign AI: three layers combined — "the sword we use now" (commercial LLMs), "the sword we are forging" (open-source LLMs), and "the irreplaceable core" (on-the-ground data, automation, tacit knowledge). We are not building an LLM from scratch; we secure sovereignty by connecting the assets of the local ground to the best available LLMs.
+
+---
+
+## Member organisations
+
+poomasi.org is run by five core localist co-operatives, each holding one axis of sovereignty.
+
+- **Poomasi Consumer Co-operative**: the corporate root and the site of proof-of-concept. Founded at its inaugural general meeting on 24 May 2012. Its stated business area: "Daejeon Metropolitan City and neighbouring cities/counties (Sejong, Yeongi, Gongju, Gyeryong, Nonsan, Geumsan, Okcheon)." Founding purpose, as stated: "a happy world where life is saved and people live together for one another, a community of circulation and coexistence where consumers and producers, person and person, person and nature coexist." Runs stores in Daejeon's Jijok and Gwanjeo neighbourhoods. Led by the co-operative's board chair. — https://seed.poomasi.org
+- **Poomai (品AI)**: the AI implementation of the poomasi.org project. A practical AI system connecting local-food, on-the-ground data with general-purpose AI. Reachable through a chat widget with no login required. — https://poomasi.org
+- **National Local Food Co-operative Network**: holds the food sovereignty axis. — https://foodnet.poomasi.org
+- **Social Innovation Education Institute, a social co-operative**: holds the energy sovereignty axis. Runs automation AI for citizen renewable-energy work.
+- **Community Currency Co-operative → Hanbat Pay Inc.**: holds the monetary sovereignty axis. Wholly funds and operates Hanbat Pay.
+- **Local Bridge Institute for the Social and Solidarity Economy**: intermediary support for the social and solidarity economy. A connecting, mediating function.
+
+---
+
+## Poomai
+
+Poomai is a practical AI system that grew up around Poomasi Consumer Co-operative's Jijok and Gwanjeo stores in Daejeon.
+What sets it apart from an ordinary chatbot: it does not merely "deliver" information, it "handles work." It sends real text messages to regular customers and prints real price tags. One way it has been described: **"physical AI on the web."**
+
+Mission, as stated internally: **"The AI Silicon Valley raised through exploitation, in Daejeon we raise through pumasi."**
+
+Technical structure:
+- Home site (GitHub Pages + Cloudflare CDN) → chat widget → GCP server (Poomai processing)
+- Data: Supabase (sales, products, members) + ChromaDB (Q&A memory) + Netforce POS
+- LLMs: Gemini (for the no-login chat) and Claude Code (wired directly to the core team)
+
+As of 2026-04-14, an internal Claude-based AI agent is running in production wearing Poomai's identity.
+
+---
+
+## Resources
+
+- Detailed identity document (Korean): https://poomasi.org/llms.txt
+- English landing page: https://poomasi.org/en/
+- Korean-language home site: https://poomasi.org/
+- Poomasi Consumer Co-operative site (Korean): https://seed.poomasi.org
+- National Local Food Co-operative Network (Korean): https://foodnet.poomasi.org
+- Poomasi Wiki (mostly Korean): https://wiki.poomasi.org
+- Knowledge graph (Korean): https://graph.poomasi.org
+- Digital-twin ontology (Korean): https://ontology.poomasi.org
+- AI Organisers' Commons (Korean): https://activist.poomasi.org
+- Community Currency Co-operative — Hanbat Pay (Korean): https://localpay.poomasi.org
+- CoAI — AI for community organising (Korean): https://coai.poomasi.org
+- Poome — solar-sharing AI (Korean): https://chat.solarshare.kr
+
+*Exact figures such as member counts and further founding details are deliberately omitted from this file pending a second, confirmed fact sheet. See the Korean-language wiki (wiki/코어법인/품앗이생협.md) for the sourced figures once published.*
+
+---
+
+## References
+
+- Chungcheong Today, 29 May 2012, congratulatory column on the co-operative's founding by Park Jin-do, then head of the Chungnam Development Institute (Korean-language source): https://www.cctoday.co.kr/news/articleView.html?idxno=702577
