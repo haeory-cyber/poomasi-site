@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-04-18",
-  "age_days": 26,
+  "last_updated": "2026-06-30",
+  "age_days": 99,
   "axes": {
     "knowledge": {
       "label": "지식(知)",
@@ -29,14 +29,14 @@
     "tech": {
       "label": "기술(技)",
       "desc": "엔진·API·파인튜닝",
-      "value": 52,
-      "detail": "320건 + 파인튜닝2회"
+      "value": 53,
+      "detail": "327건 + 파인튜닝2회"
     },
     "research": {
       "label": "조사(探)",
       "desc": "검색·지식자기화",
-      "value": 2,
-      "detail": "자기화 10건"
+      "value": 5,
+      "detail": "자기화 25건"
     }
   },
   "milestones": [
@@ -84,7 +84,7 @@
       "label": "지식나무"
     },
     {
-      "value": "320",
+      "value": "327",
       "unit": "건",
       "label": "학습 데이터"
     },
@@ -104,7 +104,7 @@
       "label": "사고 프로토콜"
     },
     {
-      "value": "26",
+      "value": "99",
       "unit": "일",
       "label": "성장 기간"
     }
