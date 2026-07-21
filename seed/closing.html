@@ -326,16 +326,20 @@ select.form-input {
   position: fixed;
   bottom: 1.5rem;
   left: 50%;
-  transform: translateX(-50%) translateY(100px);
+  transform: translateX(-50%) translateY(120px);
   background: rgba(30,21,16,0.97);
   border: 1px solid rgba(196,128,58,0.4);
   color: var(--cream);
-  padding: 0.65rem 1.25rem;
+  padding: 0.7rem 1.1rem;
   border-radius: 8px;
   font-size: 0.95rem;
+  line-height: 1.45;
   z-index: 9999;
   transition: transform 0.3s ease;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: keep-all;
+  max-width: calc(100vw - 1.5rem);
+  text-align: center;
 }
 #toast.show { transform: translateX(-50%) translateY(0); }
 
@@ -412,14 +416,22 @@ select.form-input {
 }
 .add-confirm-btn:hover { opacity: 0.85; }
 .preview-action-btn {
-  padding: 0.4rem 0.85rem;
+  padding: 0.55rem 0.9rem;
+  min-height: 46px;
   border: none;
   border-radius: 6px;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
+  line-height: 1.35;
   font-weight: 600;
   font-family: 'Noto Sans KR', sans-serif;
   cursor: pointer;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: keep-all;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
 }
 .btn-edit   { background: rgba(196,128,58,0.15); border: 1px solid rgba(196,128,58,0.4); color: var(--amber); }
 .btn-edit:hover { background: rgba(196,128,58,0.25); }
@@ -971,7 +983,7 @@ async function saveSettlement() {
   }
   const { data, error } = await sb
     .from('daily_settlement')
-    .upsert(payload, { on_conflict: 'store,date' })
+    .upsert(payload, { onConflict: 'store,date' })
     .select();
 
   btn.disabled = false;
@@ -1027,7 +1039,7 @@ function showPreview(r) {
         '<button onclick="copyViewLink(\'' + viewUrl + '\')" style="padding:0.35rem 0.7rem;background:var(--amber);border:none;border-radius:5px;color:#0f0b07;font-size:0.82rem;font-weight:600;cursor:pointer;white-space:nowrap;">링크 복사</button>' +
       '</div>' +
       '<div style="display:flex;gap:0.5rem;">' +
-        '<button class="preview-action-btn btn-edit" onclick="scrollToFormTop()">이어서 수정하기 <span style="font-size:0.75rem;font-weight:400;opacity:0.75;">(덮어쓰기됩니다)</span></button>' +
+        '<button class="preview-action-btn btn-edit" onclick="scrollToFormTop()">▲ 이어서 수정하기<span style="display:block;width:100%;font-size:0.78rem;font-weight:400;opacity:0.8;margin-top:0.15rem;">(같은 매장·날짜에 덮어쓰기됩니다)</span></button>' +
         '<button class="preview-action-btn btn-addsale" onclick="toggleAddSalePanel()">+ 추가 매출</button>' +
       '</div>' +
       '<div id="add-sale-panel">' +
