@@ -14,8 +14,10 @@ from flask import Flask, Response, abort, jsonify, request, send_from_directory
 _env_path = Path(__file__).resolve().parent.parent.parent / ".env"
 load_dotenv(_env_path, override=True)
 
-SUPABASE_URL = os.environ["SUPABASE_URL"]
-SUPABASE_KEY = os.environ["SUPABASE_SECRET_KEY"]  # service_role key
+# 2026-07-22: 사교원 데이터는 별도 Supabase 프로젝트(sakyowon)로 분리 —
+# 품앗이 중앙 DB(로컬푸드·POS·조합원)와 키 자체가 다르다. anon 키 + INSERT 전용 RLS.
+SUPABASE_URL = os.environ["SAKYOWON_SUPABASE_URL"]
+SUPABASE_KEY = os.environ["SAKYOWON_SUPABASE_ANON_KEY"]
 
 # Anthropic API key (for AI proxy)
 _ANTHROPIC_KEY = None
@@ -42,11 +44,10 @@ app = Flask(__name__, static_folder=None)
 # ── HELPERS ──
 
 def sb_post(table, data):
-    """Supabase REST INSERT."""
-    h = {**HEADERS, "Prefer": "return=representation"}
+    """Supabase REST INSERT (anon 키는 SELECT 정책이 없어 return=minimal 필수)."""
+    h = {**HEADERS, "Prefer": "return=minimal"}
     r = requests.post(f"{SUPABASE_URL}/rest/v1/{table}", headers=h, json=data)
     r.raise_for_status()
-    return r.json()
 
 
 # IP당 분당 호출 제한 (단일 프로세스 인메모리 — 이 서버 규모엔 충분)
@@ -126,8 +127,8 @@ def create_inquiry():
         v = (data.get(k) or "").strip()
         if v:
             row[k] = v
-    result = sb_post("sakyowon_inquiries", row)
-    return jsonify(result), 201
+    sb_post("sakyowon_inquiries", row)
+    return jsonify({"ok": True}), 201
 
 
 # ── FEEDBACK API (2026-07-22 LONLO 사이트 개선의견) ──
