@@ -41,6 +41,25 @@ table.kv tr { border-bottom:1px solid var(--border); }
 .btn { flex:1; padding:0.7rem 1rem; border-radius:8px; font-size:0.88rem; font-family:'Noto Sans KR',sans-serif; cursor:pointer; border:1px solid rgba(184,168,138,0.4); background:transparent; color:var(--dust); transition:all 0.15s; text-decoration:none; text-align:center; }
 .btn:hover { border-color:var(--amber); color:var(--amber); }
 .btn-edit { background:linear-gradient(135deg,var(--amber),#a06828); border:none; color:#0f0b07; font-weight:700; }
+
+/* ── LOGIN ───────────────────────────────────────────── */
+#login-screen { display:none; align-items:center; justify-content:center; min-height:60vh; padding:2rem 1rem; }
+.login-box { width:100%; max-width:400px; margin:0 auto; background:rgba(30,21,16,0.9); border:1px solid var(--border); border-radius:10px; padding:2rem 1.5rem; position:relative; }
+.login-box::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius:10px 10px 0 0; background:linear-gradient(to right,var(--amber),var(--green)); }
+.login-brand { font-family:'Noto Serif KR',serif; font-size:0.7rem; letter-spacing:0.25em; color:var(--amber); text-align:center; margin-bottom:1rem; }
+.login-title { font-family:'Noto Serif KR',serif; font-size:1.3rem; font-weight:700; color:var(--white); text-align:center; margin-bottom:0.4rem; }
+.login-sub { font-size:0.78rem; color:var(--dust); text-align:center; line-height:1.5; margin-bottom:1.6rem; }
+.form-group { margin-bottom:1rem; }
+.form-label { display:block; font-size:0.7rem; letter-spacing:0.1em; color:var(--dust); margin-bottom:0.4rem; }
+.form-input { width:100%; background:rgba(15,11,7,0.8); border:1px solid var(--border); border-radius:6px; color:var(--cream); padding:0.7rem 0.85rem; font-family:'Noto Sans KR',sans-serif; font-size:0.88rem; outline:none; transition:border-color 0.2s; }
+.form-input:focus { border-color:var(--amber); }
+.btn-login { width:100%; background:var(--amber); color:var(--earth); border:none; border-radius:8px; padding:0.8rem; font-family:'Noto Serif KR',serif; font-size:0.95rem; font-weight:700; cursor:pointer; letter-spacing:0.05em; margin-top:0.4rem; transition:background 0.2s; }
+.btn-login:hover { background:var(--amber-light); }
+.btn-login:disabled { opacity:0.5; cursor:not-allowed; }
+.login-error { margin-top:0.9rem; padding:0.65rem 0.85rem; background:rgba(184,58,42,0.15); border:1px solid rgba(184,58,42,0.3); border-radius:6px; color:#e07070; font-size:0.78rem; display:none; }
+.btn-logout { background:none; border:1px solid var(--border); color:var(--dust); padding:0.3rem 0.75rem; border-radius:6px; font-size:0.7rem; cursor:pointer; letter-spacing:0.05em; transition:all 0.2s; font-family:'Noto Sans KR',sans-serif; }
+.btn-logout:hover { border-color:var(--amber); color:var(--amber); }
+
 @media print {
   body { background:#fff; color:#000; }
   .page-header, .actions { display:none !important; }
@@ -48,6 +67,7 @@ table.kv tr { border-bottom:1px solid var(--border); }
   .card-title { color:#000; }
   table.kv td.k, .sub td.k { color:#555; }
   .row-hi { background:#f4ead8; }
+  #login-screen, .btn-logout { display:none !important; }
 }
 </style>
 </head>
@@ -59,7 +79,28 @@ table.kv tr { border-bottom:1px solid var(--border); }
       <div class="header-brand">POOMASI</div>
       <div class="header-title">일일 결산서 (조회)</div>
     </div>
-    <div style="font-size:0.78rem;color:var(--dust);" id="header-sub"></div>
+    <div style="display:flex;align-items:center;gap:0.6rem;">
+      <div style="font-size:0.78rem;color:var(--dust);" id="header-sub"></div>
+      <button id="logout-btn" class="btn-logout" onclick="doLogout()" style="display:none;">로그아웃</button>
+    </div>
+  </div>
+</div>
+
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-brand">POOMASI</div>
+    <div class="login-title">사무국 로그인</div>
+    <div class="login-sub">일일 결산서 조회는 로그인 후 이용할 수 있습니다.</div>
+    <div class="form-group">
+      <label class="form-label" for="email">이메일</label>
+      <input class="form-input" type="email" id="email" placeholder="admin@poomasi.org" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="password">비밀번호</label>
+      <input class="form-input" type="password" id="password" placeholder="••••••" autocomplete="current-password">
+    </div>
+    <button class="btn-login" id="login-btn" onclick="doLogin()">로그인</button>
+    <div class="login-error" id="login-error"></div>
   </div>
 </div>
 
@@ -208,7 +249,71 @@ async function load() {
   render(data);
 }
 
-load();
+// ── 인증 ─────────────────────────────────────────────────
+async function doLogin() {
+  const sb = getSb();
+  if (!sb) return;
+  const email = document.getElementById('email').value.trim();
+  const pw    = document.getElementById('password').value;
+  const btn   = document.getElementById('login-btn');
+  const err   = document.getElementById('login-error');
+
+  err.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = '로그인 중…';
+
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
+
+  if (error) {
+    err.textContent = '로그인 실패: ' + (error.message || '이메일/비밀번호를 확인하세요.');
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '로그인';
+    return;
+  }
+
+  btn.disabled = false;
+  btn.textContent = '로그인';
+  showApp();
+}
+
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('root').style.display = 'block';
+  document.getElementById('logout-btn').style.display = 'inline-block';
+  load();
+}
+
+async function doLogout() {
+  const sb = getSb();
+  if (sb) await sb.auth.signOut();
+  document.getElementById('root').style.display = 'none';
+  document.getElementById('root').innerHTML = '<div class="empty">불러오는 중…</div>';
+  document.getElementById('logout-btn').style.display = 'none';
+  document.getElementById('password').value = '';
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+document.getElementById('password').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+// 세션 게이트: 로그인 상태면 바로 load(), 아니면 로그인 화면 표시
+(async function initGate() {
+  const sb = getSb();
+  if (!sb) {
+    const p = new URLSearchParams(location.search);
+    renderEmpty(p.get('store'), p.get('date'), '네트워크 확인 — 조회 모듈 로드 실패. 새로고침 해주세요.');
+    return;
+  }
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    showApp();
+  } else {
+    document.getElementById('root').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+  }
+})();
 </script>
 </body>
 </html>
