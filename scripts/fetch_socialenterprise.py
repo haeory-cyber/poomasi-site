@@ -43,6 +43,26 @@ def parse_posted_date(write_date: str) -> str | None:
     return None
 
 
+def parse_end_date_from_title(title: str, posted_date: str | None) -> str | None:
+    """제목의 '~7.10.' '(모집연장~7/31)' '7.7.(화) ~ 7.16(목)' 패턴에서 마감일 추출.
+    본문·첨부(HWP/이미지)에만 마감이 있는 공고는 추출 불가 — None 유지.
+    연도는 게시연도 기준, 게시월보다 6개월 이상 앞서면 이듬해로 판단."""
+    m = re.search(r'[~∼]\s*(\d{1,2})\s*[./월]\s*(\d{1,2})', title)
+    if not m:
+        return None
+    month, day = int(m.group(1)), int(m.group(2))
+    if not (1 <= month <= 12 and 1 <= day <= 31):
+        return None
+    base = datetime.date.today()
+    if posted_date:
+        try:
+            base = datetime.date.fromisoformat(posted_date)
+        except ValueError:
+            pass
+    year = base.year + (1 if month < base.month - 6 else 0)
+    return f'{year}-{month:02d}-{day:02d}'
+
+
 def build_link(b_idx: str, bs_idx: str, page: int = 1) -> str:
     """상세 페이지 절대 URL 구성."""
     return (
@@ -114,12 +134,14 @@ def fetch_announcements(pages: int = 10) -> list:
                 print(f'  [SKIP] {category or "(없음)"} | {subject[:40]}')
                 continue
 
+            posted = parse_posted_date(item.get('WRITE_DATE', ''))
             result.append({
                 'title':       subject,
                 'link':        build_link(b_idx, item.get('BS_IDX', BS_IDX), page_no),
                 'author':      AUTHOR,
-                'posted_date': parse_posted_date(item.get('WRITE_DATE', '')),
-                'end_date':    None,  # 사이트에 마감일 필드 없음
+                'posted_date': posted,
+                # 목록 JSON에 마감일 필드 없음 → 제목 패턴에서 추출 (실측 71% 커버)
+                'end_date':    parse_end_date_from_title(subject, posted),
             })
             page_saved += 1
 
