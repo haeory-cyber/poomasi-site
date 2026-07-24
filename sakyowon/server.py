@@ -291,6 +291,117 @@ def ai_chat():
     return jsonify({"answer": answer})
 
 
+# ── AUTH / ADMIN (2026-07-24 실사용 착수) ──
+# 서버는 anon 키만 유지. 로그인·세션·admin 로직은 전부 사교원 DB의 SECURITY DEFINER
+# RPC 안에서 실행되고, 비밀번호 해시는 테이블 밖으로 나오지 않는다. 서버는 세션 토큰만
+# HttpOnly 쿠키(sk_session)로 중계한다.
+
+_COOKIE = "sk_session"
+
+
+def rpc(fn, args):
+    """사교원 DB의 SECURITY DEFINER 함수 호출 → 반환 JSON."""
+    r = requests.post(f"{SUPABASE_URL}/rest/v1/rpc/{fn}",
+                      headers=HEADERS, json=args, timeout=30)
+    r.raise_for_status()
+    return r.json()
+
+
+def _http(res):
+    if res.get("ok"):
+        return 200
+    return 403 if res.get("error") == "forbidden" else 400
+
+
+@app.route("/api/auth/signup", methods=["POST"])
+def auth_signup():
+    if rate_limited(f"signup:{client_ip()}", 5):
+        return jsonify({"ok": False, "error": "too many requests"}), 429
+    d = request.get_json(silent=True) or {}
+    res = rpc("sakyowon_signup", {
+        "p_username": d.get("username"), "p_password": d.get("password"),
+        "p_name": d.get("name"), "p_contact": d.get("contact"), "p_org": d.get("org"),
+    })
+    return jsonify(res), (201 if res.get("ok") else 400)
+
+
+@app.route("/api/auth/login", methods=["POST"])
+def auth_login():
+    if rate_limited(f"login:{client_ip()}", 10):
+        return jsonify({"ok": False, "error": "too many requests"}), 429
+    d = request.get_json(silent=True) or {}
+    res = rpc("sakyowon_login", {"p_username": d.get("username"), "p_password": d.get("password")})
+    if not res.get("ok"):
+        return jsonify(res), 401
+    token = res.pop("token", None)
+    resp = jsonify({"ok": True, "user": res.get("user")})
+    resp.set_cookie(_COOKIE, token, max_age=30 * 24 * 3600,
+                    httponly=True, secure=True, samesite="Lax", path="/")
+    return resp
+
+
+@app.route("/api/auth/logout", methods=["POST"])
+def auth_logout():
+    tok = request.cookies.get(_COOKIE)
+    if tok:
+        rpc("sakyowon_logout", {"p_token": tok})
+    resp = jsonify({"ok": True})
+    resp.delete_cookie(_COOKIE, path="/")
+    return resp
+
+
+@app.route("/api/auth/me")
+def auth_me():
+    tok = request.cookies.get(_COOKIE)
+    if not tok:
+        return jsonify({"ok": False}), 401
+    res = rpc("sakyowon_me", {"p_token": tok})
+    return (jsonify(res), 200) if res.get("ok") else (jsonify({"ok": False}), 401)
+
+
+@app.route("/api/auth/change-password", methods=["POST"])
+def auth_change_password():
+    tok = request.cookies.get(_COOKIE)
+    if not tok:
+        return jsonify({"ok": False, "error": "unauthorized"}), 401
+    d = request.get_json(silent=True) or {}
+    res = rpc("sakyowon_change_password",
+              {"p_token": tok, "p_old": d.get("old"), "p_new": d.get("new")})
+    return jsonify(res), (200 if res.get("ok") else 400)
+
+
+@app.route("/api/admin/members")
+def admin_members():
+    tok = request.cookies.get(_COOKIE) or ""
+    res = rpc("sakyowon_admin_list_members", {"p_token": tok, "p_status": request.args.get("status")})
+    return jsonify(res), _http(res)
+
+
+@app.route("/api/admin/members/<mid>", methods=["PATCH"])
+def admin_member_update(mid):
+    tok = request.cookies.get(_COOKIE) or ""
+    d = request.get_json(silent=True) or {}
+    res = rpc("sakyowon_admin_update_member",
+              {"p_token": tok, "p_id": mid, "p_status": d.get("status"), "p_memo": d.get("memo")})
+    return jsonify(res), _http(res)
+
+
+@app.route("/api/admin/feedback")
+def admin_feedback():
+    tok = request.cookies.get(_COOKIE) or ""
+    res = rpc("sakyowon_admin_list_feedback", {"p_token": tok, "p_status": request.args.get("status")})
+    return jsonify(res), _http(res)
+
+
+@app.route("/api/admin/feedback/<fid>", methods=["PATCH"])
+def admin_feedback_update(fid):
+    tok = request.cookies.get(_COOKIE) or ""
+    d = request.get_json(silent=True) or {}
+    res = rpc("sakyowon_admin_update_feedback",
+              {"p_token": tok, "p_id": fid, "p_status": d.get("status"), "p_reply": d.get("reply")})
+    return jsonify(res), _http(res)
+
+
 # ── MAIN ──
 
 if __name__ == "__main__":
