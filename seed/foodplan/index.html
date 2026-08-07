@@ -155,6 +155,64 @@
       <p style="font-size:13px;color:var(--ink-3);margin:0 0 10px;">미판매 처리(만료)된 품목의 폐기를 확정합니다. 등록·알림 품목은 위 목록의 "미판매 폐기"로 바로 처리할 수 있습니다. 폐기 중량은 절감·CO₂ 지표의 근거이므로 반드시 입력해 주세요.</p>
       <div class="queue" id="q-closing"></div>
     </section>
+
+    <!-- 5. 생산자 단골 문자 -->
+    <section class="section">
+      <div class="section-head">
+        <h2>생산자 단골 문자</h2>
+      </div>
+      <div class="card" style="padding:16px;">
+        <p style="font-size:13px;color:var(--ink-3);margin:0 0 12px;">이 생산자 상품을 최근 1년 안에 구입한 조합원(문자 수신 동의자)에게 할인 행사 문자를 보냅니다.</p>
+        <div class="field">
+          <span style="display:block;font-size:14px;font-weight:600;color:var(--ink-2);margin-bottom:6px;">생산자<span class="req">*</span></span>
+          <input class="input" id="fans-farmer-search" type="text" placeholder="생산자명 검색 (예: 옥천누리)">
+          <div class="farmer-results" id="fans-farmer-results" style="display:none;"></div>
+          <div id="fans-farmer-picked-wrap"></div>
+        </div>
+        <div id="fans-stats" style="display:none;margin:0 0 12px;padding:12px 14px;background:var(--green-050);border-radius:var(--r-sm);">
+          <div style="font-size:15px;font-weight:700;color:var(--green-900);margin-bottom:8px;">생산자: <span id="fans-farmer-label">–</span></div>
+          <div class="chips" role="radiogroup" aria-label="단골 기준 (1년 내 구매 횟수)" style="margin-bottom:10px;">
+            <label class="chip"><input type="radio" name="fans-min" value="1" checked>1회 이상 (<span id="fans-c1">–</span>명)</label>
+            <label class="chip"><input type="radio" name="fans-min" value="3">3회 이상 (<span id="fans-c3">–</span>명)</label>
+            <label class="chip"><input type="radio" name="fans-min" value="5">5회 이상 (<span id="fans-c5">–</span>명)</label>
+          </div>
+          <div style="font-size:14px;color:var(--ink-2);">발송 대상 <b id="fans-sendable" style="font-size:24px;color:var(--green-800);font-variant-numeric:tabular-nums;">–</b>명
+            <span style="color:var(--ink-3);font-size:12.5px;">(1년 내 구매 <span id="fans-buyers">–</span>명 중 수신 동의·전화 보유)</span>
+          </div>
+        </div>
+        <label class="field" id="fans-msg-field" style="display:none;"><span>문자 내용 (앞 "(광고)"와 끝 수신거부 안내는 자동으로 붙습니다)</span>
+          <textarea class="input" id="fans-msg" rows="4" style="resize:vertical;line-height:1.5;"></textarea>
+        </label>
+        <div class="preview-box" id="fans-preview" style="display:none;margin-bottom:12px;"></div>
+        <div class="actions" style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button type="button" class="btn btn-ghost btn-sm" id="fans-dryrun" style="display:none;">미리보기 (발송 안 함)</button>
+          <button type="button" class="btn btn-primary btn-sm" id="fans-send" style="display:none;" disabled>실발송</button>
+        </div>
+        <p id="fans-send-note" style="display:none;font-size:12.5px;color:var(--ink-3);margin:10px 0 0;">실발송 버튼은 미리보기 확인 후 활성화됩니다.</p>
+      </div>
+
+      <details class="card" id="manual-sms" style="margin-top:14px;padding:14px 16px;">
+        <summary style="cursor:pointer;font-size:14.5px;font-weight:600;color:var(--green-800);">수동 문자 보내기 (수신번호 직접 입력)</summary>
+        <div style="margin-top:12px;">
+          <label class="field"><span>수신번호 (여러 개는 줄바꿈 또는 쉼표로 구분)</span>
+            <textarea class="input" id="manual-phones" rows="3" style="resize:vertical;line-height:1.5;" placeholder="010-1234-5678&#10;01098765432"></textarea>
+          </label>
+          <label class="field"><span>문자 내용 (매장명 헤더는 자동으로 붙습니다)</span>
+            <textarea class="input" id="manual-text" rows="4" style="resize:vertical;line-height:1.5;"></textarea>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-2);margin:0 0 4px;cursor:pointer;">
+            <input type="checkbox" id="manual-isad" checked> 광고성 문자 ((광고)·수신거부 자동 표기)
+          </label>
+          <p style="font-size:12.5px;color:var(--ink-3);margin:0 0 12px;">광고가 아닌 개별 안내(예: 예약 상품 준비 완료)에만 해제하세요.</p>
+          <div class="preview-box" id="manual-preview" style="display:none;margin-bottom:12px;"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button type="button" class="btn btn-ghost btn-sm" id="manual-dryrun">미리보기 (발송 안 함)</button>
+            <button type="button" class="btn btn-primary btn-sm" id="manual-send" disabled>실발송</button>
+          </div>
+          <p style="font-size:12.5px;color:var(--ink-3);margin:10px 0 0;">실발송 버튼은 미리보기 확인 후 활성화됩니다.</p>
+        </div>
+      </details>
+    </section>
   </main>
 
   <!-- 하단 숫자 요약 -->
@@ -623,6 +681,194 @@ document.getElementById('notify-send').addEventListener('click', async () => {
     else toast('발송 실패: '+(j.error||res.status), 'err');
   } catch(e){ toast('발송 중 오류가 발생했습니다.', 'err'); }
   btn.disabled = false; btn.textContent = '실발송';
+});
+
+// ── 생산자 단골 문자 ─────────────────────────────────
+let fansFarmer = null;      // 선택된 생산자명
+let fansDryChecked = false; // 미리보기(dry-run) 통과 여부 — 실발송 게이트
+let fansCounts = null;      // preview의 기준별 인원수 {counts:{1,3,5}, buyers_counts:{...}}
+let fansDryPhones = 0;      // 마지막 dry-run의 실제 발송 예정 수 (confirm 문구용)
+let fansTimer = null;
+const fansEls = () => ({
+  stats: document.getElementById('fans-stats'),
+  msgField: document.getElementById('fans-msg-field'),
+  msg: document.getElementById('fans-msg'),
+  preview: document.getElementById('fans-preview'),
+  dryBtn: document.getElementById('fans-dryrun'),
+  sendBtn: document.getElementById('fans-send'),
+  note: document.getElementById('fans-send-note'),
+});
+function fansMin() { return parseInt((document.querySelector('input[name=fans-min]:checked')||{}).value) || 1; }
+function fansReset() {
+  fansDryChecked = false;
+  const el = fansEls();
+  el.sendBtn.disabled = true;
+  el.preview.style.display = 'none';
+}
+function fansApplyCounts() {
+  if (!fansCounts) return;
+  ['1','3','5'].forEach(k => { document.getElementById('fans-c'+k).textContent = fansCounts.counts[k]; });
+  const k = String(fansMin());
+  document.getElementById('fans-sendable').textContent = fansCounts.counts[k];
+  document.getElementById('fans-buyers').textContent = fansCounts.buyers_counts[k];
+}
+document.querySelectorAll('input[name=fans-min]').forEach(r => r.addEventListener('change', () => {
+  fansApplyCounts(); fansReset(); // 기준 바꾸면 재미리보기 강제
+}));
+document.getElementById('fans-farmer-search').addEventListener('input', e => {
+  clearTimeout(fansTimer);
+  const q = e.target.value.trim();
+  const box = document.getElementById('fans-farmer-results');
+  if (q.length < 1) { box.style.display='none'; return; }
+  fansTimer = setTimeout(async () => {
+    const { data } = await sb.from('farmers_pos').select('farmer_name').ilike('farmer_name', '%'+q+'%').limit(8);
+    if (!data || !data.length) { box.innerHTML = '<button type="button" disabled style="color:var(--ink-3)">검색 결과가 없습니다.</button>'; box.style.display='block'; return; }
+    box.innerHTML = data.map(f => `<button type="button" data-name="${esc(f.farmer_name||'')}">${esc(f.farmer_name||'')}</button>`).join('');
+    box.style.display='block';
+  }, 250);
+});
+document.getElementById('fans-farmer-results').addEventListener('click', async e => {
+  const b = e.target.closest('button[data-name]'); if (!b) return;
+  fansFarmer = b.dataset.name;
+  document.getElementById('fans-farmer-results').style.display='none';
+  document.getElementById('fans-farmer-search').value='';
+  document.getElementById('fans-farmer-picked-wrap').innerHTML =
+    `<div class="farmer-picked">${esc(fansFarmer)}<button type="button" id="fans-farmer-clear" aria-label="생산자 선택 취소">×</button></div>`;
+  document.getElementById('fans-farmer-clear').addEventListener('click', () => {
+    fansFarmer = null; fansCounts = null; fansReset();
+    document.getElementById('fans-farmer-picked-wrap').innerHTML='';
+    const el = fansEls();
+    el.stats.style.display = el.msgField.style.display = 'none';
+    el.dryBtn.style.display = el.sendBtn.style.display = el.note.style.display = 'none';
+  });
+  // 대상 수 조회 (preview — PII 없음)
+  fansReset();
+  fansCounts = null;
+  const el = fansEls();
+  el.stats.style.display = 'block';
+  document.getElementById('fans-farmer-label').textContent = fansFarmer;
+  document.querySelector('input[name=fans-min][value="1"]').checked = true;
+  ['1','3','5'].forEach(k => document.getElementById('fans-c'+k).textContent = '–');
+  document.getElementById('fans-buyers').textContent = '조회 중…';
+  document.getElementById('fans-sendable').textContent = '–';
+  try {
+    const res = await fetch('/api/foodplan/fans/preview', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+accessToken },
+      body: JSON.stringify({ farmer_name: fansFarmer, min_purchases: 1 })
+    });
+    const j = await res.json();
+    if (!res.ok || !j.ok) { toast('대상 조회 실패: '+(j.error||res.status), 'err'); return; }
+    fansCounts = { counts: j.counts, buyers_counts: j.buyers_counts };
+    fansApplyCounts();
+    // 예시문에서 자동 부착분((광고)·수신거부)을 뺀 본문만 편집란에
+    el.msg.value = `[품앗이 로컬푸드 지족점]\n자주 찾아주신 ${fansFarmer} 상품 할인 행사를 오늘 매장에서 진행합니다.\n조합원님께 먼저 안내드립니다.`;
+    el.msgField.style.display = 'block';
+    el.dryBtn.style.display = el.sendBtn.style.display = 'inline-flex';
+    el.note.style.display = 'block';
+  } catch (err) { toast('네트워크 오류로 대상을 조회하지 못했습니다.', 'err'); }
+});
+document.getElementById('fans-msg').addEventListener('input', fansReset); // 문안 바꾸면 다시 미리보기
+document.getElementById('fans-dryrun').addEventListener('click', async () => {
+  if (!fansFarmer) { toast('생산자를 먼저 선택해 주세요.', 'err'); return; }
+  const el = fansEls();
+  const bodyText = el.msg.value.trim();
+  if (!bodyText) { toast('문자 내용을 입력해 주세요.', 'err'); return; }
+  el.dryBtn.disabled = true;
+  try {
+    const res = await fetch('/api/foodplan/fans/send', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+accessToken },
+      body: JSON.stringify({ farmer_name: fansFarmer, message_body: bodyText, min_purchases: fansMin(), dry_run: true })
+    });
+    const j = await res.json();
+    if (!res.ok || !j.ok) { toast('미리보기 실패: '+(j.error||res.status), 'err'); return; }
+    fansDryPhones = j.unique_phones;
+    el.preview.textContent = `── 최종 발송 문안 (${fansMin()}회 이상 단골 ${j.unique_phones}명에게 발송 예정) ──\n\n${j.final_text}`;
+    el.preview.style.display = 'block';
+    fansDryChecked = true;
+    el.sendBtn.disabled = false;
+  } catch (err) { toast('네트워크 오류가 발생했습니다.', 'err'); }
+  finally { el.dryBtn.disabled = false; }
+});
+document.getElementById('fans-send').addEventListener('click', async () => {
+  if (!fansFarmer || !fansDryChecked) { toast('먼저 미리보기로 확인해 주세요.', 'err'); return; }
+  const el = fansEls();
+  const bodyText = el.msg.value.trim();
+  if (!confirm(`[${fansFarmer}]\n1년 내 ${fansMin()}회 이상 구매 단골 조합원 ${fansDryPhones}명에게 발송합니다.\n발송 후에는 취소할 수 없습니다. 진행할까요?`)) return;
+  el.sendBtn.disabled = true; el.sendBtn.innerHTML = '<span class="spinner"></span> 발송 중…';
+  try {
+    const res = await fetch('/api/foodplan/fans/send', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+accessToken },
+      body: JSON.stringify({ farmer_name: fansFarmer, message_body: bodyText, min_purchases: fansMin(), dry_run: false })
+    });
+    const j = await res.json();
+    if (res.ok && j.ok) { toast(`발송 완료 (${j.sent}건 성공${j.failed?` · ${j.failed}건 실패`:''})`, 'ok'); fansReset(); }
+    else toast('발송 실패: '+(j.error||res.status), 'err');
+  } catch (err) { toast('발송 중 오류가 발생했습니다.', 'err'); }
+  finally { el.sendBtn.innerHTML = '실발송'; el.sendBtn.disabled = !fansDryChecked; }
+});
+
+// ── 수동 문자 보내기 (단골 패널과 상태 분리) ──────────
+let manualDryChecked = false;
+let manualDryCount = 0;
+function manualReset() {
+  manualDryChecked = false;
+  document.getElementById('manual-send').disabled = true;
+  document.getElementById('manual-preview').style.display = 'none';
+}
+['manual-phones','manual-text'].forEach(id => document.getElementById(id).addEventListener('input', manualReset));
+document.getElementById('manual-isad').addEventListener('change', manualReset);
+document.getElementById('manual-dryrun').addEventListener('click', async () => {
+  const phonesRaw = document.getElementById('manual-phones').value.trim();
+  const textRaw = document.getElementById('manual-text').value.trim();
+  if (!phonesRaw) { toast('수신번호를 입력해 주세요.', 'err'); return; }
+  if (!textRaw) { toast('문자 내용을 입력해 주세요.', 'err'); return; }
+  const btn = document.getElementById('manual-dryrun');
+  btn.disabled = true;
+  try {
+    const res = await fetch('/api/foodplan/fans/manual_send', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+accessToken },
+      body: JSON.stringify({ phones: phonesRaw, text: textRaw, is_ad: document.getElementById('manual-isad').checked, dry_run: true })
+    });
+    const j = await res.json();
+    if (!res.ok || !j.ok) {
+      const rej = (j.rejected && j.rejected.length) ? `\n잘못된 번호: ${j.rejected.join(', ')}` : '';
+      toast('미리보기 실패: ' + (j.error||res.status) + rej, 'err'); return;
+    }
+    manualDryCount = j.recipients;
+    const rejLine = (j.rejected && j.rejected.length) ? `\n⚠ 제외된 번호 ${j.rejected.length}건: ${j.rejected.join(', ')}` : '';
+    const pv = document.getElementById('manual-preview');
+    pv.textContent = `── 최종 발송 문안 (${j.recipients}건 발송 예정)${rejLine} ──\n\n${j.final_text}`;
+    pv.style.display = 'block';
+    manualDryChecked = true;
+    document.getElementById('manual-send').disabled = false;
+  } catch (err) { toast('네트워크 오류가 발생했습니다.', 'err'); }
+  finally { btn.disabled = false; }
+});
+document.getElementById('manual-send').addEventListener('click', async () => {
+  if (!manualDryChecked) { toast('먼저 미리보기로 확인해 주세요.', 'err'); return; }
+  if (!confirm(`입력한 번호 ${manualDryCount}건에 실제 문자를 발송합니다.\n발송 후에는 취소할 수 없습니다. 진행할까요?`)) return;
+  const btn = document.getElementById('manual-send');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> 발송 중…';
+  try {
+    const res = await fetch('/api/foodplan/fans/manual_send', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+accessToken },
+      body: JSON.stringify({
+        phones: document.getElementById('manual-phones').value.trim(),
+        text: document.getElementById('manual-text').value.trim(),
+        is_ad: document.getElementById('manual-isad').checked,
+        dry_run: false
+      })
+    });
+    const j = await res.json();
+    if (res.ok && j.ok) { toast(`발송 완료 (${j.sent}건 성공${j.failed?` · ${j.failed}건 실패`:''})`, 'ok'); manualReset(); }
+    else toast('발송 실패: '+(j.error||res.status), 'err');
+  } catch (err) { toast('발송 중 오류가 발생했습니다.', 'err'); }
+  finally { btn.innerHTML = '실발송'; btn.disabled = !manualDryChecked; }
 });
 
 // ── 폐기 처리 (→ expired → disposed, 중량 필수) ──────
