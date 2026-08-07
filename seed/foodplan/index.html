@@ -293,9 +293,9 @@
     <div class="preview-box" id="notify-preview">불러오는 중…</div>
     <div class="send-disabled-note">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="flex:none;margin-top:1px;"><path d="M12 9v4m0 4h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L14.7 3.9a2 2 0 00-3.4 0z" stroke-linejoin="round"/></svg>
-      <span>실제 발송은 관리자 승인 후 개통됩니다. 현재는 미리보기만 가능합니다.</span>
+      <span>실발송을 누르면 동의한 조합원에게 즉시 문자가 나갑니다. 문안을 확인하고 누르세요.</span>
     </div>
-    <button type="button" class="btn btn-primary btn-block" id="notify-send" style="margin-top:16px;" disabled>실발송 (승인 후 개통)</button>
+    <button type="button" class="btn btn-primary btn-block" id="notify-send" style="margin-top:16px;">실발송</button>
     <button type="button" class="btn btn-ghost btn-block" id="notify-close" style="margin-top:10px;">닫기</button>
   </div>
 </div>
@@ -315,8 +315,8 @@
 </div>
 
 <script>
-// ── 실발송 개통 플래그 (기본 false. 서버 FOODPLAN_SEND_ENABLED와 이중 안전) ──
-const SEND_ENABLED = false;
+// ── 실발송 개통 플래그 (2026-08-07 후니님 승인으로 개통) ──
+const SEND_ENABLED = true;
 
 // ── Supabase (store.html 패턴) ───────────────────────
 const SUPABASE_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
@@ -667,7 +667,9 @@ document.getElementById('notify-close').addEventListener('click', ()=>notifyBack
 notifyBackdrop.addEventListener('click', e=>{ if(e.target===notifyBackdrop) notifyBackdrop.classList.remove('show'); });
 document.getElementById('notify-send').addEventListener('click', async () => {
   if (!SEND_ENABLED) { toast('실발송은 관리자 승인 후 개통됩니다.', 'err'); return; }
-  // 개통 후에만 도달. dry_run=false 실발송.
+  const cnt = document.getElementById('notify-recipients').textContent;
+  if (!confirm(`동의한 조합원 ${cnt}명에게 문자를 발송합니다. 진행할까요?`)) return;
+  // dry_run=false 실발송.
   const btn = document.getElementById('notify-send');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> 발송 중…';
   try {
