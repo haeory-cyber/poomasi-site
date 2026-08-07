@@ -332,7 +332,6 @@ async def notify(request: Request):
 FANS_STORE_PHONE = "042-824-0131"
 FANS_OPTOUT_LINE = f"수신거부: 매장({FANS_STORE_PHONE}) 문의"
 FANS_MIN_CHOICES = (1, 3, 5)  # 단골 기준: 1년 내 구매 횟수
-FANS_SEND_LEDGER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs", "foodplan_fans_sends.jsonl")
 _MEMBER_NO_FLOAT = _re.compile(r"^[0-9]+(\.[0-9]+)?$")
 
 
@@ -416,19 +415,11 @@ def _fans_manual_text(body: str, is_ad: bool) -> str:
     return text
 
 
-def _fans_append_ledger(entry: dict) -> None:
-    """발송 대장(JSONL) 기록 — notify_log에 생산자명 컬럼이 없어(CHECK·DDL금지) 파일로 영속화."""
-    import json as _json
-    try:
-        os.makedirs(os.path.dirname(FANS_SEND_LEDGER), exist_ok=True)
-        with open(FANS_SEND_LEDGER, "a", encoding="utf-8") as f:
-            f.write(_json.dumps(entry, ensure_ascii=False) + "\n")
-    except OSError:
-        pass  # 대장 기록 실패가 발송 응답을 막지 않게
-
-
 async def _fans_buyer_counts(client: httpx.AsyncClient, farmer_name: str) -> dict[str, int]:
-    """최근 1년 내 해당 생산자 구매 조합원 → {member_no(정규화): 구매건수}. 1000행씩 페이지네이션."""
+    """최근 1년 내 해당 생산자 구매 조합원 → {member_no(정규화): 구매건수}. 1000행씩 페이지네이션.
+
+    구매건수 = pos_transactions 행 수 기준(한 방문 3종 구매 = 3회). 2026-08-07 후니님 확정.
+    """
     since = (_dt.datetime.now(_dt.timezone.utc) - _dt.timedelta(days=365)).isoformat()
     counts: dict[str, int] = {}
     offset = 0
@@ -586,22 +577,19 @@ async def fans_send(request: Request):
                 if res["group_id"]:
                     group_ids.append(res["group_id"])
 
-            # notify_log 기록 — channel은 CHECK(sms|alimtalk)·텍스트 여유 컬럼 없음(DDL 금지)
-            # → 수치는 notify_log, 생산자명·group_id는 서버측 발송 대장(JSONL)에 영속화
+            # notify_log 단일 기록 — 수치는 기존 컬럼, 맥락(생산자명 등)은 meta jsonb (2026-08-07 승인 마이그레이션)
             await _sr_post(client, "foodplan_notify_log", {
                 "channel": "sms",
                 "recipients": len(phones),
                 "success": sent,
-            })
-            _fans_append_ledger({
-                "type": "fans_sms",
-                "farmer_name": farmer_name,
-                "min_purchases": min_p,
-                "recipients": len(phones),
-                "sent": sent, "failed": failed,
-                "group_ids": group_ids,
-                "actor": email,
-                "at": _dt.datetime.now(_dt.timezone.utc).isoformat(),
+                "meta": {
+                    "kind": "fans",
+                    "farmer_name": farmer_name,
+                    "min_purchases": min_p,
+                    "failed": failed,
+                    "group_ids": group_ids,
+                    "actor": email,
+                },
             })
 
             return {
@@ -629,6 +617,8 @@ async def fans_manual_send(request: Request):
     email = await _email_from_token(request)
     if not email:
         return JSONResponse(status_code=401, content={"ok": False, "error": "로그인이 필요합니다."})
+    if not SUPABASE_URL or not SUPABASE_SECRET_KEY:
+        return JSONResponse(status_code=503, content={"ok": False, "error": "서버 설정 미완(.env)"})
     try:
         body = await request.json()
     except Exception:
@@ -673,23 +663,20 @@ async def fans_manual_send(request: Request):
                 if res["group_id"]:
                     group_ids.append(res["group_id"])
 
-            if SUPABASE_URL and SUPABASE_SECRET_KEY:
-                await _sr_post(client, "foodplan_notify_log", {
-                    "channel": "sms",
-                    "recipients": len(phones),
-                    "success": sent,
-                })
-        _fans_append_ledger({
-            "type": "fans_sms",
-            "kind": "manual",
-            "is_ad": is_ad,
-            "recipients": len(phones),
-            "rejected": len(rejected),
-            "sent": sent, "failed": failed,
-            "group_ids": group_ids,
-            "actor": email,
-            "at": _dt.datetime.now(_dt.timezone.utc).isoformat(),
-        })
+            # notify_log 단일 기록 — 수치는 기존 컬럼, 맥락은 meta jsonb (2026-08-07 승인 마이그레이션)
+            await _sr_post(client, "foodplan_notify_log", {
+                "channel": "sms",
+                "recipients": len(phones),
+                "success": sent,
+                "meta": {
+                    "kind": "manual",
+                    "is_ad": is_ad,
+                    "rejected": len(rejected),
+                    "failed": failed,
+                    "group_ids": group_ids,
+                    "actor": email,
+                },
+            })
         return {
             "ok": True, "dry_run": False,
             "is_ad": is_ad,
