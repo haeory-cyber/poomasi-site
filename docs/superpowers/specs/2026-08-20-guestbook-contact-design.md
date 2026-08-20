@@ -23,7 +23,19 @@ poomasi.org에 방문자가 우리에게 닿을 수단이 하나도 없다. 실�
 
 ## ① 푸터
 
-`index.html`과 `en/index.html`의 `</main>` 뒤에 추가. 한지 톤(크림 배경·먹색 텍스트) 유지.
+🔴 **한글판과 영문판의 출발점이 다르다** (26-08-20 실측으로 정정):
+
+- `index.html` — `<footer>` **0건**. `</main>` 뒤에 새로 만든다.
+- `en/index.html` — **228행에 `<footer class="si-section si-foot">` 이 이미 있다.**
+  기존 푸터를 지우지 않고 그 안에 블록만 덧붙인다. 새 푸터를 또 만들면 푸터가 두 개가 된다.
+
+기존 영문 카피("Based in Daejeon…", join.poomasi.org 링크)는 **삭제·수정하지 않는다.**
+`assets/landing-hanji.css:6` 에 「원칙: 카피 불변 · 자체호스팅(외부 에셋 없음) · AA 대비」가
+명시돼 있다. 영문 연락처가 join.poomasi.org 와 이메일 둘이 되지만 성격이 달라
+(합류 폼 / 일반 문의) 그대로 둔다.
+
+root 푸터는 영문판과 같은 `si-foot` 구조·클래스로 맞춘다.
+한지 톤(크림 배경·먹색 텍스트) 유지.
 
 담는 것:
 
@@ -65,8 +77,12 @@ poomasi.org 안에 둔다(별도 서브도메인 아님). 위쪽 = 승인된 글
 페이지네이션이 필요 없다. 글이 쌓여 화면이 길어지면 그때 판단한다.
 글이 하나도 없을 때는 "첫 글을 남겨주세요" 안내를 띄운다.
 
-**라이브러리**: supabase-js를 `assets/`에 자체호스팅한다. 기존 `feedback.html`은
-jsdelivr CDN을 쓰지만 새로 만드는 것은 CDN 회귀 금지 원칙을 따른다.
+**라이브러리: 쓰지 않는다** (26-08-20 정정). 방명록이 하는 일은 REST 호출 두 개
+(목록 GET, 등록 POST)뿐이라 `fetch` 로 충분하다. supabase-js 는 207KB이고,
+`landing-hanji.css:6` 의 「자체호스팅(외부 에셋 없음)」 원칙에는 의존성 0이 더 부합한다.
+
+- 기존 `feedback.html` 은 jsdelivr CDN 을 쓰지만 **따라하지 않는다.**
+- POST 에 `Prefer: return=representation` 을 넣지 마라. SELECT 권한을 요구해서 401 이 난다.
 
 ## ③ 데이터 — Supabase
 
@@ -93,10 +109,24 @@ anon이 테이블을 직접 SELECT하면 컬럼이 다 보이기 때문이다. �
   — **email 컬럼이 뷰에 아예 없다.**
 - 원본 테이블 SELECT는 service_role만.
 
+- **anon INSERT 는 `status='pending' and published_at is null` 인 행만 허용**한다
+  (26-08-20 추가). 이 조건이 없으면 방문자가 `status:"published"` 를 직접 실어 보내
+  승인 절차를 건너뛸 수 있다.
+
 즉 승인 전 글도, 이메일도, 데이터베이스 밖으로 나가지 않는다.
 
-**검증 게이트**: anon 키로 `guestbook` 직접 SELECT를 시도해 거부되는지,
-`guestbook_public`에 email 컬럼이 없는지 실측으로 확인한다.
+**검증 게이트 — 실측 완료 (26-08-20, anon 키로 직접 확인)**
+
+| 시도 | 결과 |
+|---|---|
+| `guestbook` 직접 SELECT | 401 `permission denied for table guestbook` |
+| `guestbook_public` 에서 email 요청 | 400 `column ... does not exist` |
+| `status:"published"` 로 우회 INSERT | 401 RLS violation |
+| anon UPDATE 로 승인 시도 | 401 `permission denied` |
+| anon DELETE | 401 `permission denied` |
+| 공개 뷰 SELECT (pending 행 존재 시) | 200 `[]` — 안 새어나옴 |
+
+열람·승인·삭제 어느 쪽으로도 anon 이 넘지 못한다.
 
 ## ④ 승인 — admin.poomasi.org
 
