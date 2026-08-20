@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>알림 수신거부 — 품앗이 로컬푸드 지족점</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="/foodplan/foodplan.css?v=20260703b">
+<style>
+  .wrap { max-width: 480px; margin: 0 auto; padding: 0 16px 40px; }
+  .hero {
+    background: linear-gradient(160deg, var(--green-800), var(--green-900));
+    color: #fff; padding: 30px 22px 32px; border-radius: 0 0 var(--r-lg) var(--r-lg);
+    position: relative; overflow: hidden;
+  }
+  .hero::after {
+    content: ""; position: absolute; right: -30px; top: -30px; width: 170px; height: 170px;
+    background: radial-gradient(circle, rgba(165,214,167,.22), transparent 70%); pointer-events: none;
+  }
+  .hero .store { font-size: 13px; font-weight: 600; opacity: .85; letter-spacing: .02em; }
+  .hero h1 { font-size: 24px; margin: 6px 0 0; line-height: 1.3; }
+
+  .panel { margin-top: 16px; padding: 26px 22px; text-align: center; }
+  .panel .ic { width: 60px; height: 60px; margin: 0 auto 16px; color: var(--green-700); }
+  .panel h2 { font-size: 20px; margin: 0 0 12px; }
+  .panel p { color: var(--ink-2); font-size: 15px; line-height: 1.75; margin: 0 0 8px; }
+  .free { display: inline-block; margin-top: 12px; padding: 7px 14px; background: var(--green-100);
+          border-radius: 999px; font-size: 14px; font-weight: 700; color: var(--green-800); }
+  .note { margin-top: 22px; font-size: 12.5px; color: var(--ink-3); text-align: center; line-height: 1.7; }
+  .panel .btn { margin-top: 22px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<header class="hero">
+  <div class="store">품앗이 로컬푸드 지족점</div>
+  <h1>알림 수신거부</h1>
+</header>
+
+<main class="wrap">
+  <!-- 확인 화면 -->
+  <section class="card panel" id="confirm-view" hidden>
+    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+      <path d="M4 4h16v12H8l-4 4V4z" stroke-linejoin="round"/><path d="M9 10h6" stroke-linecap="round"/>
+    </svg>
+    <h2>수신을 거부하시겠습니까?</h2>
+    <p>거부하시면 앞으로 광고 문자를 보내드리지 않습니다.</p>
+    <span class="free">이 절차는 무료입니다</span>
+    <button type="button" class="btn btn-primary btn-block" id="confirm-btn">수신거부하기</button>
+  </section>
+
+  <!-- 완료 화면 -->
+  <section class="card panel" id="done-view" hidden>
+    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"/><path d="M8 12l2.5 2.5L16 9" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <h2>수신이 중지되었습니다</h2>
+    <p>앞으로 광고 문자를 보내드리지 않습니다.<br>그동안 이용해 주셔서 감사합니다.</p>
+  </section>
+
+  <!-- 링크 오류 -->
+  <section class="card panel" id="invalid-view" hidden>
+    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"/><path d="M12 7v6" stroke-linecap="round"/><circle cx="12" cy="16.5" r="1" fill="currentColor" stroke="none"/>
+    </svg>
+    <h2>링크를 확인해 주세요</h2>
+    <p>수신거부 링크가 올바르지 않습니다.<br>문자에 포함된 링크를 그대로 눌러 주세요.</p>
+  </section>
+
+  <p class="note">수신거부에는 어떤 비용도 들지 않습니다.</p>
+</main>
+
+<script>
+// 🔴 [별표 6] 공통2: 전송에 이용된 연락처 외의 정보를 요구하지 않는다.
+//    이 페이지는 이름·생년월일 등 어떤 입력도 받지 않고, 문자 링크의 토큰 하나만 사용한다.
+const token = new URLSearchParams(location.search).get('t') || '';
+
+function show(id) {
+  ['confirm-view', 'done-view', 'invalid-view'].forEach(v => {
+    document.getElementById(v).hidden = (v !== id);
+  });
+}
+function toast(msg, kind) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'show ' + (kind || '');
+  clearTimeout(t._h); t._h = setTimeout(() => t.className = '', 4000);
+}
+
+(async function init() {
+  if (!token) { show('invalid-view'); return; }
+  try {
+    const res = await fetch('/api/foodplan/optout?t=' + encodeURIComponent(token));
+    const data = await res.json();
+    show(data && data.valid ? 'confirm-view' : 'invalid-view');
+  } catch (e) {
+    // 조회 실패 시에도 거부를 막지 않는다 — 버튼을 띄우고 실제 처리에서 판정
+    show('confirm-view');
+  }
+})();
+
+document.getElementById('confirm-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('confirm-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> 처리 중…';
+  try {
+    const res = await fetch('/api/foodplan/optout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ t: token }),
+    });
+    const data = await res.json();
+    if (res.ok && data.ok) { show('done-view'); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+    if (res.status === 400) { show('invalid-view'); return; }
+    throw new Error('fail');
+  } catch (e) {
+    toast('처리 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.', 'err');
+    btn.disabled = false; btn.textContent = '수신거부하기';
+  }
+});
+</script>
+</body>
+</html>
