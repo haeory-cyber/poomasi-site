@@ -592,6 +592,35 @@ body::after {
 }
 .solidarity-landing .si-foot .si-note { margin-top: 0; }
 .solidarity-landing .si-foot a { color: var(--gam-deep); }
+/* 꼬리말은 장(章)이 아니다 — 一二三四五 표시를 끈다.
+   footer 는 section 과 별개 타입이라 nth-of-type(1) 에 걸린다(2026-08-20).
+   위 장번호 규칙과 특정도를 맞춰야 이긴다(.si-section 를 함께 적는 이유). */
+.solidarity-landing .si-section.si-foot .si-section-inner::before { content: none; }
+
+.solidarity-landing .si-foot-org {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 1.02rem;
+  color: var(--meok-deep);
+  margin: 1.8rem 0 0.5rem;
+}
+.solidarity-landing .si-foot .si-foot-org + .si-note { margin-top: 0; }
+
+.solidarity-landing .si-foot-nav {
+  margin: 1.2rem 0 0;
+  font-size: 0.95rem;
+}
+.solidarity-landing .si-foot-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.solidarity-landing .si-foot-nav a:focus-visible {
+  outline: 3px solid var(--meok-deep);
+  outline-offset: 3px;
+}
 
 @media (max-width: 768px) {
   .solidarity-landing .si-lang {

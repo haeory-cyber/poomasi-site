@@ -38,6 +38,32 @@
 
 ## 수정 이력
 
+### 2026-08-20
+
+#### 방명록 + 연락처 푸터 신설
+**백업**: `index.html.bak_20260820`, `en/index.html.bak_20260820`, `assets/landing-hanji.css.bak_20260820`
+**설계**: `docs/superpowers/specs/2026-08-20-guestbook-contact-design.md`
+
+- **`guestbook.html` 신규** — 승인된 글 열람 + 작성 폼. 한지 테마 확장(`assets/guestbook.css`, `assets/guestbook.js`).
+  landing-hanji.js 를 싣지 않으므로 `si-reveal` 계열은 쓰지 않고 `gb-` 클래스 체계를 따로 뒀다.
+- **푸터** — 상호·주소·이메일(mailto)·방명록 링크. 🔴 전화번호는 넣지 않는다(후니님 지시).
+  🔴 관저점은 폐점(26-08-07)이라 주소는 지족점 단일.
+  - `index.html`: 푸터가 아예 없었다 → `si-foot` 구조로 신설
+  - `en/index.html`: **이미 푸터가 있었다**(join.poomasi.org 안내). 기존 카피는 손대지 않고 블록만 덧붙였다.
+    항목명만 영문이고 주소는 한글 원문 그대로 — 영문 음역은 정본에 없어서 지어내게 된다.
+- **`assets/landing-hanji.css`** — `.si-foot-org` / `.si-foot-nav` 추가.
+  꼬리말에 뜨던 장(章) 번호 「一」 제거: `footer`는 `section`과 별개 타입이라
+  `.si-section:nth-of-type(1)` 에 걸린다. 영문판에 있던 기존 증상도 함께 사라졌다.
+- **데이터** — Supabase `guestbook` 테이블 + `guestbook_public` 뷰.
+  🔴 anon 은 테이블 SELECT·UPDATE·DELETE 불가, INSERT 만. 공개 읽기는 뷰로만 하고
+  **뷰에 email 컬럼이 아예 없다.** INSERT 정책이 `status='pending'` 을 강제해서 승인 우회도 막는다.
+  브라우저는 supabase-js 없이 `fetch` 로 직접 호출(REST 2개뿐이라 207KB 라이브러리를 매달 이유가 없다).
+  🔴 POST 에 `Prefer: return=representation` 을 넣으면 SELECT 권한을 요구해 401 이 난다.
+- **봇 대응** — 허니팟 + 최소 작성시간 3초. 승인함이 스팸으로 넘치는 걸 막는 용도이지
+  노출을 막는 장치가 아니다(전부 승인 대기로 들어가므로 노출 위험은 이미 0).
+- 승인 화면은 admin.poomasi.org (별도 레포 `poomasi-infra-git`).
+
+
 ### 2026-07-02
 
 #### index.html — 한지·낮(Hanji Daylight) 리디자인 교체

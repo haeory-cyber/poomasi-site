@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>방명록 — 연대지능</title>
+<meta name="description" content="poomasi.org 방명록. 오가는 분들이 남긴 말과, 우리에게 닿는 길.">
+<meta property="og:title" content="방명록 — 연대지능">
+<meta property="og:description" content="오가는 분들이 남긴 말.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://poomasi.org/guestbook.html">
+<meta property="og:locale" content="ko_KR">
+<link rel="canonical" href="https://poomasi.org/guestbook.html">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23c4803a'/><text x='16' y='22' text-anchor='middle' font-size='18' fill='%230f0b07'>品</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500&family=Noto+Serif+KR:wght@500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/landing-hanji.css">
+<link rel="stylesheet" href="/assets/guestbook.css">
+</head>
+<body class="gb-body">
+<a href="#gb-main" class="si-skip">본문으로 건너뛰기</a>
+
+<div class="gb-page">
+
+  <header class="gb-head">
+    <div class="gb-inner">
+      <a class="gb-back" href="/">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        연대지능
+      </a>
+      <h1 class="gb-title">방명록</h1>
+      <p class="gb-lede">오가는 분들이 남긴 말입니다. 한 줄 남기고 가셔도 좋습니다.</p>
+    </div>
+  </header>
+
+  <main id="gb-main" class="gb-main">
+    <div class="gb-inner">
+
+      <section class="gb-entries" aria-labelledby="gb-entries-h">
+        <h2 id="gb-entries-h" class="gb-h2">남겨주신 말</h2>
+
+        <p class="gb-state" id="gb-loading" role="status">불러오는 중…</p>
+
+        <ul class="gb-list" id="gb-list" hidden></ul>
+
+        <p class="gb-state gb-empty" id="gb-empty" hidden>
+          아직 남겨진 글이 없습니다. 첫 글을 남겨주세요.
+        </p>
+
+        <p class="gb-state gb-error" id="gb-listerror" role="alert" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          목록을 불러오지 못했습니다. 네트워크를 확인하고 새로고침해 주세요.
+        </p>
+      </section>
+
+      <section class="gb-write" aria-labelledby="gb-write-h">
+        <h2 id="gb-write-h" class="gb-h2">글 남기기</h2>
+
+        <form class="gb-form" id="gb-form" novalidate>
+          <div class="gb-field">
+            <label for="gb-name">이름 <span class="gb-req" aria-hidden="true">*</span><span class="gb-sr">필수</span></label>
+            <input type="text" id="gb-name" name="name" maxlength="40" required autocomplete="name">
+            <p class="gb-err" id="gb-name-err" hidden></p>
+          </div>
+
+          <div class="gb-field">
+            <label for="gb-email">이메일 <span class="gb-req" aria-hidden="true">*</span><span class="gb-sr">필수</span></label>
+            <input type="email" id="gb-email" name="email" maxlength="120" required autocomplete="email" aria-describedby="gb-email-help">
+            <p class="gb-help" id="gb-email-help">이메일은 공개되지 않으며, 답장이 필요할 때만 씁니다.</p>
+            <p class="gb-err" id="gb-email-err" hidden></p>
+          </div>
+
+          <div class="gb-field">
+            <label for="gb-body">내용 <span class="gb-req" aria-hidden="true">*</span><span class="gb-sr">필수</span></label>
+            <textarea id="gb-body" name="body" rows="6" maxlength="2000" required></textarea>
+            <p class="gb-err" id="gb-body-err" hidden></p>
+          </div>
+
+          <!-- 봇 유인용. 사람에게는 보이지 않는다. -->
+          <div class="gb-hp" aria-hidden="true">
+            <label for="gb-company">회사명</label>
+            <input type="text" id="gb-company" name="company" tabindex="-1" autocomplete="off">
+          </div>
+
+          <button type="submit" class="gb-submit" id="gb-submit">
+            <span class="gb-submit-label">남기기</span>
+          </button>
+
+          <p class="gb-note">확인 후 게시됩니다. 남기신 글이 바로 보이지는 않습니다.</p>
+
+          <p class="gb-formmsg" id="gb-formmsg" role="status" hidden></p>
+        </form>
+
+        <div class="gb-done" id="gb-done" hidden>
+          <div class="gb-done-seal" aria-hidden="true">品</div>
+          <h3>남겨주셔서 고맙습니다</h3>
+          <p>확인 후 게시됩니다. 조금만 기다려 주세요.</p>
+          <button type="button" class="gb-again" id="gb-again">한 번 더 남기기</button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="gb-foot">
+    <div class="gb-inner">
+      <p class="gb-foot-name">품앗이소비자생활협동조합</p>
+      <p class="gb-foot-line">대전광역시 유성구 지족로 364번길 40, 105호</p>
+      <p class="gb-foot-line"><a href="mailto:haeory@poomasi.org">haeory@poomasi.org</a></p>
+    </div>
+  </footer>
+
+</div>
+
+<script src="/assets/guestbook.js"></script>
+</body>
+</html>
