@@ -352,7 +352,7 @@ async function doLogin() {
   const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
 
   if (error) {
-    err.textContent = '로그인 실패: ' + (error.message || '이메일/비밀번호를 확인하세요.');
+    err.textContent = /invalid login/i.test(error.message || '') ? '이메일 또는 비밀번호가 맞지 않습니다.' : '로그인 실패: ' + (error.message || '이메일/비밀번호를 확인하세요.');
     err.style.display = 'block';
     btn.disabled = false;
     btn.textContent = '로그인';
