@@ -922,6 +922,10 @@ ZOHO_SMTP_HOST = os.environ.get("ZOHO_SMTP_HOST", "smtp.zoho.com")
 ZOHO_SMTP_USER = os.environ.get("ZOHO_SMTP_USER", "")
 ZOHO_SMTP_PASS = os.environ.get("ZOHO_SMTP_PASS", "")
 
+# 관리자(store_admins)별 발신 계정 — 다운 님 지메일로 직발송하기 위한 저장소.
+# .env 가 아닌 파일인 이유: ① 사람이 화면에서 넣는다 ② 서버 재시작 없이 요청 시점에 읽는다.
+ORDER_SMTP_STORE = os.environ.get("ORDER_SMTP_STORE", "/home/haeory/poomasi/.secrets/order_smtp.json")
+
 ORDER_CHANNELS = ("sms", "email", "kakao", "phone", "fax")
 
 
@@ -993,18 +997,82 @@ def _sms_type(text: str) -> str:
     return "SMS" if n <= 90 else "LMS"
 
 
-def _send_order_email_sync(to: str, subject: str, text: str):
+def _smtp_store_read() -> dict:
+    """발신 계정 저장소 읽기. 없으면 {}. 깨졌거나 못 읽으면 예외(→ 호출부에서 503)."""
+    import json
+
+    try:
+        with open(ORDER_SMTP_STORE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _smtp_store_write(data: dict):
+    import json
+
+    d = os.path.dirname(ORDER_SMTP_STORE)
+    if d:
+        os.makedirs(d, mode=0o700, exist_ok=True)
+    tmp = ORDER_SMTP_STORE + ".tmp"
+    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    os.replace(tmp, ORDER_SMTP_STORE)
+    os.chmod(ORDER_SMTP_STORE, 0o600)
+
+
+def _mask_email(addr: str) -> str:
+    name, _, dom = (addr or "").partition("@")
+    if not dom:
+        return "***"
+    return (name[0] if name else "*") + "***@" + dom
+
+
+def _order_smtp_creds(admin_email: str):
+    """로그인한 관리자의 발신 계정 → 없으면 ZOHO_SMTP_* 폴백 → 둘 다 없으면 (None, None, None)."""
+    ent = _smtp_store_read().get(admin_email) or {}
+    user = (ent.get("smtp_user") or "").strip()
+    pw = ent.get("app_password") or ""
+    if user and pw:
+        return (ent.get("smtp_host") or "smtp.gmail.com").strip(), user, pw
+    if ZOHO_SMTP_USER and ZOHO_SMTP_PASS:
+        return ZOHO_SMTP_HOST, ZOHO_SMTP_USER, ZOHO_SMTP_PASS
+    return None, None, None
+
+
+def _smtp_login_test_sync(host: str, user: str, password: str):
+    """(ok, kind). kind='auth'(비밀번호 문제=4xx) | 'network'(서버·회선 문제=5xx).
+
+    🔴 로그인 거부(사용자 문제)와 연결 실패(서버 문제)를 한 분기로 합치지 않는다.
+    """
+    import smtplib
+    import ssl
+
+    try:
+        with smtplib.SMTP_SSL(host, 465, context=ssl.create_default_context(), timeout=20) as s:
+            s.login(user, password)
+        return True, ""
+    except smtplib.SMTPAuthenticationError:
+        return False, "auth"
+    except (smtplib.SMTPException, OSError):
+        return False, "network"
+
+
+def _send_order_email_sync(host: str, user: str, password: str, to: str, subject: str, text: str):
     import smtplib
     import ssl
     from email.message import EmailMessage
 
     msg = EmailMessage()
-    msg["From"] = ZOHO_SMTP_USER
+    msg["From"] = user
+    msg["Reply-To"] = user
     msg["To"] = to
     msg["Subject"] = subject
     msg.set_content(text)
-    with smtplib.SMTP_SSL(ZOHO_SMTP_HOST, 465, context=ssl.create_default_context(), timeout=20) as s:
-        s.login(ZOHO_SMTP_USER, ZOHO_SMTP_PASS)
+    with smtplib.SMTP_SSL(host, 465, context=ssl.create_default_context(), timeout=20) as s:
+        s.login(user, password)
         s.send_message(msg)
 
 
@@ -1071,6 +1139,91 @@ async def _order_bookkeeping(batch: dict, items: list, warnings: list):
             warnings.append(f"현재고 기록 실패 ({code}).")
 
 
+@app.get("/api/order/email-setup")
+async def order_email_setup_get(request: Request):
+    """내 발신 지메일이 연결돼 있는지. 주소는 마스킹해서만 돌려준다."""
+    email, err = await _order_admin(request)
+    if err:
+        return err
+    try:
+        ent = _smtp_store_read().get(email) or {}
+    except Exception:
+        return _err(503, "발신 계정 설정을 읽지 못했습니다.")
+    user = (ent.get("smtp_user") or "").strip()
+    if user:
+        return {"ok": True, "configured": True, "smtp_user": _mask_email(user),
+                "smtp_host": ent.get("smtp_host") or "smtp.gmail.com", "source": "personal"}
+    if ZOHO_SMTP_USER and ZOHO_SMTP_PASS:
+        return {"ok": True, "configured": True, "smtp_user": _mask_email(ZOHO_SMTP_USER),
+                "smtp_host": ZOHO_SMTP_HOST, "source": "server"}
+    return {"ok": True, "configured": False, "smtp_user": ""}
+
+
+@app.post("/api/order/email-setup")
+async def order_email_setup_post(request: Request):
+    """발신 지메일 + 앱 비밀번호 저장. 🔴 실제 SMTP 로그인에 성공해야만 저장한다."""
+    ip = request.client.host if request.client else "unknown"
+    if not _check_rate(ip, True):
+        return _err(429, "요청 한도 초과. 잠시 후 다시 시도해주세요.")
+
+    email, err = await _order_admin(request)
+    if err:
+        return err
+
+    try:
+        body = await request.json()
+    except Exception:
+        return _err(400, "JSON 파싱 실패")
+
+    smtp_user = (body.get("smtp_user") or "").strip()
+    if "@" not in smtp_user or " " in smtp_user or len(smtp_user) < 5:
+        return _err(400, "지메일 주소를 정확히 입력해주세요.")
+    app_password = "".join((body.get("app_password") or "").split())
+    if len(app_password) != 16:
+        return _err(400, "앱 비밀번호는 공백을 빼고 16자입니다. 다시 확인해주세요.")
+    smtp_host = (body.get("smtp_host") or "smtp.gmail.com").strip()
+    if not smtp_host or any(c not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-" for c in smtp_host):
+        return _err(400, "메일 서버 주소 형식이 아닙니다.")
+
+    import asyncio as _asyncio
+
+    ok, kind = await _asyncio.to_thread(_smtp_login_test_sync, smtp_host, smtp_user, app_password)
+    if not ok:
+        if kind == "auth":
+            return _err(400, "구글 로그인 실패: 앱 비밀번호를 확인하세요.")
+        return _err(503, "메일 서버에 연결하지 못했습니다. 잠시 후 다시 시도해주세요.")
+
+    import datetime as _dt
+
+    try:
+        store = _smtp_store_read()
+        store[email] = {
+            "smtp_host": smtp_host,
+            "smtp_user": smtp_user,
+            "app_password": app_password,
+            "saved_at": _dt.datetime.now(_dt.timezone.utc).isoformat(),
+        }
+        _smtp_store_write(store)
+    except Exception:
+        return _err(503, "발신 계정을 저장하지 못했습니다.")
+    return {"ok": True, "configured": True, "smtp_user": _mask_email(smtp_user)}
+
+
+@app.delete("/api/order/email-setup")
+async def order_email_setup_delete(request: Request):
+    email, err = await _order_admin(request)
+    if err:
+        return err
+    try:
+        store = _smtp_store_read()
+        if email in store:
+            del store[email]
+            _smtp_store_write(store)
+    except Exception:
+        return _err(503, "발신 계정을 지우지 못했습니다.")
+    return {"ok": True, "configured": False}
+
+
 @app.post("/api/order/send")
 async def order_send(request: Request):
     """문자·이메일 발주 발송. body: {batch_id, channel, to_contact, message, items, dry_run}"""
@@ -1122,14 +1275,28 @@ async def order_send(request: Request):
     if items is None:
         items = batch.get("items") or []
 
+    smtp_host = smtp_user = smtp_pass = None
     if channel == "sms":
         if not SOLAPI_API_KEY or not SOLAPI_API_SECRET or not SOLAPI_FROM:
             return _err(503, "Solapi 환경변수 미설정 (.env)")
     else:
-        if not ZOHO_SMTP_USER or not ZOHO_SMTP_PASS:
-            return _err(501, "이메일 발송 미설정")
+        try:
+            smtp_host, smtp_user, smtp_pass = _order_smtp_creds(email)
+        except Exception:
+            return _err(503, "발신 계정 설정을 읽지 못했습니다.")
+        if not smtp_user:
+            # 409 = 화면이 「내 지메일로 보내기 설정」 모달을 띄우라는 신호.
+            return JSONResponse(status_code=409, content={"ok": False, "error": "needs_email_setup"})
 
     if body.get("dry_run"):
+        if channel == "email":
+            import asyncio as _asyncio
+
+            ok, kind = await _asyncio.to_thread(_smtp_login_test_sync, smtp_host, smtp_user, smtp_pass)
+            if not ok:
+                if kind == "auth":
+                    return _err(400, "구글 로그인 실패: 앱 비밀번호를 확인하세요.")
+                return _err(503, "메일 서버에 연결하지 못했습니다. 잠시 후 다시 시도해주세요.")
         return {
             "ok": True,
             "dry_run": True,
@@ -1160,10 +1327,12 @@ async def order_send(request: Request):
 
         subject = f"[품앗이생협 지족점] 발주 요청 — {batch.get('supplier_name') or ''}".strip()
         try:
-            await _asyncio.to_thread(_send_order_email_sync, to_contact, subject, message)
+            await _asyncio.to_thread(
+                _send_order_email_sync, smtp_host, smtp_user, smtp_pass, to_contact, subject, message
+            )
         except Exception as e:
             return _err(502, f"이메일 발송 실패: {e}")
-        send_result = {"via": "smtp", "host": ZOHO_SMTP_HOST, "to": to_contact}
+        send_result = {"via": "smtp", "host": smtp_host, "from": smtp_user, "to": to_contact}
 
     # ── 발송 성공 이후 기록 (실패해도 '보냈다'는 사실은 남긴다) ──
     import datetime as _dt

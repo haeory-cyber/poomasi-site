@@ -162,6 +162,31 @@ textarea.msg:focus { border-color:var(--amber); }
 .empty p { margin:0 0 0.75rem; }
 .warn-list { margin:0.6rem 0 0; padding-left:1.1rem; color:#e8c9a0; font-size:0.8rem; }
 
+/* ── 발신 계정 설정 모달 ──────────────────────── */
+.send-from { margin:-0.4rem 0 0.75rem; }
+.send-from button {
+  background:none; border:none; padding:0; margin-left:0.3rem;
+  color:var(--amber-light); font-size:0.74rem; text-decoration:underline; cursor:pointer;
+}
+.modal-back {
+  position:fixed; inset:0; z-index:var(--z-toast); background:rgba(15,11,7,0.75);
+  display:flex; align-items:center; justify-content:center; padding:1rem; overflow-y:auto;
+}
+/* 🔴 display:flex 가 [hidden] 을 이긴다 — 이 줄이 없으면 안 보이는 모달이 화면 전체 클릭을 먹는다 */
+.modal-back[hidden] { display:none; }
+.modal {
+  width:100%; max-width:26rem; background:var(--panel); border:1px solid var(--border);
+  border-radius:14px; padding:1.5rem 1.25rem;
+}
+.modal h2 { font-size:1.15rem; color:var(--amber-light); margin-bottom:0.35rem; }
+.modal-sub { font-size:0.8rem; color:var(--dust); margin:0 0 1rem; }
+.es-steps { margin:0 0 1.1rem; padding-left:1.2rem; font-size:0.85rem; color:var(--cream); }
+.es-steps li { margin-bottom:0.4rem; }
+.es-steps b { color:var(--amber-light); }
+.es-err { min-height:1.2rem; margin:0.5rem 0 0; color:#e88a7a; font-size:0.82rem; }
+.es-alt { margin:1rem 0 0; font-size:0.8rem; text-align:center; }
+.es-alt a { color:var(--dust); }
+
 /* ── 토스트 ───────────────────────────────────── */
 #toast {
   position:fixed; left:50%; bottom:1.5rem; transform:translateX(-50%) translateY(1rem);
@@ -288,6 +313,33 @@ textarea.msg:focus { border-color:var(--amber); }
   </main>
 </div>
 
+<!-- ── 내 지메일로 보내기 설정 ─────────────────── -->
+<div class="modal-back" id="email-setup" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="es-title">
+    <h2 id="es-title">내 지메일로 보내기 설정 (처음 한 번)</h2>
+    <p class="modal-sub">발주 메일이 내 지메일 주소에서 바로 나갑니다. 답장도 나에게 옵니다.</p>
+    <ol class="es-steps">
+      <li>구글 계정 → 보안 → <b>2단계 인증</b>을 켭니다.</li>
+      <li>같은 화면에서 <b>「앱 비밀번호」</b>를 검색해, 이름을 <b>품앗이 발주</b>로 만듭니다.</li>
+      <li>나온 <b>16자 비밀번호</b>를 아래에 붙여넣습니다.</li>
+    </ol>
+    <div class="form-group">
+      <label class="form-label" for="es-user">지메일 주소</label>
+      <input class="form-input" type="email" id="es-user" autocomplete="username" placeholder="name@gmail.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="es-pw">앱 비밀번호 (16자)</label>
+      <input class="form-input" type="password" id="es-pw" autocomplete="off" placeholder="abcd efgh ijkl mnop">
+    </div>
+    <p class="es-err" id="es-err" role="alert"></p>
+    <div class="btn-row">
+      <button class="btn btn-primary" type="button" id="es-save">연결 확인·저장</button>
+      <button class="btn" type="button" id="es-close">닫기</button>
+    </div>
+    <p class="es-alt" id="es-alt" hidden><a href="#" id="es-mailto">지금은 메일 앱으로 보내기</a></p>
+  </div>
+</div>
+
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -313,6 +365,8 @@ const ICON = {
 };
 
 let _drafts = [], _sent = [], _suppliers = [];
+let _emailFrom = null;   // {configured, smtp_user(마스킹)} — 내 지메일 발신 계정
+let _esPending = null;   // 설정 후 자동 재전송할 발송 건
 
 // ── 유틸 ────────────────────────────────────────
 function esc(s) {
@@ -382,23 +436,39 @@ async function authHeaders() {
 
 /** 서버 호출. 🔴 4xx(내 문제)와 5xx(서버 문제)를 한 분기로 합치지 않는다.
  *  401만 세션 만료로 취급하고, 5xx에서는 세션을 절대 건드리지 않는다. */
-async function callApi(path, body) {
-  const res = await fetch(path, { method:'POST', headers: await authHeaders(), body: JSON.stringify(body) });
+async function callApi(path, body, method) {
+  const opt = { method: method || 'POST', headers: await authHeaders() };
+  if (body !== undefined) opt.body = JSON.stringify(body);
+  const res = await fetch(path, opt);
   let json = null;
   try { json = await res.json(); } catch (e) { /* 본문 없음 */ }
   if (res.ok) return json;
+  let e;
   if (res.status === 401) {
-    throw new Error((json && json.error) || '로그인이 만료되었습니다. 다시 로그인해주세요.');
+    e = new Error((json && json.error) || '로그인이 만료되었습니다. 다시 로그인해주세요.');
+  } else if (res.status >= 500) {
+    e = new Error(((json && json.error) || '서버 오류') + ' — 로그인은 그대로입니다. 잠시 후 다시 시도해주세요.');
+  } else {
+    e = new Error((json && json.error) || ('요청 실패 (' + res.status + ')'));
   }
-  if (res.status >= 500) {
-    throw new Error(((json && json.error) || '서버 오류') + ' — 로그인은 그대로입니다. 잠시 후 다시 시도해주세요.');
-  }
-  throw new Error((json && json.error) || ('요청 실패 (' + res.status + ')'));
+  e.status = res.status;
+  e.code = json && json.error;
+  throw e;
 }
 
 // ── 데이터 로드 ─────────────────────────────────
 async function loadAll() {
+  await loadEmailFrom();   // 카드에 발신 주소를 그리려면 먼저 읽는다
   await Promise.all([loadBatches(), loadSuppliers()]);
+}
+
+/** 내 지메일 발신 계정 상태. 실패해도 화면은 뜬다(버튼 누를 때 409로 다시 안내). */
+async function loadEmailFrom() {
+  try {
+    _emailFrom = await callApi('/api/order/email-setup', undefined, 'GET');
+  } catch (e) {
+    _emailFrom = null;
+  }
 }
 
 async function loadSuppliers() {
@@ -479,6 +549,9 @@ function renderCard(b) {
       <span class="badge badge-default">기본 ${CHANNEL_LABEL[ch] || ch}</span>
       <span class="card-meta">#${b.id} · ${esc(b.created_by || '')} · ${fmtDate(b.created_at)}</span>
     </div>
+    ${isEmail && _emailFrom && _emailFrom.configured
+      ? `<p class="card-meta send-from">발신: ${esc(_emailFrom.smtp_user || '')} ·<button type="button" data-act="email-setup">변경</button></p>`
+      : ''}
 
     <table class="items">
       <thead><tr><th>품목</th><th>발주 수량</th><th>현재고</th></tr></thead>
@@ -556,12 +629,85 @@ async function actSend(btn, id, channel) {
   }
   if (!message) { toast('보낼 문구가 비었습니다.', true); return; }
   await withBusy(btn, '보내는 중…', async () => {
-    const r = await callApi('/api/order/send', {
-      batch_id: id, channel, to_contact: contact, message, items
-    });
+    let r;
+    try {
+      r = await callApi('/api/order/send', {
+        batch_id: id, channel, to_contact: contact, message, items
+      });
+    } catch (e) {
+      // 409 needs_email_setup = 아직 내 지메일이 연결 안 됨. 설정 모달을 띄우고,
+      // 저장에 성공하면 원래 보내려던 이 발주를 자동으로 다시 보낸다.
+      if (channel === 'email' && e.status === 409 && e.code === 'needs_email_setup') {
+        openEmailSetup({ id, contact, message, supplier: (readCard(id).batch || {}).supplier_name || '' });
+        return;
+      }
+      throw e;
+    }
     showWarnings(card, r.warnings);
     toast(`${CHANNEL_LABEL[channel]} 발송 완료 — ${items.length}개 품목`);
     await loadBatches();
+  });
+}
+
+// ── 내 지메일로 보내기 설정 ─────────────────────
+function openEmailSetup(pending) {
+  _esPending = pending || null;
+  const back = document.getElementById('email-setup');
+  const user = document.getElementById('es-user');
+  const pw = document.getElementById('es-pw');
+  document.getElementById('es-err').textContent = '';
+  pw.value = '';
+  user.value = (_emailFrom && _emailFrom.source === 'personal' && !String(_emailFrom.smtp_user || '').includes('*'))
+    ? _emailFrom.smtp_user
+    : (document.getElementById('user-email').textContent || '').trim();
+
+  const alt = document.getElementById('es-alt');
+  alt.hidden = !_esPending;
+  if (_esPending) {
+    const subject = `[품앗이생협 지족점] 발주 요청 — ${_esPending.supplier}`;
+    document.getElementById('es-mailto').href =
+      'mailto:' + encodeURIComponent(_esPending.contact) +
+      '?subject=' + encodeURIComponent(subject) +
+      '&body=' + encodeURIComponent(_esPending.message);
+  }
+  back.hidden = false;
+  user.focus();
+}
+
+function closeEmailSetup() {
+  document.getElementById('email-setup').hidden = true;
+  document.getElementById('es-pw').value = '';   // 앱 비밀번호는 화면에 남기지 않는다
+  _esPending = null;
+}
+
+async function saveEmailSetup(btn) {
+  const errEl = document.getElementById('es-err');
+  const smtp_user = document.getElementById('es-user').value.trim();
+  const pwEl = document.getElementById('es-pw');
+  const app_password = pwEl.value;
+  errEl.textContent = '';
+  if (!smtp_user || !app_password) { errEl.textContent = '지메일 주소와 앱 비밀번호를 모두 입력해주세요.'; return; }
+
+  const pending = _esPending;
+  await withBusy(btn, '확인 중…', async () => {
+    let r;
+    try {
+      r = await callApi('/api/order/email-setup', { smtp_user, app_password });
+    } catch (e) {
+      errEl.textContent = e.message;   // 4xx=비밀번호 문제, 5xx=서버 문제 — 문구가 다르다
+      return;
+    }
+    pwEl.value = '';
+    _emailFrom = { ok: true, configured: true, smtp_user: r.smtp_user, source: 'personal' };
+    closeEmailSetup();
+    toast(`${r.smtp_user} 로 보낼 수 있게 됐습니다.`);
+    // 🔴 재전송 전에는 다시 그리지 않는다 — 다운 님이 고친 문구·수량이 카드에 그대로 있어야 한다.
+    if (pending) {
+      const card = document.querySelector(`[data-batch="${pending.id}"]`);
+      const again = card && card.querySelector('[data-act="send"][data-ch="email"]');
+      if (again) { await actSend(again, pending.id, 'email'); return; }
+    }
+    renderDrafts();
   });
 }
 
@@ -749,7 +895,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       case 'rebuild':       actRebuild(id); break;
       case 'mark-sent':     actMark(btn, id, 'sent', btn.dataset.ch || 'kakao'); break;
       case 'mark-received': actMark(btn, id, 'received'); break;
+      case 'email-setup':   openEmailSetup(null); break;
     }
+  });
+
+  document.getElementById('es-save').addEventListener('click', e => saveEmailSetup(e.currentTarget));
+  document.getElementById('es-close').addEventListener('click', closeEmailSetup);
+  document.getElementById('es-pw').addEventListener('keydown', e => {
+    if (e.key === 'Enter') saveEmailSetup(document.getElementById('es-save'));
+  });
+  document.getElementById('es-mailto').addEventListener('click', closeEmailSetup);
+  document.getElementById('email-setup').addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeEmailSetup();
   });
 
   if (!sb) return;

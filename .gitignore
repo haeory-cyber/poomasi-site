@@ -12,6 +12,7 @@ __pycache__/
 .env
 *.env
 key_box/
+.secrets/
 
 # 데이터 파일
 *.json
