@@ -1,6 +1,7 @@
 """seed.poomasi.org — FastAPI 서버 (정적 파일 + 품아이 API)"""
 import os
 import sys
+import threading
 import time
 from collections import defaultdict
 from contextlib import asynccontextmanager
@@ -218,8 +219,12 @@ engine = None
 coai_engine = None  # 코아이(주민운동 RAG + EXAONE), persona=coai 전용
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
+def _init_engines():
+    """RAG/코아이 엔진 초기화. 임베딩 모델 로딩이 수분 걸려 백그라운드로 돈다.
+
+    준비되기 전 요청은 기존 `engine is None` 경로가 503("AI 엔진이 준비되지 않았습니다")로
+    받아내고, /api/health 는 engine:false 로 보고한다.
+    """
     global engine, coai_engine
     try:
         # rag 패키지 절대 임포트 (from rag.fuzzy_utils import ...) 지원을 위해 부모 dir도 추가
@@ -240,6 +245,14 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             print(f"[seed] CoaiEngine 초기화 실패 (코아이만 비활성): {e}")
             coai_engine = None
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # 🔴 엔진 초기화를 여기서 기다리면 uvicorn 이 포트를 안 연다.
+    # 2026-08-03 실측: 재부팅 후 정적 페이지까지 3분 54초 동안 502 였다.
+    threading.Thread(target=_init_engines, name="seed-engine-init", daemon=True).start()
+    print("[seed] 엔진 초기화 백그라운드 시작 (정적 서빙은 즉시 가능)")
     if _cli_bridge_load_error:
         print(f"[seed] CLI 브릿지 로드 실패 (Gemini 폴백): {_cli_bridge_load_error}")
     elif _cli_bridge:
@@ -759,6 +772,86 @@ def _format_sms_text(text: str, recipient_name: str | None, store_branch: str | 
     return f"{prefix}\n{text}"
 
 
+async def _solapi_send_many(messages_norm: list) -> tuple:
+    """Solapi send-many 호출. 반환 (ok, payload, http_code).
+
+    ok=True  → payload = {count, fail, group_id, status}
+    ok=False → payload = {"error": "..."} , http_code = 502
+    /api/sms-send 와 /api/order/send 가 공유한다(2026-09-04 추출, 동작 불변).
+    """
+    import hmac as _hmac
+    import hashlib as _hashlib
+    import datetime as _dt
+    import secrets as _secrets
+
+    date = _dt.datetime.utcnow().isoformat() + "Z"
+    salt = _secrets.token_hex(16)
+    sig = _hmac.new(
+        SOLAPI_API_SECRET.encode(),
+        (date + salt).encode(),
+        _hashlib.sha256,
+    ).hexdigest()
+    auth_header = f"HMAC-SHA256 apiKey={SOLAPI_API_KEY}, date={date}, salt={salt}, signature={sig}"
+
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.post(
+                "https://api.solapi.com/messages/v4/send-many",
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": auth_header,
+                },
+                json={"messages": messages_norm},
+            )
+    except Exception as e:
+        return (False, {"error": f"Solapi 호출 실패: {e}"}, 502)
+
+    if resp.status_code != 200:
+        try:
+            err = resp.json()
+            err_msg = err.get("message") or err.get("errorMessage") or str(err)[:200]
+        except Exception:
+            err_msg = resp.text[:200]
+        return (False, {"error": f"Solapi 응답 {resp.status_code}: {err_msg}"}, 502)
+
+    try:
+        result = resp.json()
+    except Exception:
+        return (False, {"error": "Solapi 응답 파싱 실패"}, 502)
+
+    # Solapi send-many 응답: count/groupId/status가 최상위 키
+    # count = { total, sentTotal, sentSuccess, sentFailed, sentPending,
+    #           registeredSuccess, registeredFailed, ... }
+    # status: "SENDING" | "COMPLETE" | "PENDING" | ...
+    count_obj = result.get("count") or {}
+    total            = count_obj.get("total")             or 0
+    sent_success     = count_obj.get("sentSuccess")       or 0
+    sent_failed      = count_obj.get("sentFailed")        or 0
+    registered_ok    = count_obj.get("registeredSuccess") or 0
+    registered_fail  = count_obj.get("registeredFailed")  or 0
+
+    group_id = result.get("groupId") or result.get("_id") or ""
+    status_str = result.get("status", "")
+
+    # 등록 자체 실패 (잘못된 번호 형식 등 사전 검증 실패)
+    if registered_fail > 0 and registered_ok == 0:
+        return (False, {"error": f"메시지 등록 실패 ({registered_fail}건). group: {group_id}"}, 502)
+
+    # 등록 성공 + status가 발송 흐름이면 ok (실제 도착은 비동기)
+    if registered_ok > 0 or sent_success > 0 or status_str in ("SENDING", "COMPLETE", "PENDING"):
+        return (True, {
+            "count": sent_success or registered_ok or total,
+            "fail": sent_failed + registered_fail,
+            "group_id": group_id,
+            "status": status_str,
+        }, 200)
+
+    # 알 수 없는 상태
+    return (False, {
+        "error": f"Solapi 응답 분석 불가 — total:{total}, status:{status_str}, group:{group_id}",
+    }, 502)
+
+
 @app.post("/api/sms-send")
 async def sms_send(request: Request):
     """Solapi SMS 발송 프록시.
@@ -814,83 +907,404 @@ async def sms_send(request: Request):
     if not messages_norm:
         return JSONResponse(status_code=400, content={"ok": False, "error": "유효한 메시지 없음"})
 
-    # Solapi HMAC-SHA256 인증
-    import hmac as _hmac
-    import hashlib as _hashlib
-    import datetime as _dt
-    import secrets as _secrets
+    ok, payload, code = await _solapi_send_many(messages_norm)
+    if not ok:
+        return JSONResponse(status_code=code, content={"ok": False, "error": payload["error"]})
+    return {"ok": True, **payload}
 
-    date = _dt.datetime.utcnow().isoformat() + "Z"
-    salt = _secrets.token_hex(16)
-    sig = _hmac.new(
-        SOLAPI_API_SECRET.encode(),
-        (date + salt).encode(),
-        _hashlib.sha256,
-    ).hexdigest()
-    auth_header = f"HMAC-SHA256 apiKey={SOLAPI_API_KEY}, date={date}, salt={salt}, signature={sig}"
 
+# ── 발주 API (order.html + 우니 CLI) ──────────────────
+# 설계서: business/order/설계_우니발주_20260904.md §4
+# 🔴 발송은 사람(store_admins)의 세션 토큰이 있어야만 된다. 우니는 비밀번호가 없어
+#    구조적으로 혼자 못 보낸다. 인증으로 막지, 훅으로 막지 않는다.
+SUPABASE_ANON_KEY = os.environ.get("SUPABASE_ANON_KEY", "") or SUPABASE_KEY
+ZOHO_SMTP_HOST = os.environ.get("ZOHO_SMTP_HOST", "smtp.zoho.com")
+ZOHO_SMTP_USER = os.environ.get("ZOHO_SMTP_USER", "")
+ZOHO_SMTP_PASS = os.environ.get("ZOHO_SMTP_PASS", "")
+
+ORDER_CHANNELS = ("sms", "email", "kakao", "phone", "fax")
+
+
+def _err(code: int, msg: str):
+    return JSONResponse(status_code=code, content={"ok": False, "error": msg})
+
+
+async def _sb(method: str, table: str, params: dict = None, body=None, prefer: str = None):
+    """service 키로 Supabase REST 호출. 반환 (status_code, json|None)."""
+    headers = {
+        "apikey": SUPABASE_KEY,
+        "Authorization": f"Bearer {SUPABASE_KEY}",
+        "Content-Type": "application/json",
+    }
+    if prefer:
+        headers["Prefer"] = prefer
+    async with httpx.AsyncClient(timeout=15.0) as client:
+        r = await client.request(
+            method, f"{SUPABASE_URL}/rest/v1/{table}", params=params, json=body, headers=headers
+        )
     try:
-        async with httpx.AsyncClient(timeout=15.0) as client:
-            resp = await client.post(
-                "https://api.solapi.com/messages/v4/send-many",
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": auth_header,
-                },
-                json={"messages": messages_norm},
+        return r.status_code, (r.json() if r.text.strip() else None)
+    except ValueError:
+        return r.status_code, None
+
+
+async def _order_admin(request: Request):
+    """(email, error_response). 토큰 검증 → store_admins 확인.
+
+    🔴 4xx(로그인 문제)와 5xx(서버 문제)를 합치지 않는다. Supabase가 죽었을 때
+       401을 돌려주면 화면이 멀쩡한 세션을 지워버린다.
+    """
+    auth = request.headers.get("authorization", "")
+    if not auth.startswith("Bearer ") or not auth[7:].strip():
+        return "", _err(401, "로그인이 필요합니다.")
+    if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+        return "", _err(503, "인증 서버 설정이 없습니다 (.env).")
+    token = auth[7:]
+    try:
+        async with httpx.AsyncClient(timeout=8.0) as client:
+            r = await client.get(
+                f"{SUPABASE_URL}/auth/v1/user",
+                headers={"apikey": SUPABASE_ANON_KEY, "Authorization": f"Bearer {token}"},
             )
-    except Exception as e:
-        return JSONResponse(status_code=502, content={"ok": False, "error": f"Solapi 호출 실패: {e}"})
+    except httpx.HTTPError as e:
+        return "", _err(503, f"인증 서버에 연결하지 못했습니다: {e}")
+    if r.status_code >= 500:
+        return "", _err(503, f"인증 서버 오류({r.status_code}). 잠시 후 다시 시도해주세요.")
+    if r.status_code != 200:
+        return "", _err(401, "로그인이 만료되었습니다. 다시 로그인해주세요.")
+    email = ((r.json() or {}).get("email") or "").strip()
+    if not email:
+        return "", _err(401, "토큰에서 계정을 확인하지 못했습니다.")
 
-    if resp.status_code != 200:
-        try:
-            err = resp.json()
-            err_msg = err.get("message") or err.get("errorMessage") or str(err)[:200]
-        except Exception:
-            err_msg = resp.text[:200]
-        return JSONResponse(status_code=502, content={"ok": False, "error": f"Solapi 응답 {resp.status_code}: {err_msg}"})
+    code, rows = await _sb("GET", "store_admins", {"email": f"eq.{email}", "limit": "1"})
+    if code >= 500:
+        return "", _err(503, "관리자 확인에 실패했습니다. 잠시 후 다시 시도해주세요.")
+    if not rows:
+        return "", _err(403, f"매장 관리자만 발주를 보낼 수 있습니다 ({email}).")
+    return email, None
+
+
+def _sms_type(text: str) -> str:
+    """Solapi 과금 타입. EUC-KR 90바이트 초과면 LMS."""
+    try:
+        n = len(text.encode("euc-kr", errors="replace"))
+    except Exception:
+        n = len(text.encode("utf-8"))
+    return "SMS" if n <= 90 else "LMS"
+
+
+def _send_order_email_sync(to: str, subject: str, text: str):
+    import smtplib
+    import ssl
+    from email.message import EmailMessage
+
+    msg = EmailMessage()
+    msg["From"] = ZOHO_SMTP_USER
+    msg["To"] = to
+    msg["Subject"] = subject
+    msg.set_content(text)
+    with smtplib.SMTP_SSL(ZOHO_SMTP_HOST, 465, context=ssl.create_default_context(), timeout=20) as s:
+        s.login(ZOHO_SMTP_USER, ZOHO_SMTP_PASS)
+        s.send_message(msg)
+
+
+async def _save_supplier_contact(supplier_name: str, channel: str, to_contact: str, warnings: list):
+    """발송 성공 시 업체 연락처 자동 저장. 비어 있으면 채우고, 다르면 note에 이력."""
+    if not supplier_name or not to_contact:
+        return
+    field = "email" if channel == "email" else "phone"
+    code, rows = await _sb("GET", "suppliers", {"name": f"eq.{supplier_name}", "limit": "1"})
+    if code != 200 or not rows:
+        warnings.append(f"업체 '{supplier_name}' 를 찾지 못해 연락처를 저장하지 못했습니다.")
+        return
+    sup = rows[0]
+    import datetime as _dt
+
+    patch = {"channel": channel, "contact_updated_at": _dt.datetime.now(_dt.timezone.utc).isoformat()}
+    old = (sup.get(field) or "").strip()
+    if not old:
+        patch[field] = to_contact
+    elif old != to_contact:
+        stamp = _dt.datetime.now(_dt.timezone(_dt.timedelta(hours=9))).strftime("%m-%d")
+        label = "이전 번호" if field == "phone" else "이전 이메일"
+        patch[field] = to_contact
+        patch["note"] = ((sup.get("note") or "") + f" [{stamp} {label}: {old}]").strip()
+    code, _ = await _sb("PATCH", "suppliers", {"id": f"eq.{sup['id']}"}, body=patch)
+    if code >= 400:
+        warnings.append(f"업체 연락처 저장 실패 ({code}).")
+
+
+async def _order_bookkeeping(batch: dict, items: list, warnings: list):
+    """staff_data 수량 갱신 + 현재고 실사(snapshot) 기록."""
+    import datetime as _dt
+
+    now = _dt.datetime.now(_dt.timezone.utc).isoformat()
+    snaps = []
+    for it in items or []:
+        ids = it.get("staff_ids") or []
+        qty = it.get("qty")
+        # 🔴 현장요청이 여러 건이면 수량 배분을 시스템이 지어내지 않는다(사람이 확인한 값만).
+        if len(ids) == 1 and isinstance(qty, int):
+            code, _ = await _sb("PATCH", "staff_data", {"id": f"eq.{ids[0]}"}, body={"qty": qty})
+            if code >= 400:
+                warnings.append(f"현장요청 #{ids[0]} 수량 갱신 실패 ({code}).")
+        elif len(ids) > 1:
+            warnings.append(
+                f"'{it.get('item_name')}' 는 현장요청 {len(ids)}건이 묶여 있어 수량을 나누지 않았습니다."
+            )
+        sn = it.get("stock_now")
+        if isinstance(sn, bool) or not isinstance(sn, (int, float)):
+            continue
+        snaps.append({
+            "item_name": it.get("item_name"),
+            "farmer_name": batch.get("supplier_name"),
+            "kind": "snapshot",
+            "qty": int(sn),
+            "at": now,
+            "source": "order.html",
+            "batch_id": batch["id"],
+            "org_id": batch.get("org_id") or "poomasi",
+        })
+    if snaps:
+        code, _ = await _sb("POST", "stock_events", body=snaps)
+        if code >= 400:
+            warnings.append(f"현재고 기록 실패 ({code}).")
+
+
+@app.post("/api/order/send")
+async def order_send(request: Request):
+    """문자·이메일 발주 발송. body: {batch_id, channel, to_contact, message, items, dry_run}"""
+    ip = request.client.host if request.client else "unknown"
+    if not _check_rate(ip, True):
+        return _err(429, "요청 한도 초과. 잠시 후 다시 시도해주세요.")
+
+    email, err = await _order_admin(request)
+    if err:
+        return err
 
     try:
-        result = resp.json()
+        body = await request.json()
     except Exception:
-        return JSONResponse(status_code=502, content={"ok": False, "error": "Solapi 응답 파싱 실패"})
+        return _err(400, "JSON 파싱 실패")
 
-    # Solapi send-many 응답: count/groupId/status가 최상위 키
-    # count = { total, sentTotal, sentSuccess, sentFailed, sentPending,
-    #           registeredSuccess, registeredFailed, ... }
-    # status: "SENDING" | "COMPLETE" | "PENDING" | ...
-    count_obj = result.get("count") or {}
-    total            = count_obj.get("total")             or 0
-    sent_success     = count_obj.get("sentSuccess")       or 0
-    sent_failed      = count_obj.get("sentFailed")        or 0
-    registered_ok    = count_obj.get("registeredSuccess") or 0
-    registered_fail  = count_obj.get("registeredFailed")  or 0
+    batch_id = body.get("batch_id")
+    if not isinstance(batch_id, int):
+        try:
+            batch_id = int(batch_id)
+        except (TypeError, ValueError):
+            return _err(400, "batch_id 가 필요합니다.")
 
-    group_id = result.get("groupId") or result.get("_id") or ""
-    status_str = result.get("status", "")
+    channel = (body.get("channel") or "").strip()
+    if channel not in ("sms", "email"):
+        return _err(400, "이 창구는 문자(sms)·이메일(email)만 보냅니다. 카톡·전화는 /api/order/mark 로 기록하세요.")
 
-    # 등록 자체 실패 (잘못된 번호 형식 등 사전 검증 실패)
-    if registered_fail > 0 and registered_ok == 0:
-        return JSONResponse(status_code=502, content={
-            "ok": False,
-            "error": f"메시지 등록 실패 ({registered_fail}건). group: {group_id}",
-        })
+    to_contact = (body.get("to_contact") or "").strip()
+    if not to_contact:
+        return _err(400, "받는 곳(전화번호 또는 이메일)을 입력해주세요.")
+    if channel == "email" and "@" not in to_contact:
+        return _err(400, "이메일 주소 형식이 아닙니다.")
+    if channel == "sms" and not to_contact.replace("-", "").isdigit():
+        return _err(400, "전화번호 형식이 아닙니다.")
 
-    # 등록 성공 + status가 발송 흐름이면 ok (실제 도착은 비동기)
-    if registered_ok > 0 or sent_success > 0 or status_str in ("SENDING", "COMPLETE", "PENDING"):
+    code, rows = await _sb("GET", "order_batches", {"id": f"eq.{batch_id}", "limit": "1"})
+    if code >= 500:
+        return _err(503, "발주 정보를 읽지 못했습니다. 잠시 후 다시 시도해주세요.")
+    if not rows:
+        return _err(404, f"발주 #{batch_id} 를 찾을 수 없습니다.")
+    batch = rows[0]
+    if batch.get("status") in ("received", "cancelled"):
+        return _err(400, f"발주 #{batch_id} 는 이미 '{batch.get('status')}' 상태입니다.")
+
+    message = (body.get("message") or batch.get("message") or "").strip()
+    if not message:
+        return _err(400, "보낼 문구가 비었습니다.")
+    items = body.get("items")
+    if items is None:
+        items = batch.get("items") or []
+
+    if channel == "sms":
+        if not SOLAPI_API_KEY or not SOLAPI_API_SECRET or not SOLAPI_FROM:
+            return _err(503, "Solapi 환경변수 미설정 (.env)")
+    else:
+        if not ZOHO_SMTP_USER or not ZOHO_SMTP_PASS:
+            return _err(501, "이메일 발송 미설정")
+
+    if body.get("dry_run"):
         return {
             "ok": True,
-            "count": sent_success or registered_ok or total,
-            "fail": sent_failed + registered_fail,
-            "group_id": group_id,
-            "status": status_str,
+            "dry_run": True,
+            "batch_id": batch_id,
+            "channel": channel,
+            "to": to_contact,
+            "sms_type": _sms_type(message) if channel == "sms" else None,
+            "message_length": len(message),
+            "item_count": len(items),
+            "approved_by": email,
         }
 
-    # 알 수 없는 상태
-    return JSONResponse(status_code=502, content={
-        "ok": False,
-        "error": f"Solapi 응답 분석 불가 — total:{total}, status:{status_str}, group:{group_id}",
-    })
+    # ── 실제 발송 ──
+    if channel == "sms":
+        to_clean = to_contact.replace("-", "")
+        msgs = [{
+            "to": to_clean,
+            "from": SOLAPI_FROM.replace("-", ""),
+            "text": message,
+            "type": _sms_type(message),
+        }]
+        ok, payload, http_code = await _solapi_send_many(msgs)
+        if not ok:
+            return JSONResponse(status_code=http_code, content={"ok": False, "error": payload["error"]})
+        send_result = {"via": "solapi", **payload}
+    else:
+        import asyncio as _asyncio
+
+        subject = f"[품앗이생협 지족점] 발주 요청 — {batch.get('supplier_name') or ''}".strip()
+        try:
+            await _asyncio.to_thread(_send_order_email_sync, to_contact, subject, message)
+        except Exception as e:
+            return _err(502, f"이메일 발송 실패: {e}")
+        send_result = {"via": "smtp", "host": ZOHO_SMTP_HOST, "to": to_contact}
+
+    # ── 발송 성공 이후 기록 (실패해도 '보냈다'는 사실은 남긴다) ──
+    import datetime as _dt
+
+    warnings = []
+    code, _ = await _sb(
+        "PATCH",
+        "order_batches",
+        {"id": f"eq.{batch_id}"},
+        body={
+            "status": "sent",
+            "sent_at": _dt.datetime.now(_dt.timezone.utc).isoformat(),
+            "channel": channel,
+            "to_contact": to_contact,
+            "message": message,
+            "items": items,
+            "send_result": send_result,
+            "approved_by": email,
+        },
+    )
+    if code >= 400:
+        warnings.append(f"발주 상태 저장 실패 ({code}) — 문자는 나갔습니다.")
+
+    try:
+        await _save_supplier_contact(batch.get("supplier_name"), channel, to_contact, warnings)
+        await _order_bookkeeping(batch, items, warnings)
+    except Exception as e:
+        warnings.append(f"뒷정리 중 오류: {e}")
+
+    return {"ok": True, "batch_id": batch_id, "channel": channel, "send_result": send_result,
+            "approved_by": email, "warnings": warnings}
+
+
+@app.post("/api/order/mark")
+async def order_mark(request: Request):
+    """카톡·전화 발송 기록, 입고 기록. body: {batch_id, status, channel, items, dry_run}"""
+    ip = request.client.host if request.client else "unknown"
+    if not _check_rate(ip, True):
+        return _err(429, "요청 한도 초과. 잠시 후 다시 시도해주세요.")
+
+    email, err = await _order_admin(request)
+    if err:
+        return err
+
+    try:
+        body = await request.json()
+    except Exception:
+        return _err(400, "JSON 파싱 실패")
+
+    batch_id = body.get("batch_id")
+    if not isinstance(batch_id, int):
+        try:
+            batch_id = int(batch_id)
+        except (TypeError, ValueError):
+            return _err(400, "batch_id 가 필요합니다.")
+
+    status = (body.get("status") or "").strip()
+    if status not in ("sent", "received"):
+        return _err(400, "status 는 sent 또는 received 여야 합니다.")
+
+    code, rows = await _sb("GET", "order_batches", {"id": f"eq.{batch_id}", "limit": "1"})
+    if code >= 500:
+        return _err(503, "발주 정보를 읽지 못했습니다. 잠시 후 다시 시도해주세요.")
+    if not rows:
+        return _err(404, f"발주 #{batch_id} 를 찾을 수 없습니다.")
+    batch = rows[0]
+    if batch.get("status") == "cancelled":
+        return _err(400, f"발주 #{batch_id} 는 취소된 건입니다.")
+
+    channel = (body.get("channel") or "").strip()
+    if channel and channel not in ORDER_CHANNELS:
+        return _err(400, f"모르는 채널입니다: {channel}")
+
+    items = body.get("items")
+    if items is None:
+        items = batch.get("items") or []
+
+    if body.get("dry_run"):
+        return {"ok": True, "dry_run": True, "batch_id": batch_id, "status": status,
+                "channel": channel or batch.get("channel"), "item_count": len(items), "by": email}
+
+    import datetime as _dt
+
+    now = _dt.datetime.now(_dt.timezone.utc).isoformat()
+    warnings = []
+
+    if status == "sent":
+        patch = {
+            "status": "sent",
+            "sent_at": now,
+            "channel": channel or batch.get("channel") or "kakao",
+            "approved_by": email,
+            "send_result": {"via": "manual", "channel": channel or batch.get("channel")},
+        }
+        if body.get("to_contact"):
+            patch["to_contact"] = (body.get("to_contact") or "").strip()
+        code, _ = await _sb("PATCH", "order_batches", {"id": f"eq.{batch_id}"}, body=patch)
+        if code >= 400:
+            return _err(502, f"발주 상태 저장 실패 ({code}).")
+        if patch.get("to_contact"):
+            await _save_supplier_contact(batch.get("supplier_name"), patch["channel"], patch["to_contact"], warnings)
+        if batch.get("status") == "draft":
+            await _order_bookkeeping(batch, items, warnings)
+        return {"ok": True, "batch_id": batch_id, "status": "sent", "channel": patch["channel"],
+                "by": email, "warnings": warnings}
+
+    # status == "received"
+    events = []
+    for it in items:
+        try:
+            q = int(it.get("qty") or 0)
+        except (TypeError, ValueError):
+            q = 0
+        if q <= 0:
+            continue
+        events.append({
+            "item_name": it.get("item_name"),
+            "farmer_name": batch.get("supplier_name"),
+            "kind": "inbound",
+            "qty": q,
+            "at": now,
+            "source": "order.html",
+            "batch_id": batch_id,
+            "org_id": batch.get("org_id") or "poomasi",
+        })
+    if events:
+        code, _ = await _sb("POST", "stock_events", body=events)
+        if code >= 400:
+            return _err(502, f"입고 기록 실패 ({code}).")
+    code, _ = await _sb(
+        "PATCH",
+        "order_batches",
+        {"id": f"eq.{batch_id}"},
+        # 🔴 items 는 덮어쓰지 않는다 — "몇 개 시켰나"가 발주 기록이고,
+        #    "몇 개 들어왔나"는 stock_events inbound 가 원장이다.
+        body={"status": "received", "received_at": now, "received_by": email},
+    )
+    if code >= 400:
+        warnings.append(f"발주 상태 저장 실패 ({code}) — 입고는 기록됐습니다.")
+    return {"ok": True, "batch_id": batch_id, "status": "received", "inbound": len(events),
+            "by": email, "warnings": warnings}
 
 
 # ── 위젯 JS 캐시 방지 (자주 업데이트되는 파일) ──────────
