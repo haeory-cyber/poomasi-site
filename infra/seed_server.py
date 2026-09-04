@@ -926,7 +926,8 @@ ZOHO_SMTP_PASS = os.environ.get("ZOHO_SMTP_PASS", "")
 # .env 가 아닌 파일인 이유: ① 사람이 화면에서 넣는다 ② 서버 재시작 없이 요청 시점에 읽는다.
 ORDER_SMTP_STORE = os.environ.get("ORDER_SMTP_STORE", "/home/haeory/poomasi/.secrets/order_smtp.json")
 
-ORDER_CHANNELS = ("sms", "email", "kakao", "phone", "fax")
+# site = 업체 웹사이트 장바구니(두레생협 등). 우니가 담고, 다운 님이 주문 버튼을 누른다.
+ORDER_CHANNELS = ("sms", "email", "kakao", "phone", "fax", "site")
 
 
 def _err(code: int, msg: str):
@@ -1080,7 +1081,7 @@ async def _save_supplier_contact(supplier_name: str, channel: str, to_contact: s
     """발송 성공 시 업체 연락처 자동 저장. 비어 있으면 채우고, 다르면 note에 이력."""
     if not supplier_name or not to_contact:
         return
-    field = "email" if channel == "email" else "phone"
+    field = {"email": "email", "site": "site_url"}.get(channel, "phone")
     code, rows = await _sb("GET", "suppliers", {"name": f"eq.{supplier_name}", "limit": "1"})
     if code != 200 or not rows:
         warnings.append(f"업체 '{supplier_name}' 를 찾지 못해 연락처를 저장하지 못했습니다.")
@@ -1094,7 +1095,7 @@ async def _save_supplier_contact(supplier_name: str, channel: str, to_contact: s
         patch[field] = to_contact
     elif old != to_contact:
         stamp = _dt.datetime.now(_dt.timezone(_dt.timedelta(hours=9))).strftime("%m-%d")
-        label = "이전 번호" if field == "phone" else "이전 이메일"
+        label = {"phone": "이전 번호", "email": "이전 이메일", "site_url": "이전 사이트"}[field]
         patch[field] = to_contact
         patch["note"] = ((sup.get("note") or "") + f" [{stamp} {label}: {old}]").strip()
     code, _ = await _sb("PATCH", "suppliers", {"id": f"eq.{sup['id']}"}, body=patch)
@@ -1368,7 +1369,11 @@ async def order_send(request: Request):
 
 @app.post("/api/order/mark")
 async def order_mark(request: Request):
-    """카톡·전화 발송 기록, 입고 기록. body: {batch_id, status, channel, items, dry_run}"""
+    """카톡·전화·사이트 주문 기록, 입고 기록, 장바구니 담김 기록.
+
+    body: {batch_id, status, channel, items, carted, carted_note, dry_run}
+    status 없이 carted:true 만 오면 담김만 기록하고 주문 상태는 건드리지 않는다.
+    """
     ip = request.client.host if request.client else "unknown"
     if not _check_rate(ip, True):
         return _err(429, "요청 한도 초과. 잠시 후 다시 시도해주세요.")
@@ -1390,7 +1395,8 @@ async def order_mark(request: Request):
             return _err(400, "batch_id 가 필요합니다.")
 
     status = (body.get("status") or "").strip()
-    if status not in ("sent", "received"):
+    carted = bool(body.get("carted"))
+    if status not in ("sent", "received") and not (carted and not status):
         return _err(400, "status 는 sent 또는 received 여야 합니다.")
 
     code, rows = await _sb("GET", "order_batches", {"id": f"eq.{batch_id}", "limit": "1"})
@@ -1412,12 +1418,24 @@ async def order_mark(request: Request):
 
     if body.get("dry_run"):
         return {"ok": True, "dry_run": True, "batch_id": batch_id, "status": status,
-                "channel": channel or batch.get("channel"), "item_count": len(items), "by": email}
+                "channel": channel or batch.get("channel"), "item_count": len(items),
+                "carted": carted, "by": email}
 
     import datetime as _dt
 
     now = _dt.datetime.now(_dt.timezone.utc).isoformat()
     warnings = []
+
+    # 사이트 발주: 장바구니에 담김 기록. status 없이 오면 여기서 끝(주문은 사람이 누른다).
+    if carted and not status:
+        patch = {"carted_at": now}
+        if body.get("carted_note") is not None:
+            patch["carted_note"] = (body.get("carted_note") or "").strip() or None
+        code, _ = await _sb("PATCH", "order_batches", {"id": f"eq.{batch_id}"}, body=patch)
+        if code >= 400:
+            return _err(502, f"담김 기록 저장 실패 ({code}).")
+        return {"ok": True, "batch_id": batch_id, "carted_at": now, "status": batch.get("status"),
+                "by": email, "warnings": warnings}
 
     if status == "sent":
         patch = {
@@ -1429,6 +1447,8 @@ async def order_mark(request: Request):
         }
         if body.get("to_contact"):
             patch["to_contact"] = (body.get("to_contact") or "").strip()
+        if carted and not batch.get("carted_at"):
+            patch["carted_at"] = now
         code, _ = await _sb("PATCH", "order_batches", {"id": f"eq.{batch_id}"}, body=patch)
         if code >= 400:
             return _err(502, f"발주 상태 저장 실패 ({code}).")

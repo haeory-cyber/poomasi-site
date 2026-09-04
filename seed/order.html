@@ -272,6 +272,7 @@ textarea.msg:focus { border-color:var(--amber); }
                 <option value="email">이메일</option>
                 <option value="kakao">카톡</option>
                 <option value="phone">전화</option>
+                <option value="site">사이트</option>
               </select>
             </div>
           </div>
@@ -355,12 +356,13 @@ if (typeof supabase === 'undefined') {
 }
 const sb = (typeof supabase !== 'undefined') ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON) : null;
 
-const CHANNEL_LABEL = { sms:'문자', email:'이메일', kakao:'카톡', phone:'전화', fax:'팩스' };
+const CHANNEL_LABEL = { sms:'문자', email:'이메일', kakao:'카톡', phone:'전화', fax:'팩스', site:'사이트' };
 const ICON = {
   sms:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
   email: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg>',
   kakao: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3c5 0 9 3.1 9 7s-4 7-9 7c-.8 0-1.6-.1-2.3-.2L5 20l1-3.7C4.2 15 3 13.1 3 10c0-3.9 4-7 9-7z"/></svg>',
   phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>',
+  site:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.4 11.2a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.6L21 7H6"/></svg>',
   check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m20 6-11 11-5-5"/></svg>'
 };
 
@@ -472,7 +474,7 @@ async function loadEmailFrom() {
 }
 
 async function loadSuppliers() {
-  const { data, error } = await sb.from('suppliers').select('name,phone,email,channel').order('name');
+  const { data, error } = await sb.from('suppliers').select('name,phone,email,channel,site_url').order('name');
   if (error) return;
   _suppliers = data || [];
   document.getElementById('supplier-names').innerHTML =
@@ -499,7 +501,9 @@ async function loadBatches() {
 function contactFor(supplierName, channel) {
   const s = _suppliers.find(x => x.name === supplierName);
   if (!s) return '';
-  return channel === 'email' ? (s.email || '') : (s.phone || '');
+  if (channel === 'email') return s.email || '';
+  if (channel === 'site')  return s.site_url || '';
+  return s.phone || '';
 }
 
 function renderDrafts() {
@@ -517,6 +521,7 @@ function renderCard(b) {
   const items = b.items || [];
   const contact = b.to_contact || contactFor(b.supplier_name, ch);
   const isEmail = ch === 'email';
+  const isSite  = ch === 'site';   // 업체 웹사이트 장바구니 — 우니가 담고 다운 님이 주문
 
   const rows = items.map((it, i) => `
     <tr>
@@ -527,7 +532,9 @@ function renderCard(b) {
         <input type="number" min="0" inputmode="numeric" id="s-${b.id}-${i}" data-role="stock" value="${it.stock_now ?? ''}" placeholder="—"></td>
     </tr>`).join('');
 
-  const primary = isEmail
+  const primary = isSite
+    ? `<button class="btn btn-primary" type="button" data-act="open-site" data-id="${b.id}">${ICON.site}사이트 열기</button>`
+    : isEmail
     ? `<button class="btn btn-primary" type="button" data-act="send" data-id="${b.id}" data-ch="email">${ICON.email}이메일 보내기</button>`
     : ch === 'kakao'
       ? `<button class="btn btn-primary" type="button" data-act="kakao" data-id="${b.id}">${ICON.kakao}문구 복사 → 카톡 열기</button>`
@@ -535,7 +542,7 @@ function renderCard(b) {
         ? `<button class="btn btn-primary" type="button" data-act="call" data-id="${b.id}">${ICON.phone}전화 걸기</button>`
         : `<button class="btn btn-primary" type="button" data-act="send" data-id="${b.id}" data-ch="sms">${ICON.sms}문자 보내기</button>`;
 
-  const others = ['sms','email','kakao','phone'].filter(c => c !== ch).map(c => {
+  const others = isSite ? '' : ['sms','email','kakao','phone'].filter(c => c !== ch).map(c => {
     if (c === 'sms')   return `<button class="btn" type="button" data-act="send" data-id="${b.id}" data-ch="sms">${ICON.sms}문자</button>`;
     if (c === 'email') return `<button class="btn" type="button" data-act="send" data-id="${b.id}" data-ch="email">${ICON.email}이메일</button>`;
     if (c === 'kakao') return `<button class="btn" type="button" data-act="kakao" data-id="${b.id}">${ICON.kakao}카톡</button>`;
@@ -560,21 +567,29 @@ function renderCard(b) {
 
     <div class="field-row">
       <div class="field">
-        <label class="form-label" for="c-${b.id}">${isEmail ? '받는 이메일' : '받는 전화번호'}</label>
+        <label class="form-label" for="c-${b.id}">${isSite ? '업체 사이트 주소' : isEmail ? '받는 이메일' : '받는 전화번호'}</label>
         <input class="form-input" id="c-${b.id}" data-role="contact"
-          type="${isEmail ? 'email' : 'tel'}" inputmode="${isEmail ? 'email' : 'tel'}"
-          value="${esc(contact)}" placeholder="${isEmail ? 'farm@example.com' : '010-0000-0000'}">
+          type="${isSite ? 'url' : isEmail ? 'email' : 'tel'}" inputmode="${isSite ? 'url' : isEmail ? 'email' : 'tel'}"
+          value="${esc(contact)}" placeholder="${isSite ? '사이트 주소' : isEmail ? 'farm@example.com' : '010-0000-0000'}">
       </div>
-      <button class="btn btn-sm btn-quiet" type="button" data-act="rebuild" data-id="${b.id}">문구 다시 만들기</button>
+      ${isSite ? '' : `<button class="btn btn-sm btn-quiet" type="button" data-act="rebuild" data-id="${b.id}">문구 다시 만들기</button>`}
     </div>
 
+    ${isSite ? '' : `
     <label class="form-label" for="m-${b.id}">보낼 문구</label>
-    <textarea class="msg" id="m-${b.id}" data-role="msg">${esc(b.message || buildMessage(items))}</textarea>
+    <textarea class="msg" id="m-${b.id}" data-role="msg">${esc(b.message || buildMessage(items))}</textarea>`}
+
+    ${isSite ? `<p class="card-meta">장바구니 담기는 우니에게: "두레 장바구니 담아줘"</p>
+    ${b.carted_at
+      ? `<p class="card-meta">✓ 우니가 담음 · ${fmtDate(b.carted_at)}${b.carted_note ? ' · ' + esc(b.carted_note) : ''}</p>`
+      : '<p class="card-meta">아직 담기 전입니다.</p>'}` : ''}
 
     <div class="btn-row">${primary}${others}</div>
-    <div class="btn-row" data-role="post-kakao" hidden>
+    ${isSite ? `<div class="btn-row">
+      <button class="btn btn-confirm" type="button" data-act="mark-sent" data-id="${b.id}" data-ch="site">${ICON.check}주문 완료</button>
+    </div>` : `<div class="btn-row" data-role="post-kakao" hidden>
       <button class="btn btn-confirm" type="button" data-act="mark-sent" data-id="${b.id}">${ICON.check}보냈음 / 했음 기록</button>
-    </div>
+    </div>`}
     <div data-role="warn"></div>
   </article>`;
 }
@@ -752,6 +767,18 @@ function actCall(id) {
   window.location.href = 'tel:' + contact.replace(/[^0-9+]/g, '');
 }
 
+// 사이트 발주: 업체 사이트를 새 탭으로. 담기는 우니가, 주문 버튼은 다운 님이.
+function actOpenSite(id) {
+  const { contact, card } = readCard(id);
+  if (!contact) {
+    toast('업체 사이트 주소를 입력해주세요.', true);
+    card.querySelector('[data-role="contact"]').focus();
+    return;
+  }
+  const url = /^https?:\/\//i.test(contact) ? contact : 'https://' + contact;
+  window.open(url, '_blank', 'noopener');
+}
+
 function actRebuild(id) {
   const { items, card } = readCard(id);
   const used = items.filter(i => i.qty > 0);
@@ -891,6 +918,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     switch (btn.dataset.act) {
       case 'send':          actSend(btn, id, btn.dataset.ch); break;
       case 'kakao':         actKakao(id); break;
+      case 'open-site':     actOpenSite(id); break;
       case 'call':          actCall(id); break;
       case 'rebuild':       actRebuild(id); break;
       case 'mark-sent':     actMark(btn, id, 'sent', btn.dataset.ch || 'kakao'); break;
