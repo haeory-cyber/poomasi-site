@@ -3093,7 +3093,7 @@ function generateOrderMessageFromTable(supplierName, supId, msgId) {
       // td의 첫 번째 셀에서 품목명 추출
       const tr = input.closest('tr');
       if (tr) {
-        const nameTd = tr.querySelector('td:first-child');
+        const nameTd = tr.querySelector('td:nth-child(2)');
         const rawName = nameTd ? nameTd.textContent.trim().replace(/긴급|보통|대비|여유/g, '').trim() : '';
         if (rawName) lines.push(`  - ${rawName}: ${qty}개`);
       }

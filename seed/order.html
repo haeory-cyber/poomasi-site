@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>발주 — 품앗이생협 지족점</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700;900&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --earth:#0f0b07; --soil:#1e1510; --bark:#2d1f14; --amber:#c4803a; --amber-light:#e8a55a;
+  --green:#3d5c35; --green-light:#5a8a4e; --cream:#f2ead8; --dust:#b8a88a; --red:#b83a2a;
+  --white:#faf7f0;
+  --panel:rgba(30,21,16,0.85); --surface:rgba(45,31,20,0.8); --border:rgba(184,168,138,0.2);
+  --z-nav:20; --z-toast:100;
+}
+* { box-sizing:border-box; }
+html, body { margin:0; padding:0; }
+body {
+  background:var(--earth); color:var(--cream);
+  font-family:'Noto Sans KR', sans-serif; font-size:16px; line-height:1.6;
+  -webkit-text-size-adjust:100%;
+}
+h1,h2,h3 { font-family:'Noto Serif KR', serif; margin:0; }
+button, input, textarea, select { font-family:inherit; font-size:inherit; }
+:focus-visible { outline:3px solid var(--amber-light); outline-offset:2px; }
+.sr-only {
+  position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0;
+}
+.skip-link {
+  position:absolute; left:0.5rem; top:-3rem; z-index:var(--z-toast);
+  background:var(--amber); color:var(--earth); padding:0.6rem 1rem; border-radius:6px;
+  font-weight:700; transition:top 0.15s ease-out;
+}
+.skip-link:focus { top:0.5rem; }
+
+/* ── 로그인 ───────────────────────────────────── */
+#login-screen {
+  min-height:100dvh; display:flex; align-items:center; justify-content:center; padding:1.25rem;
+}
+.login-box {
+  width:100%; max-width:23rem; background:var(--panel); border:1px solid var(--border);
+  border-radius:14px; padding:2rem 1.5rem;
+}
+.login-brand { font-size:0.78rem; color:var(--dust); letter-spacing:0.06em; }
+.login-title { font-family:'Noto Serif KR',serif; font-size:1.7rem; font-weight:900; color:var(--amber-light); margin:0.2rem 0 0.1rem; }
+.login-sub { font-size:0.68rem; color:var(--dust); letter-spacing:0.18em; margin-bottom:1.5rem; }
+.form-group { margin-bottom:1rem; }
+.form-label { display:block; font-size:0.8rem; color:var(--dust); margin-bottom:0.35rem; }
+.form-input {
+  width:100%; min-height:2.9rem; padding:0.65rem 0.8rem; background:var(--surface);
+  border:1px solid var(--border); border-radius:8px; color:var(--cream); outline:none;
+}
+.form-input:focus { border-color:var(--amber); }
+.btn-login {
+  width:100%; min-height:3rem; margin-top:0.5rem; background:var(--amber); color:var(--earth);
+  border:none; border-radius:8px; font-weight:700; cursor:pointer;
+}
+.btn-login:disabled { opacity:0.55; cursor:not-allowed; }
+.login-error {
+  display:none; margin-top:0.9rem; padding:0.65rem 0.8rem; background:rgba(184,58,42,0.15);
+  border:1px solid var(--red); border-radius:8px; color:#f0b8b0; font-size:0.85rem;
+}
+
+/* ── 앱 뼈대 ──────────────────────────────────── */
+#app { display:none; padding-bottom:3rem; }
+.sticky-nav { position:sticky; top:0; z-index:var(--z-nav); background:var(--earth); border-bottom:1px solid var(--border); }
+.app-header { display:flex; align-items:center; gap:0.6rem; padding:0.7rem 1rem; }
+.app-logo { font-family:'Noto Serif KR',serif; font-weight:700; color:var(--amber-light); font-size:1.05rem; }
+.header-right { margin-left:auto; display:flex; align-items:center; gap:0.5rem; }
+.user-badge { font-size:0.72rem; color:var(--dust); max-width:9rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.btn-logout {
+  min-height:2.2rem; padding:0.3rem 0.7rem; background:transparent; color:var(--dust);
+  border:1px solid var(--border); border-radius:6px; cursor:pointer; font-size:0.78rem;
+}
+.btn-logout:hover { color:var(--cream); border-color:var(--dust); }
+.tab-bar { display:flex; gap:0.25rem; padding:0 0.5rem 0.5rem; overflow-x:auto; }
+.tab-btn {
+  flex:1 1 auto; min-height:2.9rem; min-width:5.5rem; padding:0.5rem 0.6rem;
+  background:transparent; color:var(--dust); border:1px solid transparent;
+  border-bottom:2px solid transparent; border-radius:6px 6px 0 0; cursor:pointer; white-space:nowrap;
+}
+.tab-btn[aria-selected="true"] { color:var(--amber-light); border-bottom-color:var(--amber); font-weight:700; }
+.tab-count {
+  display:inline-block; min-width:1.4rem; margin-left:0.3rem; padding:0 0.35rem;
+  background:var(--surface); border-radius:999px; font-size:0.7rem; color:var(--cream);
+}
+main { max-width:44rem; margin:0 auto; padding:1rem; }
+.panel[hidden] { display:none; }
+
+/* ── 카드 ─────────────────────────────────────── */
+.card {
+  background:var(--panel); border:1px solid var(--border); border-radius:12px;
+  padding:1rem; margin-bottom:1rem;
+}
+.card-head { display:flex; align-items:baseline; gap:0.5rem; flex-wrap:wrap; margin-bottom:0.75rem; }
+.card-title { font-family:'Noto Serif KR',serif; font-size:1.1rem; font-weight:700; color:var(--cream); }
+.card-meta { font-size:0.74rem; color:var(--dust); }
+.badge {
+  display:inline-flex; align-items:center; gap:0.25rem; padding:0.1rem 0.45rem;
+  border:1px solid currentColor; border-radius:4px; font-size:0.7rem;
+}
+.badge-default { color:var(--amber-light); }
+.badge-warn { color:var(--red); }
+table.items { width:100%; border-collapse:collapse; margin-bottom:0.75rem; }
+table.items th {
+  font-size:0.72rem; font-weight:500; color:var(--dust); text-align:left;
+  padding:0.3rem 0.4rem; border-bottom:1px solid var(--border);
+}
+table.items td { padding:0.35rem 0.4rem; font-size:0.88rem; border-bottom:1px solid rgba(184,168,138,0.08); }
+table.items input[type="number"] {
+  width:4.2rem; min-height:2.6rem; padding:0.3rem 0.4rem; text-align:center;
+  background:var(--surface); border:1px solid var(--border); border-radius:6px;
+  color:var(--cream); outline:none; font-variant-numeric:tabular-nums;
+}
+table.items input[type="number"]:focus { border-color:var(--amber); }
+.num { font-variant-numeric:tabular-nums; }
+.field-row { display:flex; gap:0.5rem; align-items:flex-end; flex-wrap:wrap; margin-bottom:0.75rem; }
+.field { flex:1 1 11rem; min-width:0; }
+textarea.msg {
+  width:100%; min-height:9rem; padding:0.7rem 0.8rem; background:var(--surface);
+  border:1px solid var(--border); border-radius:8px; color:var(--cream);
+  line-height:1.7; resize:vertical; outline:none; font-size:0.9rem;
+}
+textarea.msg:focus { border-color:var(--amber); }
+
+/* ── 버튼 ─────────────────────────────────────── */
+.btn-row { display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.85rem; }
+.btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:0.4rem;
+  min-height:3rem; padding:0.5rem 1rem; border-radius:8px; cursor:pointer;
+  border:1px solid var(--border); background:var(--surface); color:var(--cream);
+  transition:background 0.15s ease-out, border-color 0.15s ease-out;
+}
+.btn:hover:not(:disabled) { border-color:var(--dust); }
+.btn:disabled { opacity:0.5; cursor:not-allowed; }
+.btn svg { width:1.05rem; height:1.05rem; flex:none; }
+.btn-primary {
+  flex:1 1 12rem; min-height:3.4rem; background:var(--amber); border-color:var(--amber);
+  color:var(--earth); font-weight:700; font-size:1.02rem;
+}
+.btn-primary:hover:not(:disabled) { background:var(--amber-light); border-color:var(--amber-light); }
+.btn-confirm { background:var(--green); border-color:var(--green-light); color:var(--white); font-weight:700; }
+.btn-confirm:hover:not(:disabled) { background:var(--green-light); }
+.btn-quiet { background:transparent; color:var(--dust); }
+.btn-sm { min-height:2.4rem; padding:0.3rem 0.7rem; font-size:0.8rem; }
+
+/* ── 재고 / 목록 ──────────────────────────────── */
+.stock-row {
+  display:flex; align-items:center; gap:0.6rem; padding:0.7rem 0.4rem;
+  border-bottom:1px solid rgba(184,168,138,0.1);
+}
+.stock-name { flex:1 1 auto; min-width:0; }
+.stock-name b { display:block; font-weight:500; overflow-wrap:anywhere; }
+.stock-name span { font-size:0.74rem; color:var(--dust); }
+.stock-qty { font-size:1.25rem; font-weight:700; color:var(--amber-light); font-variant-numeric:tabular-nums; }
+.empty { padding:2.5rem 1rem; text-align:center; color:var(--dust); }
+.empty p { margin:0 0 0.75rem; }
+.warn-list { margin:0.6rem 0 0; padding-left:1.1rem; color:#e8c9a0; font-size:0.8rem; }
+
+/* ── 토스트 ───────────────────────────────────── */
+#toast {
+  position:fixed; left:50%; bottom:1.5rem; transform:translateX(-50%) translateY(1rem);
+  z-index:var(--z-toast); max-width:90vw; padding:0.8rem 1.2rem; border-radius:8px;
+  background:var(--bark); border:1px solid var(--amber); color:var(--cream);
+  opacity:0; pointer-events:none; transition:opacity 0.2s ease-out, transform 0.2s ease-out;
+}
+#toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+#toast.err { border-color:var(--red); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration:0.01ms !important; transition-duration:0.01ms !important; }
+}
+@media (min-width: 48rem) {
+  main { padding:1.5rem; }
+  .card { padding:1.25rem; }
+}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+<!-- ── 로그인 ──────────────────────────────────── -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-brand">품앗이소비자생활협동조합</div>
+    <h1 class="login-title">발주</h1>
+    <div class="login-sub">ORDER</div>
+
+    <div class="form-group">
+      <label class="form-label" for="email">이메일</label>
+      <input class="form-input" type="email" id="email" autocomplete="email" placeholder="admin@poomasi.org">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="password">비밀번호</label>
+      <input class="form-input" type="password" id="password" autocomplete="current-password" placeholder="••••••">
+    </div>
+    <button class="btn-login" id="login-btn" type="button">로그인</button>
+    <p class="login-error" id="login-error" role="alert"></p>
+  </div>
+</div>
+
+<!-- ── 앱 ──────────────────────────────────────── -->
+<div id="app">
+  <div class="sticky-nav">
+    <header class="app-header">
+      <span class="app-logo">발주</span>
+      <div class="header-right">
+        <span class="user-badge" id="user-email"></span>
+        <button class="btn-logout" type="button" id="logout-btn">로그아웃</button>
+      </div>
+    </header>
+    <nav class="tab-bar" role="tablist" aria-label="발주 화면">
+      <button class="tab-btn" role="tab" id="tab-draft" aria-controls="panel-draft" aria-selected="true" data-tab="draft">
+        보낼 것<span class="tab-count" id="count-draft">0</span>
+      </button>
+      <button class="tab-btn" role="tab" id="tab-sent" aria-controls="panel-sent" aria-selected="false" data-tab="sent">
+        입고 대기<span class="tab-count" id="count-sent">0</span>
+      </button>
+      <button class="tab-btn" role="tab" id="tab-stock" aria-controls="panel-stock" aria-selected="false" data-tab="stock">
+        재고
+      </button>
+    </nav>
+  </div>
+
+  <main id="main">
+    <section class="panel" id="panel-draft" role="tabpanel" aria-labelledby="tab-draft">
+      <div id="draft-list"><div class="empty">불러오는 중…</div></div>
+
+      <details class="card" id="new-draft">
+        <summary style="cursor:pointer;color:var(--dust);font-size:0.88rem;min-height:2.2rem;">＋ 초안 직접 추가</summary>
+        <div style="margin-top:0.9rem;">
+          <div class="field-row">
+            <div class="field">
+              <label class="form-label" for="nd-supplier">업체 <span aria-hidden="true">*</span></label>
+              <input class="form-input" id="nd-supplier" list="supplier-names" placeholder="두레생협">
+              <datalist id="supplier-names"></datalist>
+            </div>
+            <div class="field">
+              <label class="form-label" for="nd-channel">채널</label>
+              <select class="form-input" id="nd-channel">
+                <option value="sms">문자</option>
+                <option value="email">이메일</option>
+                <option value="kakao">카톡</option>
+                <option value="phone">전화</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label class="form-label" for="nd-item">품목 <span aria-hidden="true">*</span></label>
+              <input class="form-input" id="nd-item" placeholder="오이지">
+            </div>
+            <div class="field" style="flex:0 1 7rem;">
+              <label class="form-label" for="nd-qty">수량 <span aria-hidden="true">*</span></label>
+              <input class="form-input" id="nd-qty" type="number" min="0" inputmode="numeric" placeholder="3">
+            </div>
+            <div class="field" style="flex:0 1 7rem;">
+              <label class="form-label" for="nd-stock">현재고</label>
+              <input class="form-input" id="nd-stock" type="number" min="0" inputmode="numeric" placeholder="선택">
+            </div>
+          </div>
+          <p class="login-error" id="nd-error" role="alert"></p>
+          <button class="btn btn-confirm" type="button" id="nd-submit">초안 만들기</button>
+          <p class="card-meta" style="margin:0.6rem 0 0;">품목이 여러 개면 초안을 만든 뒤 카드에서 수량을 고치거나, 우니에게 <code>draft --items</code> 로 부탁하세요.</p>
+        </div>
+      </details>
+    </section>
+
+    <section class="panel" id="panel-sent" role="tabpanel" aria-labelledby="tab-sent" hidden>
+      <div id="sent-list"><div class="empty">불러오는 중…</div></div>
+    </section>
+
+    <section class="panel" id="panel-stock" role="tabpanel" aria-labelledby="tab-stock" hidden>
+      <div class="field-row">
+        <div class="field">
+          <label class="form-label" for="stock-q">품목 찾기</label>
+          <input class="form-input" id="stock-q" type="search" placeholder="품목명 일부">
+        </div>
+        <button class="btn btn-sm" type="button" id="stock-needs">실사 필요만 보기</button>
+      </div>
+      <div class="card" id="stock-list"><div class="empty">불러오는 중…</div></div>
+    </section>
+  </main>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+'use strict';
+
+const SUPABASE_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRuaXZoY3BqcmhrbWVrY2ZxZ2RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NTc5MjMsImV4cCI6MjA4NzIzMzkyM30.yJ0_4Sg78p7oY89q7go3ab26PCPHnk1Q4ObZJIZEULA';
+
+// CDN 로드 실패 시 조용한 ReferenceError로 페이지가 통째로 죽지 않도록 가드
+if (typeof supabase === 'undefined') {
+  document.addEventListener('DOMContentLoaded', () =>
+    alert('네트워크 또는 차단으로 페이지 모듈 로드에 실패했습니다.\n새로고침하거나 네트워크 연결을 확인해 주세요.'));
+}
+const sb = (typeof supabase !== 'undefined') ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON) : null;
+
+const CHANNEL_LABEL = { sms:'문자', email:'이메일', kakao:'카톡', phone:'전화', fax:'팩스' };
+const ICON = {
+  sms:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+  email: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg>',
+  kakao: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3c5 0 9 3.1 9 7s-4 7-9 7c-.8 0-1.6-.1-2.3-.2L5 20l1-3.7C4.2 15 3 13.1 3 10c0-3.9 4-7 9-7z"/></svg>',
+  phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m20 6-11 11-5-5"/></svg>'
+};
+
+let _drafts = [], _sent = [], _suppliers = [];
+
+// ── 유틸 ────────────────────────────────────────
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+let _toastTimer = null;
+function toast(msg, isErr) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.toggle('err', !!isErr);
+  t.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => t.classList.remove('show'), isErr ? 5000 : 3000);
+}
+function fmtDate(s) {
+  if (!s) return '';
+  const d = new Date(s);
+  return isNaN(d) ? '' : `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+function buildMessage(items) {
+  const lines = items.map(i => `  - ${i.item_name}: ${i.qty}개`).join('\n');
+  return '[품앗이소비자생활협동조합 발주 요청]\n안녕하세요. 품앗이생협 지족점입니다.\n아래와 같이 발주 요청드립니다.\n\n'
+    + lines + '\n\n감사합니다.';
+}
+
+// ── 인증 ────────────────────────────────────────
+async function doLogin() {
+  const email = document.getElementById('email').value.trim();
+  const pw    = document.getElementById('password').value;
+  const btn   = document.getElementById('login-btn');
+  const err   = document.getElementById('login-error');
+
+  err.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = '로그인 중…';
+
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
+
+  if (error) {
+    err.textContent = '로그인 실패: ' + (error.message || '이메일/비밀번호를 확인하세요.');
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '로그인';
+    return;
+  }
+  showApp(data.user);
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  location.reload();
+}
+
+function showApp(user) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('user-email').textContent = user.email;
+  loadAll();
+}
+
+async function authHeaders() {
+  const { data } = await sb.auth.getSession();
+  const token = data?.session?.access_token;
+  if (!token) throw new Error('세션이 없습니다. 다시 로그인해주세요.');
+  return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+}
+
+/** 서버 호출. 🔴 4xx(내 문제)와 5xx(서버 문제)를 한 분기로 합치지 않는다.
+ *  401만 세션 만료로 취급하고, 5xx에서는 세션을 절대 건드리지 않는다. */
+async function callApi(path, body) {
+  const res = await fetch(path, { method:'POST', headers: await authHeaders(), body: JSON.stringify(body) });
+  let json = null;
+  try { json = await res.json(); } catch (e) { /* 본문 없음 */ }
+  if (res.ok) return json;
+  if (res.status === 401) {
+    throw new Error((json && json.error) || '로그인이 만료되었습니다. 다시 로그인해주세요.');
+  }
+  if (res.status >= 500) {
+    throw new Error(((json && json.error) || '서버 오류') + ' — 로그인은 그대로입니다. 잠시 후 다시 시도해주세요.');
+  }
+  throw new Error((json && json.error) || ('요청 실패 (' + res.status + ')'));
+}
+
+// ── 데이터 로드 ─────────────────────────────────
+async function loadAll() {
+  await Promise.all([loadBatches(), loadSuppliers()]);
+}
+
+async function loadSuppliers() {
+  const { data, error } = await sb.from('suppliers').select('name,phone,email,channel').order('name');
+  if (error) return;
+  _suppliers = data || [];
+  document.getElementById('supplier-names').innerHTML =
+    _suppliers.map(s => `<option value="${esc(s.name)}"></option>`).join('');
+}
+
+async function loadBatches() {
+  const { data, error } = await sb.from('order_batches')
+    .select('*').in('status', ['draft','sent']).order('id', { ascending:false }).limit(100);
+  if (error) {
+    document.getElementById('draft-list').innerHTML =
+      `<div class="empty"><p>발주 목록을 불러오지 못했습니다.</p><p class="card-meta">${esc(error.message)}</p></div>`;
+    return;
+  }
+  _drafts = (data || []).filter(b => b.status === 'draft');
+  _sent   = (data || []).filter(b => b.status === 'sent');
+  document.getElementById('count-draft').textContent = _drafts.length;
+  document.getElementById('count-sent').textContent  = _sent.length;
+  renderDrafts();
+  renderSent();
+}
+
+// ── 보낼 것 ─────────────────────────────────────
+function contactFor(supplierName, channel) {
+  const s = _suppliers.find(x => x.name === supplierName);
+  if (!s) return '';
+  return channel === 'email' ? (s.email || '') : (s.phone || '');
+}
+
+function renderDrafts() {
+  const host = document.getElementById('draft-list');
+  if (!_drafts.length) {
+    host.innerHTML = `<div class="empty"><p>보낼 발주가 없습니다.</p>
+      <p class="card-meta">우니에게 "발주 준비해" 라고 하거나, 아래에서 직접 초안을 추가하세요.</p></div>`;
+    return;
+  }
+  host.innerHTML = _drafts.map(renderCard).join('');
+}
+
+function renderCard(b) {
+  const ch = b.channel || 'sms';
+  const items = b.items || [];
+  const contact = b.to_contact || contactFor(b.supplier_name, ch);
+  const isEmail = ch === 'email';
+
+  const rows = items.map((it, i) => `
+    <tr>
+      <td>${esc(it.item_name)}</td>
+      <td><label class="sr-only" for="q-${b.id}-${i}">${esc(it.item_name)} 발주 수량</label>
+        <input type="number" min="0" inputmode="numeric" id="q-${b.id}-${i}" data-role="qty" value="${it.qty ?? ''}"></td>
+      <td><label class="sr-only" for="s-${b.id}-${i}">${esc(it.item_name)} 현재고</label>
+        <input type="number" min="0" inputmode="numeric" id="s-${b.id}-${i}" data-role="stock" value="${it.stock_now ?? ''}" placeholder="—"></td>
+    </tr>`).join('');
+
+  const primary = isEmail
+    ? `<button class="btn btn-primary" type="button" data-act="send" data-id="${b.id}" data-ch="email">${ICON.email}이메일 보내기</button>`
+    : ch === 'kakao'
+      ? `<button class="btn btn-primary" type="button" data-act="kakao" data-id="${b.id}">${ICON.kakao}문구 복사 → 카톡 열기</button>`
+      : ch === 'phone'
+        ? `<button class="btn btn-primary" type="button" data-act="call" data-id="${b.id}">${ICON.phone}전화 걸기</button>`
+        : `<button class="btn btn-primary" type="button" data-act="send" data-id="${b.id}" data-ch="sms">${ICON.sms}문자 보내기</button>`;
+
+  const others = ['sms','email','kakao','phone'].filter(c => c !== ch).map(c => {
+    if (c === 'sms')   return `<button class="btn" type="button" data-act="send" data-id="${b.id}" data-ch="sms">${ICON.sms}문자</button>`;
+    if (c === 'email') return `<button class="btn" type="button" data-act="send" data-id="${b.id}" data-ch="email">${ICON.email}이메일</button>`;
+    if (c === 'kakao') return `<button class="btn" type="button" data-act="kakao" data-id="${b.id}">${ICON.kakao}카톡</button>`;
+    return `<button class="btn" type="button" data-act="call" data-id="${b.id}">${ICON.phone}전화</button>`;
+  }).join('');
+
+  return `
+  <article class="card" data-batch="${b.id}">
+    <div class="card-head">
+      <h2 class="card-title">${esc(b.supplier_name)}</h2>
+      <span class="badge badge-default">기본 ${CHANNEL_LABEL[ch] || ch}</span>
+      <span class="card-meta">#${b.id} · ${esc(b.created_by || '')} · ${fmtDate(b.created_at)}</span>
+    </div>
+
+    <table class="items">
+      <thead><tr><th>품목</th><th>발주 수량</th><th>현재고</th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="3" class="card-meta">품목 없음</td></tr>'}</tbody>
+    </table>
+
+    <div class="field-row">
+      <div class="field">
+        <label class="form-label" for="c-${b.id}">${isEmail ? '받는 이메일' : '받는 전화번호'}</label>
+        <input class="form-input" id="c-${b.id}" data-role="contact"
+          type="${isEmail ? 'email' : 'tel'}" inputmode="${isEmail ? 'email' : 'tel'}"
+          value="${esc(contact)}" placeholder="${isEmail ? 'farm@example.com' : '010-0000-0000'}">
+      </div>
+      <button class="btn btn-sm btn-quiet" type="button" data-act="rebuild" data-id="${b.id}">문구 다시 만들기</button>
+    </div>
+
+    <label class="form-label" for="m-${b.id}">보낼 문구</label>
+    <textarea class="msg" id="m-${b.id}" data-role="msg">${esc(b.message || buildMessage(items))}</textarea>
+
+    <div class="btn-row">${primary}${others}</div>
+    <div class="btn-row" data-role="post-kakao" hidden>
+      <button class="btn btn-confirm" type="button" data-act="mark-sent" data-id="${b.id}">${ICON.check}보냈음 / 했음 기록</button>
+    </div>
+    <div data-role="warn"></div>
+  </article>`;
+}
+
+function readCard(id) {
+  const card = document.querySelector(`[data-batch="${id}"]`);
+  const src = _drafts.concat(_sent).find(b => b.id === id);
+  const items = (src?.items || []).map((it, i) => {
+    const q = card.querySelector(`#q-${id}-${i}`);
+    const s = card.querySelector(`#s-${id}-${i}`);
+    const qv = q && q.value !== '' ? parseInt(q.value, 10) : null;
+    const sv = s && s.value !== '' ? parseInt(s.value, 10) : null;
+    return {
+      item_name: it.item_name,
+      qty: Number.isFinite(qv) ? qv : (it.qty ?? 0),
+      stock_now: Number.isFinite(sv) ? sv : null,
+      staff_ids: it.staff_ids || []
+    };
+  });
+  return {
+    batch: src,
+    items,
+    contact: (card.querySelector('[data-role="contact"]')?.value || '').trim(),
+    message: (card.querySelector('[data-role="msg"]')?.value || '').trim(),
+    card
+  };
+}
+
+function showWarnings(card, warnings) {
+  const host = card.querySelector('[data-role="warn"]');
+  if (!host) return;
+  host.innerHTML = (warnings && warnings.length)
+    ? `<ul class="warn-list">${warnings.map(w => `<li>${esc(w)}</li>`).join('')}</ul>` : '';
+}
+
+async function withBusy(btn, label, fn) {
+  const old = btn.innerHTML;
+  btn.disabled = true;
+  btn.textContent = label;
+  try { await fn(); }
+  catch (e) { toast(e.message || String(e), true); }
+  finally { btn.disabled = false; btn.innerHTML = old; }
+}
+
+// ── 동작 ────────────────────────────────────────
+async function actSend(btn, id, channel) {
+  const { items, contact, message, card } = readCard(id);
+  if (!contact) {
+    toast(channel === 'email' ? '받는 이메일을 입력해주세요.' : '받는 전화번호를 입력해주세요.', true);
+    card.querySelector('[data-role="contact"]').focus();
+    return;
+  }
+  if (!message) { toast('보낼 문구가 비었습니다.', true); return; }
+  await withBusy(btn, '보내는 중…', async () => {
+    const r = await callApi('/api/order/send', {
+      batch_id: id, channel, to_contact: contact, message, items
+    });
+    showWarnings(card, r.warnings);
+    toast(`${CHANNEL_LABEL[channel]} 발송 완료 — ${items.length}개 품목`);
+    await loadBatches();
+  });
+}
+
+async function actMark(btn, id, status, channel) {
+  const { items, contact, card } = readCard(id);
+  await withBusy(btn, '기록 중…', async () => {
+    const r = await callApi('/api/order/mark', {
+      batch_id: id, status, channel, items, to_contact: contact || undefined
+    });
+    showWarnings(card, r.warnings);
+    toast(status === 'received' ? '입고 처리했습니다.' : '보냈다고 기록했습니다.');
+    await loadBatches();
+  });
+}
+
+async function actKakao(id) {
+  const { message, card } = readCard(id);
+  try {
+    await navigator.clipboard.writeText(message);
+    toast('문구를 복사했습니다. 카톡에 붙여넣어 보내세요.');
+  } catch (e) {
+    const ta = card.querySelector('[data-role="msg"]');
+    ta.focus(); ta.select();
+    toast('복사 권한이 없습니다. 선택된 문구를 직접 복사해주세요.', true);
+  }
+  const row = card.querySelector('[data-role="post-kakao"]');
+  row.hidden = false;
+  row.querySelector('[data-act="mark-sent"]').dataset.ch = 'kakao';
+  window.location.href = 'kakaotalk://launch';
+}
+
+function actCall(id) {
+  const { contact, card } = readCard(id);
+  if (!contact) {
+    toast('전화번호를 입력해주세요.', true);
+    card.querySelector('[data-role="contact"]').focus();
+    return;
+  }
+  const row = card.querySelector('[data-role="post-kakao"]');
+  row.hidden = false;
+  row.querySelector('[data-act="mark-sent"]').dataset.ch = 'phone';
+  window.location.href = 'tel:' + contact.replace(/[^0-9+]/g, '');
+}
+
+function actRebuild(id) {
+  const { items, card } = readCard(id);
+  const used = items.filter(i => i.qty > 0);
+  if (!used.length) { toast('수량이 0보다 큰 품목이 없습니다.', true); return; }
+  card.querySelector('[data-role="msg"]').value = buildMessage(used);
+  toast('문구를 다시 만들었습니다.');
+}
+
+// ── 입고 대기 ───────────────────────────────────
+function renderSent() {
+  const host = document.getElementById('sent-list');
+  if (!_sent.length) {
+    host.innerHTML = `<div class="empty"><p>입고를 기다리는 발주가 없습니다.</p></div>`;
+    return;
+  }
+  host.innerHTML = _sent.map(b => {
+    const items = b.items || [];
+    const rows = items.map((it, i) => `
+      <tr>
+        <td>${esc(it.item_name)}</td>
+        <td class="num card-meta">발주 ${it.qty ?? 0}</td>
+        <td><label class="sr-only" for="q-${b.id}-${i}">${esc(it.item_name)} 입고 수량</label>
+          <input type="number" min="0" inputmode="numeric" id="q-${b.id}-${i}" data-role="qty" value="${it.qty ?? 0}"></td>
+      </tr>`).join('');
+    return `
+    <article class="card" data-batch="${b.id}">
+      <div class="card-head">
+        <h2 class="card-title">${esc(b.supplier_name)}</h2>
+        <span class="badge badge-default">${CHANNEL_LABEL[b.channel] || b.channel || ''} 발송</span>
+        <span class="card-meta">#${b.id} · ${fmtDate(b.sent_at)} 보냄</span>
+      </div>
+      <table class="items">
+        <thead><tr><th>품목</th><th>발주</th><th>입고 수량</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="3" class="card-meta">품목 없음</td></tr>'}</tbody>
+      </table>
+      <div class="btn-row">
+        <button class="btn btn-primary btn-confirm" type="button" data-act="mark-received" data-id="${b.id}">${ICON.check}입고 완료</button>
+      </div>
+      <div data-role="warn"></div>
+    </article>`;
+  }).join('');
+}
+
+// ── 재고 ────────────────────────────────────────
+let _needsOnly = false;
+async function loadStock() {
+  const host = document.getElementById('stock-list');
+  const q = document.getElementById('stock-q').value.trim();
+  let query = sb.from('stock_current').select('*').order('item_name').limit(300);
+  if (q) query = query.ilike('item_name', `%${q}%`);
+  if (_needsOnly) query = query.eq('needs_count', true);
+  const { data, error } = await query;
+  if (error) {
+    host.innerHTML = `<div class="empty"><p>재고를 불러오지 못했습니다.</p><p class="card-meta">${esc(error.message)}</p></div>`;
+    return;
+  }
+  if (!data || !data.length) {
+    host.innerHTML = `<div class="empty"><p>표시할 재고가 없습니다.</p>
+      <p class="card-meta">발주할 때 「현재고」를 적어두면 여기에 쌓입니다.</p></div>`;
+    return;
+  }
+  host.innerHTML = data.map(r => `
+    <div class="stock-row">
+      <div class="stock-name">
+        <b>${esc(r.item_name)}</b>
+        <span>${esc(r.farmer_name || '업체 미상')} · 입고 ${r.inbound_qty || 0} · 판매 ${r.sold_qty || 0}</span>
+      </div>
+      ${r.needs_count
+        ? '<span class="badge badge-warn">실사 필요</span>'
+        : `<span class="stock-qty">${r.current_qty ?? 0}</span>`}
+    </div>`).join('');
+}
+
+// ── 초안 직접 추가 ──────────────────────────────
+async function addDraft(btn) {
+  const err = document.getElementById('nd-error');
+  const supplier = document.getElementById('nd-supplier').value.trim();
+  const item     = document.getElementById('nd-item').value.trim();
+  const qtyRaw   = document.getElementById('nd-qty').value;
+  const stockRaw = document.getElementById('nd-stock').value;
+  const channel  = document.getElementById('nd-channel').value;
+
+  err.style.display = 'none';
+  const qty = qtyRaw === '' ? NaN : parseInt(qtyRaw, 10);
+  if (!supplier || !item || !Number.isFinite(qty) || qty < 0) {
+    err.textContent = '업체·품목·수량(0 이상)을 모두 채워주세요.';
+    err.style.display = 'block';
+    return;
+  }
+  const stock = stockRaw === '' ? null : parseInt(stockRaw, 10);
+  const items = [{ item_name:item, qty, stock_now: Number.isFinite(stock) ? stock : null, staff_ids:[] }];
+
+  await withBusy(btn, '만드는 중…', async () => {
+    const { data: { user } } = await sb.auth.getUser();
+    const { error } = await sb.from('order_batches').insert({
+      supplier_name: supplier, channel, to_contact: contactFor(supplier, channel),
+      message: buildMessage(items), items, status:'draft',
+      created_by: user?.email || 'store', org_id:'poomasi'
+    });
+    if (error) throw new Error(error.message);
+    document.getElementById('nd-item').value = '';
+    document.getElementById('nd-qty').value = '';
+    document.getElementById('nd-stock').value = '';
+    toast('초안을 만들었습니다.');
+    await loadBatches();
+  });
+}
+
+// ── 탭 ──────────────────────────────────────────
+function switchTab(name) {
+  ['draft','sent','stock'].forEach(t => {
+    document.getElementById('tab-' + t).setAttribute('aria-selected', String(t === name));
+    document.getElementById('panel-' + t).hidden = (t !== name);
+  });
+  if (name === 'stock') loadStock();
+}
+
+// ── 이벤트 배선 ─────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  document.getElementById('login-btn').addEventListener('click', doLogin);
+  document.getElementById('password').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  document.getElementById('logout-btn').addEventListener('click', doLogout);
+  document.getElementById('nd-submit').addEventListener('click', e => addDraft(e.currentTarget));
+  document.querySelectorAll('.tab-btn').forEach(b =>
+    b.addEventListener('click', () => switchTab(b.dataset.tab)));
+  document.getElementById('stock-q').addEventListener('change', loadStock);
+  document.getElementById('stock-needs').addEventListener('click', e => {
+    _needsOnly = !_needsOnly;
+    e.currentTarget.textContent = _needsOnly ? '전체 보기' : '실사 필요만 보기';
+    loadStock();
+  });
+
+  document.getElementById('app').addEventListener('click', e => {
+    const btn = e.target.closest('[data-act]');
+    if (!btn) return;
+    const id = parseInt(btn.dataset.id, 10);
+    switch (btn.dataset.act) {
+      case 'send':          actSend(btn, id, btn.dataset.ch); break;
+      case 'kakao':         actKakao(id); break;
+      case 'call':          actCall(id); break;
+      case 'rebuild':       actRebuild(id); break;
+      case 'mark-sent':     actMark(btn, id, 'sent', btn.dataset.ch || 'kakao'); break;
+      case 'mark-received': actMark(btn, id, 'received'); break;
+    }
+  });
+
+  if (!sb) return;
+  const { data } = await sb.auth.getSession();
+  if (data?.session?.user) showApp(data.session.user);
+});
+</script>
+</body>
+</html>
