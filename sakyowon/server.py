@@ -188,7 +188,22 @@ def translate():
 
 @app.route("/api/ai", methods=["POST"])
 def ai_proxy():
-    """Proxy to Anthropic Messages API (streaming supported)."""
+    """🔴 폐쇄(26-09-28). 구판 햇소자(sunvillage.html)만 쓰던 경로다.
+
+    햇소자는 2026-09-06 `sakyowon.co.kr/hatsoja/` 로 이전했고, 신판은 완도 FastAPI
+    (로그인 게이트 + 품에 엔진)를 쓴다. 이 경로는 비로그인 누구나 부를 수 있어
+    AI 이용료가 공개 노출돼 있었다 — 이 출처에는 로그인 수단이 없으므로
+    게이트가 아니라 폐쇄로 닫는다. 프런트(callAI)가 error.message 를 그대로
+    띄우므로 사용자에게는 새 주소 안내가 보인다.
+
+    🟢 공개 기능인 LONLO 챗(/api/ai/chat)과 번역(/api/translate)은 그대로 열려 있다.
+    되돌리기 = 아래 return 3줄을 지우면 본체가 다시 돈다.
+    """
+    return jsonify({"error": {"message":
+        "이 주소의 햇소자는 종료되었습니다. "
+        "https://sakyowon.co.kr/hatsoja/ 에서 이용해 주세요."}}), 410
+
+    # ── 이하 옛 본체 (도달하지 않음) ──
     if not _ANTHROPIC_KEY:
         return jsonify({"error": "API key not configured"}), 500
 
