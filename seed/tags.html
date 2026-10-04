@@ -151,8 +151,12 @@
     font-family: 'Noto Sans KR', sans-serif;
   }
   /* 하단 골드바 */
+  /* 🔴 띠 두께는 종이로 고른 값이다 — 26-10-04 안심 사무실 프린터로 2.0 / 2.5 / 3.5mm 를
+     한 장에 뽑아 놓고 후니님이 3.5mm 를 고르셨고, 품앗이도 같은 값으로 맞췄다. 종전 6mm.
+     태그 규격이 65×38mm 로 안심과 같아서 그대로 적용된다(띠 색만 다르다).
+     줄인 만큼 안쪽이 2.5mm 넓어져 긴 상품명이 덜 눌리고 띠 잉크가 42% 준다. */
   .tag-bar {
-    height: 6mm; background: var(--gold-bar);
+    height: 3.5mm; background: var(--gold-bar);
     width: 100%; flex-shrink: 0;
     -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
