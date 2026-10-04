@@ -1319,7 +1319,13 @@ function updateQuickPreview() {
 qFarmer.addEventListener('input', updateQuickPreview);
 qPrice.addEventListener('input', updateQuickPreview);
 
-btnQuickPrint.addEventListener('click', () => {
+// 🔴 btnQuickPrint 는 문서에 한 번도 존재한 적 없는 id 다(git 역사 전수 확인 —
+//    2026-04-06 seed/ git 편입 시점부터 그대로). 최상위에서 ReferenceError 가 터져
+//    그 아래 코드가 통째로 실행되지 않았다. 그래서 btn-new-print 리스너가 안 붙어
+//    「새 상품 입력 → 인쇄」가 6개월째 죽어 있었다(장바구니 인쇄는 onclick 인라인이라 무사).
+//    기능 의도를 지우지 않고 가드만 단다 — 버튼을 UI 에 추가하면 저절로 살아난다.
+const btnQuickPrint = document.getElementById('btn-quick-print');
+if (btnQuickPrint) btnQuickPrint.addEventListener('click', () => {
   const p = getQuickProduct();
   if (!p) return;
   printTags([p]);
@@ -1350,7 +1356,10 @@ function readNewForm() {
   });
 });
 
-document.getElementById('btn-new-print').addEventListener('click', () => {
+// 🔴 btn-new-print 도 문서에 없는 id 다(전수 확인 — 없는 id 는 btn-quick-print 와 이 둘뿐).
+//    가드가 없으면 여기서 null.addEventListener 로 터져 아래 코드가 또 멈춘다.
+const btnNewPrint = document.getElementById('btn-new-print');
+if (btnNewPrint) btnNewPrint.addEventListener('click', () => {
   const p = readNewForm();
   if (!p) { document.getElementById('new-name').focus(); return; }
   printTags([p]);
