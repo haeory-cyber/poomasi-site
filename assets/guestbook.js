@@ -11,7 +11,7 @@
   'use strict';
 
   var API = 'https://tnivhcpjrhkmekcfqgdn.supabase.co/rest/v1';
-  var ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRuaXZoY3BqcmhrbWVrY2ZxZ2RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NTc5MjMsImV4cCI6MjA4NzIzMzkyM30.yJ0_4Sg78p7oY89q7go3ab26PCPHnk1Q4ObZJIZEULA';
+  var ANON = 'sb_publishable_SKtfO63ApOP3DyJKu_2ypw_JK4dsdUG';
   var MIN_FILL_MS = 3000;   // 폼 로드 후 3초 미만 제출은 봇으로 본다
 
   var headers = { apikey: ANON, Authorization: 'Bearer ' + ANON };

@@ -1798,7 +1798,7 @@
 <!-- ── 인증 스크립트 ── -->
 <script>
 const SUPABASE_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRuaXZoY3BqcmhrbWVrY2ZxZ2RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NTc5MjMsImV4cCI6MjA4NzIzMzkyM30.yJ0_4Sg78p7oY89q7go3ab26PCPHnk1Q4ObZJIZEULA';
+const SUPABASE_KEY = 'sb_publishable_SKtfO63ApOP3DyJKu_2ypw_JK4dsdUG';
 // CDN 로드 실패 시 조용한 ReferenceError로 페이지 전체가 죽지 않도록 가드(2026-06-28)
 if (typeof supabase === 'undefined') {
   document.addEventListener('DOMContentLoaded', () =>
@@ -1823,7 +1823,7 @@ sb && sb.auth.getSession().then(({ data: { session } }) => {
   'use strict';
 
   var SUPABASE_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
-  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRuaXZoY3BqcmhrbWVrY2ZxZ2RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NTc5MjMsImV4cCI6MjA4NzIzMzkyM30.yJ0_4Sg78p7oY89q7go3ab26PCPHnk1Q4ObZJIZEULA';
+  var SUPABASE_ANON_KEY = 'sb_publishable_SKtfO63ApOP3DyJKu_2ypw_JK4dsdUG';
 
   var INITIAL_TASKS = [
     { agent_name: '건호', task_title: '에이전트 대시보드 개발', status: '진행중', start_date: '2026-03-29', end_date: null },
@@ -1973,7 +1973,7 @@ sb && sb.auth.getSession().then(({ data: { session } }) => {
   'use strict';
 
   var SUPABASE_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
-  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRuaXZoY3BqcmhrbWVrY2ZxZ2RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NTc5MjMsImV4cCI6MjA4NzIzMzkyM30.yJ0_4Sg78p7oY89q7go3ab26PCPHnk1Q4ObZJIZEULA';
+  var SUPABASE_ANON_KEY = 'sb_publishable_SKtfO63ApOP3DyJKu_2ypw_JK4dsdUG';
   var sb = null;
   var currentUser = null;
   var selectedUrgency = '일반';
@@ -2598,7 +2598,7 @@ sb && sb.auth.getSession().then(({ data: { session } }) => {
     try {
       if (typeof supabase !== 'undefined' && supabase.createClient) {
         var SB_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
-        var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRuaXZoY3BqcmhrbWVrY2ZxZ2RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NTc5MjMsImV4cCI6MjA4NzIzMzkyM30.yJ0_4Sg78p7oY89q7go3ab26PCPHnk1Q4ObZJIZEULA';
+        var SB_KEY = 'sb_publishable_SKtfO63ApOP3DyJKu_2ypw_JK4dsdUG';
         var client = supabase.createClient(SB_URL, SB_KEY);
         var result = await client.from('agent_tasks').select('*').eq('agent_name', agentName).order('start_date', { ascending: false });
         if (result.data && result.data.length > 0) {
@@ -2618,7 +2618,7 @@ sb && sb.auth.getSession().then(({ data: { session } }) => {
     try {
       if (typeof supabase !== 'undefined' && supabase.createClient) {
         var SB_URL = 'https://tnivhcpjrhkmekcfqgdn.supabase.co';
-        var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRuaXZoY3BqcmhrbWVrY2ZxZ2RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NTc5MjMsImV4cCI6MjA4NzIzMzkyM30.yJ0_4Sg78p7oY89q7go3ab26PCPHnk1Q4ObZJIZEULA';
+        var SB_KEY = 'sb_publishable_SKtfO63ApOP3DyJKu_2ypw_JK4dsdUG';
         var client = supabase.createClient(SB_URL, SB_KEY);
         var result = await client.from('task_orders').select('*').eq('assigned_agent', agentName).order('created_at', { ascending: false }).limit(10);
         if (result.data && result.data.length > 0) {
