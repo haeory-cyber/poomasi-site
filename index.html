@@ -6,13 +6,14 @@
 <title>품앗이소비자생활협동조합 (품앗이생협) — 공식 홈페이지</title>
 <meta name="description" content="품앗이소비자생활협동조합(품앗이생협) 공식 홈페이지. 사업자등록번호 314-82-78005. 2012년 설립된 소비자생활협동조합으로, 대전광역시 유성구에서 로컬푸드 직매장 지족점을 운영합니다.">
 <meta property="og:site_name" content="품앗이소비자생활협동조합">
-<meta property="og:title" content="품앗이소비자생활협동조합 (품앗이생협)">
-<meta property="og:description" content="사업자등록번호 314-82-78005 · 2012년 설립 소비자생활협동조합 · 대전광역시 유성구 지족로364번길 40, 105호 · haeory@poomasi.org">
+<meta property="og:title" content="품앗이소비자생활협동조합 (품앗이생협) — 공식 홈페이지">
+<meta property="og:description" content="품앗이소비자생활협동조합(품앗이생협) 공식 홈페이지. 사업자등록번호 314-82-78005. 2012년 설립된 소비자생활협동조합으로, 대전광역시 유성구에서 로컬푸드 직매장 지족점을 운영합니다.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://poomasi.org/">
+<meta property="og:image" content="https://poomasi.org/images/exterior_wide.webp">
 <meta property="og:locale" content="ko_KR">
-<meta property="og:locale:alternate" content="en_US">
 <link rel="canonical" href="https://poomasi.org/">
+<meta property="og:locale:alternate" content="en_US">
 <link rel="alternate" hreflang="ko" href="https://poomasi.org/">
 <link rel="alternate" hreflang="en" href="https://poomasi.org/en/">
 <link rel="alternate" hreflang="x-default" href="https://poomasi.org/">
@@ -20,141 +21,28 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@500;700&display=swap" rel="stylesheet">
-<style>
-/* ============================================================
-   품앗이소비자생활협동조합 공식 대문 — 한지 팔레트(landing-hanji.css 토큰 재사용)
-   단일 파일 · 외부 JS 0 · 애니메이션 0
-   ============================================================ */
-:root{
-  --hanji:#f5efe2; --hanji-deep:#ede4d0; --hanji-card:#faf5ea;
-  --meok:#26221b; --meok-deep:#1a1611; --meok-faint:#6b6353;
-  --gam:#b3641f; --gam-deep:#96500f; --ssuk:#4a5d43;
-  --line:rgba(38,34,27,.14); --line-strong:rgba(38,34,27,.28);
-  --serif:"Noto Serif KR",serif; --sans:"Noto Sans KR","Noto Sans",sans-serif;
-  --wrap:1060px;
-}
-*{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-body{
-  margin:0; background:var(--hanji); color:var(--meok);
-  font-family:var(--sans); font-size:17px; line-height:1.8;
-  word-break:keep-all; overflow-wrap:break-word;
-}
-h1,h2,h3{font-family:var(--serif); color:var(--meok-deep); line-height:1.5; margin:0}
-p{margin:0}
-a{color:var(--gam-deep)}
-a:focus-visible,.pm-skip:focus{outline:3px solid var(--gam); outline-offset:3px}
-.pm-wrap{max-width:var(--wrap); margin:0 auto; padding:0 24px}
-
-.pm-skip{position:absolute; left:-9999px; top:0; z-index:100; padding:.7rem 1.1rem;
-  background:var(--meok-deep); color:var(--hanji); text-decoration:none}
-.pm-skip:focus{left:1rem; top:1rem}
-
-/* ---------- 머리띠 ---------- */
-.pm-top{border-bottom:1px solid var(--line); background:var(--hanji-card)}
-.pm-top-in{display:flex; align-items:center; justify-content:space-between; gap:16px;
-  min-height:56px; flex-wrap:wrap; padding:8px 24px}
-.pm-mark{display:flex; align-items:center; gap:10px; min-height:44px; padding:8px 2px;
-  font-family:var(--serif); font-weight:700; color:var(--meok-deep); font-size:1rem;
-  text-decoration:none}
-.pm-mark-sign{display:grid; place-items:center; width:28px; height:28px; border-radius:50%;
-  background:var(--gam); color:#1a1611; font-size:15px}
-.pm-top-nav{display:flex; align-items:center; gap:4px 18px; flex-wrap:wrap;
-  font-size:.95rem; color:var(--meok-faint)}
-.pm-top-nav a{color:var(--meok); text-decoration:underline; text-underline-offset:5px;
-  text-decoration-color:var(--line-strong); text-decoration-thickness:1px;
-  padding:11px 2px; min-height:44px; display:inline-flex; align-items:center}
-.pm-top-nav a:hover{color:var(--gam-deep); text-decoration-color:var(--gam)}
-
-/* ---------- 첫 화면 ---------- */
-.pm-hero{padding:52px 0 40px}
-.pm-eyebrow{font-size:.9rem; letter-spacing:.14em; color:var(--meok-faint); margin-bottom:14px}
-.pm-hero h1{font-size:clamp(1.55rem,5.4vw,3.1rem); font-weight:700; letter-spacing:-.01em}
-.pm-hero-alias{margin-top:10px; font-size:1.05rem; color:var(--meok-faint)}
-.pm-hero-lead{margin-top:18px; max-width:46em; font-size:1.06rem}
-
-/* 법인 식별 띠 — 첫 화면에서 보여야 하는 증빙 */
-.pm-id{margin-top:26px; border:1px solid var(--line-strong); background:var(--hanji-card);
-  display:grid; grid-template-columns:repeat(4,1fr)}
-.pm-id div{padding:16px 18px; border-left:1px solid var(--line)}
-.pm-id div:first-child{border-left:0}
-.pm-id dt{font-size:.875rem; color:var(--meok-faint); margin-bottom:2px}
-.pm-id dd{margin:0; font-family:var(--serif); font-weight:700; font-size:1.08rem;
-  color:var(--meok-deep)}
-
-/* ---------- 본문 섹션 ---------- */
-.pm-sec{padding:44px 0; border-top:1px solid var(--line)}
-.pm-sec h2{font-size:1.35rem; font-weight:700; margin-bottom:6px}
-.pm-sec-note{color:var(--meok-faint); font-size:.95rem; margin-bottom:22px}
-
-.pm-biz{display:grid; grid-template-columns:repeat(3,1fr); gap:18px}
-.pm-biz article{background:var(--hanji-card); border:1px solid var(--line); padding:20px 22px}
-.pm-biz h3{font-size:1.05rem; margin-bottom:8px}
-.pm-biz p{font-size:.97rem; color:var(--meok)}
-
-table.pm-tbl{width:100%; border-collapse:collapse; font-size:.98rem}
-table.pm-tbl th,table.pm-tbl td{text-align:left; padding:12px 14px;
-  border-bottom:1px solid var(--line); vertical-align:top}
-table.pm-tbl th{width:11em; font-weight:500; color:var(--meok-faint); background:var(--hanji-card)}
-table.pm-tbl tr:last-child th,table.pm-tbl tr:last-child td{border-bottom:0}
-
-.pm-cols{display:grid; grid-template-columns:1fr 1fr; gap:18px}
-.pm-card{background:var(--hanji-card); border:1px solid var(--line); padding:20px 22px}
-.pm-card h3{font-size:1.05rem; margin-bottom:10px}
-.pm-card dl{margin:0; display:grid; grid-template-columns:5.5em 1fr; gap:6px 12px; font-size:.98rem}
-.pm-card dt{color:var(--meok-faint)}
-.pm-card dd{margin:0}
-
-.pm-links{display:grid; grid-template-columns:repeat(3,1fr); gap:14px}
-.pm-link{display:flex; align-items:center; justify-content:space-between; gap:12px;
-  min-height:56px; padding:14px 18px; background:var(--hanji-card);
-  border:1px solid var(--line); color:var(--meok); text-decoration:none}
-.pm-link:hover{border-color:var(--gam); color:var(--gam-deep)}
-.pm-link b{font-weight:500; font-size:1rem}
-.pm-link span{font-size:.88rem; color:var(--meok-faint); display:block; font-weight:400}
-.pm-link svg{flex:0 0 auto; width:18px; height:18px}
-
-/* ---------- 꼬리 ---------- */
-.pm-foot{border-top:1px solid var(--line-strong); background:var(--hanji-deep);
-  padding:34px 0 46px; font-size:.95rem}
-.pm-foot-org{font-family:var(--serif); font-weight:700; font-size:1.1rem;
-  color:var(--meok-deep); margin-bottom:10px}
-.pm-foot-lines{color:var(--meok)}
-.pm-foot-lines a{color:var(--gam-deep)}
-
-@media (max-width:900px){
-  .pm-id{grid-template-columns:repeat(2,1fr)}
-  .pm-id div:nth-child(3){border-left:0}
-  .pm-id div:nth-child(n+3){border-top:1px solid var(--line)}
-  .pm-biz,.pm-links{grid-template-columns:1fr 1fr}
-  .pm-cols{grid-template-columns:1fr}
-}
-@media (max-width:620px){
-  body{font-size:16px}
-  .pm-wrap,.pm-top-in{padding-left:18px; padding-right:18px}
-  .pm-hero{padding:34px 0 30px}
-  .pm-id{grid-template-columns:1fr}
-  .pm-id div{border-left:0; display:flex; align-items:baseline; justify-content:space-between;
-    gap:14px; padding:11px 16px}
-  .pm-id div+div{border-top:1px solid var(--line)}
-  .pm-id dt{margin-bottom:0}
-  .pm-id dd{font-size:1rem; text-align:right}
-  .pm-biz,.pm-links{grid-template-columns:1fr}
-  table.pm-tbl th{width:8.5em; padding:10px 10px}
-  table.pm-tbl td{padding:10px 10px}
-}
-@media (prefers-reduced-motion:reduce){*{transition:none !important; animation:none !important}}
-</style>
+<link rel="stylesheet" href="/coop/coop.css">
 </head>
 <body>
 <a class="pm-skip" href="#main">본문으로 건너뛰기</a>
-
+<div class="pm-idbar" role="note" aria-label="법인 식별 정보">
+  <div class="pm-wrap">
+    <span><b>품앗이소비자생활협동조합</b> (약칭 품앗이생협)</span>
+    <span>사업자등록번호 <b>314-82-78005</b></span>
+    <span>대전광역시 유성구 지족로364번길 40, 105호</span>
+  </div>
+</div>
 <header class="pm-top">
-  <div class="pm-top-in">
-    <a class="pm-mark" href="/"><span class="pm-mark-sign" aria-hidden="true">品</span>품앗이소비자생활협동조합</a>
-    <nav class="pm-top-nav" aria-label="바로가기">
-      <a href="https://seed.poomasi.org">조합 안내</a>
-      <a href="/en/" hreflang="en" lang="en">English</a>
+  <div class="pm-wrap pm-top-in">
+    <a class="pm-mark" href="/"><span class="pm-mark-sign" aria-hidden="true">品</span><span class="pm-mark-name"><b>품앗이소비자생활협동조합</b><small>품앗이생협 · <span lang="en">Poomasi Consumer Co-operative</span></small></span></a>
+    <nav class="pm-nav" aria-label="주 메뉴">
+      <a href="/" aria-current="page">홈</a>
+      <a href="/coop/">조합 소개</a>
+      <a href="/coop/mission/">사명</a>
+      <a href="/coop/store/">직매장</a>
+      <a href="/coop/sites/">운영 사이트</a>
+      <a href="/coop/contact/">연락처</a>
+      <a href="/coop/mission/#mission-en" lang="en">English</a>
     </nav>
   </div>
 </header>
@@ -163,14 +51,27 @@ table.pm-tbl tr:last-child th,table.pm-tbl tr:last-child td{border-bottom:0}
 
   <section class="pm-hero">
     <div class="pm-wrap">
-      <p class="pm-eyebrow">소비자생활협동조합법에 따라 설립된 법인</p>
-      <h1>품앗이소비자생활협동조합</h1>
-      <p class="pm-hero-alias">약칭 품앗이생협 · Poomasi Consumer Co-operative</p>
-      <p class="pm-hero-lead">
-        품앗이생협은 2012년 대전에서 설립된 소비자생활협동조합입니다.
-        조합원이 출자하고 운영하며, 대전광역시 유성구에서 로컬푸드 직매장 지족점을 운영합니다.
-      </p>
-
+      <div class="pm-hero-grid">
+        <div>
+          <p class="pm-eyebrow">소비자생활협동조합법에 따라 설립된 법인</p>
+          <h1>품앗이소비자생활협동조합</h1>
+          <p class="pm-hero-alias">약칭 품앗이생협 · <span lang="en">Poomasi Consumer Co-operative</span></p>
+          <p class="pm-hero-lead">
+            품앗이생협은 2012년 대전에서 설립된 소비자생활협동조합입니다.
+            조합원이 출자하고 운영하며, 대전광역시 유성구에서 로컬푸드 직매장 지족점을 운영합니다.
+          </p>
+          <div class="pm-hero-cta">
+            <a class="pm-btn is-solid" href="/coop/mission/">사명 선언문</a>
+            <a class="pm-btn" href="/coop/">조합 소개</a>
+            <a class="pm-btn" href="/coop/store/">직매장 지족점</a>
+            <a class="pm-btn" href="https://poomasi.org/seed/annual_report.html">애뉴얼 리포트 2023–2025</a>
+          </div>
+        </div>
+        <figure class="pm-hero-photo">
+          <img src="/images/exterior_wide.webp" alt="품앗이생협 로컬푸드 직매장 지족점 외관 — 주황색 간판을 단 단층 매장 건물" width="1360" height="934" fetchpriority="high">
+          <figcaption>로컬푸드 직매장 지족점 · 대전광역시 유성구 지족로364번길 40, 105호</figcaption>
+        </figure>
+      </div>
       <dl class="pm-id">
         <div><dt>사업자등록번호</dt><dd>314-82-78005</dd></div>
         <div><dt>설립</dt><dd>2012년</dd></div>
@@ -180,30 +81,68 @@ table.pm-tbl tr:last-child th,table.pm-tbl tr:last-child td{border-bottom:0}
     </div>
   </section>
 
-  <section class="pm-sec">
+  <section class="pm-mission" aria-labelledby="h-mission">
     <div class="pm-wrap">
-      <h2>사업</h2>
-      <p class="pm-sec-note">사업자등록증 기재 기준입니다.</p>
-      <div class="pm-biz">
-        <article>
-          <h3>로컬푸드 직매장</h3>
-          <p>지족점 한 곳을 운영합니다. 거래 농가는 84개입니다.</p>
-        </article>
-        <article>
-          <h3>농산물·가공식품 도소매</h3>
-          <p>지역에서 생산한 농산물과 가공식품을 조합원과 지역 주민에게 공급합니다.</p>
-        </article>
-        <article>
-          <h3>교육서비스·정보통신업</h3>
-          <p>사업자등록증에 등재된 그 밖의 사업 영역입니다.</p>
-        </article>
+      <h2 class="pm-eyebrow" id="h-mission">사명</h2>
+      <div>
+        <p class="pm-mission-lead">품앗이생협은 가까운 땅에서 기른 먹거리를 이웃이 함께 나누고, 그 흐름을 시민이 스스로 다스리는 지역을 만듭니다.</p>
+        <p class="pm-mission-body">가까우면 더 신선하고 건강합니다. 농가는 제값을 받고, 먹는 사람은 누가 길렀는지 압니다. 먹거리가 덜 움직이니 탄소도 덜 나옵니다. 우리는 이 단순한 원리를 조합원과 농가, 주민이 함께 지켜 가는 것을 사명으로 삼습니다.</p>
+      <p style="margin-top:18px"><a class="pm-more" href="/coop/mission/">사명·하는 일·원칙 전문 보기 →</a></p>
       </div>
     </div>
   </section>
 
-  <section class="pm-sec">
+  <section class="pm-sec" aria-labelledby="h-work">
     <div class="pm-wrap">
-      <h2>조합 개요</h2>
+      <div class="pm-sec-head"><h2 id="h-work">우리가 하는 일</h2><a class="pm-more" href="/coop/mission/">원칙까지 보기 →</a></div>
+      <div class="pm-work">
+        <article class="is-half">
+          <img src="/coop/img/fresh_02.webp" alt="품앗이생협 로컬푸드 직매장 지족점 채소 진열대 — 지역 농가가 들인 시금치와 브로콜리" width="960" height="720" loading="lazy" decoding="async">
+          <p class="pm-num">1</p>
+          <h3>로컬푸드 직거래로 농가 소득을 지킵니다</h3>
+          <p>2012년 대전에서 설립한 소비자생활협동조합으로, 유성구에서 로컬푸드 직매장 지족점을 운영합니다. 지역 농가 84곳과 직거래하며, 중간 유통을 줄여 농가가 받는 몫을 늘립니다.</p>
+        </article>
+        <article class="is-half">
+          <img src="/coop/img/zerowaste_03.webp" alt="품앗이생협 로컬푸드 직매장 지족점 리필 판매대 — 세제를 가져온 용기에 덜어 담는 곳" width="960" height="720" loading="lazy" decoding="async">
+          <p class="pm-num">2</p>
+          <h3>푸드플랜과 탄소중립을 매장에서 실천합니다</h3>
+          <p>지역 먹거리 계획(푸드플랜)이 실제 장보기로 이어지도록 매장을 운영합니다. 먹거리의 이동 거리를 줄이고, 무포장·소분 판매로 탄소발자국을 낮춥니다.</p>
+        </article>
+        <article>
+          <p class="pm-num">3</p>
+          <h3>지역 독립 유통 플랫폼을 함께 세웁니다</h3>
+          <p>대형 유통에 기대지 않고 지역이 스스로 운영하는 유통망을 만듭니다. 전국의 로컬푸드 협동조합과 정보를 나누고, 조합 사이의 거래와 운영 경험을 잇습니다.</p>
+        </article>
+        <article>
+          <p class="pm-num">4</p>
+          <h3>사회연대경제의 한 축으로 일합니다</h3>
+          <p>조합원 20,567명(2026년 4월 기준)이 출자하고 운영하는 사회적기업입니다. 협동조합·주민조직·사회연대경제조직과 손잡고 지역의 필요를 지역의 힘으로 채웁니다.</p>
+        </article>
+        <article>
+          <p class="pm-num">5</p>
+          <h3>시민이 주인인 AI, 연대지능을 만듭니다</h3>
+          <p>정보통신업(응용 소프트웨어 개발 및 공급업)을 함께 하는 조합으로서, 시민사회가 자기 손으로 기르고 다스리는 AI를 만듭니다. 데이터와 지능이 거대 기업에 쏠리지 않도록, 조합과 주민조직이 자기 기계에서 자기 자료로 돌리는 소버린 AI를 지향합니다. 우리는 이것을 연대지능이라 부릅니다. 시민참여와 시민주권은 먹거리에서도, AI에서도 같은 원칙입니다.</p>
+        </article>
+      </div>
+      <a class="pm-report" href="https://poomasi.org/seed/annual_report.html"><span class="pm-report-k">활동 보고서</span><b>로컬의 반격 — 품앗이생협 애뉴얼 리포트 2023–2025</b><span class="pm-report-go">보고서 열기 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 4h6v6"/><line x1="10" y1="14" x2="20" y2="4"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg></span></a>
+    </div>
+  </section>
+
+  <section class="pm-sec" aria-labelledby="h-store">
+    <div class="pm-wrap">
+      <div class="pm-sec-head"><h2 id="h-store">로컬푸드 직매장 지족점</h2><a class="pm-more" href="/coop/store/">매장 사진 더 보기 →</a></div>
+      <div class="pm-photostrip">
+        <img src="/coop/img/interior_01.webp" alt="품앗이생협 로컬푸드 직매장 지족점 매장 안 — 냉장 진열대가 이어진 통로" width="960" height="720" loading="lazy" decoding="async">
+        <img src="/coop/img/fresh_01.webp" alt="품앗이생협 로컬푸드 직매장 지족점 지역 농가 채소 진열대" width="960" height="720" loading="lazy" decoding="async">
+        <img src="/coop/img/zerowaste_04.webp" alt="품앗이생협 로컬푸드 직매장 지족점 건식품 진열대" width="960" height="720" loading="lazy" decoding="async">
+        <img src="/coop/img/bulk_03.webp" alt="품앗이생협 로컬푸드 직매장 지족점 포장 없이 상자째 진열한 사과" width="960" height="720" loading="lazy" decoding="async">
+      </div>
+    </div>
+  </section>
+
+  <section class="pm-sec" aria-labelledby="h-reg">
+    <div class="pm-wrap">
+      <h2 id="h-reg">조합 개요</h2>
       <p class="pm-sec-note">법인 등록 사항입니다.</p>
       <table class="pm-tbl">
         <tbody>
@@ -223,9 +162,9 @@ table.pm-tbl tr:last-child th,table.pm-tbl tr:last-child td{border-bottom:0}
     </div>
   </section>
 
-  <section class="pm-sec">
+  <section class="pm-sec" aria-labelledby="h-contact">
     <div class="pm-wrap">
-      <h2>연락처</h2>
+      <h2 id="h-contact">연락처</h2>
       <p class="pm-sec-note">법인 사무국과 매장의 전화번호는 다릅니다.</p>
       <div class="pm-cols">
         <div class="pm-card">
@@ -248,23 +187,20 @@ table.pm-tbl tr:last-child th,table.pm-tbl tr:last-child td{border-bottom:0}
     </div>
   </section>
 
-  <section class="pm-sec">
+  <section class="pm-sec" aria-labelledby="h-links">
     <div class="pm-wrap">
-      <h2>관련 사이트</h2>
+      <h2 id="h-links">사이트 안내</h2>
       <p class="pm-sec-note">조합이 운영하는 안내 페이지입니다.</p>
       <div class="pm-links">
-        <a class="pm-link" href="https://seed.poomasi.org">
-          <b>조합 안내<span>매장·조합원·사업 소개</span></b>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </a>
-        <a class="pm-link" href="/solidarity/">
-          <b>연대지능</b>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </a>
-        <a class="pm-link" href="/guestbook.html">
-          <b>방명록<span>조합에 남기는 말</span></b>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </a>
+        <a class="pm-link" href="/coop/"><b>조합 소개<span>조합 개요와 등록 사항</span></b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+        <a class="pm-link" href="/coop/mission/"><b>사명<span>사명 선언문 · 하는 일 · 원칙 · English</span></b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+        <a class="pm-link" href="/coop/store/"><b>로컬푸드 직매장 지족점<span>매장 사진 · 직거래 · 탄소중립</span></b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+        <a class="pm-link" href="/coop/sites/"><b>운영 사이트 · 협력단체<span>조합이 운영하는 사이트와 함께 일하는 단체</span></b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+        <a class="pm-link" href="/coop/contact/"><b>연락처<span>법인 사무국 · 직매장</span></b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+        <a class="pm-link" href="https://poomasi.org/seed/annual_report.html"><b>애뉴얼 리포트<span>로컬의 반격 — 품앗이생협 애뉴얼 리포트 2023–2025</span></b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 4h6v6"/><line x1="10" y1="14" x2="20" y2="4"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg></a>
+        <a class="pm-link" href="https://seed.poomasi.org"><b>조합 안내<span>매장·조합원·사업 소개</span></b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 4h6v6"/><line x1="10" y1="14" x2="20" y2="4"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg></a>
+        <a class="pm-link" href="/solidarity/"><b>연대지능</b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+        <a class="pm-link" href="/guestbook.html"><b>방명록<span>조합에 남기는 말</span></b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
       </div>
     </div>
   </section>
@@ -272,14 +208,24 @@ table.pm-tbl tr:last-child th,table.pm-tbl tr:last-child td{border-bottom:0}
 </main>
 
 <footer class="pm-foot">
-  <div class="pm-wrap">
-    <p class="pm-foot-org">품앗이소비자생활협동조합</p>
-    <p class="pm-foot-lines">
-      대전광역시 유성구 지족로364번길 40, 105호<br>
-      사업자등록번호 314-82-78005 · 통신판매업 신고번호 제2020-대전유성-0975호<br>
-      이사장 김성훈 · 전화 042-824-0131 · 팩스 042-826-0132<br>
-      전자우편 <!--email_off--><a href="mailto:haeory@poomasi.org">haeory@poomasi.org</a><!--email_on-->
-    </p>
+  <div class="pm-wrap pm-foot-grid">
+    <div>
+      <p class="pm-foot-org">품앗이소비자생활협동조합 <span style="font-weight:500">(품앗이생협)</span></p>
+      <p class="pm-foot-lines">
+        대전광역시 유성구 지족로364번길 40, 105호<br>
+        사업자등록번호 314-82-78005 · 통신판매업 신고번호 제2020-대전유성-0975호<br>
+        이사장 김성훈 · 전화 042-824-0131 · 팩스 042-826-0132<br>
+        로컬푸드 직매장 지족점 전화 042-716-0019<br>
+        전자우편 <!--email_off--><a href="mailto:haeory@poomasi.org">haeory@poomasi.org</a><!--email_on-->
+      </p>
+    </div>
+    <nav class="pm-foot-nav" aria-label="사이트 안내">
+      <a href="/coop/">조합 소개</a>
+      <a href="/coop/mission/">사명</a>
+      <a href="/coop/store/">직매장</a>
+      <a href="/coop/sites/">운영 사이트</a>
+      <a href="/coop/contact/">연락처</a>
+    </nav>
   </div>
 </footer>
 
