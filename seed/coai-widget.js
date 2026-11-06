@@ -564,6 +564,21 @@
     textarea.style.height = Math.max(h, 38) + 'px';
   }
 
+  // ── 익명 세션 번호 (msg 5909 3, 26-11-06) ──
+  // 탭마다 무작위 번호 하나(sessionStorage). 로그인·사람 식별과 무관, 통계에서 「세션」만 센다.
+  var ANON_KEY = 'coai_anon_session';
+  function anonSession() {
+    try {
+      var s = sessionStorage.getItem(ANON_KEY);
+      if (!s) {
+        s = (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+          : (Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 12));
+        sessionStorage.setItem(ANON_KEY, s);
+      }
+      return s;
+    } catch (_) { return null; }
+  }
+
   // ── API: 채팅 (persona=coai 고정, 매장/품앗이 경로 미접촉) ──
   async function sendChat(query) {
     if (isLoading || !query.trim()) return;
@@ -582,7 +597,8 @@
         body: JSON.stringify({
           query: query,
           history: history.slice(0, -1),
-          persona: PERSONA
+          persona: PERSONA,
+          anon_session: anonSession()
         })
       });
       hideTyping();
